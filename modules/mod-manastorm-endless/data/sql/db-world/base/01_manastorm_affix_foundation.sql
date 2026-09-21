@@ -12,6 +12,16 @@ SET @sql := IF(
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+
+CREATE TABLE IF NOT EXISTS `manastorm_affix_rank_spell` (
+  `affix_id` INT UNSIGNED NOT NULL,
+  `role` TINYINT UNSIGNED NOT NULL,
+  `rank` TINYINT UNSIGNED NOT NULL,
+  `spell_id` INT UNSIGNED NOT NULL,
+  PRIMARY KEY (`affix_id`,`role`,`rank`),
+  KEY `idx_affix_rank_spell` (`spell_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `manastorm_affix_catalog` (
   `affix_id` INT UNSIGNED NOT NULL,
   `name` VARCHAR(64) NOT NULL,
@@ -57,6 +67,38 @@ ON DUPLICATE KEY UPDATE
   `helper_creature_entry_2`=VALUES(`helper_creature_entry_2`),
   `max_rank`=VALUES(`max_rank`),
   `enabled`=1;
+
+
+-- Recovered sequential rank families. Historical depth-to-rank selection
+-- remains intentionally unimplemented until recovered.
+DELETE FROM `manastorm_affix_rank_spell`
+WHERE `affix_id` IN (11,13,16,21,23,26,28,31,33,41,61,101);
+
+INSERT INTO `manastorm_affix_rank_spell`
+(`affix_id`,`role`,`rank`,`spell_id`)
+SELECT a.affix_id, a.role, r.n, a.first_spell + r.n - 1
+FROM (
+  SELECT 11 affix_id,1 role,93490 first_spell UNION ALL
+  SELECT 11,2,115211 UNION ALL
+  SELECT 13,1,115151 UNION ALL
+  SELECT 13,2,115171 UNION ALL
+  SELECT 16,1,115551 UNION ALL
+  SELECT 21,1,115451 UNION ALL
+  SELECT 23,1,115391 UNION ALL
+  SELECT 26,1,115371 UNION ALL
+  SELECT 28,1,115571 UNION ALL
+  SELECT 31,1,115271 UNION ALL
+  SELECT 33,1,115431 UNION ALL
+  SELECT 41,1,115191 UNION ALL
+  SELECT 61,1,115231 UNION ALL
+  SELECT 101,1,115291
+) a
+CROSS JOIN (
+  SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5
+  UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+  UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15
+  UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19 UNION ALL SELECT 20
+) r;
 
 INSERT INTO `manastorm_unlock`
 (`unlock_id`,`unlock_kind`,`trigger_depth`,`mode_mask`,`track_mask`,
