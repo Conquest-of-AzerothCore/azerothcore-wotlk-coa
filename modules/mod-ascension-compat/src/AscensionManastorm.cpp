@@ -795,8 +795,11 @@ namespace
             else if (run.encounter->guards.erase(unit->GetGUID()))
             {
                 UpdateLink(player, run);
-                if (GameObject* heart = map->SummonGameObject(80779, unit->GetPosition(), 0, 0, 0, 1, 60))
-                    run.encounter->hearts[heart->GetGUID()] = GameTime::GetGameTime().count() + 60;
+                // Heart gameplay belongs exclusively to mod-manastorm-endless.
+                // Do NOT directly create GO 80779 here.
+                //
+                // Shared Manastorm Hearts use:
+                // 991507 -> 991509 -> 900025 -> 991511
                 if (!run.encounter->treasureSpawned && roll_chance_f(std::min(10.0f, 2.0f + run.encounter->depth * 0.015f)))
                 {
                     run.encounter->treasureSpawned = true;

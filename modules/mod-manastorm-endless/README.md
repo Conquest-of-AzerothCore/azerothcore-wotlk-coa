@@ -1,0 +1,249 @@
+# Shared Manastorm backend: client modes
+
+Both transports use `ManastormMgr`, the SQL generator, scaling, Hearts,
+resurrection charges, Chaotic Link, affixes and existing character progression.
+No donor Scene catalogue or donor reward/run service is used.
+
+## Configuration and deployment
+
+```ini
+Manastorm.Enable = 1
+Manastorm.ClientMode = 2
+# Optional override; omitted defaults to <DataDir>/dbc/Manastorm.dbc:
+# Manastorm.NativeDBCPath = "C:/matching-client/DBFilesClient/Manastorm.dbc"
+```
+
+The compatibility router always passes the three native requests to the shared
+module, including with default configuration. The donor gameplay hooks and
+packet queue are never registered. `Enable` and `ClientMode` require a restart. Mode 1 retains the `MANASTORM` addon transport and custom
+unlock toasts. Mode 2 emits only native completion/toasts.
+
+This implementation targets the provided CoA core and its vendored
+`mod-ascension-compat`. It reuses the donor's protocol serializers, type strings,
+gadget rank catalogue and **existing** `ascension_manastorm_loadout` prepared
+statements/storage. That table must already be installed from the core's native
+Manastorm migration. No schema files were changed or migrations applied here. Apply the pending world
+update `rev_20260920_00_manastorm_shared_tools.sql` through the normal updater
+when deploying; it binds the three existing baseline tools to the shared script
+and removes the obsolete donor potion binding.
+The loadout table is equipment storage, not a second progression authority.
+The core's existing Ascension connection settings and the original client's
+Manastorm UI/configuration must be enabled for that matching client.
+
+## Native configuration and I-key reopening
+
+Mode 2 is the default; explicitly set Mode 1 for the reconstructed addon.
+The module publishes the native `SMSG_UPDATE_CONFIGS` (`0x58D`) at login:
+`CONFIG_MANASTORM_LOADOUTS_MAX` is integer 4; `CONFIG_MANASTORM_ENABLED`,
+`CONFIG_MANASTORM_END_GAME_ENABLED` and `CONFIG_MANASTORM_LOADOUTS_ENABLED`
+are one-byte booleans matching module enablement. The packet has integer,
+boolean, float, rate, integer-list and float-list sections, with length-prefixed
+keys. The client replaces all six maps on receipt. WorldSession therefore keeps
+a shared snapshot: both Manastorm and Challenges update their keys and send the
+complete snapshot, preserving each other regardless of login order. The snapshot
+is cleared on character logout. Mode 1 emits no Manastorm configuration packets.
+Verified in installed Extensions.dll: handler 0x10196C90 clears all six maps
+before reading them (clear calls at 0x10196D6E–0x10196DBC).
+The previous MS_SHARED handshake/addon has been removed from source and the
+specified client installation; no addon or C_Config override is needed.
+
+The original client's `ToggleLFDParentFrame` allows low-level players to open
+PVE only while `C_Manastorm.CanEnter(1)` is true. That is false inside a run.
+`client/build_keybind_patch.py` changes that guard to also accept
+`C_Manastorm.IsInManastorm()`. It builds a readback-verified one-file MPQ overlay
+from a hash-pinned installed UIParent, preserving all other code and normal
+Dungeon Finder level checks. `client/patch-ZZ.MPQ` was installed into the
+user-specified Acension/Data folder. Original MPQs are untouched. Restart the
+client to load it; remove this overlay to revert the keybinding change.
+Rebuild/restart the server for native config publication, then relog.
+
+The packet receiver overrides the **const** WorldPacket hook actually dispatched
+by this core. Overriding the other overload compiles but silently misses requests.
+`tests/audit_regressions.py` exercises that exact dispatch path.
+`tests/native_protocol.cpp` models full client replacement and checks all six
+sections, both login orders, enabled/disabled updates, preservation of other
+module flags and logout reset. `tests/keybind_regression.py` exercises the actual
+patched UIParent function for active low-level reopening, hide, unavailable
+entry, eligible entry and ordinary Dungeon Finder behavior.
+
+## Native behavior
+
+- `0x651`, `0x665`, `0x689`: exact payload-size validation, logged-in world-thread
+  dispatch, server-side admission and loadout validation.
+- `0x660`: depth, SQL segment's native Manastorm ID, normal/endgame type, actual
+  cache tuple, in the recovered order. Terminal state explicitly sends depth 0.
+- `0x65F`: login snapshot; `0x65D`: GUID-keyed updates, including party members.
+  The unchanged SQL backend stores four maxima, not historical lists or a
+  normal/endgame split. Each known best is represented as a singleton depth
+  list in both corresponding category views. Missing categories are empty.
+  This preserves shared entitlement without inventing a history of lower clears.
+- Completion commits the existing shared progression transaction for all
+  members before `0x65E`; the original client resolves Messages DBC toasts.
+- Four loadout slots use `0x688`, `0x689`, `0x68A`, `0x68B`; writes are acknowledged
+  only after commit. Range, active run, spell, knowledge, rank and duplicates
+  are validated. No unsupported clear-slot request is invented.
+- The checked-out shared backend has no cache issuance implementation. Its
+  authoritative count/chance/item are zero. No donor cache/pity policy was added.
+  `0x6AD` clears the active reward-visibility context: there is no rate-limit policy.
+- Login restores progression/loadout and a surviving owned private instance,
+  active state and Chaotic Link. Expired instances terminate recovery cleanly.
+  Expired empty instances also release run membership without requiring a relog.
+  Private instance return positions survive character logout; runs themselves
+  remain in memory, so a server restart returns characters outside the run.
+
+## Narrow core/compatibility changes
+
+The compatibility early hook passes shared Manastorm requests through; core
+opcode entries admit them as logged-in, world-thread requests. The donor's
+map/player/unit/spell/loot/guide/world hooks are not registered. Only its
+DB-bound cache-opening item wrapper remains, for already-owned cache items.
+
+Private-instance support has an opt-in database-spawn flag. Shared SQL stages
+use ordinary authored creatures, game objects and spawn groups; the donor's
+empty-scene default is unchanged. Private instances honor the selected instance
+difficulty and can use authored dungeon/raid maps for a party of up to five.
+Shared manager transport now supports party membership and reconnects without
+ordinary dungeon binds. Old stage instances are released on transition/exit.
+
+## Heart drops and custom effects
+
+Ordinary registered stage creatures have one 75% heart roll per runtime creature,
+independent of Chaotic Link membership. Crossing 10% health or a lethal hit can
+consume that roll; healing and repeated crossings do not grant another roll.
+A lethal hit directly executes the DBC impact summon (991509), avoiding a missile
+being interrupted by caster death. Non-lethal hits retain projectile 991507.
+Boss non-lethal thresholds at 90/80/.../10% are unchanged. Any living run member
+in the same instance can collect a heart; pickup no longer requires the owner.
+
+The deployed Spell.dbc chain was checked: 991507 uses effect 32, 991509 effect 28,
+and 991510 effects 10/137. Those core handlers already exist; the module owns
+pickup detection and the visual helper. No extra heart aura handler is required.
+
+Compared against the local checkout of Duff-SPP/EunoiaCore-Underworld at
+4e30325eb. Its commit named "SpellEffect 173 Fix" (816405a78) implements **174**;
+this core already implements 173 (aura refresh). Ported the missing bounded
+maximum-health damage handler 174, positive-Amplitude delayed trigger 193, and
+negative aura-21 power drain for Mana Bomb spells 93489-93509. Unresolved modes
+and zero-delay 193 remain inert, as in the donor. Deferred casts retain GUIDs,
+not raw object pointers, and cancel on missing/changed-map casters or targets.
+Mana Bomb draining works even at full mana; unrelated regeneration is preserved.
+
+`tests/heart_effect_regressions.py` extracts production methods for compiled
+checks of normal-trash lethal/non-lethal drops, once-only success/failure rolls,
+boss thresholds, effect-174 mode/overflow handling, and Mana Bomb power drain,
+immunity, clamping and normal regeneration. Focused source compilation checks
+cover the custom effect/aura and module changes. In-game tests are still needed:
+kill non-route trash with a single hit; test failed/repeated threshold rolls;
+collect as a non-owner party member; exercise Lightning Rod, delayed affix
+triggers and Mana Bomb at full/low mana. No DBC or SQL content was changed.
+
+## Content and bounded limitations
+
+Keep authoring the existing SQL schema. An enabled stage needs a valid map,
+supported difficulty, objective creature, teleport, positive weight, depth
+bounds and unlock eligibility. In Mode 2 its `segment_id`, `map_id`, `difficulty`
+and `dungeon_encounter_id` must match the selected client's Manastorm.dbc row.
+The server also needs the matching MapDifficulty support and actual world
+creature spawns for that difficulty. Invalid rows are logged and skipped;
+empty/partial stage content does not create invented encounters.
+
+Populate the existing scaling, unlock/grant and Chaotic Link spawn rows as
+needed. No stage catalogue or reward content was populated by this change.
+
+Stage helpers now adapt the donor's Safety Bubble (93306/93307), Cogsley (80919)
+and completion portal visual (12999 with 93338). Positions come from the SQL
+entrance teleport and the actual defeated objective, never the donor scene list.
+Preparation waits for every member, then ends when a living member leaves the
+eight-yard entrance radius or the owner selects Begin from Cogsley. Protection
+is cleared on activation, exit and failure. Cogsley respawns at the defeated
+objective and offers Continue; this advances through the same validated world
+update as the existing five-second automatic continuation. Stale gossip cannot
+skip an unfinished stage. Helpers are excluded from enemy scaling/affixes.
+The corresponding creature templates and spells must be installed.
+
+Creature levels are committed even when core SelectLevel(false) only regenerates
+stats. DB creatures created by instance initialization before the run/map lookup
+exists are registered on first arrival, including objective identity, SQL Chaotic
+Link stacks and scaling. Zero authored stacks deliberately means no Link aura;
+this does not invent route spawns or change the stage's SQL configuration.
+
+Nonzero Messages word3 conditions remain dependent on generic GameEvent state.
+No existing serializer was found for the complete `0x9BD` record, whose final
+32 bytes are not established by the reports. No guessed bytes are sent.
+Ordinary word3=0 toasts use the proven completion path. Reconnecting during an
+already-completed stage replays `0x65E` to restore the tracker and can replay its
+toasts; no eventless completion opcode is known.
+
+## Real-client acceptance checklist
+
+1. Enable Mode 2 with matching client/DBC files and one eligible authored stage.
+   Verify startup identity validation; also try an empty table and a mismatched
+   ID/map/difficulty/encounter and verify clear rejection/logging.
+2. Log in outside a run: eight progression categories, four slots, inactive
+   tracker. Enter depth 1 from the original UI. Capture `0x652` and `0x660`;
+   verify depth precedes Manastorm ID, correct type, boss and zero cache policy.
+3. Repeat with 2, 3, 4 and 5 players, including endgame characters. Verify the
+   same private instance for every member and distinct instances for other runs.
+   Check nonleader, offline/distant member, invalid checkpoint, cooldown, combat,
+   challenge restriction, malformed/truncated request and invalid group rejection.
+4. Verify all members arrive before activation, original SQL creatures spawn,
+   HP/melee/spell/DoT scaling, Hearts, resurrection charges, affixes and declining
+   native Chaotic Link stacks. Verify the entrance bubble, protection while
+   preparing, and activation on leaving the radius or selecting Begin.
+   Compare the existing Mode 1 gameplay baseline.
+5. Kill the exact objective: verify committed shared progression, one `0x65E`,
+   native tracker completion and qualifying word3=0 DBC toast(s), without a custom
+   UW toast. Verify `0x65D` reaches self and party and caches remain truthful.
+6. Test the completion guide Continue gossip, then separately wait for the five-second continuation. Verify SQL selection, a fresh
+   private instance and new depth/ID tracker. Test a one-stage catalogue repeating
+   and no eligible next stage failing cleanly.
+7. Leave and force failure: native active depth becomes zero, Chaotic Link clears,
+   members return to their own entry positions and dead members are resurrected.
+   Relog while active, during transfer and during completed-stage delay; then
+   test after private-instance expiry and after server restart.
+8. Set each loadout slot, relog, and confirm persistence. Reject out-of-range,
+   unknown/unlearned spell, lower rank, duplicate family and changes during a run.
+   Upgrade a learned gadget in its existing slot; this must succeed.
+   Simulate a database failure and verify no success acknowledgement/false clear.
+9. Restart in Mode 1 and repeat start, completion/custom toast, next stage, leave,
+   failure and reconnect. Verify no native Manastorm presentation is emitted.
+
+## Validation performed
+
+MSVC C++20 syntax checks and a compiled golden-packet test cover the changed
+source and recovered serialization. The packet test lives in
+`tests/native_protocol.cpp`. The audit fixture generator
+`tests/audit_regressions.py` extracts the production loadout/configuration logic
+and verifies exclusive donor registration. Its compiled assertions cover
+same-slot upgrades, duplicate/rank/knowledge/passive/active-run rejection,
+Mode 1/2 startup, invalid-mode fallback and restart-only configuration.
+The September 21 UI/helper fixes passed focused MSVC C++20 syntax checks and
+const-hook dispatch assertions. The replacement native config packet tests and patched keybinding function
+passed; Lua keybinding checks use the available Lua 5.2 runtime with mocked
+WoW APIs (the UI code uses Lua 5.1 syntax).
+These are not an in-client test.
+All seven translation units changed by the earlier ownership audit passed MSVC C++20
+syntax checks; the focused C++ and SQL style checks passed.
+No full server build, database migration or real
+Ascension-client runtime test was performed. The module directory is ignored by
+the repository's existing Git rules; preserve/include its files when packaging
+these local changes, in addition to the tracked core/compatibility diff.
+
+## Changed files
+
+Shared module: `src/Manastorm.cpp`, `src/ManastormClientBridge.cpp/.h`,
+`src/ManastormNativeProtocol.h`, `src/ManastormDataStore.cpp`,
+`src/ManastormMgr.cpp/.h`, `src/ManastormProgression.cpp`, `src/ManastormRun.h`,
+`conf/manastorm-endless.conf.dist`, `tests/native_protocol.cpp`, and this README.
+
+Compatibility module: `src/AscensionCompat.cpp`, `src/AscensionManastorm.cpp/.h`,
+`src/MP_loader.cpp`. Configuration is cached in `src/ManastormModuleConfig.cpp/.h`.
+Core: `src/server/game/Entities/Player/Player.h`,
+`src/server/game/Grids/GridObjectLoader.cpp`, `src/server/game/Maps/Map.cpp/.h`,
+`src/server/game/Maps/MapInstanced.cpp`, `src/server/game/Maps/MapMgr.cpp`,
+`src/server/game/Server/Protocol/Opcodes.cpp`.
+
+All changed translation units passed MSVC syntax checks. Focused style checks
+passed for the shared module/core and donor Manastorm file. The broader check
+also identified existing brace-formatting violations in `AscensionCompat.cpp`
+outside the changed routing block; those unrelated lines were left intact.

@@ -1,0 +1,210 @@
+#ifndef MANASTORM_MGR_H
+#define MANASTORM_MGR_H
+
+#include "ManastormRun.h"
+
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+class Creature;
+class Map;
+class Player;
+class Unit;
+
+enum DamageEffectType : uint8;
+
+class ManastormMgr
+{
+public:
+    static ManastormMgr& Instance();
+
+    bool ReloadData();
+
+    ManastormRun* StartRun(
+        Player* player,
+        uint32 depth,
+        std::string& error,
+        bool bypassCheckpoint = false);
+
+    bool StopRun(
+        Player* player,
+        std::string& error);
+
+    ManastormRun* GetRunFor(Player const* player);
+    ManastormRun const* GetRunFor(Player const* player) const;
+
+    void SyncClientState(Player* player);
+    void OnPlayerLogin(Player* player);
+
+    void OpenClientUI(Player* player) const;
+
+    bool IsPlayerInActiveEndlessStage(
+        Player const* player) const;
+
+    bool HasManastormPotionCharge(
+        Player const* player) const;
+
+    bool ConsumeManastormPotionCharge(
+        Player* player);
+
+    bool IsValidRegenerationMatrixTarget(
+        Player const* caster,
+        Player const* target) const;
+
+    bool ConsumeRegenerationMatrixCharge(
+        Player* caster,
+        Player* target);
+
+    void Update(uint32 diff);
+    bool HandleGuideGossip(Player* player, Creature* creature, uint32 action);
+
+    void OnPlayerEnterMap(Map* map, Player* player);
+
+    void OnPlayerLevelChanged(Player* player, uint8 oldLevel);
+
+    void OnPlayerGiveXP(
+        Player* player,
+        uint32& amount,
+        Unit* victim,
+        uint8 xpSource);
+
+    void OnBeforeCreatureSelectLevel(
+        Creature* creature,
+        uint8& level);
+
+    void OnCreatureSelectLevel(
+        Creature* creature);
+
+    void OnCreatureAddWorld(Creature* creature);
+    void OnCreatureRemoveWorld(Creature* creature);
+
+    void OnUnitDeath(
+        Unit* unit,
+        Unit* killer);
+
+    void OnDamage(
+        Unit* attacker,
+        Unit* victim,
+        uint32 damage);
+
+    uint32 ScaleCreatureDamage(
+        Unit* attacker,
+        Unit* victim,
+        uint32 damage,
+        DamageEffectType damageType);
+
+    std::size_t GetActiveRunCount() const
+    {
+        return _runs.size();
+    }
+
+    bool ForceStageAffix(
+        Player* player,
+        uint32 affixId,
+        std::string& error);
+
+private:
+    ManastormMgr() = default;
+
+    void SendClientState(
+        Player* player,
+        ManastormRun const* run) const;
+
+    void SendClientProgression(
+        Player* player) const;
+
+    void SendUnlockToast(
+        Player* player,
+        uint32 messageId) const;
+
+    void BroadcastClientState(
+        ManastormRun const& run) const;
+
+    struct ManastormPotionChargeState
+    {
+        uint8 Charges =
+            ManastormBaseline::PotionMaxCharges;
+
+        uint32 RechargeTimerMs = 0;
+    };
+
+    void HandlePlayerDeath(
+        Player* player);
+
+    void FailRun(
+        ManastormRun& run,
+        std::string const& reason,
+        ObjectGuid::LowType externalDepartureGuid = 0);
+
+    void GrantBaselineRunItems(
+        Player* player);
+
+    void RemoveBaselineRunItems(
+        Player* player,
+        bool clearPotionState);
+
+    void UpdateManastormPotionCharges(
+        uint32 diff);
+
+    bool SpawnHeartProjectile(
+        Creature* creature,
+        ManastormRun& run,
+        bool lethal = false);
+
+    bool TrySpawnTrashHeart(
+        Creature* creature,
+        ManastormRun& run,
+        bool lethal = false);
+
+    void UpdateHeartPickups(uint32 diff);
+
+    void ApplyCreatureHealthScaling(
+        Creature* creature,
+        ManastormRun& run,
+        double healthPct);
+
+    void ApplyChaoticLinkBossHealth(
+        Creature* boss,
+        ManastormRun& run,
+        double healthPct);
+
+    ManastormRun* GetRunForGuid(
+        ObjectGuid::LowType guid);
+
+    ManastormRun const* GetRunForGuid(
+        ObjectGuid::LowType guid) const;
+
+    ManastormRun* GetRunForStage(
+        uint32 mapId,
+        uint32 instanceId);
+
+    uint64 BuildRunSeed(
+        uint64 runId,
+        ObjectGuid::LowType ownerGuid) const;
+
+    void SpawnStageGuide(Map* map, ManastormRun& run, Position const& position, bool completed);
+
+    bool PrepareStage(
+        Player* player,
+        ManastormRun& run,
+        std::string& error);
+
+    bool TransitionToNextStage(
+        ManastormRun& run,
+        std::string& error);
+
+    uint64 _nextRunId = 1;
+
+    std::unordered_map<uint64, std::unique_ptr<ManastormRun>> _runs;
+    std::unordered_map<ObjectGuid::LowType, uint64> _memberRunIds;
+    std::unordered_map<uint64, uint64> _stageRunIds;
+    std::unordered_map<uint64, uint32> _transitionTimers;
+    std::unordered_map<ObjectGuid::LowType,ManastormPotionChargeState>_manastormPotionCharges;
+
+    uint32 _heartPickupCheckTimer = 0;
+    uint32 _runValidationTimer = 0;
+};
+
+#endif

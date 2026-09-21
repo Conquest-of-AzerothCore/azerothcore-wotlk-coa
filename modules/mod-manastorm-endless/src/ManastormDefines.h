@@ -1,0 +1,249 @@
+#ifndef MANASTORM_DEFINES_H
+#define MANASTORM_DEFINES_H
+
+#include "Define.h"
+#include "ObjectGuid.h"
+
+#include <string_view>
+#include <vector>
+
+enum class ManastormMode : uint8
+{
+    Solo = 1,
+    Duo = 2,
+    Trio = 3,
+    Group = 4,
+};
+
+enum class ManastormRunState : uint8
+{
+    Created = 0,
+    Preparing = 1,
+    Active = 2,
+    StageComplete = 3,
+    Transitioning = 4,
+    Failed = 5,
+    Finished = 6,
+};
+
+namespace ManastormBaseline
+{
+    // Temporary baseline Manastorm/Endless inventory tools.
+    constexpr uint32 ItemPotion = 254041;
+    constexpr uint32 ItemRegenerationMatrix = 97895;
+    constexpr uint32 ItemMagicalEscape = 254042;
+
+    // Item-cast spells recovered from shutdown-era Ascension itemcache.
+    constexpr uint32 SpellPotion = 254440;
+    constexpr uint32 SpellRegenerationMatrix = 93309;
+    constexpr uint32 SpellMagicalEscape = 93311;
+
+    // Periodic energy/rage regeneration triggered by the Potion.
+    constexpr uint32 SpellPotionResourceRegen = 254462;
+
+    // Recovered Manastorm Potion Charge System behavior.
+    constexpr uint8 PotionMaxCharges = 3;
+    constexpr uint32 PotionRechargeMs = 10000;
+}
+
+namespace ManastormResurrection
+{
+    // Recovered Manastorm stage resurrection resource pool.
+    //
+    // Each newly generated Manastorm level begins with five
+    // shared resurrection resources.
+    constexpr uint8 MaxCharges = 5;
+}
+
+namespace ManastormSegmentFlags
+{
+    // Segment is available even when the character owns
+    // no progression unlock for it.
+    constexpr uint32 StartingUnlocked = 0x00000001;
+}
+
+namespace ManastormModeBits
+{
+    constexpr uint8 Solo = 0x01;
+    constexpr uint8 Duo = 0x02;
+    constexpr uint8 Trio = 0x04;
+    constexpr uint8 Group = 0x08;
+    constexpr uint8 All = Solo | Duo | Trio | Group;
+}
+
+inline uint8 ManastormGetModeBit(
+    ManastormMode mode)
+{
+    switch (mode)
+    {
+    case ManastormMode::Solo:
+        return ManastormModeBits::Solo;
+
+    case ManastormMode::Duo:
+        return ManastormModeBits::Duo;
+
+    case ManastormMode::Trio:
+        return ManastormModeBits::Trio;
+
+    case ManastormMode::Group:
+        return ManastormModeBits::Group;
+    }
+
+    return 0;
+}
+
+enum class ManastormUnlockGrantType : uint8
+{
+    Segment = 1,
+    BossPool = 2,
+    CreaturePool = 3,
+    Affix = 4,
+};
+
+enum class ManastormAffixRuntimeType : uint8
+{
+    OnDeath = 1,
+    Passive = 2,
+    Periodic = 3,
+    Environmental = 4,
+    SpawnedHazard = 5,
+};
+
+namespace ManastormAffixIds
+{
+    // Recovered Ascension Manastorm affix ID.
+    constexpr uint32 ManaBomb = 11;
+}
+
+namespace ManastormManaBomb
+{
+    constexpr uint32 AffixId =
+        ManastormAffixIds::ManaBomb;
+
+    // Recovered Ascension Mana Bomb spell chain.
+    constexpr uint32 MarkerSpell = 93363;
+    constexpr uint32 PrecastSpell = 93364;
+    constexpr uint32 EffectSpell = 93365;
+    constexpr uint32 DispatcherSpell = 93488;
+    constexpr uint32 DebuffSpell = 93489;
+
+    // Recovered invisible Mana Bomb helper.
+    constexpr uint32 HelperCreature = 663028;
+}
+
+struct ManastormAffixDefinition
+{
+    uint32 AffixId = 0;
+    uint32 MarkerSpellId = 0;
+
+    ManastormAffixRuntimeType RuntimeType =
+        ManastormAffixRuntimeType::Passive;
+};
+
+struct ManastormUnlockGrant
+{
+    ManastormUnlockGrantType Type =
+        ManastormUnlockGrantType::Segment;
+
+    uint32 ContentId = 0;
+};
+
+struct ManastormUnlockDefinition
+{
+    uint32 UnlockId = 0;
+
+    // Completing this Endless depth queues the introduction.
+    uint32 TriggerDepth = 0;
+
+    uint8 ModeMask =
+        ManastormModeBits::All;
+
+    // Forced NEXT-RUN / next-stage introduction.
+    uint32 IntroSegmentId = 0;
+
+    // These will later resolve through
+    // manastorm_unlock_message.
+    uint32 IntroMessageId = 0;
+    uint32 CompletionMessageId = 0;
+
+    std::vector<ManastormUnlockGrant> Grants;
+};
+
+struct ManastormSegment
+{
+    uint32 SegmentId = 0;
+    uint32 MapId = 0;
+    uint8 Difficulty = 0;
+    uint32 DungeonEncounterId = 0;
+    uint32 ObjectiveCreatureEntry = 0;
+    uint32 StartGameTeleId = 0;
+    uint32 Weight = 0;
+    uint32 MinDepth = 1;
+    uint32 MaxDepth = 0; // 0 = no upper bound.
+    float RewardMultiplier = 1.0f;
+
+    // Segment-authored Chaotic Link starting stack count.
+    // This belongs to the dungeon/boss route, NOT the Endless depth.
+    uint8 ChaoticLinkStacks = 0;
+
+    // Persistent world-DB creature spawn GUIDs that are allowed to break
+    // Chaotic Links for this segment.
+    //
+    // These are NOT runtime creature GUIDs. A fresh Endless instance gets
+    // new runtime GUIDs, while Creature::GetSpawnId() still resolves back
+    // to one of these authored DB spawn GUIDs.
+    std::vector<ObjectGuid::LowType> ChaoticLinkSpawnIds;
+
+    uint32 Flags = 0;
+};
+
+struct ManastormScalingPoint
+{
+    uint32 Depth = 0;
+    float HealthMultiplier = 1.0f;
+    float GlobalDamageMultiplier = 1.0f;
+    float MeleeMultiplier = 1.0f;
+    float SpellMultiplier = 1.0f;
+};
+
+inline ManastormMode ManastormModeForMemberCount(uint32 memberCount)
+{
+    if (memberCount <= 1)
+        return ManastormMode::Solo;
+    if (memberCount == 2)
+        return ManastormMode::Duo;
+    if (memberCount == 3)
+        return ManastormMode::Trio;
+    return ManastormMode::Group;
+}
+
+inline std::string_view ManastormModeName(ManastormMode mode)
+{
+    switch (mode)
+    {
+        case ManastormMode::Solo:  return "SOLO";
+        case ManastormMode::Duo:   return "DUO";
+        case ManastormMode::Trio:  return "TRIO";
+        case ManastormMode::Group: return "GROUP";
+    }
+
+    return "UNKNOWN";
+}
+
+inline std::string_view ManastormRunStateName(ManastormRunState state)
+{
+    switch (state)
+    {
+    case ManastormRunState::Created:       return "CREATED";
+    case ManastormRunState::Preparing:     return "PREPARING";
+    case ManastormRunState::Active:        return "ACTIVE";
+    case ManastormRunState::StageComplete: return "STAGE_COMPLETE";
+    case ManastormRunState::Transitioning: return "TRANSITIONING";
+    case ManastormRunState::Failed:        return "FAILED";
+    case ManastormRunState::Finished:      return "FINISHED";
+    }
+
+    return "UNKNOWN";
+}
+
+#endif
