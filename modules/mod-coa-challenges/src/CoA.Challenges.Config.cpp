@@ -272,9 +272,7 @@ namespace CoAChallenges
         if (!session)
             return;
 
-        WorldPacket data(SMSG_COA_CONFIG, 128);
-
-        data << uint32(0);
+        NativeClientConfig& config = session->GetNativeClientConfig();
 
         std::vector<std::pair<std::string, uint8>> bools;
         bools.emplace_back("CONFIG_CHALLENGE_ENABLED",
@@ -297,17 +295,10 @@ namespace CoAChallenges
                 bools.emplace_back(m.hiddenKey, GameModeHidden(m.name) ? uint8(1) : uint8(0));
             }
         }
-        data << uint32(bools.size());
         for (auto const& [key, value] : bools)
-        {
-            AppendConfigString(data, key);
-            data << value;
-        }
+            config.SetBool(key, value != 0);
 
-        data << uint32(0);
-        data << uint32(0);
-
-        session->SendPacket(&data);
+        session->SendNativeClientConfig();
         LOG_INFO("module.coa_challenges", "Sent SMSG_COA_CONFIG ({} bool flags) to {}",
             bools.size(), player->GetName());
     }

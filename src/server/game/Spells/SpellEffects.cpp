@@ -35,6 +35,7 @@
 #include "Language.h"
 #include "Log.h"
 #include "MapMgr.h"
+#include <limits>
 #include "MiscPackets.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
@@ -243,7 +244,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectNULL,                                     //171 unknown Ascension effect
     &Spell::EffectNULL,                                     //172 unknown Ascension effect
     &Spell::EffectAscensionRefreshAura,                     //173 SPELL_EFFECT_ASCENSION_REFRESH_AURA
-    &Spell::EffectNULL,                                     //174 unknown Ascension effect
+    &Spell::EffectAscensionHealthPctDamage,                  //174 Ascension health-percentage damage
     &Spell::EffectAscensionModifyAuraStacks,                //175 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS
     &Spell::EffectAscensionModifyAuraStacksBySpell,         //176 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS_2
     &Spell::EffectAscensionModifyAuraDuration,              //177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION
@@ -262,7 +263,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectApplyAreaAura,                            //190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS
     &Spell::EffectNULL,                                     //191 unknown Ascension effect
     &Spell::EffectNULL,                                     //192 unknown Ascension effect
-    &Spell::EffectNULL,                                     //193 unknown Ascension effect
+    &Spell::EffectDelayedTriggerSpell,                      //193 Ascension delayed trigger (Amplitude)
     &Spell::EffectNULL,                                     //194 unknown Ascension effect
     &Spell::EffectAscensionResetCooldown,                   //195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN
     &Spell::EffectNULL,                                     //196 unknown Ascension effect
@@ -405,6 +406,88 @@ void Spell::EffectAscensionRestoreBaseManaPct(SpellEffIndex /*effIndex*/)
 
     uint32 gain = CalculatePct(baseMana, damage);
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, gain, POWER_MANA);
+}
+
+// Ported from EunoiaCore-Underworld 816405a7827e5b1b5f5543a235b3316bb59048af.
+// Preserve its bounded mode policy; mode 1 is not a generic max-health rule.
+void Spell::EffectAscensionHealthPctDamage(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH_TARGET ||
+        !unitTarget || !unitTarget->IsAlive() || damage <= 0)
+        return;
+    int32 const mode = m_spellInfo->Effects[effIndex].MiscValue;
+    uint32 const id = m_spellInfo->Id;
+    bool const supported = mode == 0 || (mode == 2 && (id == 93008 || id == 93050)) ||
+        (mode == 1 && (id == 93358 || (id >= 115171 && id <= 115190)));
+    if (!supported)
+        return;
+    int64 const amount = int64(unitTarget->GetMaxHealth()) * int64(damage) / 100;
+    m_damage = int32(std::min<int64>(int64(m_damage) + amount, std::numeric_limits<int32>::max()));
+}
+
+// The old core's Effect 193 uses Amplitude, unlike this core's Effect 183.
+// Preserve destination, original caster, positive-delay and target-selection rules.
+void Spell::EffectDelayedTriggerSpell(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH_TARGET && effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
+        return;
+    SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
+    SpellInfo const* trigger = sSpellMgr->GetSpellInfo(effect.TriggerSpell);
+    if (!trigger || !effect.Amplitude || !m_caster->IsInWorld())
+        return;
+    ObjectGuid targetGuid;
+    bool hasDestination = false;
+    SpellDestination destination;
+    if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
+    {
+        if (!unitTarget || !trigger->NeedsToBeTriggeredByCaster(m_spellInfo, effIndex))
+            return;
+        targetGuid = unitTarget->GetGUID();
+    }
+    else
+    {
+        if (trigger->NeedsToBeTriggeredByCaster(m_spellInfo, effIndex) &&
+            (effect.GetProvidedTargetMask() & TARGET_FLAG_UNIT_MASK))
+            return;
+        if ((trigger->GetExplicitTargetMask() & TARGET_FLAG_DEST_LOCATION) && m_targets.HasDst())
+        {
+            destination = *m_targets.GetDst();
+            hasDestination = true;
+        }
+        targetGuid = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget()->GetGUID() : m_caster->GetGUID();
+    }
+    ObjectGuid const casterGuid = m_caster->GetGUID();
+    ObjectGuid const originalCasterGuid = m_originalCasterGUID;
+    uint32 const mapId = m_caster->GetMapId();
+    uint32 const instanceId = m_caster->GetInstanceId();
+    uint32 const triggerId = trigger->Id;
+    m_caster->m_Events.AddEventAtOffset(
+        [casterGuid, originalCasterGuid, mapId, instanceId, targetGuid, destination, hasDestination, triggerId]()
+        {
+            Map* map = sMapMgr->FindMap(mapId, instanceId);
+            if (!map)
+                return;
+            Unit* caster = nullptr;
+            if (casterGuid.IsPlayer())
+                caster = ObjectAccessor::FindConnectedPlayer(casterGuid);
+            else if (casterGuid.IsPet())
+                caster = map->GetPet(casterGuid);
+            else
+                caster = map->GetCreature(casterGuid);
+            if (!caster || !caster->IsInWorld() || caster->FindMap() != map)
+                return;
+            Unit* target = targetGuid == casterGuid ? caster : ObjectAccessor::GetUnit(*caster, targetGuid);
+            SpellInfo const* delayedSpell = sSpellMgr->GetSpellInfo(triggerId);
+            if (!target || !delayedSpell)
+                return;
+            SpellCastTargets targets;
+            targets.SetUnitTarget(target);
+            if (hasDestination)
+                targets.SetDst(destination);
+            caster->CastSpell(targets, delayedSpell, nullptr,
+                TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET),
+                nullptr, nullptr, originalCasterGuid);
+        }, Milliseconds(effect.Amplitude));
 }
 
 void Spell::EffectAscensionRefreshAura(SpellEffIndex effIndex)

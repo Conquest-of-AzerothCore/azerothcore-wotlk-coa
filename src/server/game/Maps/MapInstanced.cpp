@@ -116,7 +116,8 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
 
     if (player->GetScriptedPrivateMapId() == mapId)
     {
-        if (!IsNonRaidDungeon() || player->GetScriptedPrivateMembers().size() > 5)
+        if ((!IsNonRaidDungeon() && !(IsDungeon() && player->LoadsScriptedPrivateDatabaseSpawns()))
+            || player->GetScriptedPrivateMembers().size() > 5)
             return nullptr;
 
         uint32 id = player->GetScriptedPrivateInstanceId();
@@ -130,7 +131,7 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
 
         id = sMapMgr->GenerateInstanceId();
         player->SetScriptedPrivateInstanceId(id);
-        return CreateInstance(id, nullptr, DUNGEON_DIFFICULTY_NORMAL, player);
+        return CreateInstance(id, nullptr, player->GetDifficulty(IsRaid()), player);
     }
 
     if (IsBattlegroundOrArena())
@@ -224,7 +225,8 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave* save,
     bool const privateInstance = player && player->GetScriptedPrivateMapId() == GetId()
         && player->GetScriptedPrivateInstanceId() == InstanceId;
     if (privateInstance)
-        map->SetScriptedPrivateOwner(player->GetScriptedPrivateOwner(), player->GetScriptedPrivateMembers());
+        map->SetScriptedPrivateOwner(player->GetScriptedPrivateOwner(), player->GetScriptedPrivateMembers(),
+            player->LoadsScriptedPrivateDatabaseSpawns());
     ASSERT(map->IsDungeon());
     m_InstancedMaps[InstanceId] = map;
 

@@ -14,7 +14,6 @@
 #include "AllSpellScript.h"
 #include "AscensionChangelogCompat.h"
 #include "AscensionCharacterSelection.h"
-#include "AscensionManastorm.h"
 #include "AscensionClassMechanics.h"
 #include "AscensionClassMechanics19To25.h"
 #include "AscensionClassMechanics26To32.h"
@@ -5011,8 +5010,11 @@ public:
         kChallengeCmsgs.end())
       return true;
 
-    if (QueueAscensionManastormPacket(session, packet))
-      return false;
+    // mod-manastorm-endless exclusively owns Manastorm in this core. Always
+    // pass requests to its logged-in world-thread handler, including when its
+    // config uses defaults or it is disabled. Never revive the donor service.
+    if (opcode == 0x651 || opcode == 0x665 || opcode == 0x689)
+      return true;
 
     if (opcode == CMSG_APPLY_APPEARANCES ||
         opcode == CMSG_SET_CAN_SEE_APPEARANCES) {

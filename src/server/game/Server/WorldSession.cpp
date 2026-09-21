@@ -305,6 +305,13 @@ ObjectGuid::LowType WorldSession::GetGuidLow() const
 }
 
 /// Send a packet to the client
+void WorldSession::SendNativeClientConfig()
+{
+    WorldPacket packet(SMSG_COA_CONFIG, 256);
+    _nativeClientConfig.Write(packet);
+    SendPacket(&packet);
+}
+
 void WorldSession::SendPacket(WorldPacket const* packet)
 {
     if (packet->GetOpcode() == NULL_OPCODE)
@@ -882,6 +889,7 @@ void WorldSession::LogoutPlayer(bool save, bool redirecting)
         }
 
         SetPlayer(nullptr); // pointer already deleted
+        _nativeClientConfig.Clear();
 
         //! Send the 'logout complete' packet to the client
         //! Client will respond by sending 3x CMSG_CANCEL_TRADE, which we currently dont handle

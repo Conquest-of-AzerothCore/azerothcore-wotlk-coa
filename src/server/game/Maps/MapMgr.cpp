@@ -144,7 +144,8 @@ Map::EnterState MapMgr::PlayerCannotEnter(uint32 mapid, Player* player, bool log
 
     if (player->GetScriptedPrivateMapId() == mapid)
     {
-        if (!entry->IsNonRaidDungeon() || player->GetScriptedPrivateMembers().size() > 5)
+        if ((!entry->IsNonRaidDungeon() && !(entry->IsDungeon() && player->LoadsScriptedPrivateDatabaseSpawns()))
+            || player->GetScriptedPrivateMembers().size() > 5)
             return Map::CANNOT_ENTER_INSTANCE_BIND_MISMATCH;
         if (uint32 id = player->GetScriptedPrivateInstanceId())
         {

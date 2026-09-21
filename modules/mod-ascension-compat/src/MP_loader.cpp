@@ -175,7 +175,7 @@ void Addmod_ascension_compatScripts()
     // record carries no coefficient, reads the same cleared EffectBonusMultiplier.
     AddAscensionStockCoefficientScripts();
     AddAscensionScalingBaseScripts();
-    AddAscensionManastormScripts();
+    AddAscensionManastormItemScripts();
     AddSC_AscensionReaperDirge();
     AddAscensionTinkerOverloadScripts();
     AddAscensionCompatScripts();

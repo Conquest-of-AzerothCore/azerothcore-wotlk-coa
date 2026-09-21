@@ -738,13 +738,16 @@ public:
     [[nodiscard]] InstanceScript const* GetInstanceScript() const { return instance_data; }
     void PermBindAllPlayers();
     ObjectGuid GetScriptedPrivateOwner() const { return _scriptedPrivateOwner; }
-    void SetScriptedPrivateOwner(ObjectGuid owner, std::set<ObjectGuid> const& members = {})
+    void SetScriptedPrivateOwner(ObjectGuid owner, std::set<ObjectGuid> const& members = {},
+        bool databaseSpawns = false)
     {
+        _scriptedPrivateDatabaseSpawns = databaseSpawns;
         _scriptedPrivateOwner = owner;
         _scriptedPrivateMembers = members;
         if (_scriptedPrivateMembers.empty())
             _scriptedPrivateMembers.insert(owner);
     }
+    bool LoadsScriptedPrivateDatabaseSpawns() const { return _scriptedPrivateDatabaseSpawns; }
     bool IsScriptedPrivateMember(ObjectGuid guid) const { return _scriptedPrivateMembers.contains(guid); }
     void RequestScriptedPrivateUnload() { _scriptedPrivateUnloadDelay = MIN_UNLOAD_DELAY; }
     void UnloadAll() override;
@@ -759,6 +762,7 @@ public:
     std::string GetDebugInfo() const override;
 
 private:
+    bool _scriptedPrivateDatabaseSpawns = false;
     ObjectGuid _scriptedPrivateOwner;
     std::set<ObjectGuid> _scriptedPrivateMembers;
     uint32 _scriptedPrivateUnloadDelay = 120000;

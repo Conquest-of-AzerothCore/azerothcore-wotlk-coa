@@ -4,11 +4,7 @@
 #ifndef ASCENSION_MANASTORM_H
 #define ASCENSION_MANASTORM_H
 
-class WorldSession;
-class WorldPacket;
-
-// Called only by the existing early extension sink. Copies bounded requests with a login token.
-bool QueueAscensionManastormPacket(WorldSession* session, WorldPacket const& packet);
-void AddAscensionManastormScripts();
+// Registers only the DB-bound cache item wrapper; the shared module owns gameplay.
+void AddAscensionManastormItemScripts();
 
 #endif

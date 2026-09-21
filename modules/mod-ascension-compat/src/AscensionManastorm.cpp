@@ -159,7 +159,8 @@ namespace
         void Configure()
         {
             // Startup only: disabling a live run halfway through must not discard its return location.
-            enabled.store(sConfigMgr->GetOption<bool>("Ascension.Manastorm.Enable", false));
+            enabled.store(sConfigMgr->GetOption<bool>("Ascension.Manastorm.Enable", false)
+                && !sConfigMgr->GetOption<bool>("Manastorm.Enable", false, false));
         }
 
         void ValidateScenes()
@@ -246,6 +247,8 @@ namespace
 
         SpellCastResult CheckUtility(Player* player, uint32 spell)
         {
+            if (!enabled.load())
+                return SPELL_CAST_OK;
             Gadget const* gadget = FindGadget(spell);
             if (!gadget && spell != 254440 && spell != 93309 && spell != 93311)
                 return SPELL_CAST_OK;
@@ -2089,21 +2092,10 @@ namespace
     };
 }
 
-bool QueueAscensionManastormPacket(WorldSession* session, WorldPacket const& packet)
+void AddAscensionManastormItemScripts()
 {
-    return ManastormService::Get().Queue(session, packet);
-}
-
-void AddAscensionManastormScripts()
-{
-    new ManastormWorld();
-    new ManastormMaps();
-    new ManastormPlayers();
-    new ManastormUnits();
-    new ManastormSpells();
-    new ManastormLoot();
+    // Keep the DB-bound wrapper for opening already-owned cache items. It does
+    // not select loot or own runs. The SQL-backed module is the only gameplay
+    // owner: no donor world/map/player/unit/spell/loot/guide hooks are registered.
     new item_ascension_manastorm_cache();
-    RegisterSpellScript(spell_ascension_manastorm_potion);
-    new ManastormGuides();
-    new ManastormCommands();
 }

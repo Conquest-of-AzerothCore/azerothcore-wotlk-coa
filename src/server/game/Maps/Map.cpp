@@ -2636,7 +2636,7 @@ bool Map::IsSpawnGroupActive(uint32 groupId) const
 
 bool Map::SpawnGroupSpawn(uint32 groupId, bool ignoreRespawn /*= false*/, bool force /*= false*/)
 {
-    if (IsScriptedPrivateInstance())
+    if (IsScriptedPrivateInstance() && !ToInstanceMap()->LoadsScriptedPrivateDatabaseSpawns())
         return false;
 
     SpawnGroupTemplateData const* groupData = sObjectMgr->GetSpawnGroupData(groupId);

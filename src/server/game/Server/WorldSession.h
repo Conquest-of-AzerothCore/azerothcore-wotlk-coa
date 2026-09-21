@@ -27,6 +27,7 @@
 #include "AuthDefines.h"
 #include "CircularBuffer.h"
 #include "Common.h"
+#include "NativeClientConfig.h"
 #include "DatabaseEnv.h"
 #include "Duration.h"
 #include "GossipDef.h"
@@ -461,6 +462,8 @@ public:
     bool ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, Player* plrMover, WorldPacket& recvData);
 
     void SendPacket(WorldPacket const* packet);
+    NativeClientConfig& GetNativeClientConfig() { return _nativeClientConfig; }
+    void SendNativeClientConfig();
     // Socketless integration tests can observe native responses without opening a client connection.
     void SetSocketlessPacketObserver(std::function<void(WorldPacket const&)> observer)
     {
@@ -1252,6 +1255,7 @@ public:                                                 // opcodes handlers
     }
 
 private:
+    NativeClientConfig _nativeClientConfig;
     void ProcessQueryCallbacks();
 
     QueryCallbackProcessor _queryProcessor;
