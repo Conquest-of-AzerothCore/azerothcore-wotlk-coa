@@ -362,6 +362,14 @@ bool ManastormProgression::RecordStageCompletion(
                     run.GetMode(),
                     run.IsEndgame());
 
+    std::vector<ManastormUnlockDefinition const*> const
+        directUnlocks =
+            ManastormDataStore::Instance()
+                .GetDirectUnlocksForTrigger(
+                    run.GetDepth(),
+                    run.GetMode(),
+                    run.IsEndgame());
+
     CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
 
     for (ObjectGuid::LowType characterGuid :
@@ -420,6 +428,46 @@ bool ManastormProgression::RecordStageCompletion(
 
                 completionMessageId =
                     pendingUnlock->CompletionMessageId;
+            }
+        }
+
+        std::vector<uint32> directUnlockMessageIds;
+        uint32 directUnlockCount = 0;
+
+        for (ManastormUnlockDefinition const* directUnlock :
+            directUnlocks)
+        {
+            if (!directUnlock)
+                continue;
+
+            bool alreadyCompleted = false;
+
+            if (!IsUnlockCompleted(
+                characterGuid,
+                directUnlock->UnlockId,
+                alreadyCompleted,
+                error))
+            {
+                return false;
+            }
+
+            if (alreadyCompleted)
+                continue;
+
+            transaction->Append(
+                "INSERT IGNORE INTO "
+                "`character_manastorm_unlock` "
+                "(`guid`, `unlock_id`) "
+                "VALUES ({}, {})",
+                characterGuid,
+                directUnlock->UnlockId);
+
+            ++directUnlockCount;
+
+            if (directUnlock->CompletionMessageId)
+            {
+                directUnlockMessageIds.push_back(
+                    directUnlock->CompletionMessageId);
             }
         }
 
@@ -537,6 +585,21 @@ bool ManastormProgression::RecordStageCompletion(
                 event);
         }
 
+        for (uint32 directMessageId :
+            directUnlockMessageIds)
+        {
+            ManastormProgressionToastEvent event;
+
+            event.CharacterGuid =
+                characterGuid;
+
+            event.MessageId =
+                directMessageId;
+
+            toastEvents.push_back(
+                event);
+        }
+
         if (introMessageId)
         {
             ManastormProgressionToastEvent event;
@@ -555,12 +618,13 @@ bool ManastormProgression::RecordStageCompletion(
             LOG_FILTER,
             "Manastorm progression: character={} "
             "mode={} completedDepth={} segment={} "
-            "completedUnlock={} queuedUnlock={}.",
+            "completedUnlock={} directUnlocks={} queuedUnlock={}.",
             characterGuid,
             ManastormModeName(run.GetMode()),
             run.GetDepth(),
             run.GetSegment().SegmentId,
             completedUnlockId,
+            directUnlockCount,
             queueTriggeredUnlock
                 ? triggeredUnlock->UnlockId
                 : 0);

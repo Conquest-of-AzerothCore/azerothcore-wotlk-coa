@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `manastorm_scaling_curve` (
 
 CREATE TABLE IF NOT EXISTS `manastorm_unlock` (
   `unlock_id` INT UNSIGNED NOT NULL,
+  `unlock_kind` TINYINT UNSIGNED NOT NULL DEFAULT 0,
   `trigger_depth` INT UNSIGNED NOT NULL,
   `mode_mask` TINYINT UNSIGNED NOT NULL DEFAULT 15,
   `track_mask` TINYINT UNSIGNED NOT NULL DEFAULT 3,

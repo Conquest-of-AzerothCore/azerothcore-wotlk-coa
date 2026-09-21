@@ -14,22 +14,17 @@ class ManastormAffixEngine
 public:
     static ManastormAffixEngine& Instance();
 
-    // Builds the affix side of a fresh disposable stage.
-    //
-    // IMPORTANT:
-    // Automatic historical Ascension selection is deliberately
-    // NOT enabled yet because its density/count/rank policy has
-    // not been recovered with enough confidence.
     void InitializeStage(
         ManastormRun& run,
-        std::unordered_set<uint32> const&
-            unlockedAffixIds);
+        std::unordered_set<uint32> const& unlockedAffixIds);
 
-    // GM/debug path. Bypasses permanent progression ownership.
     bool ForceStageAffix(
         ManastormRun& run,
         uint32 affixId,
         std::string& error);
+
+    bool IsAffixHelperCreature(
+        uint32 creatureEntry) const;
 
     void OnCreatureAdded(
         Creature* creature,
@@ -47,8 +42,7 @@ private:
     ManastormAffixEngine() = default;
 
     ManastormAffixDefinition const*
-    GetDefinition(
-        uint32 affixId) const;
+    GetDefinition(uint32 affixId) const;
 
     bool ValidateDefinition(
         ManastormAffixDefinition const& definition,

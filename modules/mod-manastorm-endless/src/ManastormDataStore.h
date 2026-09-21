@@ -26,6 +26,12 @@ public:
         ManastormMode mode,
         bool endgame) const;
 
+    std::vector<ManastormUnlockDefinition const*>
+    GetDirectUnlocksForTrigger(
+        uint32 completedDepth,
+        ManastormMode mode,
+        bool endgame) const;
+
     std::size_t GetUnlockCount() const
     {
         return _unlocks.size();

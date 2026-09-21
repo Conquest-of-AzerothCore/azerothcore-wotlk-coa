@@ -532,6 +532,7 @@ bool ManastormDataStore::LoadUnlocks()
         WorldDatabase.Query(
             "SELECT "
             "`unlock_id`, "
+            "`unlock_kind`, "
             "`trigger_depth`, "
             "`mode_mask`, "
             "`track_mask`, "
@@ -564,26 +565,29 @@ bool ManastormDataStore::LoadUnlocks()
         definition.UnlockId =
             fields[0].Get<uint32>();
 
+        uint8 const unlockKindRaw =
+            fields[1].Get<uint8>();
+
         definition.TriggerDepth =
-            fields[1].Get<uint32>();
+            fields[2].Get<uint32>();
 
         definition.ModeMask =
-            fields[2].Get<uint8>();
-
-        definition.TrackMask =
             fields[3].Get<uint8>();
 
-        definition.IntroSegmentId =
-            fields[4].Get<uint32>();
+        definition.TrackMask =
+            fields[4].Get<uint8>();
 
-        definition.EndgameIntroSegmentId =
+        definition.IntroSegmentId =
             fields[5].Get<uint32>();
 
-        definition.IntroMessageId =
+        definition.EndgameIntroSegmentId =
             fields[6].Get<uint32>();
 
-        definition.CompletionMessageId =
+        definition.IntroMessageId =
             fields[7].Get<uint32>();
+
+        definition.CompletionMessageId =
+            fields[8].Get<uint32>();
 
         if (!definition.UnlockId)
         {
@@ -594,6 +598,23 @@ bool ManastormDataStore::LoadUnlocks()
             valid = false;
             continue;
         }
+
+        if (unlockKindRaw >
+            uint8(ManastormUnlockKind::Direct))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm unlock {}: unlock_kind={}.",
+                definition.UnlockId,
+                uint32(unlockKindRaw));
+
+            valid = false;
+            continue;
+        }
+
+        definition.Kind =
+            ManastormUnlockKind(
+                unlockKindRaw);
 
         if (!definition.TriggerDepth)
         {
@@ -633,6 +654,30 @@ bool ManastormDataStore::LoadUnlocks()
                 uint32(definition.TrackMask));
 
             valid = false;
+            continue;
+        }
+
+        if (definition.Kind ==
+            ManastormUnlockKind::Direct)
+        {
+            if (definition.IntroSegmentId ||
+                definition.EndgameIntroSegmentId ||
+                definition.IntroMessageId)
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Invalid direct Manastorm unlock {}: "
+                    "intro segment/message fields must be 0.",
+                    definition.UnlockId);
+
+                valid = false;
+                continue;
+            }
+
+            _unlocks.emplace(
+                definition.UnlockId,
+                std::move(definition));
+
             continue;
         }
 
@@ -1065,6 +1110,12 @@ ManastormDataStore::GetUnlockForTrigger(
         ManastormUnlockDefinition const& unlock =
             pair.second;
 
+        if (unlock.Kind !=
+            ManastormUnlockKind::Introduction)
+        {
+            continue;
+        }
+
         if (unlock.TriggerDepth !=
             completedDepth)
         {
@@ -1087,4 +1138,62 @@ ManastormDataStore::GetUnlockForTrigger(
     }
 
     return nullptr;
+}
+
+std::vector<ManastormUnlockDefinition const*>
+ManastormDataStore::GetDirectUnlocksForTrigger(
+    uint32 completedDepth,
+    ManastormMode mode,
+    bool endgame) const
+{
+    std::vector<ManastormUnlockDefinition const*> matches;
+
+    uint8 const modeBit =
+        ManastormGetModeBit(mode);
+
+    uint8 const trackBit =
+        ManastormGetTrackBit(endgame);
+
+    if (!completedDepth ||
+        !modeBit ||
+        !trackBit)
+    {
+        return matches;
+    }
+
+    for (auto const& pair :
+        _unlocks)
+    {
+        ManastormUnlockDefinition const& unlock =
+            pair.second;
+
+        if (unlock.Kind !=
+            ManastormUnlockKind::Direct)
+        {
+            continue;
+        }
+
+        if (unlock.TriggerDepth !=
+            completedDepth)
+        {
+            continue;
+        }
+
+        if (!(unlock.ModeMask &
+            modeBit))
+        {
+            continue;
+        }
+
+        if (!(unlock.TrackMask &
+            trackBit))
+        {
+            continue;
+        }
+
+        matches.push_back(
+            &unlock);
+    }
+
+    return matches;
 }

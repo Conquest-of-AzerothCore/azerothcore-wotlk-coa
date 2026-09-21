@@ -3519,8 +3519,9 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
 // It is a trigger/helper, not normal dungeon trash,
 // so let the Affix Engine initialize it separately.
 //
-    if (creature->GetEntry() ==
-        ManastormManaBomb::HelperCreature)
+    if (ManastormAffixEngine::Instance()
+        .IsAffixHelperCreature(
+            creature->GetEntry()))
     {
         ManastormAffixEngine::Instance()
             .OnCreatureAdded(
@@ -3701,11 +3702,12 @@ void ManastormMgr::OnCreatureRemoveWorld(Creature* creature)
             *run);
 
     //
-    // Mana Bomb helper 663028 is never registered as a normal
-    // stage creature.
+    // Recovered affix helper summons are never registered as normal
+    // stage creatures.
     //
-    if (creature->GetEntry() ==
-        ManastormManaBomb::HelperCreature)
+    if (ManastormAffixEngine::Instance()
+        .IsAffixHelperCreature(
+            creature->GetEntry()))
     {
         return;
     }
