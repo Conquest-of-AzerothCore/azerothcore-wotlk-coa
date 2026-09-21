@@ -534,7 +534,9 @@ bool ManastormDataStore::LoadUnlocks()
             "`unlock_id`, "
             "`trigger_depth`, "
             "`mode_mask`, "
+            "`track_mask`, "
             "`intro_segment_id`, "
+            "`endgame_intro_segment_id`, "
             "`intro_message_id`, "
             "`completion_message_id` "
             "FROM `manastorm_unlock` "
@@ -568,14 +570,20 @@ bool ManastormDataStore::LoadUnlocks()
         definition.ModeMask =
             fields[2].Get<uint8>();
 
-        definition.IntroSegmentId =
-            fields[3].Get<uint32>();
+        definition.TrackMask =
+            fields[3].Get<uint8>();
 
-        definition.IntroMessageId =
+        definition.IntroSegmentId =
             fields[4].Get<uint32>();
 
-        definition.CompletionMessageId =
+        definition.EndgameIntroSegmentId =
             fields[5].Get<uint32>();
+
+        definition.IntroMessageId =
+            fields[6].Get<uint32>();
+
+        definition.CompletionMessageId =
+            fields[7].Get<uint32>();
 
         if (!definition.UnlockId)
         {
@@ -613,20 +621,65 @@ bool ManastormDataStore::LoadUnlocks()
             continue;
         }
 
-        if (!definition.IntroSegmentId ||
-            !GetSegmentById(
-                definition.IntroSegmentId))
+        if (!definition.TrackMask ||
+            (uint32(definition.TrackMask) &
+                ~uint32(ManastormTrackBits::All)) != 0)
         {
             LOG_ERROR(
                 LOG_FILTER,
                 "Invalid Manastorm unlock {}: "
-                "intro segment {} is not an enabled "
-                "valid Manastorm segment.",
+                "track_mask={} contains unsupported bits.",
                 definition.UnlockId,
-                definition.IntroSegmentId);
+                uint32(definition.TrackMask));
 
             valid = false;
             continue;
+        }
+
+        if (definition.TrackMask &
+            ManastormTrackBits::Normal)
+        {
+            ManastormSegment const* intro =
+                GetSegmentById(
+                    definition.IntroSegmentId);
+
+            if (!intro ||
+                intro->Difficulty != 0)
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Invalid Manastorm unlock {}: "
+                    "normal intro segment {} must be an enabled "
+                    "difficulty-0 Manastorm segment.",
+                    definition.UnlockId,
+                    definition.IntroSegmentId);
+
+                valid = false;
+                continue;
+            }
+        }
+
+        if (definition.TrackMask &
+            ManastormTrackBits::Endgame)
+        {
+            ManastormSegment const* intro =
+                GetSegmentById(
+                    definition.EndgameIntroSegmentId);
+
+            if (!intro ||
+                intro->Difficulty != 2)
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Invalid Manastorm unlock {}: "
+                    "end-game intro segment {} must be an enabled "
+                    "difficulty-2 Manastorm segment.",
+                    definition.UnlockId,
+                    definition.EndgameIntroSegmentId);
+
+                valid = false;
+                continue;
+            }
         }
 
         bool conflict = false;
@@ -649,11 +702,17 @@ bool ManastormDataStore::LoadUnlocks()
                 continue;
             }
 
+            if (!(existing.TrackMask &
+                definition.TrackMask))
+            {
+                continue;
+            }
+
             LOG_ERROR(
                 LOG_FILTER,
                 "Manastorm unlock {} conflicts with "
                 "unlock {} at trigger depth {}. "
-                "Their mode masks overlap.",
+                "Their mode and native-track masks overlap.",
                 definition.UnlockId,
                 existing.UnlockId,
                 definition.TriggerDepth);
@@ -984,13 +1043,18 @@ ManastormDataStore::GetUnlockById(
 ManastormUnlockDefinition const*
 ManastormDataStore::GetUnlockForTrigger(
     uint32 completedDepth,
-    ManastormMode mode) const
+    ManastormMode mode,
+    bool endgame) const
 {
     uint8 const modeBit =
         ManastormGetModeBit(mode);
 
+    uint8 const trackBit =
+        ManastormGetTrackBit(endgame);
+
     if (!completedDepth ||
-        !modeBit)
+        !modeBit ||
+        !trackBit)
     {
         return nullptr;
     }
@@ -1009,6 +1073,12 @@ ManastormDataStore::GetUnlockForTrigger(
 
         if (!(unlock.ModeMask &
             modeBit))
+        {
+            continue;
+        }
+
+        if (!(unlock.TrackMask &
+            trackBit))
         {
             continue;
         }

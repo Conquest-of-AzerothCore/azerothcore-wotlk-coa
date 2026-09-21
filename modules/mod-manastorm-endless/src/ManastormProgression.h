@@ -15,6 +15,7 @@ struct ManastormProgressionSnapshot
 
     uint32 PendingUnlockId = 0;
     uint32 PendingIntroSegmentId = 0;
+    uint32 PendingEndgameIntroSegmentId = 0;
     uint32 PendingIntroDepth = 0;
 
     std::unordered_set<uint32>

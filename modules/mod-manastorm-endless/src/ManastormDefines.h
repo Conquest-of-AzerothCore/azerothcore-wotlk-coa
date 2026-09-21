@@ -71,6 +71,21 @@ namespace ManastormModeBits
     constexpr uint8 All = Solo | Duo | Trio | Group;
 }
 
+namespace ManastormTrackBits
+{
+    // Patch-M native stage tracks.
+    constexpr uint8 Normal = 0x01;  // Manastorm.dbc difficulty 0
+    constexpr uint8 Endgame = 0x02; // Manastorm.dbc difficulty 2
+    constexpr uint8 All = Normal | Endgame;
+}
+
+inline uint8 ManastormGetTrackBit(bool endgame)
+{
+    return endgame
+        ? ManastormTrackBits::Endgame
+        : ManastormTrackBits::Normal;
+}
+
 inline uint8 ManastormGetModeBit(
     ManastormMode mode)
 {
@@ -92,6 +107,20 @@ inline uint8 ManastormGetModeBit(
     return 0;
 }
 
+enum class ManastormUnlockKind : uint8
+{
+    // Existing Chapter-2 map/content flow:
+    // complete trigger depth -> force NEXT introduction -> permanent grant.
+    Introduction = 0,
+
+    // Direct completion grant:
+    // complete trigger depth -> permanent ownership immediately.
+    //
+    // Recovered ManastormMessages uses this wording for the 14 affixes:
+    // "...affix in future Manastorms".
+    Direct = 1,
+};
+
 enum class ManastormUnlockGrantType : uint8
 {
     Segment = 1,
@@ -111,8 +140,27 @@ enum class ManastormAffixRuntimeType : uint8
 
 namespace ManastormAffixIds
 {
-    // Recovered Ascension Manastorm affix ID.
+    //
+    // Shared backend runtime IDs.
+    //
+    // These values match the recovered Chapter-2 unlock depths for a
+    // stable reconstructed namespace. They are NOT claimed to be an
+    // original native C_Manastorm protocol affix-ID field.
+    //
     constexpr uint32 ManaBomb = 11;
+    constexpr uint32 LightningRod = 13;
+    constexpr uint32 Rampaging = 16;
+    constexpr uint32 AethyricWinds = 19;
+    constexpr uint32 ColdSnap = 21;
+    constexpr uint32 TribalFury = 23;
+    constexpr uint32 Vortex = 26;
+    constexpr uint32 Stalwart = 28;
+    constexpr uint32 Fungal = 31;
+    constexpr uint32 WildMagics = 33;
+    constexpr uint32 RunesOfPower = 39;
+    constexpr uint32 Reflecting = 41;
+    constexpr uint32 BoneStorm = 61;
+    constexpr uint32 OverwhelmingEnergy = 101;
 }
 
 namespace ManastormManaBomb
@@ -152,14 +200,27 @@ struct ManastormUnlockDefinition
 {
     uint32 UnlockId = 0;
 
-    // Completing this Endless depth queues the introduction.
+    ManastormUnlockKind Kind =
+        ManastormUnlockKind::Introduction;
+
+    // Completing this Endless depth either queues an introduction
+    // or, for Direct unlocks, grants ownership immediately.
     uint32 TriggerDepth = 0;
 
     uint8 ModeMask =
         ManastormModeBits::All;
 
-    // Forced NEXT-RUN / next-stage introduction.
+    // Which native stage track can trigger this unlock.
+    uint8 TrackMask =
+        ManastormTrackBits::All;
+
+    // Forced NEXT-RUN / next-stage introductions.
+    //
+    // Patch-M carries separate difficulty-0 and difficulty-2
+    // Manastorm stage identities. Permanent ownership is shared,
+    // but the forced introduction must use the matching track.
     uint32 IntroSegmentId = 0;
+    uint32 EndgameIntroSegmentId = 0;
 
     // These will later resolve through
     // manastorm_unlock_message.

@@ -320,6 +320,9 @@ bool ManastormProgression::LoadSnapshot(
         snapshot.PendingIntroSegmentId =
             unlock->IntroSegmentId;
 
+        snapshot.PendingEndgameIntroSegmentId =
+            unlock->EndgameIntroSegmentId;
+
         if (unlock->TriggerDepth ==
             std::numeric_limits<uint32>::max())
         {
@@ -356,7 +359,8 @@ bool ManastormProgression::RecordStageCompletion(
             ManastormDataStore::Instance()
                 .GetUnlockForTrigger(
                     run.GetDepth(),
-                    run.GetMode());
+                    run.GetMode(),
+                    run.IsEndgame());
 
     CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
 
@@ -402,8 +406,14 @@ bool ManastormProgression::RecordStageCompletion(
                 return false;
             }
 
-            if (pendingUnlock->IntroSegmentId ==
-                run.GetSegment().SegmentId)
+            uint32 const pendingIntroSegmentId =
+                run.IsEndgame()
+                ? pendingUnlock->EndgameIntroSegmentId
+                : pendingUnlock->IntroSegmentId;
+
+            if (pendingIntroSegmentId &&
+                pendingIntroSegmentId ==
+                    run.GetSegment().SegmentId)
             {
                 completedUnlockId =
                     pendingUnlockId;

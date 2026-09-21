@@ -23,7 +23,8 @@ public:
 
     ManastormUnlockDefinition const* GetUnlockForTrigger(
         uint32 completedDepth,
-        ManastormMode mode) const;
+        ManastormMode mode,
+        bool endgame) const;
 
     std::size_t GetUnlockCount() const
     {

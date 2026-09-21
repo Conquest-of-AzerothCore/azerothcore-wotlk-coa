@@ -69,8 +69,8 @@ int rolls=0, launches=0; bool immediate=false; uint32 dice=1;
 uint32 urand(uint32,uint32){++rolls;return dice;}
 struct ManastormMgr {
  ManastormRun* GetRunForStage(uint32,uint32){return &run;}
- bool SpawnHeartProjectile(Creature*,ManastormRun&,bool lethal=false){++launches;immediate=lethal;return true;}
- bool TrySpawnTrashHeart(Creature*,ManastormRun&,bool lethal=false);
+ bool SpawnHeartProjectile(Creature*,ManastormRun&,bool persistentLauncher=false){++launches;immediate=persistentLauncher;return true;}
+ bool TrySpawnTrashHeart(Creature*,ManastormRun&);
  void OnDamage(Unit*,Unit*,uint32);
 };
 struct Target {uint32 hp=1000; bool alive=true; bool IsAlive(){return alive;} uint32 GetMaxHealth(){return hp;}};
@@ -84,6 +84,12 @@ struct Spell {
  void EffectAscensionHealthPctDamage(SpellEffIndex);
 };
 """
+spawn_impl = function(mgr, 'bool ManastormMgr::SpawnHeartProjectile(')
+death_impl = function(mgr, 'void ManastormMgr::OnUnitDeath(')
+assert 'SummonTrigger(' in spawn_impl
+assert 'SPELL_MANASTORM_HEART_PROJECTILE' in spawn_impl
+assert 'lethal ? SPELL_MANASTORM_HEART_SUMMON' not in spawn_impl
+assert 'TrySpawnTrashHeart(' in death_impl
 source += function(mgr, 'bool ManastormMgr::TrySpawnTrashHeart(')
 source += function(mgr, 'void ManastormMgr::OnDamage(')
 source += function(effects, 'void Spell::EffectAscensionHealthPctDamage(')
@@ -113,17 +119,36 @@ int main(){
  aura.id=42; aura.m_amount=5; powerTarget.power=50;
  aura.HandleObsModPowerAuraTick(&powerTarget,nullptr); assert(powerTarget.power==55);
  ManastormMgr mgr; Creature mob;
- mgr.OnDamage(nullptr,&mob,1000); // Ordinary non-linked trash, one-shot.
+
+ // Normal trash is no longer HP-threshold driven.
+ mgr.OnDamage(nullptr,&mob,1000);
+ assert(rolls==0 && launches==0);
+ mob.hp=200;
+ mgr.OnDamage(nullptr,&mob,150);
+ assert(rolls==0 && launches==0);
+
+ // Death flow owns exactly one 75% trash roll and always requests
+ // the persistent 991507 projectile launcher.
+ run.rolls.clear(); rolls=launches=0; dice=1;
+ mob.hp=0; mob.guid=1; mob.entry=42;
+ assert(mgr.TrySpawnTrashHeart(&mob,run));
  assert(rolls==1 && launches==1 && immediate);
- mgr.OnDamage(nullptr,&mob,1000); assert(rolls==1); // One roll only.
- run.rolls.clear(); rolls=launches=0; mob.hp=200;
- mgr.OnDamage(nullptr,&mob,150); assert(rolls==1 && launches==1 && !immediate);
- mob.hp=200; mgr.OnDamage(nullptr,&mob,150); assert(rolls==1); // Healing cannot farm rerolls.
- run.rolls.clear(); dice=100; mgr.OnDamage(nullptr,&mob,200);
- int count=rolls; mgr.OnDamage(nullptr,&mob,200); assert(rolls==count); // Failed rolls also consumed.
- run.member=false; run.rolls.clear(); mgr.OnDamage(nullptr,&mob,200); assert(rolls==count);
+ assert(!mgr.TrySpawnTrashHeart(&mob,run));
+ assert(rolls==1 && launches==1);
+
+ // A failed 75% roll is consumed too.
+ run.rolls.clear(); rolls=launches=0; dice=100;
+ assert(!mgr.TrySpawnTrashHeart(&mob,run));
+ assert(rolls==1 && launches==0);
+ assert(!mgr.TrySpawnTrashHeart(&mob,run));
+ assert(rolls==1 && launches==0);
+
+ run.member=false; run.rolls.clear(); dice=1;
+ assert(!mgr.TrySpawnTrashHeart(&mob,run));
  run.member=true; run.state=ManastormRunState::Preparing;
- mgr.OnDamage(nullptr,&mob,200); assert(rolls==count);
+ assert(!mgr.TrySpawnTrashHeart(&mob,run));
+
+ // Boss threshold behavior remains unchanged.
  run.state=ManastormRunState::Active; mob.guid=99; mob.entry=99; mob.hp=1000;
  launches=0; mgr.OnDamage(nullptr,&mob,250); assert(launches==2); // Boss 90/80 thresholds preserved.
  Target target; Info info; Spell spell; spell.unitTarget=&target; spell.m_spellInfo=&info;
@@ -138,7 +163,7 @@ int main(){
  spell.EffectAscensionHealthPctDamage(0); assert(spell.m_damage==INT32_MAX);
  spell.m_damage=0; spell.damage=-1;
  spell.EffectAscensionHealthPctDamage(0); assert(spell.m_damage==0);
- std::cout << "Heart eligibility, lethal hits, once-only rolls, boss thresholds and effect 174 passed\n";
+ std::cout << "Death-driven trash Hearts, persistent projectile launchers, once-only rolls, boss thresholds and effect 174 passed\n";
 }
 """
 Path(sys.argv[1]).write_text(source, encoding='utf-8', newline='\n')

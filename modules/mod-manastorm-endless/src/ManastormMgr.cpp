@@ -221,7 +221,6 @@ namespace
     constexpr uint32 NPC_MANASTORM_HEART = 900025;
 
     constexpr uint32 SPELL_MANASTORM_HEART_PROJECTILE = 991507;
-    constexpr uint32 SPELL_MANASTORM_HEART_SUMMON = 991509;
     constexpr uint32 SPELL_MANASTORM_HEART_HEALING = 991510;
     constexpr uint32 SPELL_MANASTORM_HEART_VISUAL = 991511;
 
@@ -245,13 +244,15 @@ namespace
     constexpr double CHAOTIC_LINK_HEALTH_PER_STACK = 0.25;
     constexpr double CHAOTIC_LINK_DAMAGE_PER_STACK = 0.10;
 
-    // Recovered Ascension Heart Proc chance.
+    // Recovered Ascension Heart Proc chance for ordinary monsters.
+    // The roll is owned by OnUnitDeath(), matching the kill-associated
+    // trash Heart behavior while boss Hearts remain HP-threshold driven.
     constexpr uint32 HEART_TRASH_CHANCE_PCT = 75;
 
-    // Regular Manastorm trash gets one Heart opportunity near death.
-    // The non-lethal 10% crossing keeps the creature alive long enough
-    // for the client to render 991507 before the mob dies.
-    constexpr uint32 HEART_TRASH_TRIGGER_PCT = 10;
+    // A death-triggered trash Heart is launched by a short-lived built-in
+    // WORLD_TRIGGER. At the recovered 991507 speed, two seconds is ample
+    // for the 10-20 yard projectile while leaving no persistent helper.
+    constexpr uint32 HEART_PROJECTILE_LAUNCHER_LIFETIME_MS = 35000;
     constexpr uint32 HEART_PICKUP_ARM_DELAY_MS = 1000;
     constexpr uint32 HEART_PICKUP_CHECK_INTERVAL_MS = 500;
     constexpr float HEART_PICKUP_DISTANCE = 2.0f;
@@ -2104,11 +2105,51 @@ ManastormRun* ManastormMgr::StartRun(
         return nullptr;
     }
 
+    //
+    // Resolve the native stage track BEFORE selecting a segment.
+    //
+    // Patch-M Manastorm.dbc uses difficulty 0 for normal stages and
+    // difficulty 2 for end-game stages. The old code calculated this only
+    // after selection, which allowed the two native pools to mix.
+    //
+    bool endgame = false;
+    uint32 const endgameLevel =
+        std::max(
+            60u,
+            sWorld->getIntConfig(
+                CONFIG_MAX_PLAYER_LEVEL));
+
+    for (ObjectGuid::LowType memberGuid :
+        members)
+    {
+        Player* member =
+            ObjectAccessor::FindConnectedPlayer(
+                ObjectGuid::Create<HighGuid::Player>(
+                    memberGuid));
+
+        if (!member ||
+            !member->IsInWorld() ||
+            member->IsBeingTeleported())
+        {
+            error =
+                "Every run member must be connected and ready.";
+
+            return nullptr;
+        }
+
+        endgame =
+            endgame ||
+            member->GetLevel() >=
+                endgameLevel;
+    }
+
     ManastormGenerator generator;
 
     uint32 const forcedIntroSegmentId =
         progression.PendingIntroDepth == depth
-        ? progression.PendingIntroSegmentId
+        ? (endgame
+            ? progression.PendingEndgameIntroSegmentId
+            : progression.PendingIntroSegmentId)
         : 0;
 
     ManastormSegment const* selected =
@@ -2116,6 +2157,7 @@ ManastormRun* ManastormMgr::StartRun(
             depth,
             seed,
             progression.UnlockedSegmentIds,
+            endgame,
             0,
             forcedIntroSegmentId);
 
@@ -2173,7 +2215,6 @@ ManastormRun* ManastormMgr::StartRun(
         *selected,
         scaling);
 
-    bool endgame = false;
     for (auto guid : members)
     {
         Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
@@ -2184,7 +2225,6 @@ ManastormRun* ManastormMgr::StartRun(
         }
         member->SaveRecallPosition();
         run->SaveReturnLocation(guid, WorldLocation(member->GetMapId(), member->GetPosition()));
-        endgame = endgame || member->GetLevel() >= std::max(60u, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
     }
     run->SetEndgame(endgame);
 
@@ -3038,7 +3078,7 @@ void ManastormMgr::ApplyChaoticLinkBossHealth(
 bool ManastormMgr::SpawnHeartProjectile(
     Creature* creature,
     ManastormRun& run,
-    bool lethal)
+    bool persistentLauncher)
 {
     if (!creature ||
         run.GetState() != ManastormRunState::Active ||
@@ -3085,13 +3125,51 @@ bool ManastormMgr::SpawnHeartProjectile(
     //
     // 991509 then summons creature 900025 at the destination.
     //
-    creature->CastSpell(
+    Creature* projectileCaster =
+        creature;
+
+    //
+    // Ordinary trash Hearts are death-triggered.
+    //
+    // Never cast 991509 directly for a lethal trash kill: doing so bypasses
+    // the recovered projectile and makes the Heart pop into existence.
+    //
+    // Instead create the core's built-in invisible WORLD_TRIGGER at the
+    // corpse position. It survives the source creature's death long enough
+    // to cast the real 991507 missile. Spell.dbc then continues naturally:
+    //
+    //     991507 -> 991509 -> 900025
+    //
+    if (persistentLauncher)
+    {
+        projectileCaster =
+            creature->SummonTrigger(
+                creature->GetPositionX(),
+                creature->GetPositionY(),
+                creature->GetPositionZ(),
+                creature->GetOrientation(),
+                HEART_PROJECTILE_LAUNCHER_LIFETIME_MS,
+                false);
+
+        if (!projectileCaster)
+        {
+            LOG_WARN(
+                LOG_FILTER,
+                "Manastorm run {} could not create temporary Heart "
+                "projectile launcher for creature entry={} guid={}.",
+                run.GetRunId(),
+                creature->GetEntry(),
+                creature->GetGUID().GetRawValue());
+
+            return false;
+        }
+    }
+
+    projectileCaster->CastSpell(
         destination.GetPositionX(),
         destination.GetPositionY(),
         destination.GetPositionZ(),
-        // A lethal hit can interrupt the dying caster's in-flight missile.
-        // Execute its existing DBC impact/summon immediately for that case.
-        lethal ? SPELL_MANASTORM_HEART_SUMMON : SPELL_MANASTORM_HEART_PROJECTILE,
+        SPELL_MANASTORM_HEART_PROJECTILE,
         true);
 
     LOG_INFO(
@@ -3110,8 +3188,7 @@ bool ManastormMgr::SpawnHeartProjectile(
 
 bool ManastormMgr::TrySpawnTrashHeart(
     Creature* creature,
-    ManastormRun& run,
-    bool lethal)
+    ManastormRun& run)
 {
     if (!creature ||
         run.GetState() != ManastormRunState::Active ||
@@ -3121,19 +3198,25 @@ bool ManastormMgr::TrySpawnTrashHeart(
         return false;
     }
 
-    // Recovered Ascension Heart Proc candidate:
-    // procChance = 75.
     //
-    // Every eligible stage creature receives one roll on crossing 10% HP
-    // or taking a lethal hit, independent of Chaotic Link route membership.
-    if (!run.TryMarkTrashHeartRoll(creature->GetGUID()) ||
-        urand(1, 100) > HEART_TRASH_CHANCE_PCT)
+    // Recovered Ascension Heart proc chance: 75%.
+    //
+    // Ordinary stage monsters get exactly one roll when they die.
+    // Failed rolls are consumed too, so the same runtime creature cannot
+    // acquire repeated Heart attempts.
+    //
+    if (!run.TryMarkTrashHeartRoll(
+            creature->GetGUID()) ||
+        urand(1, 100) >
+            HEART_TRASH_CHANCE_PCT)
+    {
         return false;
+    }
 
     return SpawnHeartProjectile(
         creature,
         run,
-        lethal);
+        true);
 }
 
 void ManastormMgr::OnDamage(
@@ -3203,14 +3286,14 @@ void ManastormMgr::OnDamage(
         creature->GetEntry() ==
         segment.ObjectiveCreatureEntry;
 
-    // Lethal trash hits use the DBC impact summon immediately, before death
-    // interrupts the caster. Boss thresholds retain their non-lethal policy.
+    //
+    // Normal trash Hearts are death-driven in OnUnitDeath().
+    //
+    // Keep objective-boss behavior unchanged: boss Hearts remain tied to
+    // the non-lethal 90..10% thresholds below.
+    //
     if (damage >= currentHealth)
-    {
-        if (!isObjectiveBoss)
-            TrySpawnTrashHeart(creature, *run, true);
         return;
-    }
 
     uint32 const remainingHealth =
         currentHealth - damage;
@@ -3266,25 +3349,9 @@ void ManastormMgr::OnDamage(
     }
 
     //
-    // Normal trash:
+    // Regular trash intentionally has no HP-threshold Heart behavior here.
+    // Its single 75% chance is evaluated by OnUnitDeath().
     //
-    // one 75% Heart roll when the add FIRST crosses 10% HP.
-    //
-    if (uint64(currentHealth) * 100 <=
-        uint64(maxHealth) * HEART_TRASH_TRIGGER_PCT)
-    {
-        return;
-    }
-
-    if (uint64(remainingHealth) * 100 >
-        uint64(maxHealth) * HEART_TRASH_TRIGGER_PCT)
-    {
-        return;
-    }
-
-    TrySpawnTrashHeart(
-        creature,
-        *run);
 }
 
 bool ManastormMgr::ForceStageAffix(
@@ -3832,6 +3899,32 @@ void ManastormMgr::OnUnitDeath(
         objectiveGuid ==
         creature->GetGUID();
 
+    bool const isObjectiveCreature =
+        isObjectiveBoss ||
+        creature->GetEntry() ==
+            segment.ObjectiveCreatureEntry;
+
+    //
+    // ORIGINAL-STYLE TRASH HEART FLOW
+    //
+    // Ordinary stage monsters receive one 75% Heart roll on death.
+    // The corpse supplies the origin position only. SpawnHeartProjectile()
+    // creates a short-lived invisible WORLD_TRIGGER that remains alive long
+    // enough to cast 991507, after which the recovered DBC performs:
+    //
+    //     991507 -> 991509 -> 900025
+    //
+    // OnCreatureAddWorld() then registers 900025 and applies 991511.
+    //
+    // This covers one-shots without shortcutting directly to 991509.
+    //
+    if (!isObjectiveCreature)
+    {
+        TrySpawnTrashHeart(
+            creature,
+            *run);
+    }
+
     //
     // CHAOTIC LINK ROUTE TRASH
     //
@@ -4129,7 +4222,9 @@ bool ManastormMgr::TransitionToNextStage(
 
     uint32 const forcedIntroSegmentId =
         progression.PendingIntroDepth == nextDepth
-        ? progression.PendingIntroSegmentId
+        ? (run.IsEndgame()
+            ? progression.PendingEndgameIntroSegmentId
+            : progression.PendingIntroSegmentId)
         : 0;
 
     ManastormSegment const* nextSegment =
@@ -4137,6 +4232,7 @@ bool ManastormMgr::TransitionToNextStage(
             nextDepth,
             run.GetSeed(),
             progression.UnlockedSegmentIds,
+            run.IsEndgame(),
             previousSegmentId,
             forcedIntroSegmentId);
 

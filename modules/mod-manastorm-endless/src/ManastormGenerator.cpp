@@ -22,6 +22,7 @@ ManastormGenerator::SelectSegment(
     uint64 runSeed,
     std::unordered_set<uint32> const&
     unlockedSegmentIds,
+    bool endgame,
     uint32 excludedSegmentId,
     uint32 forcedSegmentId) const
 {
@@ -49,6 +50,23 @@ ManastormGenerator::SelectSegment(
                 "force unknown segment {} at depth {}.",
                 forcedSegmentId,
                 depth);
+
+            return nullptr;
+        }
+
+        uint8 const expectedDifficulty =
+            endgame ? uint8(2) : uint8(0);
+
+        if (forced->Difficulty != expectedDifficulty)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm progression attempted to force segment {} "
+                "with difficulty {} into a {} run (expected difficulty {}).",
+                forcedSegmentId,
+                uint32(forced->Difficulty),
+                endgame ? "end-game" : "normal",
+                uint32(expectedDifficulty));
 
             return nullptr;
         }
@@ -85,6 +103,9 @@ ManastormGenerator::SelectSegment(
 
     uint64 totalWeight = 0;
 
+    uint8 const expectedDifficulty =
+        endgame ? uint8(2) : uint8(0);
+
     for (ManastormSegment const& segment :
         ManastormDataStore::Instance()
         .GetSegments())
@@ -92,6 +113,20 @@ ManastormGenerator::SelectSegment(
         if (excludedSegmentId &&
             segment.SegmentId ==
             excludedSegmentId)
+        {
+            continue;
+        }
+
+        //
+        // Patch-M/native Manastorm has two distinct stage tracks:
+        //
+        //   difficulty 0 = normal
+        //   difficulty 2 = end-game
+        //
+        // Never allow the generator to cross-select between them.
+        //
+        if (segment.Difficulty !=
+            expectedDifficulty)
         {
             continue;
         }
@@ -159,6 +194,7 @@ ManastormGenerator::SelectSegment(
                 depth,
                 runSeed,
                 unlockedSegmentIds,
+                endgame,
                 0,
                 0);
         }

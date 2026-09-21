@@ -151,12 +151,11 @@ private:
     bool SpawnHeartProjectile(
         Creature* creature,
         ManastormRun& run,
-        bool lethal = false);
+        bool persistentLauncher = false);
 
     bool TrySpawnTrashHeart(
         Creature* creature,
-        ManastormRun& run,
-        bool lethal = false);
+        ManastormRun& run);
 
     void UpdateHeartPickups(uint32 diff);
 

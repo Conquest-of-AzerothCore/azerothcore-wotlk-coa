@@ -13,6 +13,7 @@ public:
         uint64 runSeed,
         std::unordered_set<uint32> const&
         unlockedSegmentIds,
+        bool endgame,
         uint32 excludedSegmentId = 0,
         uint32 forcedSegmentId = 0) const;
 };
