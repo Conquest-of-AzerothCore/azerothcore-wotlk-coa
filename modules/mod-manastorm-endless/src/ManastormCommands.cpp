@@ -35,7 +35,8 @@ namespace
             "SELECT "
             "`segment_id`, "
             "COALESCE(NULLIF(`runtime_map_id`, 0), `map_id`), "
-            "`objective_creature_entry`, "
+            "COALESCE(NULLIF(`runtime_objective_creature_entry`, 0), "
+            "`objective_creature_entry`), "
             "`chaotic_link_stacks` "
             "FROM `manastorm_segment` "
             "WHERE `segment_id` = {} "
@@ -297,10 +298,11 @@ public:
 
         static ChatCommandTable segmentCommandTable =
         {
-            { "info",    HandleSegmentInfoCommand,       SEC_GAMEMASTER, Console::No },
-            { "runtime", HandleSegmentRuntimeMapCommand, SEC_GAMEMASTER, Console::No },
-            { "enable",  HandleSegmentEnableCommand,     SEC_GAMEMASTER, Console::No },
-            { "test",    HandleSegmentTestCommand,       SEC_GAMEMASTER, Console::No },
+            { "info",      HandleSegmentInfoCommand,             SEC_GAMEMASTER, Console::No },
+            { "runtime",   HandleSegmentRuntimeMapCommand,       SEC_GAMEMASTER, Console::No },
+            { "objective", HandleSegmentRuntimeObjectiveCommand, SEC_GAMEMASTER, Console::No },
+            { "enable",    HandleSegmentEnableCommand,           SEC_GAMEMASTER, Console::No },
+            { "test",      HandleSegmentTestCommand,             SEC_GAMEMASTER, Console::No },
         };
 
         static ChatCommandTable affixCommandTable =
@@ -1519,6 +1521,65 @@ public:
         return true;
     }
 
+
+    static bool HandleSegmentRuntimeObjectiveCommand(
+        ChatHandler* handler,
+        uint32 segmentId,
+        uint32 creatureEntry)
+    {
+        QueryResult segmentResult =
+            WorldDatabase.Query(
+                "SELECT `objective_creature_entry` "
+                "FROM `manastorm_segment` "
+                "WHERE `segment_id` = {} "
+                "LIMIT 1",
+                segmentId);
+
+        if (!segmentResult)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: segment {} does not exist.",
+                segmentId);
+            return true;
+        }
+
+        uint32 const nativeObjectiveEntry =
+            segmentResult->Fetch()[0].Get<uint32>();
+
+        if (creatureEntry &&
+            !sObjectMgr->GetCreatureTemplate(creatureEntry))
+        {
+            handler->PSendSysMessage(
+                "Manastorm: runtime objective creature entry {} "
+                "does not exist in creature_template.",
+                creatureEntry);
+            return true;
+        }
+
+        WorldDatabase.DirectExecute(
+            "UPDATE `manastorm_segment` "
+            "SET `runtime_objective_creature_entry` = {} "
+            "WHERE `segment_id` = {}",
+            creatureEntry,
+            segmentId);
+
+        if (!ReloadAfterAuthoring(handler))
+            return false;
+
+        handler->PSendSysMessage(
+            "Manastorm: segment {} nativeObjective={} runtimeObjective={}{}.",
+            segmentId,
+            nativeObjectiveEntry,
+            creatureEntry
+                ? creatureEntry
+                : nativeObjectiveEntry,
+            creatureEntry
+                ? " (override)"
+                : " (native)");
+
+        return true;
+    }
+
     static bool HandleSegmentInfoCommand(
         ChatHandler* handler,
         uint32 segmentId)
@@ -1530,6 +1591,7 @@ public:
             "`difficulty`, "
             "`dungeon_encounter_id`, "
             "`objective_creature_entry`, "
+            "`runtime_objective_creature_entry`, "
             "`start_game_tele_id`, "
             "`weight`, "
             "`min_depth`, "
@@ -1571,29 +1633,37 @@ public:
         uint32 const encounterId =
             fields[3].Get<uint32>();
 
-        uint32 const objectiveEntry =
+        uint32 const nativeObjectiveEntry =
             fields[4].Get<uint32>();
 
-        uint32 const teleId =
+        uint32 const runtimeObjectiveOverride =
             fields[5].Get<uint32>();
 
-        uint32 const weight =
+        uint32 const runtimeObjectiveEntry =
+            runtimeObjectiveOverride
+            ? runtimeObjectiveOverride
+            : nativeObjectiveEntry;
+
+        uint32 const teleId =
             fields[6].Get<uint32>();
 
-        uint32 const minDepth =
+        uint32 const weight =
             fields[7].Get<uint32>();
 
-        uint32 const maxDepth =
+        uint32 const minDepth =
             fields[8].Get<uint32>();
 
+        uint32 const maxDepth =
+            fields[9].Get<uint32>();
+
         float const rewardMultiplier =
-            fields[9].Get<float>();
+            fields[10].Get<float>();
 
         uint8 const configuredStacks =
-            fields[10].Get<uint8>();
+            fields[11].Get<uint8>();
 
         bool const enabled =
-            fields[11].Get<uint8>() != 0;
+            fields[12].Get<uint8>() != 0;
 
         uint32 const routeSpawnCount =
             GetChaoticLinkCount(segmentId);
@@ -1611,8 +1681,10 @@ public:
             encounterId);
 
         handler->PSendSysMessage(
-            "  objectiveEntry={} startTele={}",
-            objectiveEntry,
+            "  objectiveNative={} objectiveRuntime={}{} startTele={}",
+            nativeObjectiveEntry,
+            runtimeObjectiveEntry,
+            runtimeObjectiveOverride ? " (override)" : "",
             teleId);
 
         handler->PSendSysMessage(
