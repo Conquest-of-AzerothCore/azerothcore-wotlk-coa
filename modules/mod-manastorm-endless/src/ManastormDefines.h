@@ -302,7 +302,16 @@ struct ManastormUnlockDefinition
 struct ManastormSegment
 {
     uint32 SegmentId = 0;
+
+    // Original Manastorm.dbc identity map. In native Mode 2 this must remain
+    // byte-for-byte compatible with the client row even when the original
+    // realm used a custom staging map that our server does not need.
+    uint32 NativeMapId = 0;
+
+    // Physical server map used for this stage. Defaults to NativeMapId when
+    // manastorm_segment.runtime_map_id is 0.
     uint32 MapId = 0;
+
     uint8 Difficulty = 0;
     uint32 DungeonEncounterId = 0;
     uint32 ObjectiveCreatureEntry = 0;

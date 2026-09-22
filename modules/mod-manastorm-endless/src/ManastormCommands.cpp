@@ -34,7 +34,7 @@ namespace
         QueryResult result = WorldDatabase.Query(
             "SELECT "
             "`segment_id`, "
-            "`map_id`, "
+            "COALESCE(NULLIF(`runtime_map_id`, 0), `map_id`), "
             "`objective_creature_entry`, "
             "`chaotic_link_stacks` "
             "FROM `manastorm_segment` "
@@ -297,7 +297,8 @@ public:
 
         static ChatCommandTable segmentCommandTable =
         {
-            { "info", HandleSegmentInfoCommand, SEC_GAMEMASTER, Console::No },
+            { "info",    HandleSegmentInfoCommand,       SEC_GAMEMASTER, Console::No },
+            { "runtime", HandleSegmentRuntimeMapCommand, SEC_GAMEMASTER, Console::No },
         };
 
         static ChatCommandTable affixCommandTable =
@@ -1318,6 +1319,73 @@ public:
         return true;
     }
 
+    static bool HandleSegmentRuntimeMapCommand(
+        ChatHandler* handler,
+        uint32 segmentId,
+        uint32 mapId)
+    {
+        QueryResult segmentResult =
+            WorldDatabase.Query(
+                "SELECT `map_id` "
+                "FROM `manastorm_segment` "
+                "WHERE `segment_id` = {} "
+                "LIMIT 1",
+                segmentId);
+
+        if (!segmentResult)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: segment {} does not exist.",
+                segmentId);
+            return true;
+        }
+
+        uint32 const nativeMapId =
+            segmentResult->Fetch()[0].Get<uint32>();
+
+        if (mapId)
+        {
+            MapEntry const* mapEntry =
+                sMapStore.LookupEntry(mapId);
+
+            if (!mapEntry)
+            {
+                handler->PSendSysMessage(
+                    "Manastorm: runtime map {} does not exist.",
+                    mapId);
+                return true;
+            }
+
+            if (mapEntry->IsBattlegroundOrArena())
+            {
+                handler->PSendSysMessage(
+                    "Manastorm: battleground/arena map {} cannot be used "
+                    "as a runtime stage map.",
+                    mapId);
+                return true;
+            }
+        }
+
+        WorldDatabase.DirectExecute(
+            "UPDATE `manastorm_segment` "
+            "SET `runtime_map_id` = {} "
+            "WHERE `segment_id` = {}",
+            mapId,
+            segmentId);
+
+        if (!ReloadAfterAuthoring(handler))
+            return false;
+
+        handler->PSendSysMessage(
+            "Manastorm: segment {} nativeMap={} runtimeMap={}{}.",
+            segmentId,
+            nativeMapId,
+            mapId ? mapId : nativeMapId,
+            mapId ? " (override)" : " (native)");
+
+        return true;
+    }
+
     static bool HandleSegmentInfoCommand(
         ChatHandler* handler,
         uint32 segmentId)
@@ -1325,6 +1393,7 @@ public:
         QueryResult result = WorldDatabase.Query(
             "SELECT "
             "`map_id`, "
+            "`runtime_map_id`, "
             "`difficulty`, "
             "`dungeon_encounter_id`, "
             "`objective_creature_entry`, "
@@ -1352,38 +1421,46 @@ public:
         Field* fields =
             result->Fetch();
 
-        uint32 const mapId =
+        uint32 const nativeMapId =
             fields[0].Get<uint32>();
 
+        uint32 const runtimeMapOverride =
+            fields[1].Get<uint32>();
+
+        uint32 const runtimeMapId =
+            runtimeMapOverride
+            ? runtimeMapOverride
+            : nativeMapId;
+
         uint8 const difficulty =
-            fields[1].Get<uint8>();
+            fields[2].Get<uint8>();
 
         uint32 const encounterId =
-            fields[2].Get<uint32>();
-
-        uint32 const objectiveEntry =
             fields[3].Get<uint32>();
 
-        uint32 const teleId =
+        uint32 const objectiveEntry =
             fields[4].Get<uint32>();
 
-        uint32 const weight =
+        uint32 const teleId =
             fields[5].Get<uint32>();
 
-        uint32 const minDepth =
+        uint32 const weight =
             fields[6].Get<uint32>();
 
-        uint32 const maxDepth =
+        uint32 const minDepth =
             fields[7].Get<uint32>();
 
+        uint32 const maxDepth =
+            fields[8].Get<uint32>();
+
         float const rewardMultiplier =
-            fields[8].Get<float>();
+            fields[9].Get<float>();
 
         uint8 const configuredStacks =
-            fields[9].Get<uint8>();
+            fields[10].Get<uint8>();
 
         bool const enabled =
-            fields[10].Get<uint8>() != 0;
+            fields[11].Get<uint8>() != 0;
 
         uint32 const routeSpawnCount =
             GetChaoticLinkCount(segmentId);
@@ -1393,8 +1470,10 @@ public:
             segmentId);
 
         handler->PSendSysMessage(
-            "  map={} difficulty={} encounter={}",
-            mapId,
+            "  nativeMap={} runtimeMap={}{} difficulty={} encounter={}",
+            nativeMapId,
+            runtimeMapId,
+            runtimeMapOverride ? " (override)" : "",
             uint32(difficulty),
             encounterId);
 

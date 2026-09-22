@@ -180,7 +180,8 @@ bool ManastormDataStore::LoadSegments()
 
     QueryResult result = WorldDatabase.Query(
         "SELECT "
-        "`segment_id`, `map_id`, `difficulty`, `dungeon_encounter_id`, "
+        "`segment_id`, `map_id`, `runtime_map_id`, "
+        "`difficulty`, `dungeon_encounter_id`, "
         "`objective_creature_entry`, `start_game_tele_id`, `weight`, "
         "`min_depth`, `max_depth`, `reward_multiplier`, "
         "`chaotic_link_stacks`, `flags` "
@@ -202,17 +203,26 @@ bool ManastormDataStore::LoadSegments()
 
         ManastormSegment segment;
         segment.SegmentId = fields[0].Get<uint32>();
-        segment.MapId = fields[1].Get<uint32>();
-        segment.Difficulty = fields[2].Get<uint8>();
-        segment.DungeonEncounterId = fields[3].Get<uint32>();
-        segment.ObjectiveCreatureEntry = fields[4].Get<uint32>();
-        segment.StartGameTeleId = fields[5].Get<uint32>();
-        segment.Weight = fields[6].Get<uint32>();
-        segment.MinDepth = fields[7].Get<uint32>();
-        segment.MaxDepth = fields[8].Get<uint32>();
-        segment.RewardMultiplier = fields[9].Get<float>();
-        segment.ChaoticLinkStacks = fields[10].Get<uint8>();
-        segment.Flags = fields[11].Get<uint32>();
+        segment.NativeMapId = fields[1].Get<uint32>();
+
+        uint32 const runtimeMapId =
+            fields[2].Get<uint32>();
+
+        segment.MapId =
+            runtimeMapId
+            ? runtimeMapId
+            : segment.NativeMapId;
+
+        segment.Difficulty = fields[3].Get<uint8>();
+        segment.DungeonEncounterId = fields[4].Get<uint32>();
+        segment.ObjectiveCreatureEntry = fields[5].Get<uint32>();
+        segment.StartGameTeleId = fields[6].Get<uint32>();
+        segment.Weight = fields[7].Get<uint32>();
+        segment.MinDepth = fields[8].Get<uint32>();
+        segment.MaxDepth = fields[9].Get<uint32>();
+        segment.RewardMultiplier = fields[10].Get<float>();
+        segment.ChaoticLinkStacks = fields[11].Get<uint8>();
+        segment.Flags = fields[12].Get<uint32>();
 
         if (!segment.SegmentId)
         {
@@ -257,9 +267,15 @@ bool ManastormDataStore::LoadSegments()
 
         if (tele->mapId != segment.MapId)
         {
-            LOG_ERROR(LOG_FILTER,
-                "Ignoring Manastorm segment {}: map_id={} but game_tele id {} points to map {}.",
-                segment.SegmentId, segment.MapId, segment.StartGameTeleId, tele->mapId);
+            LOG_ERROR(
+                LOG_FILTER,
+                "Ignoring Manastorm segment {}: native map_id={} runtime map={} "
+                "but game_tele id {} points to map {}.",
+                segment.SegmentId,
+                segment.NativeMapId,
+                segment.MapId,
+                segment.StartGameTeleId,
+                tele->mapId);
             continue;
         }
 
@@ -310,12 +326,24 @@ bool ManastormDataStore::LoadSegments()
 
         if (native)
         {
-            auto const identity = nativeIdentities.find(segment.SegmentId);
-            if (identity == nativeIdentities.end() || identity->second[1] != segment.MapId
-                || identity->second[2] != segment.Difficulty || identity->second[3] != segment.DungeonEncounterId)
+            auto const identity =
+                nativeIdentities.find(
+                    segment.SegmentId);
+
+            if (identity == nativeIdentities.end() ||
+                identity->second[1] !=
+                    segment.NativeMapId ||
+                identity->second[2] !=
+                    segment.Difficulty ||
+                identity->second[3] !=
+                    segment.DungeonEncounterId)
             {
-                LOG_ERROR(LOG_FILTER, "Ignoring Mode 2 segment {}: segment_id/map_id/difficulty/"
-                    "dungeon_encounter_id must match the original Manastorm.dbc row.", segment.SegmentId);
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Ignoring Mode 2 segment {}: segment_id/native map_id/"
+                    "difficulty/dungeon_encounter_id must match the original "
+                    "Manastorm.dbc row.",
+                    segment.SegmentId);
                 continue;
             }
 
@@ -345,12 +373,51 @@ bool ManastormDataStore::LoadSegments()
             segment.NativeExperienceFactor2 =
                 NativeWordAsFloat(identity->second[8]);
         }
-        MapEntry const* map = sMapStore.LookupEntry(segment.MapId);
-        if (!map || !map->IsDungeon()
-            || !GetMapDifficultyData(segment.MapId, Difficulty(segment.Difficulty)))
+        MapEntry const* map =
+            sMapStore.LookupEntry(
+                segment.MapId);
+
+        if (!map)
         {
-            LOG_ERROR(LOG_FILTER, "Ignoring Manastorm segment {}: unsupported private dungeon map/difficulty.",
-                segment.SegmentId);
+            LOG_ERROR(
+                LOG_FILTER,
+                "Ignoring Manastorm segment {}: runtime map {} does not exist "
+                "(native map_id={}).",
+                segment.SegmentId,
+                segment.MapId,
+                segment.NativeMapId);
+            continue;
+        }
+
+        if (map->IsBattlegroundOrArena())
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Ignoring Manastorm segment {}: runtime map {} is a "
+                "battleground/arena.",
+                segment.SegmentId,
+                segment.MapId);
+            continue;
+        }
+
+        // Native dungeon/raid stages retain ordinary map-difficulty
+        // validation. An explicit runtime override may instead point at a
+        // non-instanceable world map; the generic scripted-private map layer
+        // handles isolation for that case.
+        if (map->Instanceable() &&
+            (!map->IsDungeon() ||
+             !GetMapDifficultyData(
+                 segment.MapId,
+                 Difficulty(
+                     segment.Difficulty))))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Ignoring Manastorm segment {}: unsupported runtime "
+                "dungeon/raid map {} difficulty {}.",
+                segment.SegmentId,
+                segment.MapId,
+                uint32(segment.Difficulty));
             continue;
         }
 

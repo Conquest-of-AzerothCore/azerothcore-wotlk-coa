@@ -1961,10 +1961,21 @@ bool ManastormMgr::PrepareStage(
             error = "The run has no saved return location for a member.";
             return false;
         }
-        if (mapEntry->IsRaid())
-            member->SetRaidDifficulty(Difficulty(segment.Difficulty));
-        else
-            member->SetDungeonDifficulty(Difficulty(segment.Difficulty));
+        if (mapEntry->Instanceable())
+        {
+            if (mapEntry->IsRaid())
+            {
+                member->SetRaidDifficulty(
+                    Difficulty(
+                        segment.Difficulty));
+            }
+            else
+            {
+                member->SetDungeonDifficulty(
+                    Difficulty(
+                        segment.Difficulty));
+            }
+        }
         member->PrepareScriptedPrivateInstance(segment.MapId, *location, owner, memberGuids, true);
     }
     run.SetState(ManastormRunState::Preparing);
