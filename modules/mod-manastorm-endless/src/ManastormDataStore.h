@@ -56,6 +56,7 @@ private:
     bool LoadCreaturePools();
     bool LoadScalingCurve();
     bool LoadUnlocks();
+    bool LoadUnlockTriggers();
     bool LoadUnlockGrants();
 
     bool _loaded = false;

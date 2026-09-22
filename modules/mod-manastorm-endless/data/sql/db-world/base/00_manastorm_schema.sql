@@ -90,6 +90,16 @@ CREATE TABLE IF NOT EXISTS `manastorm_unlock` (
   KEY `idx_trigger_depth` (`trigger_depth`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `manastorm_unlock_trigger` (
+  `unlock_id` INT UNSIGNED NOT NULL,
+  -- Exact native track bit: 1=Normal, 2=Endgame.
+  `track` TINYINT UNSIGNED NOT NULL,
+  `trigger_depth` INT UNSIGNED NOT NULL,
+  `enabled` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  PRIMARY KEY (`unlock_id`,`track`),
+  KEY `idx_native_trigger` (`track`,`trigger_depth`,`enabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `manastorm_unlock_grant` (
   `unlock_id` INT UNSIGNED NOT NULL,
   `grant_type` TINYINT UNSIGNED NOT NULL,

@@ -111,8 +111,12 @@ bool ManastormDataStore::Load()
         segmentsLoaded &&
         LoadUnlocks();
 
-    bool const unlockGrantsLoaded =
+    bool const unlockTriggersLoaded =
         unlocksLoaded &&
+        LoadUnlockTriggers();
+
+    bool const unlockGrantsLoaded =
+        unlockTriggersLoaded &&
         creaturePoolsLoaded &&
         LoadUnlockGrants();
 
@@ -122,6 +126,7 @@ bool ManastormDataStore::Load()
         creaturePoolsLoaded &&
         scalingLoaded &&
         unlocksLoaded &&
+        unlockTriggersLoaded &&
         unlockGrantsLoaded;
 
     if (_loaded)
@@ -1157,6 +1162,222 @@ bool ManastormDataStore::LoadUnlocks()
         "Loaded {} enabled Manastorm progression "
         "unlocks from {} configured rows.",
         _unlocks.size(),
+        configuredRows);
+
+    return valid;
+}
+
+bool ManastormDataStore::LoadUnlockTriggers()
+{
+    QueryResult countResult =
+        WorldDatabase.Query(
+            "SELECT COUNT(*) "
+            "FROM `manastorm_unlock_trigger`");
+
+    if (!countResult)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to query `manastorm_unlock_trigger`. "
+            "Apply 06_manastorm_native_track_triggers.sql.");
+
+        return false;
+    }
+
+    uint64 const configuredRows =
+        countResult->Fetch()[0].Get<uint64>();
+
+    QueryResult result =
+        WorldDatabase.Query(
+            "SELECT "
+            "`unlock_id`, "
+            "`track`, "
+            "`trigger_depth` "
+            "FROM `manastorm_unlock_trigger` "
+            "WHERE `enabled` = 1 "
+            "ORDER BY `unlock_id`, `track`");
+
+    bool valid = true;
+    std::size_t loadedRows = 0;
+
+    if (result)
+    {
+        do
+        {
+            Field* fields =
+                result->Fetch();
+
+            uint32 const unlockId =
+                fields[0].Get<uint32>();
+
+            uint8 const track =
+                fields[1].Get<uint8>();
+
+            uint32 const triggerDepth =
+                fields[2].Get<uint32>();
+
+            auto unlockItr =
+                _unlocks.find(
+                    unlockId);
+
+            if (unlockItr ==
+                _unlocks.end())
+            {
+                LOG_WARN(
+                    LOG_FILTER,
+                    "Ignoring native-track trigger for unknown or "
+                    "disabled Manastorm unlock {}.",
+                    unlockId);
+
+                continue;
+            }
+
+            if ((track !=
+                    ManastormTrackBits::Normal &&
+                 track !=
+                    ManastormTrackBits::Endgame) ||
+                !triggerDepth)
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Invalid Manastorm trigger: unlock={} track={} depth={}.",
+                    unlockId,
+                    uint32(track),
+                    triggerDepth);
+
+                valid = false;
+                continue;
+            }
+
+            ManastormUnlockDefinition& unlock =
+                unlockItr->second;
+
+            if (unlock.GetTriggerDepthForTrack(
+                track))
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Manastorm unlock {} has duplicate enabled "
+                    "trigger rows for track {}.",
+                    unlockId,
+                    uint32(track));
+
+                valid = false;
+                continue;
+            }
+
+            if (unlock.Kind ==
+                ManastormUnlockKind::Introduction)
+            {
+                uint32 const introSegmentId =
+                    track ==
+                        ManastormTrackBits::Endgame
+                    ? unlock.EndgameIntroSegmentId
+                    : unlock.IntroSegmentId;
+
+                uint8 const expectedDifficulty =
+                    track ==
+                        ManastormTrackBits::Endgame
+                    ? uint8(2)
+                    : uint8(0);
+
+                ManastormSegment const* intro =
+                    GetSegmentById(
+                        introSegmentId);
+
+                if (!intro ||
+                    intro->Difficulty !=
+                        expectedDifficulty)
+                {
+                    LOG_ERROR(
+                        LOG_FILTER,
+                        "Manastorm unlock {} track {} requires "
+                        "difficulty-{} intro segment; configured segment={}.",
+                        unlockId,
+                        uint32(track),
+                        uint32(expectedDifficulty),
+                        introSegmentId);
+
+                    valid = false;
+                    continue;
+                }
+
+                bool conflict = false;
+
+                for (auto const& otherPair :
+                    _unlocks)
+                {
+                    if (otherPair.first ==
+                        unlockId)
+                    {
+                        continue;
+                    }
+
+                    ManastormUnlockDefinition const& other =
+                        otherPair.second;
+
+                    if (other.Kind !=
+                            ManastormUnlockKind::Introduction ||
+                        !(other.ModeMask &
+                            unlock.ModeMask) ||
+                        other.GetTriggerDepthForTrack(
+                            track) !=
+                            triggerDepth)
+                    {
+                        continue;
+                    }
+
+                    LOG_ERROR(
+                        LOG_FILTER,
+                        "Manastorm introduction unlock {} conflicts with "
+                        "unlock {} at depth {} on native track {}.",
+                        unlockId,
+                        other.UnlockId,
+                        triggerDepth,
+                        uint32(track));
+
+                    valid = false;
+                    conflict = true;
+                    break;
+                }
+
+                if (conflict)
+                    continue;
+            }
+
+            ManastormUnlockTrigger trigger;
+            trigger.Track =
+                track;
+            trigger.TriggerDepth =
+                triggerDepth;
+
+            unlock.Triggers.push_back(
+                trigger);
+
+            ++loadedRows;
+        } while (result->NextRow());
+    }
+
+    for (auto const& pair :
+        _unlocks)
+    {
+        if (!pair.second.Triggers.empty())
+            continue;
+
+        LOG_ERROR(
+            LOG_FILTER,
+            "Enabled Manastorm unlock {} has no enabled "
+            "native-track trigger rows.",
+            pair.first);
+
+        valid = false;
+    }
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Loaded {} enabled Manastorm native-track triggers "
+        "from {} configured rows.",
+        loadedRows,
         configuredRows);
 
     return valid;

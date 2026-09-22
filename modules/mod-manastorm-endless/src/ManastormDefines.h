@@ -243,6 +243,13 @@ struct ManastormCreaturePoolDefinition
     std::vector<uint32> CreatureEntries;
 };
 
+struct ManastormUnlockTrigger
+{
+    // Exact native track bit: 1=Normal, 2=Endgame.
+    uint8 Track = 0;
+    uint32 TriggerDepth = 0;
+};
+
 struct ManastormUnlockDefinition
 {
     uint32 UnlockId = 0;
@@ -257,9 +264,24 @@ struct ManastormUnlockDefinition
     uint8 ModeMask =
         ManastormModeBits::All;
 
-    // Which native stage track can trigger this unlock.
+    // Legacy import compatibility. Runtime trigger authority is the exact
+    // per-track Triggers vector loaded from manastorm_unlock_trigger.
     uint8 TrackMask =
         ManastormTrackBits::All;
+
+    std::vector<ManastormUnlockTrigger> Triggers;
+
+    uint32 GetTriggerDepthForTrack(uint8 trackBit) const
+    {
+        for (ManastormUnlockTrigger const& trigger :
+            Triggers)
+        {
+            if (trigger.Track == trackBit)
+                return trigger.TriggerDepth;
+        }
+
+        return 0;
+    }
 
     // Forced NEXT-RUN / next-stage introductions.
     //
@@ -269,8 +291,8 @@ struct ManastormUnlockDefinition
     uint32 IntroSegmentId = 0;
     uint32 EndgameIntroSegmentId = 0;
 
-    // These will later resolve through
-    // manastorm_unlock_message.
+    // Optional reconstructed Mode-1 presentation references only.
+    // Native Mode 2 renders from ManastormMessages.dbc after 0x65E.
     uint32 IntroMessageId = 0;
     uint32 CompletionMessageId = 0;
 
