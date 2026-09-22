@@ -314,7 +314,17 @@ struct ManastormSegment
 
     uint8 Difficulty = 0;
     uint32 DungeonEncounterId = 0;
+
+    // Original recovered objective identity from the imported/native segment
+    // catalogue. Preserve it even when the physical AzerothCore source area
+    // uses a different creature entry for the same encounter.
+    uint32 NativeObjectiveCreatureEntry = 0;
+
+    // Physical server creature entry used for runtime objective detection.
+    // Defaults to NativeObjectiveCreatureEntry when
+    // runtime_objective_creature_entry is 0.
     uint32 ObjectiveCreatureEntry = 0;
+
     uint32 StartGameTeleId = 0;
     uint32 Weight = 0;
     uint32 MinDepth = 1;
