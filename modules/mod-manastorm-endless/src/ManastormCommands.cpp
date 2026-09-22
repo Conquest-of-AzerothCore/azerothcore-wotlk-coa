@@ -9,7 +9,9 @@
 #include "ManastormProgression.h"
 #include "ManastormDataStore.h"
 #include "ObjectMgr.h"
+#include "World.h"
 
+#include <algorithm>
 #include <string>
 
 
@@ -169,12 +171,12 @@ namespace
                 roleFlag;
 
             WorldDatabase.DirectExecute(
-                "INSERT INTO \`manastorm_segment_spawn\` "
-                "(\`segment_id\`, \`spawn_guid\`, \`flags\`, \`enabled\`) "
+                "INSERT INTO `manastorm_segment_spawn` "
+                "(`segment_id`, `spawn_guid`, `flags`, `enabled`) "
                 "VALUES ({}, {}, {}, 1) "
                 "ON DUPLICATE KEY UPDATE "
-                "\`flags\` = (\`flags\` | VALUES(\`flags\`)), "
-                "\`enabled\` = 1",
+                "`flags` = (`flags` | VALUES(`flags`)), "
+                "`enabled` = 1",
                 segmentId,
                 spawnId,
                 flags);
@@ -182,10 +184,10 @@ namespace
         else
         {
             WorldDatabase.DirectExecute(
-                "UPDATE \`manastorm_segment_spawn\` "
-                "SET \`flags\` = (\`flags\` & ~{}) "
-                "WHERE \`segment_id\` = {} "
-                "AND \`spawn_guid\` = {}",
+                "UPDATE `manastorm_segment_spawn` "
+                "SET `flags` = (`flags` & ~{}) "
+                "WHERE `segment_id` = {} "
+                "AND `spawn_guid` = {}",
                 roleFlag,
                 segmentId,
                 spawnId);
@@ -467,9 +469,20 @@ public:
         ManastormProgressionSnapshot snapshot;
         std::string error;
 
+        uint32 const endgameLevel =
+            std::max(
+                60u,
+                sWorld->getIntConfig(
+                    CONFIG_MAX_PLAYER_LEVEL));
+
+        bool const endgame =
+            player->GetLevel() >=
+                endgameLevel;
+
         if (!ManastormProgression::LoadSnapshot(
             player->GetGUID().GetCounter(),
             mode,
+            endgame,
             snapshot,
             error))
         {
@@ -643,10 +656,10 @@ public:
         }
 
         QueryResult result = WorldDatabase.Query(
-            "SELECT \`flags\`, \`enabled\` "
-            "FROM \`manastorm_segment_spawn\` "
-            "WHERE \`segment_id\` = {} "
-            "AND \`spawn_guid\` = {} "
+            "SELECT `flags`, `enabled` "
+            "FROM `manastorm_segment_spawn` "
+            "WHERE `segment_id` = {} "
+            "AND `spawn_guid` = {} "
             "LIMIT 1",
             segmentId,
             spawnId);
@@ -692,15 +705,15 @@ public:
     {
         QueryResult result = WorldDatabase.Query(
             "SELECT "
-            "s.\`spawn_guid\`, "
-            "COALESCE(c.\`id\`, 0), "
-            "s.\`flags\`, "
-            "s.\`enabled\` "
-            "FROM \`manastorm_segment_spawn\` s "
-            "LEFT JOIN \`creature\` c "
-            "ON c.\`guid\` = s.\`spawn_guid\` "
-            "WHERE s.\`segment_id\` = {} "
-            "ORDER BY s.\`spawn_guid\`",
+            "s.`spawn_guid`, "
+            "COALESCE(c.`id`, 0), "
+            "s.`flags`, "
+            "s.`enabled` "
+            "FROM `manastorm_segment_spawn` s "
+            "LEFT JOIN `creature` c "
+            "ON c.`guid` = s.`spawn_guid` "
+            "WHERE s.`segment_id` = {} "
+            "ORDER BY s.`spawn_guid`",
             segmentId);
 
         if (!result)
