@@ -303,7 +303,11 @@ void ManastormAffixEngine::OnCreatureAdded(Creature* creature, ManastormRun& run
 
     if (IsAffixHelperCreature(creature->GetEntry()))
     {
-        if (creature->IsSummon())
+        // Mana Bomb's existing visual helper historically follows its summoner.
+        // The recovered 80913/80914/80917 helpers are Hostile templates, while
+        // 80922/80923/80924/80925 are explicitly Neutral in preserved data.
+        // Do not overwrite those recovered template-side dispositions.
+        if (creature->GetEntry() == 663028 && creature->IsSummon())
         {
             if (TempSummon* summon = creature->ToTempSummon())
                 if (Unit* summoner = summon->GetSummonerUnit())
