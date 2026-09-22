@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS `manastorm_segment` (
   `difficulty` TINYINT UNSIGNED NOT NULL DEFAULT 0,
   `dungeon_encounter_id` INT UNSIGNED NOT NULL DEFAULT 0,
   `objective_creature_entry` INT UNSIGNED NOT NULL,
+  -- Optional physical server objective override. 0 preserves the recovered
+  -- native/imported objective identity and uses objective_creature_entry.
+  `runtime_objective_creature_entry` INT UNSIGNED NOT NULL DEFAULT 0,
   `start_game_tele_id` INT UNSIGNED NOT NULL,
   `weight` INT UNSIGNED NOT NULL DEFAULT 1,
   `min_depth` INT UNSIGNED NOT NULL DEFAULT 1,
