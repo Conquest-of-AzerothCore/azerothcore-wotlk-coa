@@ -62,6 +62,21 @@ bool EnsureCharacterProgressionTables(
         return false;
     }
 
+    QueryResult completedDepths =
+        CharacterDatabase.Query(
+            "SELECT COUNT(*) "
+            "FROM `character_manastorm_completed_depth` "
+            "WHERE `guid` = 0");
+
+    if (!completedDepths)
+    {
+        error =
+            "character_manastorm_completed_depth is "
+            "missing or inaccessible.";
+
+        return false;
+    }
+
     return true;
 }
 
@@ -96,6 +111,90 @@ bool IsUnlockCompleted(
 
     return true;
 }
+}
+
+bool ManastormProgression::LoadCompletedDepthLists(
+    ObjectGuid::LowType characterGuid,
+    ManastormCompletedDepthLists& depths,
+    std::string& error)
+{
+    depths =
+        ManastormCompletedDepthLists{};
+
+    error.clear();
+
+    if (!characterGuid)
+    {
+        error =
+            "A valid character GUID is required for "
+            "Manastorm progression.";
+
+        return false;
+    }
+
+    if (!EnsureCharacterProgressionTables(
+        error))
+    {
+        return false;
+    }
+
+    QueryResult result =
+        CharacterDatabase.Query(
+            "SELECT `mode`, `track`, `depth` "
+            "FROM `character_manastorm_completed_depth` "
+            "WHERE `guid` = {} "
+            "ORDER BY `track`, `mode`, `depth`",
+            characterGuid);
+
+    if (!result)
+        return true;
+
+    do
+    {
+        Field* fields =
+            result->Fetch();
+
+        uint8 const mode =
+            fields[0].Get<uint8>();
+
+        uint8 const track =
+            fields[1].Get<uint8>();
+
+        uint32 const depth =
+            fields[2].Get<uint32>();
+
+        if (mode < 1 ||
+            mode > 4 ||
+            (track !=
+                ManastormTrackBits::Normal &&
+             track !=
+                ManastormTrackBits::Endgame) ||
+            !depth)
+        {
+            LOG_WARN(
+                LOG_FILTER,
+                "Ignoring invalid persisted Manastorm completed depth: "
+                "guid={} mode={} track={} depth={}.",
+                characterGuid,
+                uint32(mode),
+                uint32(track),
+                depth);
+
+            continue;
+        }
+
+        std::size_t const index =
+            std::size_t(mode - 1) +
+            (track ==
+                ManastormTrackBits::Endgame
+                ? 4u
+                : 0u);
+
+        depths[index].push_back(
+            depth);
+    } while (result->NextRow());
+
+    return true;
 }
 
 bool ManastormProgression::LoadBestCompletedDepths(
@@ -198,15 +297,21 @@ bool ManastormProgression::LoadSnapshot(
         return false;
     }
 
+    uint8 const trackBit =
+        ManastormGetTrackBit(
+            endgame);
+
     QueryResult progress =
         CharacterDatabase.Query(
             "SELECT `best_completed_depth` "
             "FROM `character_manastorm_progress` "
             "WHERE `guid` = {} "
             "AND `mode` = {} "
+            "AND `track` = {} "
             "LIMIT 1",
             characterGuid,
-            uint32(uint8(mode)));
+            uint32(uint8(mode)),
+            uint32(trackBit));
 
     if (progress)
     {
@@ -283,9 +388,11 @@ bool ManastormProgression::LoadSnapshot(
             "FROM `character_manastorm_pending_unlock` "
             "WHERE `guid` = {} "
             "AND `mode` = {} "
+            "AND `track` = {} "
             "LIMIT 1",
             characterGuid,
-            uint32(uint8(mode)));
+            uint32(uint8(mode)),
+            uint32(trackBit));
 
     if (pending)
     {
@@ -328,10 +435,6 @@ bool ManastormProgression::LoadSnapshot(
         snapshot.PendingEndgameIntroSegmentId =
             unlock->EndgameIntroSegmentId;
 
-        uint8 const trackBit =
-            ManastormGetTrackBit(
-                endgame);
-
         uint32 const triggerDepth =
             unlock->GetTriggerDepthForTrack(
                 trackBit);
@@ -368,6 +471,10 @@ bool ManastormProgression::RecordStageCompletion(
         return false;
     }
 
+    uint8 const trackBit =
+        ManastormGetTrackBit(
+            run.IsEndgame());
+
     ManastormUnlockDefinition const*
         triggeredUnlock =
             ManastormDataStore::Instance()
@@ -397,9 +504,11 @@ bool ManastormProgression::RecordStageCompletion(
                 "FROM `character_manastorm_pending_unlock` "
                 "WHERE `guid` = {} "
                 "AND `mode` = {} "
+                "AND `track` = {} "
                 "LIMIT 1",
                 characterGuid,
-                uint32(uint8(run.GetMode())));
+                uint32(uint8(run.GetMode())),
+                uint32(trackBit));
 
         if (pending)
         {
@@ -538,17 +647,19 @@ bool ManastormProgression::RecordStageCompletion(
                 "`character_manastorm_pending_unlock` "
                 "WHERE `guid` = {} "
                 "AND `mode` = {} "
+                "AND `track` = {} "
                 "AND `unlock_id` = {}",
                 characterGuid,
                 uint32(uint8(run.GetMode())),
+                uint32(trackBit),
                 completedUnlockId);
         }
 
         transaction->Append(
             "INSERT INTO "
             "`character_manastorm_progress` "
-            "(`guid`, `mode`, `best_completed_depth`) "
-            "VALUES ({}, {}, {}) "
+            "(`guid`, `mode`, `track`, `best_completed_depth`) "
+            "VALUES ({}, {}, {}, {}) "
             "ON DUPLICATE KEY UPDATE "
             "`best_completed_depth` = "
             "GREATEST("
@@ -557,6 +668,17 @@ bool ManastormProgression::RecordStageCompletion(
             "`updated_at` = CURRENT_TIMESTAMP",
             characterGuid,
             uint32(uint8(run.GetMode())),
+            uint32(trackBit),
+            run.GetDepth());
+
+        transaction->Append(
+            "INSERT IGNORE INTO "
+            "`character_manastorm_completed_depth` "
+            "(`guid`, `mode`, `track`, `depth`) "
+            "VALUES ({}, {}, {}, {})",
+            characterGuid,
+            uint32(uint8(run.GetMode())),
+            uint32(trackBit),
             run.GetDepth());
 
         if (queueTriggeredUnlock)
@@ -564,10 +686,11 @@ bool ManastormProgression::RecordStageCompletion(
             transaction->Append(
                 "INSERT IGNORE INTO "
                 "`character_manastorm_pending_unlock` "
-                "(`guid`, `mode`, `unlock_id`) "
-                "VALUES ({}, {}, {})",
+                "(`guid`, `mode`, `track`, `unlock_id`) "
+                "VALUES ({}, {}, {}, {})",
                 characterGuid,
                 uint32(uint8(run.GetMode())),
+                uint32(trackBit),
                 triggeredUnlock->UnlockId);
         }
 

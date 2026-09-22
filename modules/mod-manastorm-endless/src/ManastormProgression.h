@@ -3,6 +3,7 @@
 
 #include "ManastormDefines.h"
 
+#include <array>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -36,6 +37,9 @@ struct ManastormProgressionSnapshot
         UnlockedAffixIds;
 };
 
+using ManastormCompletedDepthLists =
+    std::array<std::vector<uint32>, 8>;
+
 struct ManastormBestCompletedDepths
 {
     uint32 Solo = 0;
@@ -58,6 +62,11 @@ public:
         ManastormMode mode,
         bool endgame,
         ManastormProgressionSnapshot& snapshot,
+        std::string& error);
+
+    static bool LoadCompletedDepthLists(
+        ObjectGuid::LowType characterGuid,
+        ManastormCompletedDepthLists& depths,
         std::string& error);
 
     static bool LoadBestCompletedDepths(

@@ -47,25 +47,35 @@ namespace
         player->SendDirectMessage(&packet);
     }
 
-    // The shared SQL policy has four maxima, no historical depth journal and
-    // no endgame reset. A singleton list reports only the known completed best;
-    // normal/endgame categories are views of the SAME persisted entitlement.
+    // Native 0x65F carries eight completed-depth vectors:
+    // Normal Solo/Duo/Trio/Group, then Endgame Solo/Duo/Trio/Group.
     bool LoadProgress(Player* player, Ascension::Manastorm::Progress& progress)
     {
-        ManastormBestCompletedDepths best;
+        ManastormCompletedDepthLists completed;
         std::string error;
-        if (!ManastormProgression::LoadBestCompletedDepths(player->GetGUID().GetCounter(), best, error))
+
+        if (!ManastormProgression::LoadCompletedDepthLists(
+            player->GetGUID().GetCounter(),
+            completed,
+            error))
         {
-            LOG_ERROR(LOG_FILTER, "Cannot load native progression for {}: {}", player->GetGUID().ToString(), error);
+            LOG_ERROR(
+                LOG_FILTER,
+                "Cannot load native progression for {}: {}",
+                player->GetGUID().ToString(),
+                error);
+
             return false;
         }
-        std::array<uint32, 4> const maxima = {best.Solo, best.Duo, best.Trio, best.Group};
-        for (std::size_t i = 0; i < maxima.size(); ++i)
-            if (maxima[i])
-            {
-                progress[i].push_back(maxima[i]);
-                progress[i + 4].push_back(maxima[i]);
-            }
+
+        for (std::size_t index = 0;
+            index < completed.size();
+            ++index)
+        {
+            progress[index] =
+                completed[index];
+        }
+
         return true;
     }
 
