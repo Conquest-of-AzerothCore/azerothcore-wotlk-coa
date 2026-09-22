@@ -64,10 +64,12 @@ namespace
     {
         QueryResult result = WorldDatabase.Query(
             "SELECT COUNT(*) "
-            "FROM `manastorm_chaotic_link_spawn` "
+            "FROM `manastorm_segment_spawn` "
             "WHERE `segment_id` = {} "
+            "AND (`flags` & {}) <> 0 "
             "AND `enabled` = 1",
-            segmentId);
+            segmentId,
+            ManastormSegmentSpawnFlags::ChaoticLinkEligible);
 
         if (!result)
             return 0;
@@ -519,34 +521,53 @@ public:
         }
 
         QueryResult existing = WorldDatabase.Query(
-            "SELECT `enabled` "
-            "FROM `manastorm_chaotic_link_spawn` "
+            "SELECT `flags`, `enabled` "
+            "FROM `manastorm_segment_spawn` "
             "WHERE `segment_id` = {} "
             "AND `spawn_guid` = {} "
             "LIMIT 1",
             segmentId,
             spawnId);
 
-        if (existing &&
-            existing->Fetch()[0].Get<uint8>() != 0)
+        if (existing)
         {
-            handler->PSendSysMessage(
-                "Manastorm: spawn {} is already a Chaotic Link "
-                "for segment {}.",
-                spawnId,
-                segmentId);
+            Field* fields =
+                existing->Fetch();
 
-            return true;
+            uint32 const flags =
+                fields[0].Get<uint32>();
+
+            bool const enabled =
+                fields[1].Get<uint8>() != 0;
+
+            if (enabled &&
+                (flags &
+                    ManastormSegmentSpawnFlags::ChaoticLinkEligible))
+            {
+                handler->PSendSysMessage(
+                    "Manastorm: spawn {} is already a Chaotic Link "
+                    "for segment {}.",
+                    spawnId,
+                    segmentId);
+
+                return true;
+            }
         }
 
+        uint32 const addFlags =
+            ManastormSegmentSpawnFlags::RouteCreature |
+            ManastormSegmentSpawnFlags::ChaoticLinkEligible;
 
         WorldDatabase.DirectExecute(
-            "INSERT INTO `manastorm_chaotic_link_spawn` "
-            "(`segment_id`, `spawn_guid`, `enabled`) "
-            "VALUES ({}, {}, 1) "
-            "ON DUPLICATE KEY UPDATE `enabled` = 1",
+            "INSERT INTO `manastorm_segment_spawn` "
+            "(`segment_id`, `spawn_guid`, `flags`, `enabled`) "
+            "VALUES ({}, {}, {}, 1) "
+            "ON DUPLICATE KEY UPDATE "
+            "`flags` = (`flags` | VALUES(`flags`)), "
+            "`enabled` = 1",
             segmentId,
-            spawnId);
+            spawnId,
+            addFlags);
 
 
         if (!ReloadAfterAuthoring(handler))
@@ -617,8 +638,8 @@ public:
         }
 
         QueryResult existing = WorldDatabase.Query(
-            "SELECT 1 "
-            "FROM `manastorm_chaotic_link_spawn` "
+            "SELECT `flags`, `enabled` "
+            "FROM `manastorm_segment_spawn` "
             "WHERE `segment_id` = {} "
             "AND `spawn_guid` = {} "
             "LIMIT 1",
@@ -630,6 +651,28 @@ public:
             handler->PSendSysMessage(
                 "Manastorm: spawn {} is not registered "
                 "to segment {}.",
+                spawnId,
+                segmentId);
+
+            return true;
+        }
+
+        Field* existingFields =
+            existing->Fetch();
+
+        uint32 const existingFlags =
+            existingFields[0].Get<uint32>();
+
+        bool const existingEnabled =
+            existingFields[1].Get<uint8>() != 0;
+
+        if (!existingEnabled ||
+            !(existingFlags &
+                ManastormSegmentSpawnFlags::ChaoticLinkEligible))
+        {
+            handler->PSendSysMessage(
+                "Manastorm: spawn {} is not an enabled Chaotic Link "
+                "candidate for segment {}.",
                 spawnId,
                 segmentId);
 
@@ -661,12 +704,36 @@ public:
             return true;
         }
 
-        WorldDatabase.DirectExecute(
-            "DELETE FROM `manastorm_chaotic_link_spawn` "
-            "WHERE `segment_id` = {} "
-            "AND `spawn_guid` = {}",
-            segmentId,
-            spawnId);
+        uint32 const nonRouteRoles =
+            existingFlags &
+            (ManastormSegmentSpawnFlags::RandomizationSlot |
+                ManastormSegmentSpawnFlags::CreaturePoolSource);
+
+        if (nonRouteRoles)
+        {
+            // Other evidence-backed roles still depend on this authored route
+            // spawn. Remove only Chaotic Link eligibility.
+            WorldDatabase.DirectExecute(
+                "UPDATE `manastorm_segment_spawn` "
+                "SET `flags` = (`flags` & ~{}) "
+                "WHERE `segment_id` = {} "
+                "AND `spawn_guid` = {}",
+                ManastormSegmentSpawnFlags::ChaoticLinkEligible,
+                segmentId,
+                spawnId);
+        }
+        else
+        {
+            // A row authored only through .manastorm link add carries
+            // RouteCreature|ChaoticLinkEligible. Preserve the old intuitive
+            // remove behavior and remove that authoring row completely.
+            WorldDatabase.DirectExecute(
+                "DELETE FROM `manastorm_segment_spawn` "
+                "WHERE `segment_id` = {} "
+                "AND `spawn_guid` = {}",
+                segmentId,
+                spawnId);
+        }
 
         if (!ReloadAfterAuthoring(handler))
             return false;
@@ -703,15 +770,18 @@ public:
 
         QueryResult result = WorldDatabase.Query(
             "SELECT "
-            "l.`spawn_guid`, "
-            "COALESCE(c.`id1`, 0), "
-            "l.`enabled` "
-            "FROM `manastorm_chaotic_link_spawn` l "
+            "s.`spawn_guid`, "
+            "COALESCE(c.`id`, 0), "
+            "s.`flags`, "
+            "s.`enabled` "
+            "FROM `manastorm_segment_spawn` s "
             "LEFT JOIN `creature` c "
-            "ON c.`guid` = l.`spawn_guid` "
-            "WHERE l.`segment_id` = {} "
-            "ORDER BY l.`spawn_guid`",
-            segmentId);
+            "ON c.`guid` = s.`spawn_guid` "
+            "WHERE s.`segment_id` = {} "
+            "AND (s.`flags` & {}) <> 0 "
+            "ORDER BY s.`spawn_guid`",
+            segmentId,
+            ManastormSegmentSpawnFlags::ChaoticLinkEligible);
 
         handler->PSendSysMessage(
             "Manastorm: Chaotic Link route for segment {} "
@@ -740,13 +810,17 @@ public:
             uint32 const entry =
                 fields[1].Get<uint32>();
 
+            uint32 const flags =
+                fields[2].Get<uint32>();
+
             bool const enabled =
-                fields[2].Get<uint8>() != 0;
+                fields[3].Get<uint8>() != 0;
 
             handler->PSendSysMessage(
-                "  spawn={} entry={} enabled={}",
+                "  spawn={} entry={} flags=0x{:X} enabled={}",
                 spawnId,
                 entry,
+                flags,
                 enabled ? "yes" : "no");
         } while (result->NextRow());
 
@@ -787,10 +861,27 @@ public:
         uint32 const oldCount =
             GetChaoticLinkCount(segmentId);
 
+        // Rows with future randomization/pool-source roles remain authored
+        // route members; rows that only existed for Chaotic Link authoring
+        // are removed entirely.
         WorldDatabase.DirectExecute(
-            "DELETE FROM `manastorm_chaotic_link_spawn` "
-            "WHERE `segment_id` = {}",
-            segmentId);
+            "DELETE FROM `manastorm_segment_spawn` "
+            "WHERE `segment_id` = {} "
+            "AND (`flags` & {}) <> 0 "
+            "AND (`flags` & {}) = 0",
+            segmentId,
+            ManastormSegmentSpawnFlags::ChaoticLinkEligible,
+            ManastormSegmentSpawnFlags::RandomizationSlot |
+                ManastormSegmentSpawnFlags::CreaturePoolSource);
+
+        WorldDatabase.DirectExecute(
+            "UPDATE `manastorm_segment_spawn` "
+            "SET `flags` = (`flags` & ~{}) "
+            "WHERE `segment_id` = {} "
+            "AND (`flags` & {}) <> 0",
+            ManastormSegmentSpawnFlags::ChaoticLinkEligible,
+            segmentId,
+            ManastormSegmentSpawnFlags::ChaoticLinkEligible);
 
         if (!ReloadAfterAuthoring(handler))
             return false;
