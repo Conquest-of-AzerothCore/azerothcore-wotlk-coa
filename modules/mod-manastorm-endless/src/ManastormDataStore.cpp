@@ -756,17 +756,17 @@ bool ManastormDataStore::LoadCreaturePools()
     QueryResult candidateResult =
         WorldDatabase.Query(
             "SELECT DISTINCT "
-            "p.\`pool_id\`, "
-            "c.\`id\` "
-            "FROM \`manastorm_creature_pool_segment\` p "
-            "INNER JOIN \`manastorm_segment_spawn\` s "
-            "ON s.\`segment_id\` = p.\`segment_id\` "
-            "INNER JOIN \`creature\` c "
-            "ON c.\`guid\` = s.\`spawn_guid\` "
-            "WHERE p.\`enabled\` = 1 "
-            "AND s.\`enabled\` = 1 "
-            "AND (s.\`flags\` & {}) <> 0 "
-            "ORDER BY p.\`pool_id\`, c.\`id\`",
+            "p.`pool_id`, "
+            "c.`id` "
+            "FROM `manastorm_creature_pool_segment` p "
+            "INNER JOIN `manastorm_segment_spawn` s "
+            "ON s.`segment_id` = p.`segment_id` "
+            "INNER JOIN `creature` c "
+            "ON c.`guid` = s.`spawn_guid` "
+            "WHERE p.`enabled` = 1 "
+            "AND s.`enabled` = 1 "
+            "AND (s.`flags` & {}) <> 0 "
+            "ORDER BY p.`pool_id`, c.`id`",
             ManastormSegmentSpawnFlags::CreaturePoolSource);
 
     if (candidateResult)
