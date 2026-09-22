@@ -160,7 +160,15 @@ public:
 
 private:
     typedef std::unordered_map<uint32, Map*> MapMapType;
+    typedef std::unordered_map<uint64, Map*> ScriptedPrivateMapType;
     typedef std::vector<bool> InstanceIds;
+
+    Map* CreateScriptedPrivateWorldMap(
+        uint32 mapId,
+        Player* player);
+    Map* FindScriptedPrivateWorldMap(
+        uint32 mapId,
+        uint32 instanceId) const;
 
     MapMgr();
     ~MapMgr();
@@ -170,6 +178,11 @@ private:
 
     std::mutex Lock;
     MapMapType i_maps;
+
+    // Non-instanceable maps remain native public maps in i_maps. Explicit
+    // scripted-private copies are stored separately by (mapId, instanceId).
+    ScriptedPrivateMapType _scriptedPrivateWorldMaps;
+
     IntervalTimer i_timer[4]; // continents, bgs/arenas, instances, total from the beginning
     uint8 mapUpdateStep;
 
@@ -195,6 +208,12 @@ void MapMgr::DoForAllMaps(Worker&& worker)
         else
             worker(map);
     }
+
+    for (auto& privatePair :
+        _scriptedPrivateWorldMaps)
+    {
+        worker(privatePair.second);
+    }
 }
 
 template<typename Worker>
@@ -214,6 +233,16 @@ inline void MapMgr::DoForAllMapsWithMapId(uint32 mapId, Worker&& worker)
         }
         else
             worker(map);
+    }
+
+    for (auto& privatePair :
+        _scriptedPrivateWorldMaps)
+    {
+        if (privatePair.second->GetId() ==
+            mapId)
+        {
+            worker(privatePair.second);
+        }
     }
 }
 

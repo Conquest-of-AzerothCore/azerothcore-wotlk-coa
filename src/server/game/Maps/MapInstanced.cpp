@@ -124,9 +124,14 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
         if (id)
         {
             Map* existing = FindInstanceMap(id);
-            return existing && existing->IsScriptedPrivateInstance()
-                && existing->ToInstanceMap()->GetScriptedPrivateOwner() == player->GetScriptedPrivateOwner()
-                && existing->ToInstanceMap()->IsScriptedPrivateMember(player->GetGUID()) ? existing : nullptr;
+            return existing &&
+                existing->IsScriptedPrivateInstance() &&
+                existing->GetScriptedPrivateOwner() ==
+                    player->GetScriptedPrivateOwner() &&
+                existing->IsScriptedPrivateMember(
+                    player->GetGUID())
+                ? existing
+                : nullptr;
         }
 
         id = sMapMgr->GenerateInstanceId();

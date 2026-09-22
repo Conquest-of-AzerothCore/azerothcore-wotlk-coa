@@ -1512,7 +1512,7 @@ void ManastormMgr::FailRun(
 
     if (Map* stage = sMapMgr->FindMap(stageMapId, stageInstanceId))
         if (stage->IsScriptedPrivateInstance())
-            stage->ToInstanceMap()->RequestScriptedPrivateUnload();
+            stage->RequestScriptedPrivateUnload();
     _runs.erase(
         runId);
 
@@ -1896,16 +1896,39 @@ bool ManastormMgr::PrepareStage(
     }
 
     MapEntry const* mapEntry = sMapStore.LookupEntry(segment.MapId);
-    if (!mapEntry || !mapEntry->Instanceable() || !mapEntry->IsDungeon())
+    if (!mapEntry)
     {
-        error = "The selected segment map is not a valid instanced dungeon.";
+        error =
+            "The selected segment map does not exist.";
         return false;
     }
 
-    if (!sObjectMgr->GetInstanceTemplate(segment.MapId))
+    if (mapEntry->IsBattlegroundOrArena())
     {
-        error = "The selected segment map has no instance_template row.";
+        error =
+            "Battleground/arena maps cannot be used as Manastorm stages.";
         return false;
+    }
+
+    // Native dungeon/raid maps keep their ordinary instance-template
+    // requirements. Non-instanceable world maps use the generic scripted-
+    // private world-copy path without changing Map.dbc or public map behavior.
+    if (mapEntry->Instanceable())
+    {
+        if (!mapEntry->IsDungeon())
+        {
+            error =
+                "The selected instanceable map is not a supported dungeon/raid stage.";
+            return false;
+        }
+
+        if (!sObjectMgr->GetInstanceTemplate(
+            segment.MapId))
+        {
+            error =
+                "The selected dungeon/raid map has no instance_template row.";
+            return false;
+        }
     }
 
     // Shared backend owns the run and SQL stage. Core private-instance support
@@ -2298,7 +2321,7 @@ void ManastormMgr::OnPlayerLogin(Player* player)
     WorldLocation const* location = run->GetReturnLocation(player->GetGUID().GetCounter());
     GameTele const* tele = sObjectMgr->GetGameTele(run->GetSegment().StartGameTeleId);
     if (!map || !map->IsScriptedPrivateInstance() || !location || !tele
-        || !map->ToInstanceMap()->IsScriptedPrivateMember(player->GetGUID()))
+        || !map->IsScriptedPrivateMember(player->GetGUID()))
     {
         FailRun(*run, "The private stage is no longer available for reconnect.");
         return;
@@ -4292,7 +4315,7 @@ bool ManastormMgr::TransitionToNextStage(
 
     if (Map* previous = sMapMgr->FindMap(previousMapId, previousInstanceId))
         if (previous->IsScriptedPrivateInstance())
-            previous->ToInstanceMap()->RequestScriptedPrivateUnload();
+            previous->RequestScriptedPrivateUnload();
 
     if (!prepared)
         return false;
@@ -4676,7 +4699,7 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
 
     if (Map* stage = sMapMgr->FindMap(run->GetSegment().MapId, run->GetInstanceId()))
         if (stage->IsScriptedPrivateInstance())
-            stage->ToInstanceMap()->RequestScriptedPrivateUnload();
+            stage->RequestScriptedPrivateUnload();
     _transitionTimers.erase(runId);
     _runs.erase(runId);
 
