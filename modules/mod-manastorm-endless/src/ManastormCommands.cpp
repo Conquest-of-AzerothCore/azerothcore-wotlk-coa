@@ -299,6 +299,8 @@ public:
         {
             { "info",    HandleSegmentInfoCommand,       SEC_GAMEMASTER, Console::No },
             { "runtime", HandleSegmentRuntimeMapCommand, SEC_GAMEMASTER, Console::No },
+            { "enable",  HandleSegmentEnableCommand,     SEC_GAMEMASTER, Console::No },
+            { "test",    HandleSegmentTestCommand,       SEC_GAMEMASTER, Console::No },
         };
 
         static ChatCommandTable affixCommandTable =
@@ -1315,6 +1317,137 @@ public:
             segmentId,
             candidateCount,
             stacks);
+
+        return true;
+    }
+
+    static bool HandleSegmentEnableCommand(
+        ChatHandler* handler,
+        uint32 segmentId,
+        uint32 enabled)
+    {
+        if (!segmentId || enabled > 1)
+        {
+            handler->SendErrorMessage(
+                "Usage: .manastorm segment enable <segmentId> <0|1>");
+            return false;
+        }
+
+        QueryResult result =
+            WorldDatabase.Query(
+                "SELECT 1 "
+                "FROM `manastorm_segment` "
+                "WHERE `segment_id` = {} "
+                "LIMIT 1",
+                segmentId);
+
+        if (!result)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: segment {} does not exist.",
+                segmentId);
+            return true;
+        }
+
+        WorldDatabase.DirectExecute(
+            "UPDATE `manastorm_segment` "
+            "SET `enabled` = {} "
+            "WHERE `segment_id` = {}",
+            enabled,
+            segmentId);
+
+        if (enabled)
+        {
+            if (!ReloadAfterAuthoring(handler))
+            {
+                handler->PSendSysMessage(
+                    "Manastorm: segment {} was enabled in SQL, "
+                    "but datastore validation rejected it. Check worldserver logs.",
+                    segmentId);
+                return true;
+            }
+        }
+        else
+        {
+            // Reload when possible. If this was the final enabled segment the
+            // datastore may intentionally report that no valid rows remain.
+            ManastormMgr::Instance().ReloadData();
+        }
+
+        handler->PSendSysMessage(
+            "Manastorm: segment {} {}.",
+            segmentId,
+            enabled ? "enabled" : "disabled");
+
+        return true;
+    }
+
+    static bool HandleSegmentTestCommand(
+        ChatHandler* handler,
+        uint32 segmentId)
+    {
+        Player* player =
+            handler->GetSession()
+            ? handler->GetSession()->GetPlayer()
+            : nullptr;
+
+        if (!player)
+        {
+            handler->SendErrorMessage(
+                "Manastorm: this command requires an in-game player.");
+            return false;
+        }
+
+        ManastormSegment const* segment =
+            ManastormDataStore::Instance().GetSegmentById(
+                segmentId);
+
+        if (!segment)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: segment {} is not enabled/valid. "
+                "Use `.manastorm segment enable {} 1` and inspect the "
+                "worldserver log if validation rejects it.",
+                segmentId,
+                segmentId);
+            return true;
+        }
+
+        uint32 const depth =
+            std::max<uint32>(
+                1,
+                segment->MinDepth);
+
+        std::string error;
+
+        ManastormRun* run =
+            ManastormMgr::Instance().StartRun(
+                player,
+                depth,
+                error,
+                true,
+                segmentId);
+
+        if (!run)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: exact-segment test failed: {}",
+                error);
+            return true;
+        }
+
+        handler->PSendSysMessage(
+            "Manastorm: TEST launched exact segment {} "
+            "at depth {} | nativeMap={} runtimeMap={} instance={}.",
+            segmentId,
+            depth,
+            run->GetSegment().NativeMapId,
+            run->GetSegment().MapId,
+            run->GetInstanceId());
+
+        SendRunStatus(
+            handler,
+            *run);
 
         return true;
     }

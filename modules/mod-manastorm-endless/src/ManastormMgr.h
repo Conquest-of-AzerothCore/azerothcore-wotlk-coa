@@ -26,7 +26,8 @@ public:
         Player* player,
         uint32 depth,
         std::string& error,
-        bool bypassCheckpoint = false);
+        bool bypassCheckpoint = false,
+        uint32 forcedSegmentId = 0);
 
     bool StopRun(
         Player* player,

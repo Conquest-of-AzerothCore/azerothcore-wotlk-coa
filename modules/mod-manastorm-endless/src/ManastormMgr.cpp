@@ -2021,7 +2021,8 @@ ManastormRun* ManastormMgr::StartRun(
     Player* player,
     uint32 depth,
     std::string& error,
-    bool bypassCheckpoint)
+    bool bypassCheckpoint,
+    uint32 forcedSegmentId)
 {
     error.clear();
 
@@ -2047,6 +2048,37 @@ ManastormRun* ManastormMgr::StartRun(
     {
         error = "Manastorm datastore is not loaded. Apply the world SQL and check server logs.";
         return nullptr;
+    }
+
+    ManastormSegment const* authoringForcedSegment = nullptr;
+
+    if (forcedSegmentId)
+    {
+        authoringForcedSegment =
+            ManastormDataStore::Instance().GetSegmentById(
+                forcedSegmentId);
+
+        if (!authoringForcedSegment)
+        {
+            error =
+                "Forced Manastorm segment " +
+                std::to_string(forcedSegmentId) +
+                " is not enabled/valid in the datastore.";
+            return nullptr;
+        }
+
+        if (authoringForcedSegment->Difficulty != 0 &&
+            authoringForcedSegment->Difficulty != 2)
+        {
+            error =
+                "Forced Manastorm segment " +
+                std::to_string(forcedSegmentId) +
+                " has unsupported native difficulty " +
+                std::to_string(
+                    uint32(authoringForcedSegment->Difficulty)) +
+                ".";
+            return nullptr;
+        }
     }
 
     std::vector<ObjectGuid::LowType> members;
@@ -2136,6 +2168,12 @@ ManastormRun* ManastormMgr::StartRun(
                 endgameLevel;
     }
 
+    // GM authoring tests must be deterministic even when the GM character is
+    // max level. The exact forced segment owns its native Normal/Endgame track.
+    if (authoringForcedSegment)
+        endgame =
+            authoringForcedSegment->Difficulty == 2;
+
 
     ManastormProgressionSnapshot progression;
 
@@ -2202,6 +2240,11 @@ ManastormRun* ManastormMgr::StartRun(
             : progression.PendingIntroSegmentId)
         : 0;
 
+    uint32 const selectedForcedSegmentId =
+        forcedSegmentId
+        ? forcedSegmentId
+        : forcedIntroSegmentId;
+
     ManastormSegment const* selected =
         generator.SelectSegment(
             depth,
@@ -2209,7 +2252,7 @@ ManastormRun* ManastormMgr::StartRun(
             progression.UnlockedSegmentIds,
             endgame,
             0,
-            forcedIntroSegmentId);
+            selectedForcedSegmentId);
 
     if (!selected)
     {
