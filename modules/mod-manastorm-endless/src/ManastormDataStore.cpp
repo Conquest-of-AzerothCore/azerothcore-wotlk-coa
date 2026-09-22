@@ -182,7 +182,8 @@ bool ManastormDataStore::LoadSegments()
         "SELECT "
         "`segment_id`, `map_id`, `runtime_map_id`, "
         "`difficulty`, `dungeon_encounter_id`, "
-        "`objective_creature_entry`, `start_game_tele_id`, `weight`, "
+        "`objective_creature_entry`, `runtime_objective_creature_entry`, "
+        "`start_game_tele_id`, `weight`, "
         "`min_depth`, `max_depth`, `reward_multiplier`, "
         "`chaotic_link_stacks`, `flags` "
         "FROM `manastorm_segment` "
@@ -215,14 +216,23 @@ bool ManastormDataStore::LoadSegments()
 
         segment.Difficulty = fields[3].Get<uint8>();
         segment.DungeonEncounterId = fields[4].Get<uint32>();
-        segment.ObjectiveCreatureEntry = fields[5].Get<uint32>();
-        segment.StartGameTeleId = fields[6].Get<uint32>();
-        segment.Weight = fields[7].Get<uint32>();
-        segment.MinDepth = fields[8].Get<uint32>();
-        segment.MaxDepth = fields[9].Get<uint32>();
-        segment.RewardMultiplier = fields[10].Get<float>();
-        segment.ChaoticLinkStacks = fields[11].Get<uint8>();
-        segment.Flags = fields[12].Get<uint32>();
+        segment.NativeObjectiveCreatureEntry = fields[5].Get<uint32>();
+
+        uint32 const runtimeObjectiveCreatureEntry =
+            fields[6].Get<uint32>();
+
+        segment.ObjectiveCreatureEntry =
+            runtimeObjectiveCreatureEntry
+            ? runtimeObjectiveCreatureEntry
+            : segment.NativeObjectiveCreatureEntry;
+
+        segment.StartGameTeleId = fields[7].Get<uint32>();
+        segment.Weight = fields[8].Get<uint32>();
+        segment.MinDepth = fields[9].Get<uint32>();
+        segment.MaxDepth = fields[10].Get<uint32>();
+        segment.RewardMultiplier = fields[11].Get<float>();
+        segment.ChaoticLinkStacks = fields[12].Get<uint8>();
+        segment.Flags = fields[13].Get<uint32>();
 
         if (!segment.SegmentId)
         {
@@ -233,17 +243,25 @@ bool ManastormDataStore::LoadSegments()
 
         if (!segment.ObjectiveCreatureEntry)
         {
-            LOG_ERROR(LOG_FILTER,
-                "Ignoring Manastorm segment {}: objective_creature_entry is 0.",
-                segment.SegmentId);
+            LOG_ERROR(
+                LOG_FILTER,
+                "Ignoring Manastorm segment {}: native objective={} and runtime "
+                "objective override={} resolve to creature entry 0.",
+                segment.SegmentId,
+                segment.NativeObjectiveCreatureEntry,
+                runtimeObjectiveCreatureEntry);
             continue;
         }
 
         if (!sObjectMgr->GetCreatureTemplate(segment.ObjectiveCreatureEntry))
         {
-            LOG_ERROR(LOG_FILTER,
-                "Ignoring Manastorm segment {}: objective creature entry {} does not exist.",
-                segment.SegmentId, segment.ObjectiveCreatureEntry);
+            LOG_ERROR(
+                LOG_FILTER,
+                "Ignoring Manastorm segment {}: runtime objective creature "
+                "entry {} does not exist (native objective={}).",
+                segment.SegmentId,
+                segment.ObjectiveCreatureEntry,
+                segment.NativeObjectiveCreatureEntry);
             continue;
         }
 
