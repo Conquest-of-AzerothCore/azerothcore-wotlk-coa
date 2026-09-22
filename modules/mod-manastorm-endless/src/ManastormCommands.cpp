@@ -8,6 +8,7 @@
 #include "Group.h"
 #include "ManastormProgression.h"
 #include "ManastormDataStore.h"
+#include "ObjectMgr.h"
 
 #include <string>
 
@@ -91,6 +92,120 @@ namespace
         return false;
     }
 
+    bool SetSelectedSpawnRole(
+        ChatHandler* handler,
+        uint32 segmentId,
+        uint32 roleFlag,
+        bool enable,
+        char const* roleName)
+    {
+        ManastormAuthoringSegment segment;
+
+        if (!GetAuthoringSegment(
+            segmentId,
+            segment))
+        {
+            handler->PSendSysMessage(
+                "Manastorm: segment {} does not exist.",
+                segmentId);
+
+            return true;
+        }
+
+        Creature* creature =
+            handler->getSelectedCreature();
+
+        if (!creature)
+        {
+            handler->SendErrorMessage(
+                "Manastorm: select a creature first.");
+
+            return false;
+        }
+
+        ObjectGuid::LowType const spawnId =
+            creature->GetSpawnId();
+
+        if (!spawnId)
+        {
+            handler->SendErrorMessage(
+                "Manastorm: selected creature has no stable DB spawn ID. "
+                "Temporary/summoned creatures cannot receive authored "
+                "segment-spawn roles.");
+
+            return false;
+        }
+
+        if (creature->GetMapId() !=
+            segment.MapId)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: spawn {} is on map {}, but segment {} uses map {}.",
+                spawnId,
+                creature->GetMapId(),
+                segmentId,
+                segment.MapId);
+
+            return true;
+        }
+
+        if (creature->GetEntry() ==
+            segment.ObjectiveCreatureEntry)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: creature entry {} is the fixed objective for "
+                "segment {} and cannot be a trash randomization/pool-source "
+                "spawn.",
+                creature->GetEntry(),
+                segmentId);
+
+            return true;
+        }
+
+        if (enable)
+        {
+            uint32 const flags =
+                ManastormSegmentSpawnFlags::RouteCreature |
+                roleFlag;
+
+            WorldDatabase.DirectExecute(
+                "INSERT INTO \`manastorm_segment_spawn\` "
+                "(\`segment_id\`, \`spawn_guid\`, \`flags\`, \`enabled\`) "
+                "VALUES ({}, {}, {}, 1) "
+                "ON DUPLICATE KEY UPDATE "
+                "\`flags\` = (\`flags\` | VALUES(\`flags\`)), "
+                "\`enabled\` = 1",
+                segmentId,
+                spawnId,
+                flags);
+        }
+        else
+        {
+            WorldDatabase.DirectExecute(
+                "UPDATE \`manastorm_segment_spawn\` "
+                "SET \`flags\` = (\`flags\` & ~{}) "
+                "WHERE \`segment_id\` = {} "
+                "AND \`spawn_guid\` = {}",
+                roleFlag,
+                segmentId,
+                spawnId);
+        }
+
+        if (!ReloadAfterAuthoring(handler))
+            return false;
+
+        handler->PSendSysMessage(
+            "Manastorm: {} {} for segment={} spawn={} entry={} name='{}'.",
+            roleName,
+            enable ? "enabled" : "disabled",
+            segmentId,
+            spawnId,
+            creature->GetEntry(),
+            creature->GetName());
+
+        return true;
+    }
+
     void SendRunStatus(ChatHandler* handler, ManastormRun const& run)
     {
         ManastormSegment const& segment = run.GetSegment();
@@ -165,6 +280,19 @@ public:
             { "stacks", HandleLinkStacksCommand, SEC_GAMEMASTER, Console::No },
         };
 
+        static ChatCommandTable spawnCommandTable =
+        {
+            { "randomslot", HandleSpawnRandomSlotCommand, SEC_GAMEMASTER, Console::No },
+            { "poolsource", HandleSpawnPoolSourceCommand, SEC_GAMEMASTER, Console::No },
+            { "info",       HandleSpawnInfoCommand,       SEC_GAMEMASTER, Console::No },
+            { "list",       HandleSpawnListCommand,       SEC_GAMEMASTER, Console::No },
+        };
+
+        static ChatCommandTable poolCommandTable =
+        {
+            { "info", HandlePoolInfoCommand, SEC_GAMEMASTER, Console::No },
+        };
+
         static ChatCommandTable segmentCommandTable =
         {
             { "info", HandleSegmentInfoCommand, SEC_GAMEMASTER, Console::No },
@@ -185,6 +313,8 @@ public:
             { "stop",        HandleStopCommand,        SEC_GAMEMASTER, Console::No },
 
             { "link",    linkCommandTable },
+            { "spawn",   spawnCommandTable },
+            { "pool",    poolCommandTable },
             { "segment", segmentCommandTable },
             { "affix",   affixCommandTable },
 
@@ -441,6 +571,215 @@ public:
         }
 
         handler->SendSysMessage("Manastorm: run stopped.");
+        return true;
+    }
+
+    static bool HandleSpawnRandomSlotCommand(
+        ChatHandler* handler,
+        uint32 segmentId,
+        uint32 enabled)
+    {
+        if (enabled > 1)
+        {
+            handler->SendErrorMessage(
+                "Manastorm: randomslot value must be 0 or 1.");
+
+            return false;
+        }
+
+        return SetSelectedSpawnRole(
+            handler,
+            segmentId,
+            ManastormSegmentSpawnFlags::RandomizationSlot,
+            enabled != 0,
+            "RandomizationSlot");
+    }
+
+    static bool HandleSpawnPoolSourceCommand(
+        ChatHandler* handler,
+        uint32 segmentId,
+        uint32 enabled)
+    {
+        if (enabled > 1)
+        {
+            handler->SendErrorMessage(
+                "Manastorm: poolsource value must be 0 or 1.");
+
+            return false;
+        }
+
+        return SetSelectedSpawnRole(
+            handler,
+            segmentId,
+            ManastormSegmentSpawnFlags::CreaturePoolSource,
+            enabled != 0,
+            "CreaturePoolSource");
+    }
+
+    static bool HandleSpawnInfoCommand(
+        ChatHandler* handler,
+        uint32 segmentId)
+    {
+        Creature* creature =
+            handler->getSelectedCreature();
+
+        if (!creature)
+        {
+            handler->SendErrorMessage(
+                "Manastorm: select a creature first.");
+
+            return false;
+        }
+
+        ObjectGuid::LowType const spawnId =
+            creature->GetSpawnId();
+
+        if (!spawnId)
+        {
+            handler->SendErrorMessage(
+                "Manastorm: selected creature has no stable DB spawn ID.");
+
+            return false;
+        }
+
+        QueryResult result = WorldDatabase.Query(
+            "SELECT \`flags\`, \`enabled\` "
+            "FROM \`manastorm_segment_spawn\` "
+            "WHERE \`segment_id\` = {} "
+            "AND \`spawn_guid\` = {} "
+            "LIMIT 1",
+            segmentId,
+            spawnId);
+
+        if (!result)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: spawn {} has no authored roles for segment {}.",
+                spawnId,
+                segmentId);
+
+            return true;
+        }
+
+        Field* fields =
+            result->Fetch();
+
+        uint32 const flags =
+            fields[0].Get<uint32>();
+
+        bool const enabled =
+            fields[1].Get<uint8>() != 0;
+
+        handler->PSendSysMessage(
+            "Manastorm spawn roles | segment={} spawn={} entry={} "
+            "flags=0x{:X} enabled={} route={} link={} randomslot={} poolsource={}",
+            segmentId,
+            spawnId,
+            creature->GetEntry(),
+            flags,
+            enabled ? "yes" : "no",
+            (flags & ManastormSegmentSpawnFlags::RouteCreature) ? "yes" : "no",
+            (flags & ManastormSegmentSpawnFlags::ChaoticLinkEligible) ? "yes" : "no",
+            (flags & ManastormSegmentSpawnFlags::RandomizationSlot) ? "yes" : "no",
+            (flags & ManastormSegmentSpawnFlags::CreaturePoolSource) ? "yes" : "no");
+
+        return true;
+    }
+
+    static bool HandleSpawnListCommand(
+        ChatHandler* handler,
+        uint32 segmentId)
+    {
+        QueryResult result = WorldDatabase.Query(
+            "SELECT "
+            "s.\`spawn_guid\`, "
+            "COALESCE(c.\`id\`, 0), "
+            "s.\`flags\`, "
+            "s.\`enabled\` "
+            "FROM \`manastorm_segment_spawn\` s "
+            "LEFT JOIN \`creature\` c "
+            "ON c.\`guid\` = s.\`spawn_guid\` "
+            "WHERE s.\`segment_id\` = {} "
+            "ORDER BY s.\`spawn_guid\`",
+            segmentId);
+
+        if (!result)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: segment {} has no authored spawn roles.",
+                segmentId);
+
+            return true;
+        }
+
+        handler->PSendSysMessage(
+            "Manastorm authored spawns for segment {}:",
+            segmentId);
+
+        do
+        {
+            Field* fields =
+                result->Fetch();
+
+            handler->PSendSysMessage(
+                "  spawn={} entry={} flags=0x{:X} enabled={}",
+                fields[0].Get<uint32>(),
+                fields[1].Get<uint32>(),
+                fields[2].Get<uint32>(),
+                fields[3].Get<uint8>() ? "yes" : "no");
+        } while (result->NextRow());
+
+        return true;
+    }
+
+    static bool HandlePoolInfoCommand(
+        ChatHandler* handler,
+        uint32 poolId)
+    {
+        ManastormCreaturePoolDefinition const* pool =
+            ManastormDataStore::Instance()
+            .GetCreaturePoolById(poolId);
+
+        if (!pool)
+        {
+            handler->PSendSysMessage(
+                "Manastorm: creature pool {} is not loaded/enabled.",
+                poolId);
+
+            return true;
+        }
+
+        handler->PSendSysMessage(
+            "Manastorm creature pool {} '{}' | sourceSegments={} "
+            "derivedCreatureEntries={} | replacementRuntime=disabled",
+            pool->PoolId,
+            pool->Name,
+            pool->SourceSegmentIds.size(),
+            pool->CreatureEntries.size());
+
+        for (uint32 segmentId :
+            pool->SourceSegmentIds)
+        {
+            handler->PSendSysMessage(
+                "  sourceSegment={}",
+                segmentId);
+        }
+
+        for (uint32 creatureEntry :
+            pool->CreatureEntries)
+        {
+            CreatureTemplate const* creatureTemplate =
+                sObjectMgr->GetCreatureTemplate(
+                    creatureEntry);
+
+            handler->PSendSysMessage(
+                "  creatureEntry={} name='{}'",
+                creatureEntry,
+                creatureTemplate
+                    ? creatureTemplate->Name
+                    : "<missing template>");
+        }
+
         return true;
     }
 

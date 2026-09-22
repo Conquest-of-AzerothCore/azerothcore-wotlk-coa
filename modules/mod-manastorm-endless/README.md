@@ -165,6 +165,28 @@ chance, weighting, archetype matching and depth behavior have not been recovered
 Boss/objective progression continues to use exact Segment grants; the historical
 BossPool grant number remains reserved and has no runtime consumer.
 
+Authoring/inspection commands for the recovered roles are additive and do not
+enable replacement:
+
+```text
+.manastorm link add <segmentId>
+    -> RouteCreature + ChaoticLinkEligible
+
+.manastorm spawn randomslot <segmentId> <0|1>
+    -> mark/unmark the selected persistent spawn as a future replacement slot
+
+.manastorm spawn poolsource <segmentId> <0|1>
+    -> mark/unmark the selected native creature as a future pool source
+
+.manastorm spawn info <segmentId>
+.manastorm spawn list <segmentId>
+.manastorm pool info <poolId>
+```
+
+Creature pools now materialize a distinct list of valid creature-template entries
+from their enabled source segments' CreaturePoolSource spawn roles. This is
+queryable evidence/readiness only; no creature is transformed by this code.
+
 In native-client mode the full nine-word Manastorm.dbc row is now preserved in
 the selected `ManastormSegment` snapshot. Words 0-3 remain the strict native
 identity; words 4-8 are retained as native tuning/evidence fields without

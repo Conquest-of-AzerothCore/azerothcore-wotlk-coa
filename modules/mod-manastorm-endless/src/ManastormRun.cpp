@@ -23,6 +23,10 @@ ManastormRun::ManastormRun(
     _segment(segment),
     _scaling(scaling)
 {
+    _routeConfiguredSpawnIds.insert(
+        segment.RouteSpawnIds.begin(),
+        segment.RouteSpawnIds.end());
+
     _chaoticLinkConfiguredSpawnIds.insert(
         segment.ChaoticLinkSpawnIds.begin(),
         segment.ChaoticLinkSpawnIds.end());
@@ -30,6 +34,14 @@ ManastormRun::ManastormRun(
     _chaoticLinkUnusedSpawnIds.insert(
         segment.ChaoticLinkSpawnIds.begin(),
         segment.ChaoticLinkSpawnIds.end());
+
+    _randomizationConfiguredSpawnIds.insert(
+        segment.RandomizationSpawnIds.begin(),
+        segment.RandomizationSpawnIds.end());
+
+    _creaturePoolSourceSpawnIds.insert(
+        segment.CreaturePoolSourceSpawnIds.begin(),
+        segment.CreaturePoolSourceSpawnIds.end());
 }
 
 void ManastormRun::PrepareNextStage(
@@ -54,8 +66,15 @@ void ManastormRun::PrepareNextStage(
 
     _chaoticLinkBaseMaxHealth = 0;
 
+    _routeConfiguredSpawnIds.clear();
     _chaoticLinkConfiguredSpawnIds.clear();
     _chaoticLinkUnusedSpawnIds.clear();
+    _randomizationConfiguredSpawnIds.clear();
+    _creaturePoolSourceSpawnIds.clear();
+
+    _routeConfiguredSpawnIds.insert(
+        segment.RouteSpawnIds.begin(),
+        segment.RouteSpawnIds.end());
 
     _chaoticLinkConfiguredSpawnIds.insert(
         segment.ChaoticLinkSpawnIds.begin(),
@@ -64,6 +83,14 @@ void ManastormRun::PrepareNextStage(
     _chaoticLinkUnusedSpawnIds.insert(
         segment.ChaoticLinkSpawnIds.begin(),
         segment.ChaoticLinkSpawnIds.end());
+
+    _randomizationConfiguredSpawnIds.insert(
+        segment.RandomizationSpawnIds.begin(),
+        segment.RandomizationSpawnIds.end());
+
+    _creaturePoolSourceSpawnIds.insert(
+        segment.CreaturePoolSourceSpawnIds.begin(),
+        segment.CreaturePoolSourceSpawnIds.end());
 
     _instanceId = 0;
     _guideGuid.Clear();

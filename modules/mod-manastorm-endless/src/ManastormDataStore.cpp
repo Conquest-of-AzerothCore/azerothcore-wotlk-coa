@@ -318,6 +318,17 @@ bool ManastormDataStore::LoadSegments()
             // snapshot even though the shared gameplay backend does not yet
             // consume them. This prevents duplicate-looking segment families
             // from losing native Patch-M/realm-overlay evidence.
+            segment.NativeWord4Raw =
+                identity->second[4];
+            segment.NativeWord5Raw =
+                identity->second[5];
+            segment.NativeWord6Raw =
+                identity->second[6];
+            segment.NativeWord7Raw =
+                identity->second[7];
+            segment.NativeWord8Raw =
+                identity->second[8];
+
             segment.NativeRewardEndMultiplier =
                 NativeWordAsFloat(identity->second[4]);
             segment.NativeRewardEncounterMultiplier =
@@ -734,6 +745,67 @@ bool ManastormDataStore::LoadCreaturePools()
         }
     }
 
+    // Materialize the distinct native creature entries contributed by
+    // authored CreaturePoolSource spawn roles. This is a data-resolution step
+    // only; no runtime creature replacement is performed here.
+    QueryResult candidateResult =
+        WorldDatabase.Query(
+            "SELECT DISTINCT "
+            "p.\`pool_id\`, "
+            "c.\`id\` "
+            "FROM \`manastorm_creature_pool_segment\` p "
+            "INNER JOIN \`manastorm_segment_spawn\` s "
+            "ON s.\`segment_id\` = p.\`segment_id\` "
+            "INNER JOIN \`creature\` c "
+            "ON c.\`guid\` = s.\`spawn_guid\` "
+            "WHERE p.\`enabled\` = 1 "
+            "AND s.\`enabled\` = 1 "
+            "AND (s.\`flags\` & {}) <> 0 "
+            "ORDER BY p.\`pool_id\`, c.\`id\`",
+            ManastormSegmentSpawnFlags::CreaturePoolSource);
+
+    if (candidateResult)
+    {
+        do
+        {
+            Field* fields =
+                candidateResult->Fetch();
+
+            uint32 const poolId =
+                fields[0].Get<uint32>();
+
+            uint32 const creatureEntry =
+                fields[1].Get<uint32>();
+
+            auto poolItr =
+                _creaturePools.find(poolId);
+
+            if (poolItr ==
+                _creaturePools.end())
+            {
+                continue;
+            }
+
+            if (!creatureEntry ||
+                !sObjectMgr->GetCreatureTemplate(
+                    creatureEntry))
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Creature pool {} resolves invalid creature entry {} "
+                    "from an authored source spawn.",
+                    poolId,
+                    creatureEntry);
+
+                valid = false;
+                continue;
+            }
+
+            poolItr->second.CreatureEntries.push_back(
+                creatureEntry);
+        } while (candidateResult->NextRow());
+    }
+
     for (auto const& pair :
         _creaturePools)
     {
@@ -778,12 +850,25 @@ bool ManastormDataStore::LoadCreaturePools()
                 pool.PoolId,
                 pool.Name);
         }
+        else if (pool.CreatureEntries.empty())
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm creature pool {} ({}) has {} source spawn(s) "
+                "but resolves no valid creature entries.",
+                pool.PoolId,
+                pool.Name,
+                sourceSpawnCount);
+
+            valid = false;
+        }
     }
 
     LOG_INFO(
         LOG_FILTER,
         "Loaded {} enabled Manastorm creature pools with {} enabled "
-        "pool-to-segment source rows from {} configured source rows.",
+        "pool-to-segment source rows and derived candidate entries "
+        "from {} configured source rows.",
         _creaturePools.size(),
         loadedSourceRows,
         configuredSourceRows);

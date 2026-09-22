@@ -108,6 +108,17 @@ public:
             maxHealth;
     }
 
+    bool IsRouteSpawn(
+        ObjectGuid::LowType spawnId) const
+    {
+        if (!spawnId)
+            return false;
+
+        return _routeConfiguredSpawnIds.find(
+            spawnId) !=
+            _routeConfiguredSpawnIds.end();
+    }
+
     bool IsChaoticLinkSpawn(
         ObjectGuid::LowType spawnId) const
     {
@@ -117,6 +128,28 @@ public:
         return _chaoticLinkConfiguredSpawnIds.find(
             spawnId) !=
             _chaoticLinkConfiguredSpawnIds.end();
+    }
+
+    bool IsRandomizationSpawn(
+        ObjectGuid::LowType spawnId) const
+    {
+        if (!spawnId)
+            return false;
+
+        return _randomizationConfiguredSpawnIds.find(
+            spawnId) !=
+            _randomizationConfiguredSpawnIds.end();
+    }
+
+    bool IsCreaturePoolSourceSpawn(
+        ObjectGuid::LowType spawnId) const
+    {
+        if (!spawnId)
+            return false;
+
+        return _creaturePoolSourceSpawnIds.find(
+            spawnId) !=
+            _creaturePoolSourceSpawnIds.end();
     }
 
     bool ConsumeChaoticLinkSpawn(
@@ -354,14 +387,21 @@ private:
     // multiplying an already Chaotic-scaled health value.
     uint32 _chaoticLinkBaseMaxHealth = 0;
 
-    // Complete authored set of persistent DB spawn GUIDs belonging
- // to this segment's Chaotic Link route.
- //
- // This set never changes during the stage and can therefore
- // also be used by affixes such as Mana Bomb to identify
- // authored route creatures.
+    // Immutable authored persistent-spawn roles for this disposable stage.
+    // Creature::GetSpawnId() resolves runtime creatures back to these IDs.
+    std::unordered_set<ObjectGuid::LowType>
+        _routeConfiguredSpawnIds;
+
     std::unordered_set<ObjectGuid::LowType>
         _chaoticLinkConfiguredSpawnIds;
+
+    // Evidence-backed eligibility markers only. The current runtime does not
+    // perform creature replacement.
+    std::unordered_set<ObjectGuid::LowType>
+        _randomizationConfiguredSpawnIds;
+
+    std::unordered_set<ObjectGuid::LowType>
+        _creaturePoolSourceSpawnIds;
 
     // Remaining authored spawns that may still consume one boss Link.
     //

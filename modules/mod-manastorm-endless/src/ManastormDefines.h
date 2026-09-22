@@ -235,7 +235,12 @@ struct ManastormCreaturePoolDefinition
 {
     uint32 PoolId = 0;
     std::string Name;
+
+    // Authoritative content relationships. Pools reference source segments,
+    // then derive candidate creature entries from those segments' authored
+    // CreaturePoolSource spawn roles.
     std::vector<uint32> SourceSegmentIds;
+    std::vector<uint32> CreatureEntries;
 };
 
 struct ManastormUnlockDefinition
@@ -301,6 +306,14 @@ struct ManastormSegment
 
     // Native Manastorm.dbc evidence carried with the selected segment in
     // native-client mode. These values are not used to invent gameplay.
+    // Preserve the exact raw words as evidence as well as the recovered
+    // float interpretations. w7 remains semantically unresolved.
+    uint32 NativeWord4Raw = 0;
+    uint32 NativeWord5Raw = 0;
+    uint32 NativeWord6Raw = 0;
+    uint32 NativeWord7Raw = 0;
+    uint32 NativeWord8Raw = 0;
+
     float NativeRewardEndMultiplier = 1.0f;       // DBC w4
     float NativeRewardEncounterMultiplier = 1.0f; // DBC w5
     float NativeExperienceFactor1 = 1.0f;         // DBC w6
