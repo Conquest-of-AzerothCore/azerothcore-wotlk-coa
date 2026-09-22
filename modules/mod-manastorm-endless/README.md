@@ -147,8 +147,29 @@ The server also needs the matching MapDifficulty support and actual world
 creature spawns for that difficulty. Invalid rows are logged and skipped;
 empty/partial stage content does not create invented encounters.
 
-Populate the existing scaling, unlock/grant and Chaotic Link spawn rows as
-needed. No stage catalogue or reward content was populated by this change.
+Populate the scaling and unlock/grant rows as needed. Segment route authoring
+now belongs in `manastorm_segment_spawn`, which records persistent DB spawn GUIDs
+once and assigns independent evidence-backed roles: route membership, Chaotic
+Link eligibility, future randomization-slot eligibility, and future
+creature-pool-source eligibility. Existing `manastorm_chaotic_link_spawn` rows
+are legacy input only; `05_manastorm_segment_pool_architecture.sql` copies them
+as RouteCreature|ChaoticLinkEligible and deliberately does **not** infer either
+randomization role.
+
+Creature-content ownership is stored through `manastorm_creature_pool` and
+`manastorm_creature_pool_segment`. Pools source candidate creature entries from
+the native occupants of source-segment spawns explicitly marked
+CreaturePoolSource. The progression snapshot now consumes CreaturePool grants.
+The actual creature replacement algorithm remains disabled because replacement
+chance, weighting, archetype matching and depth behavior have not been recovered.
+Boss/objective progression continues to use exact Segment grants; the historical
+BossPool grant number remains reserved and has no runtime consumer.
+
+In native-client mode the full nine-word Manastorm.dbc row is now preserved in
+the selected `ManastormSegment` snapshot. Words 0-3 remain the strict native
+identity; words 4-8 are retained as native tuning/evidence fields without
+changing shared gameplay policy. No stage catalogue, creature-pool membership or
+replacement probability is invented by this architecture change.
 
 Stage helpers now adapt the donor's Safety Bubble (93306/93307), Cogsley (80919)
 and completion portal visual (12999 with 93338). Positions come from the SQL

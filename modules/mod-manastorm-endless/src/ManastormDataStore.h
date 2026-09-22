@@ -21,6 +21,9 @@ public:
     ManastormUnlockDefinition const* GetUnlockById(
         uint32 unlockId) const;
 
+    ManastormCreaturePoolDefinition const* GetCreaturePoolById(
+        uint32 poolId) const;
+
     ManastormUnlockDefinition const* GetUnlockForTrigger(
         uint32 completedDepth,
         ManastormMode mode,
@@ -49,7 +52,8 @@ private:
     ManastormDataStore() = default;
 
     bool LoadSegments();
-    bool LoadChaoticLinkSpawns();
+    bool LoadSegmentSpawns();
+    bool LoadCreaturePools();
     bool LoadScalingCurve();
     bool LoadUnlocks();
     bool LoadUnlockGrants();
@@ -57,6 +61,7 @@ private:
     bool _loaded = false;
     std::vector<ManastormSegment> _segments;
     std::map<uint32, ManastormScalingPoint> _scalingCurve;
+    std::map<uint32, ManastormCreaturePoolDefinition> _creaturePools;
     std::map<uint32, ManastormUnlockDefinition> _unlocks;
 
 };

@@ -19,12 +19,51 @@ CREATE TABLE IF NOT EXISTS `manastorm_segment` (
   KEY `idx_enabled_depth` (`enabled`,`min_depth`,`max_depth`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Authoritative authored roster for persistent DB spawns belonging to a
+-- Manastorm segment. One row may carry several independent roles.
+-- flags:
+--   0x01 RouteCreature
+--   0x02 ChaoticLinkEligible
+--   0x04 RandomizationSlot       (recorded only; replacement runtime disabled)
+--   0x08 CreaturePoolSource      (may contribute its native creature entry)
+CREATE TABLE IF NOT EXISTS `manastorm_segment_spawn` (
+  `segment_id` INT UNSIGNED NOT NULL,
+  `spawn_guid` INT UNSIGNED NOT NULL,
+  `flags` INT UNSIGNED NOT NULL DEFAULT 1,
+  `enabled` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  PRIMARY KEY (`segment_id`,`spawn_guid`),
+  KEY `idx_spawn_guid` (`spawn_guid`),
+  KEY `idx_segment_flags` (`segment_id`,`flags`,`enabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Legacy compatibility table. New authoring belongs in
+-- manastorm_segment_spawn. 05_manastorm_segment_pool_architecture.sql copies
+-- existing rows as RouteCreature|ChaoticLinkEligible without guessing any
+-- randomization or creature-pool eligibility.
 CREATE TABLE IF NOT EXISTS `manastorm_chaotic_link_spawn` (
   `segment_id` INT UNSIGNED NOT NULL,
   `spawn_guid` INT UNSIGNED NOT NULL,
   `enabled` TINYINT UNSIGNED NOT NULL DEFAULT 1,
   PRIMARY KEY (`segment_id`,`spawn_guid`),
   KEY `idx_spawn_guid` (`spawn_guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `manastorm_creature_pool` (
+  `pool_id` INT UNSIGNED NOT NULL,
+  `name` VARCHAR(120) NOT NULL DEFAULT '',
+  `enabled` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  PRIMARY KEY (`pool_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Pools reference authored source segments rather than duplicating thousands
+-- of creature-entry rows. Candidate creature entries are derived from each
+-- source segment's CreaturePoolSource spawn roles.
+CREATE TABLE IF NOT EXISTS `manastorm_creature_pool_segment` (
+  `pool_id` INT UNSIGNED NOT NULL,
+  `segment_id` INT UNSIGNED NOT NULL,
+  `enabled` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  PRIMARY KEY (`pool_id`,`segment_id`),
+  KEY `idx_source_segment` (`segment_id`,`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `manastorm_scaling_curve` (

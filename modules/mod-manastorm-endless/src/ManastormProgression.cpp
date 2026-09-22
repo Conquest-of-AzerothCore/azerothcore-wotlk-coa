@@ -261,10 +261,14 @@ bool ManastormProgression::LoadSnapshot(
                         grant.ContentId);
                     break;
 
-                case ManastormUnlockGrantType::BossPool:
                 case ManastormUnlockGrantType::CreaturePool:
-                    // These grant types are valid datastore content,
-                    // but their runtime consumers are not implemented yet.
+                    snapshot.UnlockedCreaturePoolIds.insert(
+                        grant.ContentId);
+                    break;
+
+                case ManastormUnlockGrantType::BossPool:
+                    // Reserved legacy/reconstruction grant type.
+                    // Recovered objective progression uses Segment grants.
                     break;
                 }
             }

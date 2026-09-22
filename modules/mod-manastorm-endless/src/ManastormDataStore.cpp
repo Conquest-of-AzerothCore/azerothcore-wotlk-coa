@@ -14,6 +14,7 @@
 #include "ObjectMgr.h"
 
 #include <cmath>
+#include <cstring>
 #include <limits>
 
 namespace
@@ -25,7 +26,16 @@ bool IsValidPositiveMultiplier(float value)
     return std::isfinite(value) && value > 0.0f;
 }
 
-using NativeIdentity = std::array<uint32, 4>;
+using NativeIdentity = std::array<uint32, 9>;
+
+float NativeWordAsFloat(uint32 word)
+{
+    static_assert(sizeof(float) == sizeof(uint32));
+
+    float value = 0.0f;
+    std::memcpy(&value, &word, sizeof(value));
+    return value;
+}
 
 bool LoadNativeIdentities(std::unordered_map<uint32, NativeIdentity>& identities)
 {
@@ -59,7 +69,7 @@ bool LoadNativeIdentities(std::unordered_map<uint32, NativeIdentity>& identities
         NativeIdentity row{};
         for (auto& word : row)
             word = readWord();
-        file.seekg(20, std::ios::cur); // Five remaining words are not server identity fields.
+
         if (!file || !identities.emplace(row[0], row).second)
             return false;
     }
@@ -80,14 +90,19 @@ bool ManastormDataStore::Load()
 
     _segments.clear();
     _scalingCurve.clear();
+    _creaturePools.clear();
     _unlocks.clear();
 
     bool const segmentsLoaded =
         LoadSegments();
 
-    bool const chaoticLinkSpawnsLoaded =
+    bool const segmentSpawnsLoaded =
         segmentsLoaded &&
-        LoadChaoticLinkSpawns();
+        LoadSegmentSpawns();
+
+    bool const creaturePoolsLoaded =
+        segmentSpawnsLoaded &&
+        LoadCreaturePools();
 
     bool const scalingLoaded =
         LoadScalingCurve();
@@ -98,11 +113,13 @@ bool ManastormDataStore::Load()
 
     bool const unlockGrantsLoaded =
         unlocksLoaded &&
+        creaturePoolsLoaded &&
         LoadUnlockGrants();
 
     _loaded =
         segmentsLoaded &&
-        chaoticLinkSpawnsLoaded &&
+        segmentSpawnsLoaded &&
+        creaturePoolsLoaded &&
         scalingLoaded &&
         unlocksLoaded &&
         unlockGrantsLoaded;
@@ -112,8 +129,9 @@ bool ManastormDataStore::Load()
         LOG_INFO(
             LOG_FILTER,
             "Manastorm datastore loaded: {} segments, "
-            "{} scaling points, {} progression unlocks.",
+            "{} creature pools, {} scaling points, {} progression unlocks.",
             _segments.size(),
+            _creaturePools.size(),
             _scalingCurve.size(),
             _unlocks.size());
     }
@@ -295,6 +313,21 @@ bool ManastormDataStore::LoadSegments()
                     "dungeon_encounter_id must match the original Manastorm.dbc row.", segment.SegmentId);
                 continue;
             }
+
+            // Preserve all five remaining native row values in the segment
+            // snapshot even though the shared gameplay backend does not yet
+            // consume them. This prevents duplicate-looking segment families
+            // from losing native Patch-M/realm-overlay evidence.
+            segment.NativeRewardEndMultiplier =
+                NativeWordAsFloat(identity->second[4]);
+            segment.NativeRewardEncounterMultiplier =
+                NativeWordAsFloat(identity->second[5]);
+            segment.NativeExperienceFactor1 =
+                NativeWordAsFloat(identity->second[6]);
+            segment.NativeUnknownW7 =
+                NativeWordAsFloat(identity->second[7]);
+            segment.NativeExperienceFactor2 =
+                NativeWordAsFloat(identity->second[8]);
         }
         MapEntry const* map = sMapStore.LookupEntry(segment.MapId);
         if (!map || !map->IsDungeon()
@@ -316,19 +349,19 @@ bool ManastormDataStore::LoadSegments()
     return true;
 }
 
-bool ManastormDataStore::LoadChaoticLinkSpawns()
+bool ManastormDataStore::LoadSegmentSpawns()
 {
     QueryResult countResult =
         WorldDatabase.Query(
             "SELECT COUNT(*) "
-            "FROM `manastorm_chaotic_link_spawn`");
+            "FROM `manastorm_segment_spawn`");
 
     if (!countResult)
     {
         LOG_ERROR(
             LOG_FILTER,
-            "Unable to query `manastorm_chaotic_link_spawn`. "
-            "The table is missing or inaccessible.");
+            "Unable to query `manastorm_segment_spawn`. "
+            "Apply 05_manastorm_segment_pool_architecture.sql before starting.");
 
         return false;
     }
@@ -341,22 +374,19 @@ bool ManastormDataStore::LoadChaoticLinkSpawns()
 
     if (configuredRows)
     {
-        //
-        // Join against `creature` while loading so bad authoring data
-        // cannot silently connect a segment to a spawn from another map.
-        //
         QueryResult result =
             WorldDatabase.Query(
                 "SELECT "
-                "l.`segment_id`, "
-                "l.`spawn_guid`, "
+                "s.`segment_id`, "
+                "s.`spawn_guid`, "
+                "s.`flags`, "
                 "COALESCE(c.`map`, 4294967295), "
                 "COALESCE(c.`id`, 0) "
-                "FROM `manastorm_chaotic_link_spawn` l "
+                "FROM `manastorm_segment_spawn` s "
                 "LEFT JOIN `creature` c "
-                "ON c.`guid` = l.`spawn_guid` "
-                "WHERE l.`enabled` = 1 "
-                "ORDER BY l.`segment_id`, l.`spawn_guid`");
+                "ON c.`guid` = s.`spawn_guid` "
+                "WHERE s.`enabled` = 1 "
+                "ORDER BY s.`segment_id`, s.`spawn_guid`");
 
         if (result)
         {
@@ -371,11 +401,14 @@ bool ManastormDataStore::LoadChaoticLinkSpawns()
                 ObjectGuid::LowType const spawnGuid =
                     fields[1].Get<uint32>();
 
-                uint32 const spawnMap =
+                uint32 const flags =
                     fields[2].Get<uint32>();
 
-                uint32 const spawnEntry =
+                uint32 const spawnMap =
                     fields[3].Get<uint32>();
+
+                uint32 const spawnEntry =
+                    fields[4].Get<uint32>();
 
                 ManastormSegment* segment = nullptr;
 
@@ -390,19 +423,55 @@ bool ManastormDataStore::LoadChaoticLinkSpawns()
                     }
                 }
 
-                //
-                // Rows for disabled/non-loaded segments do not affect
-                // the current datastore.
-                //
                 if (!segment)
                 {
                     LOG_WARN(
                         LOG_FILTER,
-                        "Ignoring Chaotic Link spawn {} for unknown or "
+                        "Ignoring authored spawn {} for unknown or "
                         "disabled Manastorm segment {}.",
                         spawnGuid,
                         segmentId);
 
+                    continue;
+                }
+
+                if (!flags ||
+                    (flags &
+                        ~ManastormSegmentSpawnFlags::KnownMask))
+                {
+                    LOG_ERROR(
+                        LOG_FILTER,
+                        "Invalid authored spawn {} for segment {}: "
+                        "flags=0x{:X} contains no known role or unknown bits.",
+                        spawnGuid,
+                        segmentId,
+                        flags);
+
+                    valid = false;
+                    continue;
+                }
+
+                bool const routeCreature =
+                    (flags &
+                        ManastormSegmentSpawnFlags::RouteCreature) != 0;
+
+                uint32 const dependentRoles =
+                    ManastormSegmentSpawnFlags::ChaoticLinkEligible |
+                    ManastormSegmentSpawnFlags::RandomizationSlot |
+                    ManastormSegmentSpawnFlags::CreaturePoolSource;
+
+                if (!routeCreature &&
+                    (flags & dependentRoles))
+                {
+                    LOG_ERROR(
+                        LOG_FILTER,
+                        "Invalid authored spawn {} for segment {}: "
+                        "Chaotic Link/randomization/pool-source roles require "
+                        "RouteCreature.",
+                        spawnGuid,
+                        segmentId);
+
+                    valid = false;
                     continue;
                 }
 
@@ -413,7 +482,7 @@ bool ManastormDataStore::LoadChaoticLinkSpawns()
                 {
                     LOG_ERROR(
                         LOG_FILTER,
-                        "Invalid Chaotic Link route spawn for segment {}: "
+                        "Invalid authored route spawn for segment {}: "
                         "spawn_guid={} does not resolve to a creature DB spawn.",
                         segmentId,
                         spawnGuid);
@@ -427,7 +496,7 @@ bool ManastormDataStore::LoadChaoticLinkSpawns()
                 {
                     LOG_ERROR(
                         LOG_FILTER,
-                        "Invalid Chaotic Link route spawn {} for segment {}: "
+                        "Invalid authored spawn {} for segment {}: "
                         "creature is on map {}, but segment uses map {}.",
                         spawnGuid,
                         segmentId,
@@ -438,16 +507,14 @@ bool ManastormDataStore::LoadChaoticLinkSpawns()
                     continue;
                 }
 
-                //
-                // Never allow the objective itself to be configured as
-                // one of its own Link breakers.
-                //
+                // The objective remains fixed to the selected segment and is
+                // never part of the route-trash/randomization roster.
                 if (spawnEntry ==
                     segment->ObjectiveCreatureEntry)
                 {
                     LOG_ERROR(
                         LOG_FILTER,
-                        "Invalid Chaotic Link route spawn {} for segment {}: "
+                        "Invalid authored route spawn {} for segment {}: "
                         "spawn entry {} is the objective boss itself.",
                         spawnGuid,
                         segmentId,
@@ -457,18 +524,38 @@ bool ManastormDataStore::LoadChaoticLinkSpawns()
                     continue;
                 }
 
-                segment->ChaoticLinkSpawnIds.push_back(
-                    spawnGuid);
+                if (routeCreature)
+                {
+                    segment->RouteSpawnIds.push_back(
+                        spawnGuid);
+                }
+
+                if (flags &
+                    ManastormSegmentSpawnFlags::ChaoticLinkEligible)
+                {
+                    segment->ChaoticLinkSpawnIds.push_back(
+                        spawnGuid);
+                }
+
+                if (flags &
+                    ManastormSegmentSpawnFlags::RandomizationSlot)
+                {
+                    segment->RandomizationSpawnIds.push_back(
+                        spawnGuid);
+                }
+
+                if (flags &
+                    ManastormSegmentSpawnFlags::CreaturePoolSource)
+                {
+                    segment->CreaturePoolSourceSpawnIds.push_back(
+                        spawnGuid);
+                }
 
                 ++loadedRows;
             } while (result->NextRow());
         }
     }
 
-    //
-    // A segment must have at least as many usable route spawns as its
-    // starting Link count. Otherwise reaching zero would be impossible.
-    //
     for (ManastormSegment const& segment :
         _segments)
     {
@@ -491,10 +578,215 @@ bool ManastormDataStore::LoadChaoticLinkSpawns()
 
     LOG_INFO(
         LOG_FILTER,
-        "Loaded {} enabled Chaotic Link route spawns from {} "
+        "Loaded {} enabled Manastorm segment-spawn role rows from {} "
         "configured rows.",
         loadedRows,
         configuredRows);
+
+    return valid;
+}
+
+bool ManastormDataStore::LoadCreaturePools()
+{
+    QueryResult countResult =
+        WorldDatabase.Query(
+            "SELECT COUNT(*) "
+            "FROM `manastorm_creature_pool`");
+
+    if (!countResult)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to query `manastorm_creature_pool`. "
+            "Apply 05_manastorm_segment_pool_architecture.sql before starting.");
+
+        return false;
+    }
+
+    uint64 const configuredRows =
+        countResult->Fetch()[0].Get<uint64>();
+
+    if (configuredRows)
+    {
+        QueryResult result =
+            WorldDatabase.Query(
+                "SELECT `pool_id`, `name` "
+                "FROM `manastorm_creature_pool` "
+                "WHERE `enabled` = 1 "
+                "ORDER BY `pool_id`");
+
+        if (result)
+        {
+            do
+            {
+                Field* fields =
+                    result->Fetch();
+
+                ManastormCreaturePoolDefinition pool;
+                pool.PoolId =
+                    fields[0].Get<uint32>();
+                pool.Name =
+                    fields[1].Get<std::string>();
+
+                if (!pool.PoolId)
+                {
+                    LOG_ERROR(
+                        LOG_FILTER,
+                        "Ignoring Manastorm creature pool with pool_id=0.");
+
+                    continue;
+                }
+
+                if (!_creaturePools.emplace(
+                    pool.PoolId,
+                    std::move(pool)).second)
+                {
+                    LOG_ERROR(
+                        LOG_FILTER,
+                        "Duplicate Manastorm creature pool id {}.",
+                        fields[0].Get<uint32>());
+
+                    return false;
+                }
+            } while (result->NextRow());
+        }
+    }
+
+    QueryResult sourceCountResult =
+        WorldDatabase.Query(
+            "SELECT COUNT(*) "
+            "FROM `manastorm_creature_pool_segment`");
+
+    if (!sourceCountResult)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to query `manastorm_creature_pool_segment`.");
+
+        return false;
+    }
+
+    uint64 const configuredSourceRows =
+        sourceCountResult->Fetch()[0].Get<uint64>();
+
+    std::size_t loadedSourceRows = 0;
+    bool valid = true;
+
+    if (configuredSourceRows)
+    {
+        QueryResult result =
+            WorldDatabase.Query(
+                "SELECT `pool_id`, `segment_id` "
+                "FROM `manastorm_creature_pool_segment` "
+                "WHERE `enabled` = 1 "
+                "ORDER BY `pool_id`, `segment_id`");
+
+        if (result)
+        {
+            do
+            {
+                Field* fields =
+                    result->Fetch();
+
+                uint32 const poolId =
+                    fields[0].Get<uint32>();
+
+                uint32 const segmentId =
+                    fields[1].Get<uint32>();
+
+                auto poolItr =
+                    _creaturePools.find(poolId);
+
+                if (poolItr ==
+                    _creaturePools.end())
+                {
+                    LOG_ERROR(
+                        LOG_FILTER,
+                        "Creature-pool source row references unknown or "
+                        "disabled pool {}.",
+                        poolId);
+
+                    valid = false;
+                    continue;
+                }
+
+                ManastormSegment const* segment =
+                    GetSegmentById(segmentId);
+
+                if (!segment)
+                {
+                    LOG_ERROR(
+                        LOG_FILTER,
+                        "Creature pool {} references unknown or disabled "
+                        "source segment {}.",
+                        poolId,
+                        segmentId);
+
+                    valid = false;
+                    continue;
+                }
+
+                poolItr->second.SourceSegmentIds.push_back(
+                    segmentId);
+
+                ++loadedSourceRows;
+            } while (result->NextRow());
+        }
+    }
+
+    for (auto const& pair :
+        _creaturePools)
+    {
+        ManastormCreaturePoolDefinition const& pool =
+            pair.second;
+
+        if (pool.SourceSegmentIds.empty())
+        {
+            LOG_WARN(
+                LOG_FILTER,
+                "Manastorm creature pool {} ({}) has no enabled source "
+                "segments. Ownership can be stored, but it currently "
+                "contributes no candidate creatures.",
+                pool.PoolId,
+                pool.Name);
+
+            continue;
+        }
+
+        std::size_t sourceSpawnCount = 0;
+
+        for (uint32 segmentId :
+            pool.SourceSegmentIds)
+        {
+            ManastormSegment const* segment =
+                GetSegmentById(segmentId);
+
+            if (segment)
+            {
+                sourceSpawnCount +=
+                    segment->CreaturePoolSourceSpawnIds.size();
+            }
+        }
+
+        if (!sourceSpawnCount)
+        {
+            LOG_WARN(
+                LOG_FILTER,
+                "Manastorm creature pool {} ({}) has source segments but "
+                "none of their authored spawns are flagged "
+                "CreaturePoolSource.",
+                pool.PoolId,
+                pool.Name);
+        }
+    }
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Loaded {} enabled Manastorm creature pools with {} enabled "
+        "pool-to-segment source rows from {} configured source rows.",
+        _creaturePools.size(),
+        loadedSourceRows,
+        configuredSourceRows);
 
     return valid;
 }
@@ -925,6 +1217,33 @@ bool ManastormDataStore::LoadUnlockGrants()
             continue;
         }
 
+        if (grantType ==
+            ManastormUnlockGrantType::CreaturePool &&
+            !GetCreaturePoolById(contentId))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm unlock {} grants creature pool {}, "
+                "but that pool is not enabled/valid.",
+                unlockId,
+                contentId);
+
+            valid = false;
+            continue;
+        }
+
+        if (grantType ==
+            ManastormUnlockGrantType::BossPool)
+        {
+            LOG_WARN(
+                LOG_FILTER,
+                "Manastorm unlock {} uses reserved BossPool grant {}. "
+                "Recovered objective progression uses Segment grants; "
+                "this grant has no runtime effect.",
+                unlockId,
+                contentId);
+        }
+
         ManastormUnlockGrant grant;
 
         grant.Type =
@@ -1070,6 +1389,18 @@ ManastormDataStore::GetSegmentById(
     }
 
     return nullptr;
+}
+
+ManastormCreaturePoolDefinition const*
+ManastormDataStore::GetCreaturePoolById(
+    uint32 poolId) const
+{
+    auto itr =
+        _creaturePools.find(poolId);
+
+    return itr == _creaturePools.end()
+        ? nullptr
+        : &itr->second;
 }
 
 ManastormUnlockDefinition const*

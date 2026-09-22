@@ -21,6 +21,13 @@ struct ManastormProgressionSnapshot
     std::unordered_set<uint32>
         UnlockedSegmentIds;
 
+    // Creature-content ownership is independent of exact segment ownership.
+    // The replacement algorithm is intentionally not enabled yet; this set
+    // preserves recovered progression state for the future server-side
+    // creature randomizer.
+    std::unordered_set<uint32>
+        UnlockedCreaturePoolIds;
+
     // Permanent affix ownership is resolved from the SAME
     // character unlock -> world unlock grant chain as segments.
     //

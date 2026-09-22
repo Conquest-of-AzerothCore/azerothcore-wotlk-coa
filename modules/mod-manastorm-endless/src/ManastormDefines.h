@@ -4,6 +4,7 @@
 #include "Define.h"
 #include "ObjectGuid.h"
 
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -124,10 +125,44 @@ enum class ManastormUnlockKind : uint8
 enum class ManastormUnlockGrantType : uint8
 {
     Segment = 1,
+
+    // Reserved legacy/reconstruction slot.
+    //
+    // Recovered Ascension evidence ties objective bosses to authored
+    // Manastorm segment families. Boss progression therefore uses Segment
+    // grants; do not invent independent boss replacement from this value.
     BossPool = 2,
+
+    // Permanent ownership of a server-authored creature-content pool.
+    // Runtime replacement selection is intentionally separate and may remain
+    // disabled until its original selection rules are recovered.
     CreaturePool = 3,
+
     Affix = 4,
 };
+
+namespace ManastormSegmentSpawnFlags
+{
+    // The persistent DB spawn belongs to the authored route for this segment.
+    constexpr uint32 RouteCreature = 1u << 0;
+
+    // Killing this exact persistent spawn may consume one Chaotic Link.
+    constexpr uint32 ChaoticLinkEligible = 1u << 1;
+
+    // This physical spawn slot may eventually receive a randomized creature.
+    // The current runtime records this evidence but does not replace creatures.
+    constexpr uint32 RandomizationSlot = 1u << 2;
+
+    // The native creature occupying this slot may contribute to a creature
+    // content pool sourced from this segment.
+    constexpr uint32 CreaturePoolSource = 1u << 3;
+
+    constexpr uint32 KnownMask =
+        RouteCreature |
+        ChaoticLinkEligible |
+        RandomizationSlot |
+        CreaturePoolSource;
+}
 
 enum class ManastormAffixRuntimeType : uint8
 {
@@ -196,6 +231,13 @@ struct ManastormUnlockGrant
     uint32 ContentId = 0;
 };
 
+struct ManastormCreaturePoolDefinition
+{
+    uint32 PoolId = 0;
+    std::string Name;
+    std::vector<uint32> SourceSegmentIds;
+};
+
 struct ManastormUnlockDefinition
 {
     uint32 UnlockId = 0;
@@ -247,13 +289,23 @@ struct ManastormSegment
     // This belongs to the dungeon/boss route, NOT the Endless depth.
     uint8 ChaoticLinkStacks = 0;
 
-    // Persistent world-DB creature spawn GUIDs that are allowed to break
-    // Chaotic Links for this segment.
+    // One authored segment roster powers several independent roles.
     //
-    // These are NOT runtime creature GUIDs. A fresh Endless instance gets
-    // new runtime GUIDs, while Creature::GetSpawnId() still resolves back
-    // to one of these authored DB spawn GUIDs.
+    // These are persistent world-DB spawn GUIDs, NOT runtime creature GUIDs.
+    // A fresh Endless instance receives new runtime GUIDs while
+    // Creature::GetSpawnId() still resolves to these authored DB spawn IDs.
+    std::vector<ObjectGuid::LowType> RouteSpawnIds;
     std::vector<ObjectGuid::LowType> ChaoticLinkSpawnIds;
+    std::vector<ObjectGuid::LowType> RandomizationSpawnIds;
+    std::vector<ObjectGuid::LowType> CreaturePoolSourceSpawnIds;
+
+    // Native Manastorm.dbc evidence carried with the selected segment in
+    // native-client mode. These values are not used to invent gameplay.
+    float NativeRewardEndMultiplier = 1.0f;       // DBC w4
+    float NativeRewardEncounterMultiplier = 1.0f; // DBC w5
+    float NativeExperienceFactor1 = 1.0f;         // DBC w6
+    float NativeUnknownW7 = 1.0f;                 // DBC w7, semantics unresolved
+    float NativeExperienceFactor2 = 1.0f;         // DBC w8
 
     uint32 Flags = 0;
 };
