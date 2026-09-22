@@ -160,8 +160,25 @@ namespace
             ManastormProgressionSnapshot snapshot;
             std::string error;
             auto const mode = ManastormModeForMemberCount(group ? group->GetMembersCount() : 1);
-            if (!ManastormProgression::LoadSnapshot(member->GetGUID().GetCounter(), mode, snapshot, error))
+            uint32 const endgameLevel =
+                std::max(
+                    60u,
+                    sWorld->getIntConfig(
+                        CONFIG_MAX_PLAYER_LEVEL));
+
+            bool const endgame =
+                member->GetLevel() >=
+                    endgameLevel;
+
+            if (!ManastormProgression::LoadSnapshot(
+                member->GetGUID().GetCounter(),
+                mode,
+                endgame,
+                snapshot,
+                error))
+            {
                 return "ENTER_MANASTORM_UNKNOWN";
+            }
             if (!ManastormProgression::IsDepthEnterable(snapshot, depth))
                 return "ENTER_MANASTORM_TOO_LOW_COMPLETED_LEVEL";
             return nullptr;

@@ -56,6 +56,7 @@ public:
     static bool LoadSnapshot(
         ObjectGuid::LowType characterGuid,
         ManastormMode mode,
+        bool endgame,
         ManastormProgressionSnapshot& snapshot,
         std::string& error);
 

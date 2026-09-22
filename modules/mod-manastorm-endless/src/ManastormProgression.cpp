@@ -174,6 +174,7 @@ bool ManastormProgression::LoadBestCompletedDepths(
 bool ManastormProgression::LoadSnapshot(
     ObjectGuid::LowType characterGuid,
     ManastormMode mode,
+    bool endgame,
     ManastormProgressionSnapshot& snapshot,
     std::string& error)
 {
@@ -327,18 +328,27 @@ bool ManastormProgression::LoadSnapshot(
         snapshot.PendingEndgameIntroSegmentId =
             unlock->EndgameIntroSegmentId;
 
-        if (unlock->TriggerDepth ==
-            std::numeric_limits<uint32>::max())
+        uint8 const trackBit =
+            ManastormGetTrackBit(
+                endgame);
+
+        uint32 const triggerDepth =
+            unlock->GetTriggerDepthForTrack(
+                trackBit);
+
+        if (!triggerDepth ||
+            triggerDepth ==
+                std::numeric_limits<uint32>::max())
         {
             error =
-                "Pending Manastorm unlock has an "
-                "invalid progression trigger depth.";
+                "Pending Manastorm unlock has no valid "
+                "trigger for the current native track.";
 
             return false;
         }
 
         snapshot.PendingIntroDepth =
-            unlock->TriggerDepth + 1;
+            triggerDepth + 1;
     }
 
     return true;

@@ -656,9 +656,22 @@ void ManastormMgr::SendClientProgression(
 
     ManastormProgressionSnapshot snapshot;
 
+    uint32 const snapshotEndgameLevel =
+        std::max(
+            60u,
+            sWorld->getIntConfig(
+                CONFIG_MAX_PLAYER_LEVEL));
+
+    bool const snapshotEndgame =
+        GetRunFor(player)
+        ? GetRunFor(player)->IsEndgame()
+        : player->GetLevel() >=
+            snapshotEndgameLevel;
+
     if (!ManastormProgression::LoadSnapshot(
         characterGuid,
         mode,
+        snapshotEndgame,
         snapshot,
         error))
     {
@@ -2051,11 +2064,51 @@ ManastormRun* ManastormMgr::StartRun(
         ManastormModeForMemberCount(
             uint32(members.size()));
 
+    //
+    // Resolve the native stage track BEFORE selecting a segment.
+    //
+    // Patch-M Manastorm.dbc uses difficulty 0 for normal stages and
+    // difficulty 2 for end-game stages. The old code calculated this only
+    // after selection, which allowed the two native pools to mix.
+    //
+    bool endgame = false;
+    uint32 const endgameLevel =
+        std::max(
+            60u,
+            sWorld->getIntConfig(
+                CONFIG_MAX_PLAYER_LEVEL));
+
+    for (ObjectGuid::LowType memberGuid :
+        members)
+    {
+        Player* member =
+            ObjectAccessor::FindConnectedPlayer(
+                ObjectGuid::Create<HighGuid::Player>(
+                    memberGuid));
+
+        if (!member ||
+            !member->IsInWorld() ||
+            member->IsBeingTeleported())
+        {
+            error =
+                "Every run member must be connected and ready.";
+
+            return nullptr;
+        }
+
+        endgame =
+            endgame ||
+            member->GetLevel() >=
+                endgameLevel;
+    }
+
+
     ManastormProgressionSnapshot progression;
 
     if (!ManastormProgression::LoadSnapshot(
         ownerGuid,
         mode,
+        endgame,
         progression,
         error))
     {
@@ -2105,43 +2158,6 @@ ManastormRun* ManastormMgr::StartRun(
         return nullptr;
     }
 
-    //
-    // Resolve the native stage track BEFORE selecting a segment.
-    //
-    // Patch-M Manastorm.dbc uses difficulty 0 for normal stages and
-    // difficulty 2 for end-game stages. The old code calculated this only
-    // after selection, which allowed the two native pools to mix.
-    //
-    bool endgame = false;
-    uint32 const endgameLevel =
-        std::max(
-            60u,
-            sWorld->getIntConfig(
-                CONFIG_MAX_PLAYER_LEVEL));
-
-    for (ObjectGuid::LowType memberGuid :
-        members)
-    {
-        Player* member =
-            ObjectAccessor::FindConnectedPlayer(
-                ObjectGuid::Create<HighGuid::Player>(
-                    memberGuid));
-
-        if (!member ||
-            !member->IsInWorld() ||
-            member->IsBeingTeleported())
-        {
-            error =
-                "Every run member must be connected and ready.";
-
-            return nullptr;
-        }
-
-        endgame =
-            endgame ||
-            member->GetLevel() >=
-                endgameLevel;
-    }
 
     ManastormGenerator generator;
 
@@ -4214,6 +4230,7 @@ bool ManastormMgr::TransitionToNextStage(
     if (!ManastormProgression::LoadSnapshot(
         run.GetOwnerGuid(),
         run.GetMode(),
+        run.IsEndgame(),
         progression,
         error))
     {

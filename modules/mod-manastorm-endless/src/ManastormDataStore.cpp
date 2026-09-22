@@ -1753,7 +1753,8 @@ ManastormDataStore::GetUnlockForTrigger(
             continue;
         }
 
-        if (unlock.TriggerDepth !=
+        if (unlock.GetTriggerDepthForTrack(
+            trackBit) !=
             completedDepth)
         {
             continue;
@@ -1761,12 +1762,6 @@ ManastormDataStore::GetUnlockForTrigger(
 
         if (!(unlock.ModeMask &
             modeBit))
-        {
-            continue;
-        }
-
-        if (!(unlock.TrackMask &
-            trackBit))
         {
             continue;
         }
@@ -1810,7 +1805,8 @@ ManastormDataStore::GetDirectUnlocksForTrigger(
             continue;
         }
 
-        if (unlock.TriggerDepth !=
+        if (unlock.GetTriggerDepthForTrack(
+            trackBit) !=
             completedDepth)
         {
             continue;
@@ -1818,12 +1814,6 @@ ManastormDataStore::GetDirectUnlocksForTrigger(
 
         if (!(unlock.ModeMask &
             modeBit))
-        {
-            continue;
-        }
-
-        if (!(unlock.TrackMask &
-            trackBit))
         {
             continue;
         }
