@@ -60,6 +60,38 @@ public:
     bool StartRequested() const { return _startRequested; }
     void RequestStart() { _startRequested = true; }
 
+    static constexpr uint32
+        PreparationProtectionMs = 120000;
+
+    uint32 GetPreparationProtectionRemainingMs() const
+    {
+        return _preparationProtectionRemainingMs;
+    }
+
+    bool UpdatePreparationProtection(uint32 diff)
+    {
+        if (!_preparationProtectionRemainingMs)
+            return true;
+
+        if (diff >=
+            _preparationProtectionRemainingMs)
+        {
+            _preparationProtectionRemainingMs = 0;
+            return true;
+        }
+
+        _preparationProtectionRemainingMs -=
+            diff;
+
+        return false;
+    }
+
+    void ResetPreparationProtection()
+    {
+        _preparationProtectionRemainingMs =
+            PreparationProtectionMs;
+    }
+
     uint8 GetResurrectionCharges() const
     {
         return _resurrectionCharges;
@@ -462,6 +494,11 @@ private:
     uint8 _creatureLevel = 1;
 
     uint32 _depth = 1;
+
+    // Live Ascension observation: entry protection lasts at most ~2 minutes.
+    // Movement / explicit combat may collapse it earlier.
+    uint32 _preparationProtectionRemainingMs =
+        PreparationProtectionMs;
 
     // Shared resurrection resources for the CURRENT stage.
     //
