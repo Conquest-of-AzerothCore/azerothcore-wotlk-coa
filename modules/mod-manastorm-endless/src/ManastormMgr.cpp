@@ -231,12 +231,24 @@ namespace
     // spell 93418.
     constexpr uint32 NPC_COGSLEY = 80919;
 
-    // Existing transition placeholder. Native click-to-next-stage portal
-    // reconstruction is deliberately deferred.
-    constexpr uint32 NPC_STAGE_PORTAL = 12999;
+    // Recovered Ascension end-of-stage Manastorm portal presentation.
+    //
+    // Runtime validation on the target client proved:
+    //
+    //     80910 "The Manastorm"
+    //         = invisible creature/controller
+    //
+    //     93305 "Manastorm Portal Effect"
+    //         = the visible purple/black stage portal
+    //
+    // The portal remains server-authoritative: interacting with this exact
+    // runtime creature advances the shared run, while the existing five-second
+    // automatic transition remains as a fallback.
+    constexpr uint32 NPC_STAGE_PORTAL = 80910;
+    constexpr uint32 SPELL_STAGE_PORTAL = 93305;
+
     constexpr uint32 SPELL_SAFETY_BUBBLE = 93306;
     constexpr uint32 SPELL_SAFETY_BUBBLE_HELPER = 93307;
-    constexpr uint32 SPELL_STAGE_PORTAL = 93338;
 
     void ClearSafetyBubble(Player* player)
     {
@@ -1939,18 +1951,41 @@ void ManastormMgr::SpawnStagePortal(
     {
         portal->SetFaction(35);
         portal->SetReactState(REACT_PASSIVE);
-        portal->AddAura(
+
+        //
+        // The recovered creature itself is intentionally invisible.
+        // Spell 93305 is the verified visible Manastorm portal effect.
+        //
+        portal->CastSpell(
+            portal,
             SPELL_STAGE_PORTAL,
-            portal);
+            true);
 
         run.SetPortalGuid(
             portal->GetGUID());
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Spawned recovered Manastorm stage portal for run {}: "
+            "creature={} guid={} spell={} map={} instance={} "
+            "position=({}, {}, {}, {}).",
+            run.GetRunId(),
+            NPC_STAGE_PORTAL,
+            portal->GetGUID().GetRawValue(),
+            SPELL_STAGE_PORTAL,
+            portal->GetMapId(),
+            portal->GetInstanceId(),
+            portal->GetPositionX(),
+            portal->GetPositionY(),
+            portal->GetPositionZ(),
+            portal->GetOrientation());
     }
     else
     {
         LOG_ERROR(
             LOG_FILTER,
-            "Cannot summon Manastorm transition placeholder {} for run {}.",
+            "Cannot summon recovered Manastorm stage portal creature {} "
+            "for run {}.",
             NPC_STAGE_PORTAL,
             run.GetRunId());
     }
@@ -4332,9 +4367,13 @@ void ManastormMgr::OnUnitDeath(
     run->SetState(
         ManastormRunState::StageComplete);
 
-    // No temporary Begin/Continue/Leave NPC is spawned. The current automatic
-    // transition remains intact while native click-to-next-stage portal behavior
-    // is deferred for a dedicated reconstruction pass.
+    // Spawn the recovered Ascension presentation at the dead objective:
+    //
+    //     80910 invisible controller
+    //       + 93305 Manastorm Portal Effect
+    //
+    // A player may interact with it to advance immediately. If nobody does,
+    // the existing five-second automatic transition remains the fallback.
     SpawnStagePortal(
         map,
         *run,
@@ -4376,9 +4415,140 @@ void ManastormMgr::OnUnitDeath(
             {
                 member->SendSystemMessage(
                     "Manastorm: objective complete. "
-                    "Transitioning to the next depth in 5 seconds.");
+                    "Use the portal to continue now, or the next depth "
+                    "will begin automatically in 5 seconds.");
             }
         }
+}
+
+
+bool ManastormMgr::UseStagePortal(
+    Player* player,
+    Creature* portal,
+    std::string& error)
+{
+    error.clear();
+
+    if (!player || !portal)
+    {
+        error =
+            "A player and the active Manastorm portal are required.";
+
+        return false;
+    }
+
+    if (portal->GetEntry() != NPC_STAGE_PORTAL)
+    {
+        error =
+            "That creature is not the active Manastorm stage portal.";
+
+        return false;
+    }
+
+    ManastormRun* run =
+        GetRunFor(player);
+
+    if (!run)
+    {
+        error =
+            "You are not part of an active Manastorm run.";
+
+        return false;
+    }
+
+    if (run->GetState() !=
+        ManastormRunState::StageComplete)
+    {
+        error =
+            "The current Manastorm stage is not ready to advance.";
+
+        return false;
+    }
+
+    ManastormSegment const& segment =
+        run->GetSegment();
+
+    //
+    // Do not let a copied/stale 80910 outside this exact disposable stage
+    // advance the run.
+    //
+    if (player->GetMapId() !=
+            segment.MapId ||
+        player->GetInstanceId() !=
+            run->GetInstanceId() ||
+        portal->GetMapId() !=
+            segment.MapId ||
+        portal->GetInstanceId() !=
+            run->GetInstanceId())
+    {
+        error =
+            "That portal does not belong to your current Manastorm stage.";
+
+        return false;
+    }
+
+    ObjectGuid const activePortalGuid =
+        run->GetPortalGuid();
+
+    if (activePortalGuid.IsEmpty() ||
+        portal->GetGUID() != activePortalGuid)
+    {
+        error =
+            "That is not the active portal for this Manastorm stage.";
+
+        return false;
+    }
+
+    uint64 const runId =
+        run->GetRunId();
+
+    uint32 const completedDepth =
+        run->GetDepth();
+
+    //
+    // Clicking wins the race against the fallback timer. The normal timer
+    // path remains untouched when nobody interacts with the portal.
+    //
+    _transitionTimers.erase(
+        runId);
+
+    std::string transitionError;
+
+    if (!TransitionToNextStage(
+            *run,
+            transitionError))
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Manastorm run {} failed to transition after portal click "
+            "at completed depth {}: {}",
+            runId,
+            completedDepth,
+            transitionError);
+
+        error =
+            transitionError.empty()
+            ? "The next Manastorm stage could not be prepared."
+            : transitionError;
+
+        FailRun(
+            *run,
+            std::string(
+                "Stage transition failed after portal click: ") +
+                error);
+
+        return false;
+    }
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Manastorm run {} advanced immediately from completed depth {} "
+        "because player {} used the recovered stage portal.",
+        runId,
+        completedDepth,
+        player->GetGUID().GetCounter());
+
+    return true;
 }
 
 bool ManastormMgr::TransitionToNextStage(

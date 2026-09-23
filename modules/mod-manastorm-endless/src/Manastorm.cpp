@@ -693,6 +693,52 @@ public:
     }
 };
 
+
+class npc_manastorm_stage_portal : public CreatureScript
+{
+public:
+    npc_manastorm_stage_portal()
+        : CreatureScript(
+            "npc_manastorm_stage_portal")
+    {
+    }
+
+    bool OnGossipHello(
+        Player* player,
+        Creature* creature) override
+    {
+        //
+        // 80910 is an invisible controller carrying the recovered 93305
+        // Manastorm Portal Effect. A direct interaction advances the shared
+        // run immediately; returning true suppresses an empty gossip window.
+        //
+        if (!ManastormModuleConfig::Enabled())
+            return true;
+
+        std::string error;
+
+        if (!ManastormMgr::Instance()
+            .UseStagePortal(
+                player,
+                creature,
+                error))
+        {
+            if (player &&
+                player->GetSession() &&
+                !error.empty())
+            {
+                ChatHandler(
+                    player->GetSession())
+                    .PSendSysMessage(
+                        "Manastorm: {}",
+                        error);
+            }
+        }
+
+        return true;
+    }
+};
+
 class manastorm_mapscript : public AllMapScript
 {
 public:
@@ -717,6 +763,7 @@ void AddSC_manastorm()
     new manastorm_creaturescript();
     new manastorm_unitscript();
     new manastorm_playerscript();
+    new npc_manastorm_stage_portal();
     new manastorm_mapscript();
 
     RegisterSpellScript(spell_manastorm_baseline_tool);

@@ -33,6 +33,11 @@ public:
         Player* player,
         std::string& error);
 
+    bool UseStagePortal(
+        Player* player,
+        Creature* portal,
+        std::string& error);
+
     ManastormRun* GetRunFor(Player const* player);
     ManastormRun const* GetRunFor(Player const* player) const;
 
