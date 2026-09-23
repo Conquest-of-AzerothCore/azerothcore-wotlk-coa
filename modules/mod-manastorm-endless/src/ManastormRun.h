@@ -4,6 +4,7 @@
 #include "ManastormDefines.h"
 #include "Position.h"
 
+#include <array>
 #include <limits>
 #include <unordered_set>
 #include <vector>
@@ -60,6 +61,17 @@ public:
     bool StartRequested() const { return _startRequested; }
     void RequestStart() { _startRequested = true; }
 
+    bool CanStartWithMissingMembers() const
+    {
+        return _canStartWithMissingMembers;
+    }
+
+    void AllowStartWithMissingMembers()
+    {
+        _canStartWithMissingMembers = true;
+        _startRequested = true;
+    }
+
     static constexpr uint32
         PreparationProtectionMs = 120000;
 
@@ -77,6 +89,7 @@ public:
             _preparationProtectionRemainingMs)
         {
             _preparationProtectionRemainingMs = 0;
+            _canStartWithMissingMembers = true;
             return true;
         }
 
@@ -90,6 +103,38 @@ public:
     {
         _preparationProtectionRemainingMs =
             PreparationProtectionMs;
+
+        _canStartWithMissingMembers = false;
+    }
+
+    static constexpr std::size_t GadgetSlotCount = 4;
+    using GadgetSlots = std::array<uint32, GadgetSlotCount>;
+
+    void SetMemberGadgetLoadout(
+        ObjectGuid::LowType guid,
+        GadgetSlots const& slots)
+    {
+        _memberGadgetLoadouts[guid] = slots;
+    }
+
+    bool IsGadgetEquipped(
+        ObjectGuid::LowType guid,
+        uint32 spellId) const
+    {
+        auto const itr =
+            _memberGadgetLoadouts.find(guid);
+
+        if (itr == _memberGadgetLoadouts.end())
+            return false;
+
+        for (uint32 slotSpell :
+            itr->second)
+        {
+            if (slotSpell == spellId)
+                return true;
+        }
+
+        return false;
     }
 
     uint8 GetResurrectionCharges() const
@@ -499,6 +544,18 @@ private:
     // Movement / explicit combat may collapse it earlier.
     uint32 _preparationProtectionRemainingMs =
         PreparationProtectionMs;
+
+    // Set only by the real protection timeout or by the five-second
+    // inter-stage fallback. Ordinary movement/combat start requests still
+    // wait for every connected member to finish the private-map transfer.
+    bool _canStartWithMissingMembers = false;
+
+    // Snapshot each member's active gadget loadout at run creation. Native
+    // loadout changes are already forbidden while a run is active.
+    std::unordered_map<
+        ObjectGuid::LowType,
+        GadgetSlots>
+        _memberGadgetLoadouts;
 
     // Shared resurrection resources for the CURRENT stage.
     //
