@@ -201,9 +201,37 @@ namespace
         Group* group = player->GetGroup();
         if (group && !group->IsLeader(player->GetGUID()))
             return "ENTER_MANASTORM_NOT_GROUP_LEADER";
-        if (group && (group->isRaidGroup() || group->GetMembersCount() > 5))
+        if (group && group->GetMembersCount() > ManastormLimits::MaxMembers)
             return "ENTER_MANASTORM_BAD_GROUP_SIZE";
-        auto check = [player, depth, group](Player* member) -> char const*
+
+        uint32 const endgameLevel =
+            std::max(
+                60u,
+                sWorld->getIntConfig(
+                    CONFIG_MAX_PLAYER_LEVEL));
+
+        bool runEndgame =
+            player->GetLevel() >=
+                endgameLevel;
+
+        if (group)
+        {
+            for (auto const& memberSlot :
+                group->GetMemberSlots())
+            {
+                if (Player* member =
+                    ObjectAccessor::FindConnectedPlayer(
+                        memberSlot.guid))
+                {
+                    runEndgame =
+                        runEndgame ||
+                        member->GetLevel() >=
+                            endgameLevel;
+                }
+            }
+        }
+
+        auto check = [player, depth, group, runEndgame](Player* member) -> char const*
         {
             if (!member || !member->IsInWorld() || !member->FindMap() || !member->IsAlive()
                 || member->IsBeingTeleported())
@@ -228,21 +256,16 @@ namespace
                 return other ? "ENTER_MANASTORM_GROUP_NO_MANASTORM_CHALLENGE" : "ENTER_MANASTORM_NO_MANASTORM_CHALLENGE";
             ManastormProgressionSnapshot snapshot;
             std::string error;
-            auto const mode = ManastormModeForMemberCount(group ? group->GetMembersCount() : 1);
-            uint32 const endgameLevel =
-                std::max(
-                    60u,
-                    sWorld->getIntConfig(
-                        CONFIG_MAX_PLAYER_LEVEL));
-
-            bool const endgame =
-                member->GetLevel() >=
-                    endgameLevel;
+            auto const mode =
+                ManastormModeForMemberCount(
+                    group
+                    ? group->GetMembersCount()
+                    : 1);
 
             if (!ManastormProgression::LoadSnapshot(
                 member->GetGUID().GetCounter(),
                 mode,
-                endgame,
+                runEndgame,
                 snapshot,
                 error))
             {
