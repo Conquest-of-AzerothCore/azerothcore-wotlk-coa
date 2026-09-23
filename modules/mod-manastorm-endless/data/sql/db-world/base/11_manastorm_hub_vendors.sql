@@ -37,6 +37,24 @@
 -- intentionally deferred until that portal is reconstructed separately.
 
 -- ---------------------------------------------------------------------------
+-- Remove obsolete local stage-controller placeholder
+-- ---------------------------------------------------------------------------
+--
+-- Older revisions of this reconstruction created 900027 as a temporary
+-- Begin/Continue/Leave NPC. The working Manastorm runtime does not need it.
+-- Keep this cleanup so re-running the migration removes the obsolete template
+-- from databases that already applied an earlier revision.
+--
+DELETE FROM `npc_vendor`
+WHERE `entry` = 900027;
+
+DELETE FROM `creature_template_model`
+WHERE `CreatureID` = 900027;
+
+DELETE FROM `creature_template`
+WHERE `entry` = 900027;
+
+-- ---------------------------------------------------------------------------
 -- Creature model support
 -- ---------------------------------------------------------------------------
 
