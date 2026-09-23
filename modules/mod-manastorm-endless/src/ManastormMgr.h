@@ -59,8 +59,6 @@ public:
         Player* target);
 
     void Update(uint32 diff);
-    bool HandleGuideGossip(Player* player, Creature* creature, uint32 action);
-
     void OnPlayerEnterMap(Map* map, Player* player);
 
     void OnPlayerLevelChanged(Player* player, uint8 oldLevel);
@@ -184,7 +182,7 @@ private:
         uint64 runId,
         ObjectGuid::LowType ownerGuid) const;
 
-    void SpawnStageGuide(Map* map, ManastormRun& run, Position const& position, bool completed);
+    void SpawnStagePortal(Map* map, ManastormRun& run, Position const& position);
 
     bool PrepareStage(
         Player* player,
