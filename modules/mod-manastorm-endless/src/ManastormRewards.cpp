@@ -1211,10 +1211,6 @@ void ManastormRewards::PublishCommitted(
         if (!publication)
             continue;
 
-        sMailMgr->OnMailSent(
-            publication->
-                CharacterGuid);
-
         Player* player =
             ObjectAccessor::
                 FindConnectedPlayer(
@@ -1223,27 +1219,207 @@ void ManastormRewards::PublishCommitted(
                             publication->
                                 CharacterGuid));
 
+        //
+        // The stage-completion transaction has already committed every reward
+        // item into a durable mailbox escrow. This gives us a crash-safe source
+        // of truth before we try to make the reward feel immediate.
+        //
+        // Preferred delivery:
+        //   1. Move each attachment directly into the connected character's
+        //      inventory when the whole attachment fits.
+        //   2. Delete only that attachment's mail_items row and persist the
+        //      inventory move.
+        //   3. Keep any attachment that cannot fit in the already-committed
+        //      reward mail as the overflow safeguard.
+        //
+        // If the member disconnected after the completion commit, leave the
+        // durable reward mail untouched.
+        //
         if (!player)
-            continue;
-
-        player->AddNewMailDeliverTime(
-            publication->
-                MailData.deliver_time);
-
-        player->AddMail(
-            new Mail(
+        {
+            sMailMgr->OnMailSent(
                 publication->
-                    MailData));
+                    CharacterGuid);
+
+            continue;
+        }
+
+        CharacterDatabaseTransaction
+            inventoryTransaction =
+                CharacterDatabase
+                    .BeginTransaction();
+
+        uint32 inventoryStacks = 0;
+        uint32 mailedStacks = 0;
 
         for (std::unique_ptr<Item>& item :
             publication->Items)
         {
-            if (item)
+            if (!item)
+                continue;
+
+            ItemPosCountVec destination;
+
+            InventoryResult const result =
+                player->CanStoreItem(
+                    NULL_BAG,
+                    NULL_SLOT,
+                    destination,
+                    item.get(),
+                    false);
+
+            if (result != EQUIP_ERR_OK)
             {
-                player->AddMItem(
-                    item.release());
+                ++mailedStacks;
+                continue;
             }
+
+            ObjectGuid::LowType const
+                itemGuid =
+                    item->GetGUID()
+                        .GetCounter();
+
+            //
+            // This item was durably written as a mail attachment by the
+            // completion transaction. Remove only its escrow link now that the
+            // core has proved there is room in the live character inventory.
+            //
+            publication->
+                MailData
+                    .RemoveItem(
+                        itemGuid);
+
+            auto* deleteMailItem =
+                CharacterDatabase
+                    .GetPreparedStatement(
+                        CHAR_DEL_MAIL_ITEM);
+
+            deleteMailItem->
+                SetData(
+                    0,
+                    itemGuid);
+
+            inventoryTransaction->
+                Append(
+                    deleteMailItem);
+
+            //
+            // Mirror the normal mailbox "Take Item" path. The item instance is
+            // already durable, so mark it unchanged before moving it out of
+            // mail storage and let SaveInventoryAndGoldToDB persist its exact
+            // bag/slot placement in this follow-up transaction.
+            //
+            item->SetState(
+                ITEM_UNCHANGED);
+
+            player->
+                MoveItemToInventory(
+                    destination,
+                    item.release(),
+                    true);
+
+            ++inventoryStacks;
         }
+
+        if (inventoryStacks)
+        {
+            if (!publication->
+                    MailData
+                        .HasItems())
+            {
+                //
+                // Everything fitted. Remove the temporary durable escrow mail
+                // entirely; the character sees only the direct inventory
+                // reward.
+                //
+                auto* deleteMail =
+                    CharacterDatabase
+                        .GetPreparedStatement(
+                            CHAR_DEL_MAIL_BY_ID);
+
+                deleteMail->
+                    SetData(
+                        0,
+                        publication->
+                            MailData
+                                .messageID);
+
+                inventoryTransaction->
+                    Append(
+                        deleteMail);
+
+                auto* deleteMailItems =
+                    CharacterDatabase
+                        .GetPreparedStatement(
+                            CHAR_DEL_MAIL_ITEM_BY_ID);
+
+                deleteMailItems->
+                    SetData(
+                        0,
+                        publication->
+                            MailData
+                                .messageID);
+
+                inventoryTransaction->
+                    Append(
+                        deleteMailItems);
+            }
+
+            player->
+                SaveInventoryAndGoldToDB(
+                    inventoryTransaction);
+
+            CharacterDatabase
+                .CommitTransaction(
+                    inventoryTransaction);
+        }
+
+        if (publication->
+                MailData
+                    .HasItems())
+        {
+            //
+            // At least one reward attachment did not fit. Keep only those
+            // remaining attachments in the already-committed reward mail.
+            //
+            sMailMgr->OnMailSent(
+                publication->
+                    CharacterGuid);
+
+            player->
+                AddNewMailDeliverTime(
+                    publication->
+                        MailData
+                            .deliver_time);
+
+            player->
+                AddMail(
+                    new Mail(
+                        publication->
+                            MailData));
+
+            for (std::unique_ptr<Item>& item :
+                publication->Items)
+            {
+                if (item)
+                {
+                    player->
+                        AddMItem(
+                            item.release());
+                }
+            }
+
+            player->SendNewMail();
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Published Manastorm stage rewards: character={} "
+            "inventoryStacks={} mailedOverflowStacks={}.",
+            publication->
+                CharacterGuid,
+            inventoryStacks,
+            mailedStacks);
     }
 
     publications.clear();
