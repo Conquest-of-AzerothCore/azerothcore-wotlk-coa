@@ -2108,7 +2108,10 @@ void ManastormMgr::SpawnStagePortal(
 }
 
 bool ManastormMgr::PrepareStage(
-    Player* player, ManastormRun& run, std::string& error)
+    Player* player,
+    ManastormRun& run,
+    std::string& error,
+    ObjectGuid::LowType transferOnlyGuid)
 {
     error.clear();
 
@@ -2118,8 +2121,13 @@ bool ManastormMgr::PrepareStage(
         return false;
     }
 
-    ManastormSegment const& segment = run.GetSegment();
-    GameTele const* tele = sObjectMgr->GetGameTele(segment.StartGameTeleId);
+    ManastormSegment const& segment =
+        run.GetSegment();
+
+    GameTele const* tele =
+        sObjectMgr->GetGameTele(
+            segment.StartGameTeleId);
+
     if (!tele)
     {
         error = "The selected segment start GameTele no longer exists.";
@@ -2132,76 +2140,133 @@ bool ManastormMgr::PrepareStage(
         return false;
     }
 
-    MapEntry const* mapEntry = sMapStore.LookupEntry(segment.MapId);
+    MapEntry const* mapEntry =
+        sMapStore.LookupEntry(
+            segment.MapId);
+
     if (!mapEntry)
     {
-        error =
-            "The selected segment map does not exist.";
+        error = "The selected segment map does not exist.";
         return false;
     }
 
     if (mapEntry->IsBattlegroundOrArena())
     {
-        error =
-            "Battleground/arena maps cannot be used as Manastorm stages.";
+        error = "Battleground/arena maps cannot be used as Manastorm stages.";
         return false;
     }
 
-    // Native dungeon/raid maps keep their ordinary instance-template
-    // requirements. Non-instanceable world maps use the generic scripted-
-    // private world-copy path without changing Map.dbc or public map behavior.
     if (mapEntry->Instanceable())
     {
         if (!mapEntry->IsDungeon())
         {
-            error =
-                "The selected instanceable map is not a supported dungeon/raid stage.";
+            error = "The selected instanceable map is not a supported dungeon/raid stage.";
             return false;
         }
 
         if (!sObjectMgr->GetInstanceTemplate(
-            segment.MapId))
+                segment.MapId))
         {
-            error =
-                "The selected dungeon/raid map has no instance_template row.";
+            error = "The selected dungeon/raid map has no instance_template row.";
             return false;
         }
     }
 
-    // Shared backend owns the run and SQL stage. Core private-instance support
-    // supplies isolation, group membership and safe saved login positions.
+    bool const transferAll =
+        transferOnlyGuid == 0;
+
     std::set<ObjectGuid> memberGuids;
     std::vector<Player*> connected;
-    for (auto guid : run.GetMembers())
+    Player* transferPlayer = nullptr;
+
+    for (ObjectGuid::LowType guid :
+        run.GetMembers())
     {
-        ObjectGuid const fullGuid = ObjectGuid::Create<HighGuid::Player>(guid);
-        memberGuids.insert(fullGuid);
-        Player* member = ObjectAccessor::FindConnectedPlayer(fullGuid);
-        if (!member || !member->GetSession() || !member->IsInWorld() || member->IsBeingTeleported())
+        ObjectGuid const fullGuid =
+            ObjectGuid::Create<
+                HighGuid::Player>(
+                    guid);
+
+        memberGuids.insert(
+            fullGuid);
+
+        Player* member =
+            ObjectAccessor::FindConnectedPlayer(
+                fullGuid);
+
+        bool const ready =
+            member &&
+            member->GetSession() &&
+            member->IsInWorld() &&
+            !member->IsBeingTeleported();
+
+        if (!ready)
         {
-            error = "Every run member must be connected and ready before stage transfer.";
-            return false;
+            if (transferAll)
+            {
+                error =
+                    "Every run member must be connected and ready before the initial stage transfer.";
+
+                return false;
+            }
+
+            continue;
         }
-        connected.push_back(member);
+
+        connected.push_back(
+            member);
+
+        if (guid ==
+            transferOnlyGuid)
+        {
+            transferPlayer =
+                member;
+        }
     }
+
     if (connected.empty() ||
-        connected.size() > ManastormLimits::MaxMembers)
+        connected.size() >
+            ManastormLimits::MaxMembers)
     {
         error =
             "Private Manastorm stages require one to " +
-            std::to_string(ManastormLimits::MaxMembers) +
-            " members.";
+            std::to_string(
+                ManastormLimits::MaxMembers) +
+            " connected member(s).";
+
         return false;
     }
-    ObjectGuid const owner = ObjectGuid::Create<HighGuid::Player>(run.GetOwnerGuid());
-    for (Player* member : connected)
+
+    if (!transferAll &&
+        !transferPlayer)
     {
-        WorldLocation const* location = run.GetReturnLocation(member->GetGUID().GetCounter());
+        error =
+            "The player using the stage portal is no longer ready to transfer.";
+
+        return false;
+    }
+
+    ObjectGuid const owner =
+        ObjectGuid::Create<
+            HighGuid::Player>(
+                run.GetOwnerGuid());
+
+    for (Player* member :
+        connected)
+    {
+        WorldLocation const* location =
+            run.GetReturnLocation(
+                member->GetGUID()
+                    .GetCounter());
+
         if (!location)
         {
-            error = "The run has no saved return location for a member.";
+            error =
+                "The run has no saved return location for a member.";
+
             return false;
         }
+
         if (mapEntry->Instanceable())
         {
             if (mapEntry->IsRaid())
@@ -2217,39 +2282,97 @@ bool ManastormMgr::PrepareStage(
                         segment.Difficulty));
             }
         }
-        member->PrepareScriptedPrivateInstance(segment.MapId, *location, owner, memberGuids, true);
+
+        member->PrepareScriptedPrivateInstance(
+            segment.MapId,
+            *location,
+            owner,
+            memberGuids,
+            true);
     }
-    run.SetState(ManastormRunState::Preparing);
-    Map* destination = sMapMgr->CreateMap(segment.MapId, player);
-    if (!destination || !destination->IsScriptedPrivateInstance())
+
+    run.SetState(
+        ManastormRunState::Preparing);
+
+    Map* destination =
+        sMapMgr->CreateMap(
+            segment.MapId,
+            transferAll
+            ? player
+            : transferPlayer);
+
+    if (!destination ||
+        !destination->IsScriptedPrivateInstance())
     {
-        error = "Unable to create the private Manastorm instance.";
+        error =
+            "Unable to create the private Manastorm instance.";
+
         return false;
     }
-    uint32 const instanceId = destination->GetInstanceId();
-    run.SetInstanceId(instanceId);
-    _stageRunIds[MakeStageKey(segment.MapId, instanceId)] = run.GetRunId();
-    for (Player* member : connected)
+
+    uint32 const instanceId =
+        destination->GetInstanceId();
+
+    run.SetInstanceId(
+        instanceId);
+
+    _stageRunIds[
+        MakeStageKey(
+            segment.MapId,
+            instanceId)] =
+        run.GetRunId();
+
+    for (Player* member :
+        connected)
     {
-        member->SetScriptedPrivateInstanceId(instanceId);
-        member->CombatStopWithPets(true);
-        if (!member->TeleportTo(segment.MapId, tele->position_x, tele->position_y,
-            tele->position_z, tele->orientation, TELE_TO_GM_MODE, nullptr, true))
+        member->SetScriptedPrivateInstanceId(
+            instanceId);
+    }
+
+    for (Player* member :
+        connected)
+    {
+        if (!transferAll &&
+            member->GetGUID()
+                .GetCounter() !=
+                transferOnlyGuid)
         {
-            error = "A member could not transfer to the private Manastorm instance.";
+            continue;
+        }
+
+        member->CombatStopWithPets(
+            true);
+
+        if (!member->TeleportTo(
+                segment.MapId,
+                tele->position_x,
+                tele->position_y,
+                tele->position_z,
+                tele->orientation,
+                TELE_TO_GM_MODE,
+                nullptr,
+                true))
+        {
+            error =
+                "A member could not transfer to the private Manastorm instance.";
+
             return false;
         }
     }
 
-    LOG_INFO(LOG_FILTER,
+    LOG_INFO(
+        LOG_FILTER,
         "Prepared Manastorm run {} stage: segment={} map={} instance={} "
-        "difficulty={} tele={} destination=({}, {}, {}, {}).",
+        "difficulty={} tele={} immediateTransfer={} destination=({}, {}, {}, {}).",
         run.GetRunId(),
         segment.SegmentId,
         segment.MapId,
         instanceId,
         segment.Difficulty,
         segment.StartGameTeleId,
+        transferAll
+            ? 0
+            : transferOnlyGuid,
         tele->position_x,
         tele->position_y,
         tele->position_z,
@@ -2257,6 +2380,164 @@ bool ManastormMgr::PrepareStage(
 
     return true;
 }
+
+bool ManastormMgr::TransferMemberToCurrentStage(
+    Player* player,
+    ManastormRun& run,
+    std::string& error)
+{
+    error.clear();
+
+    if (!player ||
+        !player->GetSession() ||
+        !player->IsInWorld() ||
+        player->IsBeingTeleported())
+    {
+        error =
+            "The Manastorm member is not ready to transfer.";
+
+        return false;
+    }
+
+    ObjectGuid::LowType const guid =
+        player->GetGUID()
+            .GetCounter();
+
+    if (!run.IsPendingStageTransfer(
+            guid))
+    {
+        return true;
+    }
+
+    ManastormSegment const& segment =
+        run.GetSegment();
+
+    GameTele const* tele =
+        sObjectMgr->GetGameTele(
+            segment.StartGameTeleId);
+
+    WorldLocation const* location =
+        run.GetReturnLocation(
+            guid);
+
+    Map* destination =
+        sMapMgr->FindMap(
+            segment.MapId,
+            run.GetInstanceId());
+
+    if (!tele ||
+        !location ||
+        !destination ||
+        !destination->IsScriptedPrivateInstance() ||
+        !destination->IsScriptedPrivateMember(
+            player->GetGUID()))
+    {
+        error =
+            "The prepared next Manastorm stage is no longer available.";
+
+        return false;
+    }
+
+    std::set<ObjectGuid> memberGuids;
+
+    for (ObjectGuid::LowType memberGuid :
+        run.GetMembers())
+    {
+        memberGuids.insert(
+            ObjectGuid::Create<
+                HighGuid::Player>(
+                    memberGuid));
+    }
+
+    MapEntry const* mapEntry =
+        sMapStore.LookupEntry(
+            segment.MapId);
+
+    if (mapEntry &&
+        mapEntry->Instanceable())
+    {
+        if (mapEntry->IsRaid())
+        {
+            player->SetRaidDifficulty(
+                Difficulty(
+                    segment.Difficulty));
+        }
+        else
+        {
+            player->SetDungeonDifficulty(
+                Difficulty(
+                    segment.Difficulty));
+        }
+    }
+
+    player->PrepareScriptedPrivateInstance(
+        segment.MapId,
+        *location,
+        ObjectGuid::Create<
+            HighGuid::Player>(
+                run.GetOwnerGuid()),
+        memberGuids,
+        true);
+
+    player->SetScriptedPrivateInstanceId(
+        run.GetInstanceId());
+
+    player->CombatStopWithPets(
+        true);
+
+    if (!player->TeleportTo(
+            segment.MapId,
+            tele->position_x,
+            tele->position_y,
+            tele->position_z,
+            tele->orientation,
+            TELE_TO_GM_MODE,
+            nullptr,
+            true))
+    {
+        error =
+            "The member could not transfer to the next Manastorm stage.";
+
+        return false;
+    }
+
+    return true;
+}
+
+void ManastormMgr::FinishPreviousStageTransition(
+    ManastormRun& run)
+{
+    if (!run.HasPreviousStage())
+        return;
+
+    uint32 const previousMapId =
+        run.GetPreviousSegment()
+            .MapId;
+
+    uint32 const previousInstanceId =
+        run.GetPreviousInstanceId();
+
+    _stageRunIds.erase(
+        MakeStageKey(
+            previousMapId,
+            previousInstanceId));
+
+    if (Map* previous =
+        sMapMgr->FindMap(
+            previousMapId,
+            previousInstanceId))
+    {
+        if (previous->
+            IsScriptedPrivateInstance())
+        {
+            previous->
+                RequestScriptedPrivateUnload();
+        }
+    }
+
+    run.ClearPreviousStageTransition();
+}
+
 
 ManastormRun* ManastormMgr::StartRun(
     Player* player,
