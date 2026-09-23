@@ -86,8 +86,40 @@ namespace
             ManastormMgr& mgr =
                 ManastormMgr::Instance();
 
+            uint32 const spellId =
+                GetSpellInfo()->Id;
+
             //
-            // ALL THREE baseline tools are Manastorm/Endless-only.
+            // Cogsley (93418) is a native non-combat companion summon.
+            // Its recovered item text says it only works in the Manastorm.
+            //
+            // Unlike combat tools, the companion is useful while the player
+            // is still preparing inside the private stage, so validate exact
+            // run/map ownership rather than requiring ACTIVE state.
+            //
+            if (spellId == 93418)
+            {
+                ManastormRun const* run =
+                    mgr.GetRunFor(player);
+
+                Map const* map =
+                    player->FindMap();
+
+                if (!run ||
+                    !map ||
+                    run->GetState() == ManastormRunState::Failed ||
+                    run->GetState() == ManastormRunState::Finished ||
+                    map->GetId() != run->GetSegment().MapId ||
+                    map->GetInstanceId() != run->GetInstanceId())
+                {
+                    return SPELL_FAILED_NOT_HERE;
+                }
+
+                return SPELL_CAST_OK;
+            }
+
+            //
+            // The baseline combat/survival tools are active-stage only.
             //
             if (!mgr.IsPlayerInActiveEndlessStage(
                 player))
@@ -95,7 +127,7 @@ namespace
                 return SPELL_FAILED_NOT_HERE;
             }
 
-            switch (GetSpellInfo()->Id)
+            switch (spellId)
             {
             case ManastormBaseline::SpellPotion:
             {
