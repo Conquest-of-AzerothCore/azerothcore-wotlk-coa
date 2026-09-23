@@ -2820,16 +2820,34 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                     OnCreatureAddWorld(spawn.second);
         }
         bool start = run->StartRequested();
-        // Keep the shared preparation protection until the entire party has
-        // arrived in this exact private instance.
-        for (auto guid : run->GetMembers())
+        // Normal movement/combat activation waits for the whole party.
+        // The real protection timeout and the five-second inter-stage fallback
+        // are allowed to activate with disconnected/missing members so
+        // PREPARING can never become permanent.
+        if (!run->CanStartWithMissingMembers())
         {
-            Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
-            if (!member || !member->IsInWorld() || member->IsBeingTeleported() ||
-                member->GetMapId() != map->GetId() || member->GetInstanceId() != map->GetInstanceId())
+            for (auto guid : run->GetMembers())
             {
-                SendClientState(player, run);
-                return;
+                Player* member =
+                    ObjectAccessor::FindConnectedPlayer(
+                        ObjectGuid::Create<
+                            HighGuid::Player>(
+                                guid));
+
+                if (!member ||
+                    !member->IsInWorld() ||
+                    member->IsBeingTeleported() ||
+                    member->GetMapId() !=
+                        map->GetId() ||
+                    member->GetInstanceId() !=
+                        map->GetInstanceId())
+                {
+                    SendClientState(
+                        player,
+                        run);
+
+                    return;
+                }
             }
         }
         for (auto guid : run->GetMembers())
@@ -3733,10 +3751,9 @@ void ManastormMgr::OnDamage(
         run->GetSegment();
 
     bool const isObjectiveBoss =
-        creature->GetGUID() ==
-        run->GetObjectiveCreatureGuid() ||
-        creature->GetEntry() ==
-        segment.ObjectiveCreatureEntry;
+        IsObjectiveBoss(
+            creature,
+            *run);
 
     //
     // Normal trash Hearts are death-driven in OnUnitDeath().
@@ -4163,17 +4180,42 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
         !IsPlayerControlledCreature(
             creature))
     {
+        creature->SetLootRewardDisabled(
+            true);
+        creature->SetReputationRewardDisabled(
+            true);
+        creature->SetLootMode(0);
+
         bool const newlyRegistered =
             run->RegisterStageCreature(
                 guid);
 
-        if (newlyRegistered && creature->GetLevel() != run->GetCreatureLevel())
+        if (newlyRegistered &&
+            creature->GetLevel() !=
+                run->GetCreatureLevel())
         {
             creature->SelectLevel();
-            CreatureTemplate const* creatureTemplate = creature->GetCreatureTemplate();
-            CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(
-                run->GetCreatureLevel(), creatureTemplate->unit_class);
-            creature->SetStatFlatModifier(UNIT_MOD_ARMOR, BASE_VALUE, stats->GenerateArmor(creatureTemplate));
+
+            CreatureTemplate const* creatureTemplate =
+                creature->GetCreatureTemplate();
+
+            if (creatureTemplate)
+            {
+                CreatureBaseStats const* stats =
+                    sObjectMgr->GetCreatureBaseStats(
+                        run->GetCreatureLevel(),
+                        creatureTemplate->unit_class);
+
+                if (stats)
+                {
+                    creature->SetStatFlatModifier(
+                        UNIT_MOD_ARMOR,
+                        BASE_VALUE,
+                        stats->GenerateArmor(
+                            creatureTemplate));
+                }
+            }
+
             creature->UpdateArmor();
             creature->UpdateAttackPowerAndDamage(false);
             creature->UpdateAttackPowerAndDamage(true);
@@ -5154,7 +5196,7 @@ void ManastormMgr::Update(uint32 diff)
         if (run->UpdatePreparationProtection(
                 diff))
         {
-            run->RequestStart();
+            run->AllowStartWithMissingMembers();
 
             LOG_INFO(
                 LOG_FILTER,
