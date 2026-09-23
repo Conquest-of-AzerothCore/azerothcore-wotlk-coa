@@ -81,6 +81,24 @@ CREATE TABLE IF NOT EXISTS `manastorm_scaling_curve` (
   PRIMARY KEY (`depth`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Optional second scaling layer by live Manastorm member count.
+-- Rows are non-overlapping inclusive ranges:
+--   1-15 = one generic group profile
+--   1-1, 2-2, 3-3, 4-15 = Solo/Duo/Trio/Group-style profiles
+--   1-1 ... 15-15 = exact per-count profiles
+-- Missing member counts are neutral 1.0x and therefore keep the depth curve.
+CREATE TABLE IF NOT EXISTS `manastorm_group_scaling` (
+  `min_members` TINYINT UNSIGNED NOT NULL,
+  `max_members` TINYINT UNSIGNED NOT NULL,
+  `health_multiplier` FLOAT NOT NULL DEFAULT 1,
+  `global_damage_multiplier` FLOAT NOT NULL DEFAULT 1,
+  `melee_multiplier` FLOAT NOT NULL DEFAULT 1,
+  `spell_multiplier` FLOAT NOT NULL DEFAULT 1,
+  `enabled` TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  PRIMARY KEY (`min_members`,`max_members`),
+  KEY `idx_group_scaling_enabled` (`enabled`,`min_members`,`max_members`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `manastorm_unlock` (
   `unlock_id` INT UNSIGNED NOT NULL,
   `unlock_kind` TINYINT UNSIGNED NOT NULL DEFAULT 0,
