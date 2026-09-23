@@ -446,31 +446,67 @@ INSERT INTO `npc_vendor`
     `VerifiedBuild`
 )
 VALUES
+    -- Current/recovered Millhouse reward catalog.
     (179538,  0,   53834, 0, 0, 4217, 0), -- Empty Heart Container, 200 Bedlam
-    (179538,  1,  427920, 0, 0, 4217, 0), -- Millhouse's Goggles of Imminent Peril, 200
-    (179538,  2,  453836, 0, 0, 4207, 0), -- Millhouse Mixtape, 500
-    (179538,  3,  509890, 0, 0, 4207, 0), -- Manastorm's Duplicator, 500
-    (179538,  4,  980060, 0, 0, 4207, 0), -- Beastmaster's Whistle: Pink Elekk, 500
-    (179538,  5,  222739, 0, 0, 4207, 0), -- Tome of Polymorph: Frogduck, 500
-    (179538,  6,  233223, 0, 0, 4210, 0), -- Millhouse's Mystical Transportation Device, 1500
-    (179538,  7,  532570, 0, 0, 4210, 0), -- Pip, 1500
-    (179538,  8,  532571, 0, 0, 4210, 0), -- Boomer, 1500
-    (179538,  9,  309907, 0, 0, 4211, 0), -- Recalibrator Pylon, 2000
-    (179538, 10, 2903513, 0, 0, 4213, 0), -- Mechanical Mystic Altar, 3000
-    (179538, 11,  236415, 0, 0, 4216, 0), -- Celestial Glitterplume, 5000
-    (179538, 12, 1500126, 0, 0, 4221, 0), -- Tome of Eye of Kilrogg, 150
-    (179538, 13, 1500128, 0, 0, 4221, 0), -- Tome of Mind Soothe, 150
-    (179538, 14, 1500134, 0, 0, 4221, 0), -- Tome of Levitate, 150
-    (179538, 15, 1500135, 0, 0, 4221, 0), -- Tome of Safe Fall, 150
-    (179538, 16, 1500136, 0, 0, 4221, 0), -- Tome of Mind Vision, 150
-    (179538, 17, 1500141, 0, 0, 4221, 0), -- Tome of Teleport: Moonglade, 150
-    (179538, 18, 1500153, 0, 0, 4221, 0); -- Tome of Call of the Elements, 150
 
--- This is the complete 19-item catalog visible across the supplied current
--- Millhouse Page 1/2 and Page 2/2 screenshots. The older db.exil screenshot
--- contains a different historical catalog (Purple Desert Satin, S.A.V.I.O.R,
--- Alchemist's Brewing Staff, Tinkertrot, Silvershine Sentinel, etc.); those
--- are intentionally not mixed into this later/current vendor revision.
+    -- Archival db.exil Millhouse cosmetic set.
+    -- ItemExtendedCost 4220 = 225 Bedlam. This is a reconstruction choice:
+    -- the archive proves vendor membership but does not expose the custom
+    -- currency amount; 4220 is the otherwise-unassigned low cosmetic tier
+    -- present in the recovered shutdown ItemExtendedCost.dbc.
+    (179538,  1,   69078, 0, 0, 4220, 0), -- Purple Desert Satin Cord, reconstructed 225 Bedlam
+    (179538,  2,   69079, 0, 0, 4220, 0), -- Purple Desert Satin Treads, reconstructed 225 Bedlam
+    (179538,  3,   69080, 0, 0, 4220, 0), -- Purple Desert Satin Tunic, reconstructed 225 Bedlam
+    (179538,  4,   69081, 0, 0, 4220, 0), -- Purple Desert Satin Gloves, reconstructed 225 Bedlam
+    (179538,  5,   69082, 0, 0, 4220, 0), -- Purple Desert Satin Hood, reconstructed 225 Bedlam
+    (179538,  6,   69083, 0, 0, 4220, 0), -- Purple Desert Satin Leggings, reconstructed 225 Bedlam
+    (179538,  7,   69084, 0, 0, 4220, 0), -- Purple Desert Satin Robe, reconstructed 225 Bedlam
+    (179538,  8,   69085, 0, 0, 4220, 0), -- Purple Desert Satin Mantle, reconstructed 225 Bedlam
+    (179538,  9,   69086, 0, 0, 4220, 0), -- Purple Desert Satin Cuffs, reconstructed 225 Bedlam
+    (179538, 10,   98451, 0, 0, 4220, 0), -- Purple Desert Satin Skirt, reconstructed 225 Bedlam
+
+    (179538, 11,  427920, 0, 0, 4217, 0), -- Millhouse's Goggles of Imminent Peril, 200 Bedlam
+    (179538, 12,  453836, 0, 0, 4207, 0), -- Millhouse Mixtape, 500 Bedlam
+    (179538, 13,  509890, 0, 0, 4207, 0), -- Manastorm's Duplicator, 500 Bedlam (+ native 350g BuyPrice)
+    (179538, 14,  980060, 0, 0, 4207, 0), -- Beastmaster's Whistle: Pink Elekk, 500 Bedlam
+    (179538, 15,  222739, 0, 0, 4207, 0), -- Tome of Polymorph: Frogduck, 500 Bedlam
+
+    (179538, 16,  280760, 0, 0, 4209, 0), -- S.A.V.I.O.R, reconstructed 1000 Bedlam
+    (179538, 17,  233223, 0, 0, 4210, 0), -- Millhouse's Mystical Transportation Device, 1500 Bedlam
+    (179538, 18,  350411, 0, 0, 4215, 0), -- Alchemist's Brewing Staff, reconstructed 1500 Bedlam
+    (179538, 19,  532570, 0, 0, 4210, 0), -- Pip, 1500 Bedlam
+    (179538, 20,  532571, 0, 0, 4210, 0), -- Boomer, 1500 Bedlam
+    (179538, 21,  309907, 0, 0, 4211, 0), -- Recalibrator Pylon, 2000 Bedlam
+    (179538, 22, 2903513, 0, 0, 4213, 0), -- Mechanical Mystic Altar, 3000 Bedlam
+
+    -- Public Ascension collection documentation confirms both mount costs.
+    (179538, 23,  236415, 0, 0, 4216, 0), -- Celestial Glitterplume, 5000 Bedlam
+    (179538, 24,  439040, 0, 0, 4216, 0), -- Tinkertrot, 5000 Bedlam
+    (179538, 25,  428236, 0, 0, 4500, 0), -- Reins of Silvershine Sentinel, 20000 Bedlam
+
+    -- Current tome rewards.
+    (179538, 26, 1500126, 0, 0, 4221, 0), -- Tome of Eye of Kilrogg, 150 Bedlam
+    (179538, 27, 1500128, 0, 0, 4221, 0), -- Tome of Mind Soothe, 150 Bedlam
+    (179538, 28, 1500134, 0, 0, 4221, 0), -- Tome of Levitate, 150 Bedlam
+    (179538, 29, 1500135, 0, 0, 4221, 0), -- Tome of Safe Fall, 150 Bedlam
+    (179538, 30, 1500136, 0, 0, 4221, 0), -- Tome of Mind Vision, 150 Bedlam
+    (179538, 31, 1500141, 0, 0, 4221, 0), -- Tome of Teleport: Moonglade, 150 Bedlam
+    (179538, 32, 1500153, 0, 0, 4221, 0); -- Tome of Call of the Elements, 150 Bedlam
+
+-- Millhouse is intentionally a union of the two recovered vendor revisions:
+--   * the supplied current Page 1/2 + Page 2/2 screenshots;
+--   * the archival db.exil vendor membership list.
+--
+-- This preserves every known reward item instead of discarding historical
+-- membership merely because Ascension changed the visible catalog over time.
+--
+-- Price confidence:
+--   PROVEN/current screenshot: 150, 200, 500, 1500, 2000, 3000, 5000 tiers.
+--   PROVEN/public guide: Tinkertrot=5000, Silvershine Sentinel=20000.
+--   RECONSTRUCTED: Purple Desert Satin set=225 each, S.A.V.I.O.R=1000,
+--                  Alchemist's Brewing Staff=1500.
+-- The reconstructed prices use native Bedlam rows recovered from the supplied
+-- shutdown ItemExtendedCost.dbc rather than inventing custom currency rows.
 
 -- ---------------------------------------------------------------------------
 -- Cogsworth <Manastorm Gadget Vendor> — reconstructed full 147-item economy
