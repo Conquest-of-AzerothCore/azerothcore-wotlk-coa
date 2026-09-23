@@ -1966,6 +1966,17 @@ void ManastormMgr::SpawnStagePortal(
         portal->SetReactState(REACT_PASSIVE);
 
         //
+        // 80910 is only an invisible visual/controller anchor.
+        //
+        // Creature::Create() preserves the +Z position supplied above, but a
+        // normal creature remains subject to gravity and will settle back onto
+        // the terrain. Keep this temporary controller suspended at the authored
+        // portal height instead of turning it into a normal flying creature.
+        //
+        portal->SetDisableGravity(true);
+        portal->SetHomePosition(portalPosition);
+
+        //
         // The recovered creature itself is intentionally invisible.
         // Spell 93305 is the verified visible Manastorm portal effect.
         //
