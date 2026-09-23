@@ -16,8 +16,9 @@
 --
 -- Server-only compatibility choices:
 --   * faction 35 keeps the hub vendors neutral/friendly.
---   * level 80 is used for the server template because CMSG creature-query cache
---     data does not contain creature level.
+--   * Millhouse/Cogsworth use level 80 server templates.
+--   * Cogsley preserves the existing level-1 non-combat-companion semantics
+--     (type 12) while restoring its recovered name/subname/model/services.
 --   * display 100722 model geometry comes from the native P.O.S.T. Master model:
 --       BoundingRadius=2.41881, CombatReach=0.
 --     AzerothCore normalizes a sub-0.1 combat reach to its default at load.
@@ -201,17 +202,17 @@ VALUES
     'Manastorm Gadget Vendor',
     'Buy',
     0,
-    80,
-    80,
-    2,
+    1,
+    1,
+    0,
     35,
-    128,
+    67113089,
     1,
     1.14286,
     1,
     1,
     20,
-    1,
+    0,
     0,
     1,
     2000,
@@ -223,7 +224,7 @@ VALUES
     0,
     0,
     0,
-    7,
+    12,
     0,
     '',
     0,
@@ -233,7 +234,7 @@ VALUES
     1,
     1,
     0,
-    999,
+    0,
     1,
     0,
     0,
@@ -244,18 +245,86 @@ ON DUPLICATE KEY UPDATE
     `name` = VALUES(`name`),
     `subname` = VALUES(`subname`),
     `IconName` = VALUES(`IconName`),
+    `gossip_menu_id` = VALUES(`gossip_menu_id`),
+    `minlevel` = VALUES(`minlevel`),
+    `maxlevel` = VALUES(`maxlevel`),
+    `exp` = VALUES(`exp`),
     `faction` = VALUES(`faction`),
     `npcflag` = VALUES(`npcflag`),
+    `speed_walk` = VALUES(`speed_walk`),
+    `speed_run` = VALUES(`speed_run`),
+    `speed_swim` = VALUES(`speed_swim`),
+    `speed_flight` = VALUES(`speed_flight`),
+    `detection_range` = VALUES(`detection_range`),
     `rank` = VALUES(`rank`),
+    `dmgschool` = VALUES(`dmgschool`),
+    `DamageModifier` = VALUES(`DamageModifier`),
+    `BaseAttackTime` = VALUES(`BaseAttackTime`),
+    `RangeAttackTime` = VALUES(`RangeAttackTime`),
+    `BaseVariance` = VALUES(`BaseVariance`),
+    `RangeVariance` = VALUES(`RangeVariance`),
+    `unit_class` = VALUES(`unit_class`),
+    `unit_flags` = VALUES(`unit_flags`),
+    `unit_flags2` = VALUES(`unit_flags2`),
+    `dynamicflags` = VALUES(`dynamicflags`),
+    `family` = VALUES(`family`),
     `type` = VALUES(`type`),
     `type_flags` = VALUES(`type_flags`),
+    `AIName` = VALUES(`AIName`),
+    `MovementType` = VALUES(`MovementType`),
+    `HoverHeight` = VALUES(`HoverHeight`),
     `HealthModifier` = VALUES(`HealthModifier`),
     `ManaModifier` = VALUES(`ManaModifier`),
+    `ArmorModifier` = VALUES(`ArmorModifier`),
+    `ExperienceModifier` = VALUES(`ExperienceModifier`),
     `RacialLeader` = VALUES(`RacialLeader`),
-    `movementId` = VALUES(`movementId`);
+    `movementId` = VALUES(`movementId`),
+    `RegenHealth` = VALUES(`RegenHealth`),
+    `CreatureImmunitiesId` = VALUES(`CreatureImmunitiesId`),
+    `flags_extra` = VALUES(`flags_extra`),
+    `ScriptName` = VALUES(`ScriptName`);
+
+-- ---------------------------------------------------------------------------
+-- Local Manastorm stage controller
+-- ---------------------------------------------------------------------------
+--
+-- 80919 is the native Cogsley companion and MUST NOT be reused for the
+-- Begin / Continue / Leave stage-control gossip. 900027 is a module-private
+-- reconstruction placeholder until the exact native transition controller is
+-- proven. It is deliberately not a vendor and is never a world spawn.
+--
+INSERT INTO `creature_template`
+(
+    `entry`, `name`, `subname`, `IconName`, `gossip_menu_id`,
+    `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`,
+    `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`,
+    `detection_range`, `rank`, `dmgschool`, `DamageModifier`,
+    `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`,
+    `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`,
+    `family`, `type`, `type_flags`, `AIName`, `MovementType`,
+    `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`,
+    `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`,
+    `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`
+)
+VALUES
+(
+    900027, 'Manastorm Stage Controller', 'Temporary Stage Controller', '',
+    0, 1, 1, 0, 35, 1,
+    1, 1.14286, 1, 1, 20, 0, 0, 1,
+    2000, 2000, 1, 1, 1, 0, 0, 0,
+    0, 10, 0, '', 0, 1, 1, 1, 1,
+    1, 0, 0, 1, 0, 0, '', 0
+)
+ON DUPLICATE KEY UPDATE
+    `name` = VALUES(`name`),
+    `subname` = VALUES(`subname`),
+    `faction` = VALUES(`faction`),
+    `npcflag` = VALUES(`npcflag`),
+    `type` = VALUES(`type`),
+    `ScriptName` = VALUES(`ScriptName`);
 
 DELETE FROM `creature_template_model`
-WHERE `CreatureID` IN (179538, 179539, 80919);
+WHERE `CreatureID` IN (179538, 179539, 80919, 900027);
 
 INSERT INTO `creature_template_model`
 (
@@ -269,7 +338,8 @@ INSERT INTO `creature_template_model`
 VALUES
     (179538, 0, 19942,  1, 1, 0),
     (179539, 0, 100722, 1, 1, 0),
-    (80919,  0, 100722, 1, 1, 0);
+    (80919,  0, 100722, 1, 1, 0),
+    (900027, 0, 10045, 1, 1, 0);
 
 -- ---------------------------------------------------------------------------
 -- Native Manastorm hub object
@@ -639,10 +709,11 @@ VALUES
 -- spell is 93418 -> creature 80919.
 --
 -- Reconstruction choice:
---   Cogsley is the portable counterpart of Cogsworth, so its vendor inventory
---   references Cogsworth's native 179539 vendor list instead of duplicating
---   147 rows here. AzerothCore supports vendor references through a negative
---   item value.
+--   Cogsley is the portable Manastorm services companion. Its vendor inventory
+--   references BOTH native static shops: Millhouse 179538 (Bedlam rewards) and
+--   Cogsworth 179539 (Bonzo gadget progression). This matches the recovered
+--   mixed Cogsley shop evidence while avoiding duplicated item rows.
+--   AzerothCore supports vendor references through a negative item value.
 --
 -- This also means future corrections to Cogsworth's item/ExtendedCost rows
 -- automatically propagate to Cogsley.
@@ -666,10 +737,27 @@ INSERT INTO `npc_vendor`
     `VerifiedBuild`
 )
 VALUES
-    (80919, 0, -179539, 0, 0, 0, 0); -- Reference Cogsworth's full vendor list
+    (80919, 0, -179538, 0, 0, 0, 0), -- Reference Millhouse reward list
+    (80919, 1, -179539, 0, 0, 0, 0); -- Reference Cogsworth gadget list
 
 -- Research note:
 -- The older 0-50 / 51-100 / ... / 1901+ Manastorm table is a CACHE-LOOT
 -- bracket table, not a segment/dungeon-selection wall. It intentionally does
 -- not belong in this hub/vendor migration and must not be used to gate segment
 -- availability.
+
+-- ---------------------------------------------------------------------------
+-- Cogsley companion summon
+-- ---------------------------------------------------------------------------
+--
+-- Item 98074 teaches spell 93418. The recovered item text explicitly says
+-- Cogsley is a non-combat companion that only works in the Manastorm.
+-- Spell 93418 already performs the native summon of creature 80919; binding it
+-- to the shared Manastorm tool validator only adds the missing stage restriction.
+--
+DELETE FROM `spell_script_names`
+WHERE `spell_id` = 93418
+  AND `ScriptName` = 'spell_manastorm_baseline_tool';
+
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`)
+VALUES (93418, 'spell_manastorm_baseline_tool');
