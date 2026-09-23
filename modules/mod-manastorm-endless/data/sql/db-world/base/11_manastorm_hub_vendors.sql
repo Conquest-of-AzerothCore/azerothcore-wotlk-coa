@@ -631,15 +631,25 @@ VALUES
 
 
 -- ---------------------------------------------------------------------------
--- Cogsley <Manastorm Gadget Vendor> — screenshot-confirmed Page 1 subset
+-- Cogsley <Manastorm Gadget Vendor> — summonable/mobile Cogsworth vendor
 -- ---------------------------------------------------------------------------
 --
--- The supplied screenshot is explicitly Page 1 of 3. These nine visible rows
--- are therefore authored exactly; Pages 2-3 remain unresolved and are not
--- silently invented here.
+-- External Manastorm guide evidence identifies Cogsley as a companion/pet
+-- specifically used to vendor while inside Manastorm. The recovered summon
+-- spell is 93418 -> creature 80919.
 --
--- Bedlam: 4217=200, 4207=500, 4210=1500
--- Bonzo:  4208=10,000
+-- Reconstruction choice:
+--   Cogsley is the portable counterpart of Cogsworth, so its vendor inventory
+--   references Cogsworth's native 179539 vendor list instead of duplicating
+--   147 rows here. AzerothCore supports vendor references through a negative
+--   item value.
+--
+-- This also means future corrections to Cogsworth's item/ExtendedCost rows
+-- automatically propagate to Cogsley.
+--
+-- IMPORTANT:
+--   80919 is NOT a permanent capital/world spawn. It is a summoned companion
+--   template. No creature spawn row should be authored for Cogsley.
 -- ---------------------------------------------------------------------------
 
 DELETE FROM `npc_vendor`
@@ -656,12 +666,10 @@ INSERT INTO `npc_vendor`
     `VerifiedBuild`
 )
 VALUES
-    (80919, 0,   53834, 0, 0, 4217, 0), -- Empty Heart Container, 200 Bedlam
-    (80919, 1,  222739, 0, 0, 4207, 0), -- Tome of Polymorph: Frogduck, 500 Bedlam
-    (80919, 2,  233223, 0, 0, 4210, 0), -- Millhouse's Mystical Transportation Device, 1500 Bedlam
-    (80919, 3,  339030, 0, 0, 4208, 0), -- Manastorm Cleanse R1, 10,000 Bonzo
-    (80919, 4,  427920, 0, 0, 4217, 0), -- Millhouse's Goggles of Imminent Peril, 200 Bedlam
-    (80919, 5,  453836, 0, 0, 4207, 0), -- Millhouse Mixtape, 500 Bedlam
-    (80919, 6,  339031, 0, 0, 4208, 0), -- Manastorm Purification R1, 10,000 Bonzo
-    (80919, 7,  980060, 0, 0, 4207, 0), -- Beastmaster's Whistle: Pink Elekk, 500 Bedlam
-    (80919, 8,  339033, 0, 0, 4208, 0); -- Manastorm Curing R1, 10,000 Bonzo
+    (80919, 0, -179539, 0, 0, 0, 0); -- Reference Cogsworth's full vendor list
+
+-- Research note:
+-- The older 0-50 / 51-100 / ... / 1901+ Manastorm table is a CACHE-LOOT
+-- bracket table, not a segment/dungeon-selection wall. It intentionally does
+-- not belong in this hub/vendor migration and must not be used to gate segment
+-- availability.
