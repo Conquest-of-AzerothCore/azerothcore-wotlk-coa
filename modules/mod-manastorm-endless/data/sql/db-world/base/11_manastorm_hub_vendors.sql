@@ -709,11 +709,10 @@ VALUES
 -- spell is 93418 -> creature 80919.
 --
 -- Reconstruction choice:
---   Cogsley is the portable Manastorm services companion. Its vendor inventory
---   references BOTH native static shops: Millhouse 179538 (Bedlam rewards) and
---   Cogsworth 179539 (Bonzo gadget progression). This matches the recovered
---   mixed Cogsley shop evidence while avoiding duplicated item rows.
---   AzerothCore supports vendor references through a negative item value.
+--   Cogsley is the portable/pet counterpart of Cogsworth. Its vendor inventory
+--   therefore references Cogsworth 179539 directly instead of duplicating
+--   147 rows here. AzerothCore supports vendor references through a negative
+--   item value, so future Cogsworth corrections automatically reach Cogsley.
 --
 -- This also means future corrections to Cogsworth's item/ExtendedCost rows
 -- automatically propagate to Cogsley.
@@ -737,8 +736,7 @@ INSERT INTO `npc_vendor`
     `VerifiedBuild`
 )
 VALUES
-    (80919, 0, -179538, 0, 0, 0, 0), -- Reference Millhouse reward list
-    (80919, 1, -179539, 0, 0, 0, 0); -- Reference Cogsworth gadget list
+    (80919, 0, -179539, 0, 0, 0, 0); -- Reference Cogsworth's full vendor list
 
 -- Research note:
 -- The older 0-50 / 51-100 / ... / 1901+ Manastorm table is a CACHE-LOOT
