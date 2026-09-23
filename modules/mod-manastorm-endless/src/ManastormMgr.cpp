@@ -1344,6 +1344,19 @@ void ManastormMgr::FailRun(
         RemoveBaselineRunItems(
             member,
             true);
+
+        // A terminal ejection can return to the same native map ID as the
+        // private stage (for example private Kalimdor -> public Kalimdor).
+        // Player::TeleportTo normally treats same-map movement as a near
+        // teleport, which would leave the player inside the private instance.
+        // Remember that we are leaving a scripted-private map before clearing
+        // its routing metadata so the return teleport can be forced through
+        // the far/world-transfer path.
+        bool const leavingScriptedPrivateStage =
+            member->IsInWorld() &&
+            member->GetMap() &&
+            member->GetMap()->IsScriptedPrivateInstance();
+
         member->ClearScriptedPrivateInstance();
 
         std::ostringstream failureMessage;
@@ -1477,7 +1490,10 @@ void ManastormMgr::FailRun(
             returnX,
             returnY,
             returnZ,
-            returnO))
+            returnO,
+            0,
+            nullptr,
+            leavingScriptedPrivateStage))
         {
             LOG_ERROR(
                 LOG_FILTER,
@@ -4691,6 +4707,16 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
         RemoveBaselineRunItems(
             member,
             true);
+
+        // Returning from a private world copy to the public copy can use the
+        // same map ID. Force a far transfer in that case; otherwise TeleportTo
+        // would perform an in-instance near teleport and strand the player in
+        // the disposable Manastorm map.
+        bool const leavingScriptedPrivateStage =
+            member->IsInWorld() &&
+            member->GetMap() &&
+            member->GetMap()->IsScriptedPrivateInstance();
+
         member->ClearScriptedPrivateInstance();
 
         //
@@ -4747,7 +4773,10 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
             returnX,
             returnY,
             returnZ,
-            returnO))
+            returnO,
+            0,
+            nullptr,
+            leavingScriptedPrivateStage))
         {
             LOG_ERROR(
                 LOG_FILTER,
