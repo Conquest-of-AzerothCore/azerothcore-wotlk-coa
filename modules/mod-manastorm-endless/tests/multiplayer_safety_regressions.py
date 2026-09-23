@@ -57,6 +57,10 @@ def main() -> None:
                 true)""" in mgr
     assert "FinishPreviousStageTransition" in mgr
     assert "previousStageInstanceId" in mgr
+    assert """run->CanStartWithMissingMembers() &&
+            run->HasPreviousStage() &&
+            run->HasPendingStageTransfers()""" in mgr
+    assert "Could not auto-transfer connected member" in mgr
 
     # Boss Heart thresholds use only the exact registered objective GUID.
     damage_start = mgr.index("void ManastormMgr::OnDamage(")
