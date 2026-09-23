@@ -2167,7 +2167,8 @@ public:
     void ClearScriptedPrivateInstance()
     {
         _scriptedPrivateDatabaseSpawns = false;
-        _scriptedPrivateMapId = _scriptedPrivateInstanceId = 0;
+        _scriptedPrivateMapId = MAPID_INVALID;
+        _scriptedPrivateInstanceId = 0;
         _scriptedPrivateOwner.Clear();
         _scriptedPrivateMembers.clear();
     }
@@ -2881,7 +2882,10 @@ protected:
     void _SaveCharacter(bool create, CharacterDatabaseTransaction trans);
 
     bool _scriptedPrivateDatabaseSpawns = false;
-    uint32 _scriptedPrivateMapId = 0;
+
+    // Map 0 is Eastern Kingdoms, so zero cannot represent "no private map".
+    // MAPID_INVALID preserves Map 0 as a valid scripted-private destination.
+    uint32 _scriptedPrivateMapId = MAPID_INVALID;
     uint32 _scriptedPrivateInstanceId = 0;
     WorldLocation _scriptedPrivateReturn;
     ObjectGuid _scriptedPrivateOwner;
