@@ -91,7 +91,7 @@ public:
     void OnDamage(
         Unit* attacker,
         Unit* victim,
-        uint32 damage);
+        uint32& damage);
 
     uint32 ScaleCreatureDamage(
         Unit* attacker,
