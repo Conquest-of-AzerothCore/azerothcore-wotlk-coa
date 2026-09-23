@@ -218,6 +218,13 @@ namespace
     constexpr char const* LOG_FILTER = "module.manastorm.endless";
     constexpr uint64 RUN_SEED_MIX = 0xD1B54A32D192ED03ULL;
     constexpr uint32 STAGE_TRANSITION_DELAY_MS = 5000;
+
+    // 93305 is visually centered on its invisible 80910 controller. Spawning
+    // that controller at the objective corpse's ground Z buries roughly half
+    // of the recovered portal effect below the terrain, so lift only the
+    // temporary portal anchor while preserving the boss X/Y/orientation.
+    constexpr float STAGE_PORTAL_Z_OFFSET = 2.0f;
+
     constexpr uint32 NPC_MANASTORM_HEART = 900025;
 
     constexpr uint32 SPELL_MANASTORM_HEART_PROJECTILE = 991507;
@@ -1944,10 +1951,16 @@ void ManastormMgr::SpawnStagePortal(
     run.SetPortalGuid(
         ObjectGuid::Empty);
 
+    Position portalPosition =
+        position;
+
+    portalPosition.m_positionZ +=
+        STAGE_PORTAL_Z_OFFSET;
+
     if (Creature* portal =
         map->SummonCreature(
             NPC_STAGE_PORTAL,
-            position))
+            portalPosition))
     {
         portal->SetFaction(35);
         portal->SetReactState(REACT_PASSIVE);
