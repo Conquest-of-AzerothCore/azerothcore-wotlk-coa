@@ -18,6 +18,7 @@
 #include "ManastormDataStore.h"
 #include "ManastormGenerator.h"
 #include "ManastormProgression.h"
+#include "ManastormRewards.h"
 #include "ManastormAffixEngine.h"
 #include <algorithm>
 #include <cmath>
@@ -559,16 +560,43 @@ void ManastormMgr::SendClientState(
                 run->GetSegment().RewardMultiplier);
 
         //
-        // Actual Underworld Cache mechanics have not been
-        // designed yet.
+        // Reward % and Cache Chance are independent systems.
         //
-        // -1 tells the client that no authoritative chance
-        // currently exists.
+        // RewardMultiplier modifies applicable currency payout.
+        // CacheChancePct is persistent bad-luck protection for the
+        // next normal Manastorm Cache roll.
         //
-        int32 const cacheChancePct = -1;
+        ManastormRewardStateSnapshot rewardState;
+        std::string rewardError;
 
-        uint32 const guaranteedCaches = 0;
-        uint32 const cacheItemId = 0;
+        int32 cacheChancePct = -1;
+        uint32 guaranteedCaches =
+            run->GetBonusCacheCount();
+
+        uint32 cacheItemId =
+            ManastormRewards::Instance()
+                .GetCacheItemEntry();
+
+        if (ManastormRewards::Instance()
+            .LoadState(
+                player->GetGUID().GetCounter(),
+                run->GetMode(),
+                run->IsEndgame(),
+                rewardState,
+                rewardError))
+        {
+            cacheChancePct =
+                int32(
+                    rewardState.CacheChancePct);
+        }
+        else
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Unable to load Manastorm reward state for {}: {}",
+                player->GetGUID().GetCounter(),
+                rewardError);
+        }
 
         message
             << "1|"
@@ -1046,7 +1074,10 @@ void ManastormMgr::OpenClientUI(
 
 bool ManastormMgr::ReloadData()
 {
-    return ManastormDataStore::Instance().Load();
+    if (!ManastormDataStore::Instance().Load())
+        return false;
+
+    return ManastormRewards::Instance().Load();
 }
 
 uint64 ManastormMgr::BuildRunSeed(
@@ -3771,6 +3802,49 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
     }
 
     //
+    // Treasure Keeper is a real hostile special encounter, but it must not
+    // inherit ordinary trash affixes, Heart rolls, or authored route roles.
+    //
+    if (ManastormRewards::Instance()
+        .IsTreasureKeeperEntry(
+            creature->GetEntry()))
+    {
+        if (run->GetState() !=
+                ManastormRunState::Preparing &&
+            run->GetState() !=
+                ManastormRunState::Active)
+        {
+            return;
+        }
+
+        run->RegisterStageCreature(
+            creature->GetGUID());
+
+        if (run->TreasureKeeperSpawned())
+        {
+            run->SetTreasureKeeperGuid(
+                creature->GetGUID());
+        }
+
+        creature->SetLootRewardDisabled(
+            true);
+        creature->SetReputationRewardDisabled(
+            true);
+        creature->SetLootMode(0);
+
+        if (run->GetState() ==
+            ManastormRunState::Active)
+        {
+            ApplyCreatureHealthScaling(
+                creature,
+                *run,
+                1.0);
+        }
+
+        return;
+    }
+
+    //
 // Recovered Mana Bomb helper.
 //
 // It is a trigger/helper, not normal dungeon trash,
@@ -3945,6 +4019,22 @@ void ManastormMgr::OnCreatureRemoveWorld(Creature* creature)
     {
         run->UnregisterActiveHeart(
             creature->GetGUID());
+
+        return;
+    }
+
+    if (ManastormRewards::Instance()
+        .IsTreasureKeeperEntry(
+            creature->GetEntry()))
+    {
+        run->UnregisterStageCreature(
+            creature->GetGUID());
+
+        if (run->GetTreasureKeeperGuid() ==
+            creature->GetGUID())
+        {
+            run->ClearTreasureKeeperGuid();
+        }
 
         return;
     }
@@ -4135,6 +4225,25 @@ void ManastormMgr::OnUnitDeath(
     }
 
     //
+    // Treasure Keeper reward resolution is intentionally separate from
+    // objective/cache pity and ordinary trash death processing.
+    //
+    if (ManastormRewards::Instance()
+        .IsActiveTreasureKeeper(
+            creature,
+            *run))
+    {
+        ManastormRewards::Instance()
+            .OnTreasureKeeperKilled(
+                *run);
+
+        BroadcastClientState(
+            *run);
+
+        return;
+    }
+
+    //
     // AFFIX EVENTS MUST RUN BEFORE SPECIALIZED DEATH LOGIC.
     //
     // Chaotic Link route processing below deliberately contains
@@ -4182,6 +4291,17 @@ void ManastormMgr::OnUnitDeath(
         TrySpawnTrashHeart(
             creature,
             *run);
+
+        //
+        // Separate special-encounter roll:
+        //
+        // eligible trash kills increase the Treasure Keeper chance.
+        // This does NOT consume or modify the normal Cache pity meter.
+        //
+        ManastormRewards::Instance()
+            .TrySpawnTreasureKeeper(
+                creature,
+                *run);
     }
 
     //

@@ -100,6 +100,13 @@ void ManastormRun::PrepareNextStage(
     _stageCreatureGuids.clear();
     _trashHeartRolls.clear();
 
+    _treasureTrashKills = 0;
+    _treasureKeeperSpawned = false;
+    _treasureKeeperGuid.Clear();
+    _bonusCacheCount = 0;
+    _bonusAbilityCaseCount = 0;
+    _bonusTalentCaseCount = 0;
+
     // Affixes belong to one disposable stage.
     // Selection/assignment is rebuilt for every new depth.
     ClearStageAffixState();

@@ -4,6 +4,7 @@
 #include "ManastormDefines.h"
 #include "Position.h"
 
+#include <limits>
 #include <unordered_set>
 #include <vector>
 #include <unordered_map>
@@ -247,6 +248,101 @@ public:
         return _activeHeartGuids;
     }
 
+    uint32 IncrementTreasureTrashKills()
+    {
+        if (_treasureTrashKills !=
+            std::numeric_limits<uint32>::max())
+        {
+            ++_treasureTrashKills;
+        }
+
+        return _treasureTrashKills;
+    }
+
+    uint32 GetTreasureTrashKills() const
+    {
+        return _treasureTrashKills;
+    }
+
+    bool TreasureKeeperSpawned() const
+    {
+        return _treasureKeeperSpawned;
+    }
+
+    void SetTreasureKeeperSpawned(bool value)
+    {
+        _treasureKeeperSpawned = value;
+    }
+
+    ObjectGuid GetTreasureKeeperGuid() const
+    {
+        return _treasureKeeperGuid;
+    }
+
+    void SetTreasureKeeperGuid(ObjectGuid guid)
+    {
+        _treasureKeeperGuid = guid;
+    }
+
+    void ClearTreasureKeeperGuid()
+    {
+        _treasureKeeperGuid.Clear();
+    }
+
+    uint32 GetBonusCacheCount() const
+    {
+        return _bonusCacheCount;
+    }
+
+    void AddBonusCaches(uint32 count)
+    {
+        uint64 const value =
+            uint64(_bonusCacheCount) +
+            uint64(count);
+
+        _bonusCacheCount =
+            value >
+                std::numeric_limits<uint32>::max()
+            ? std::numeric_limits<uint32>::max()
+            : uint32(value);
+    }
+
+    uint32 GetBonusAbilityCaseCount() const
+    {
+        return _bonusAbilityCaseCount;
+    }
+
+    void AddBonusAbilityCases(uint32 count)
+    {
+        uint64 const value =
+            uint64(_bonusAbilityCaseCount) +
+            uint64(count);
+
+        _bonusAbilityCaseCount =
+            value >
+                std::numeric_limits<uint32>::max()
+            ? std::numeric_limits<uint32>::max()
+            : uint32(value);
+    }
+
+    uint32 GetBonusTalentCaseCount() const
+    {
+        return _bonusTalentCaseCount;
+    }
+
+    void AddBonusTalentCases(uint32 count)
+    {
+        uint64 const value =
+            uint64(_bonusTalentCaseCount) +
+            uint64(count);
+
+        _bonusTalentCaseCount =
+            value >
+                std::numeric_limits<uint32>::max()
+            ? std::numeric_limits<uint32>::max()
+            : uint32(value);
+    }
+
     bool HasBossHeartThreshold(uint8 thresholdPct) const
     {
         if (thresholdPct < 10 ||
@@ -421,6 +517,19 @@ private:
     ObjectGuid _objectiveCreatureGuid;
     std::unordered_set<ObjectGuid> _stageCreatureGuids;
     std::unordered_set<ObjectGuid> _trashHeartRolls;
+
+    // Treasure Keeper is a separate special-encounter reward path.
+    // The spawn chance grows with eligible trash kills/depth, but at most
+    // one Keeper may appear in a disposable stage.
+    uint32 _treasureTrashKills = 0;
+    bool _treasureKeeperSpawned = false;
+    ObjectGuid _treasureKeeperGuid;
+
+    // Treasure Keeper rewards are secured during the stage and committed
+    // atomically with the objective-completion reward.
+    uint32 _bonusCacheCount = 0;
+    uint32 _bonusAbilityCaseCount = 0;
+    uint32 _bonusTalentCaseCount = 0;
 
     // Affixes selected for the CURRENT disposable stage.
     std::unordered_set<uint32>

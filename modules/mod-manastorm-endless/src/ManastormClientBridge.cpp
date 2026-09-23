@@ -15,6 +15,7 @@
 #include "World.h"
 #include "ManastormMgr.h"
 #include "ManastormProgression.h"
+#include "ManastormRewards.h"
 #include "ManastormRun.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -242,26 +243,165 @@ void ManastormClientBridge::SendFailed(Player* player) const
 
 void ManastormClientBridge::SendState(Player* player, ManastormRun const* run) const
 {
-    if (!player || !player->GetSession() || !NativeEnabled())
+    if (!player ||
+        !player->GetSession() ||
+        !NativeEnabled())
+    {
         return;
-    bool const active = run && run->GetState() != ManastormRunState::Failed
-        && run->GetState() != ManastormRunState::Finished;
-    if (run && run->GetState() == ManastormRunState::Failed)
+    }
+
+    bool const active =
+        run &&
+        run->GetState() !=
+            ManastormRunState::Failed &&
+        run->GetState() !=
+            ManastormRunState::Finished;
+
+    if (run &&
+        run->GetState() ==
+            ManastormRunState::Failed)
+    {
         SendFailed(player);
-    WorldPacket packet(ManastormNativeOpcode::ActiveState, 48);
-    // Existing shared reward policy currently awards no caches. Never borrow
-    // the donor's pity/reward algorithms or advertise an unawarded item.
-    Ascension::Manastorm::WriteActive(packet, active ? run->GetDepth() : 0,
-        active ? run->GetSegment().SegmentId : 0,
-        active ? uint8(uint8(run->GetMode()) - 1 + (run->IsEndgame() ? 4 : 0)) : 0);
-    player->SendDirectMessage(&packet);
-    SendChaoticLink(player, active && run->GetState() != ManastormRunState::StageComplete
-        ? run->GetChaoticLinkStacks() : 0);
-    // No historical rate-limit policy exists in the shared backend. Clear the
-    // current native context instead of fabricating limits or lock timestamps.
-    WorldPacket visibility(ManastormNativeOpcode::RewardVisibility, 12);
-    visibility << uint64(active ? run->GetSegment().SegmentId : 0) << uint32(0);
-    player->SendDirectMessage(&visibility);
+    }
+
+    uint32 guaranteedCaches = 0;
+    float cacheChancePct = 0.0f;
+    uint32 cacheItem = 0;
+
+    if (active)
+    {
+        ManastormRewardStateSnapshot rewardState;
+        std::string rewardError;
+
+        if (ManastormRewards::Instance()
+            .LoadState(
+                player->GetGUID().GetCounter(),
+                run->GetMode(),
+                run->IsEndgame(),
+                rewardState,
+                rewardError))
+        {
+            guaranteedCaches =
+                run->GetBonusCacheCount();
+
+            cacheChancePct =
+                float(
+                    rewardState.CacheChancePct);
+
+            cacheItem =
+                ManastormRewards::Instance()
+                    .GetCacheItemEntry();
+        }
+        else
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Cannot load native Manastorm reward state for {}: {}",
+                player->GetGUID().ToString(),
+                rewardError);
+        }
+    }
+
+    WorldPacket packet(
+        ManastormNativeOpcode::ActiveState,
+        48);
+
+    Ascension::Manastorm::WriteActive(
+        packet,
+        active
+            ? run->GetDepth()
+            : 0,
+        active
+            ? run->GetSegment().SegmentId
+            : 0,
+        active
+            ? uint8(
+                uint8(run->GetMode()) -
+                1 +
+                (run->IsEndgame()
+                    ? 4
+                    : 0))
+            : 0,
+        guaranteedCaches,
+        cacheChancePct,
+        cacheItem);
+
+    player->SendDirectMessage(
+        &packet);
+
+    SendChaoticLink(
+        player,
+        active &&
+            run->GetState() !=
+                ManastormRunState::StageComplete
+            ? run->GetChaoticLinkStacks()
+            : 0);
+
+    //
+    // Exact Extensions.dll 0x06AD layout:
+    //
+    //   u64 context
+    //   u32 count
+    //
+    //   repeat:
+    //     u32 itemID
+    //     u8  action
+    //     u32 lockEndTimestamp
+    //     u32 secondsRemaining
+    //     u32 earnedQuantity
+    //     u32 maxQuantity
+    //     u32 remainingQuantity
+    //     u32 windowStart
+    //     u32 windowEnd
+    //
+    // Sending all seven native Potential Reward identities also causes the
+    // native MANASTORM_REWARD_VISIBILITY_UPDATED path to refresh the queue.
+    //
+    std::vector<ManastormRewardVisibilityRecord> const
+        records =
+            ManastormRewards::Instance()
+                .BuildVisibilityRecords();
+
+    WorldPacket visibility(
+        ManastormNativeOpcode::RewardVisibility,
+        12 +
+            records.size() * 33);
+
+    visibility <<
+        uint64(
+            active
+            ? run->GetSegment().SegmentId
+            : 0);
+
+    visibility <<
+        uint32(
+            records.size());
+
+    for (ManastormRewardVisibilityRecord const& record :
+        records)
+    {
+        visibility <<
+            record.ItemEntry;
+        visibility <<
+            record.Action;
+        visibility <<
+            record.LockEndTimestamp;
+        visibility <<
+            record.SecondsRemaining;
+        visibility <<
+            record.EarnedQuantity;
+        visibility <<
+            record.MaxQuantity;
+        visibility <<
+            record.RemainingQuantity;
+        visibility <<
+            record.WindowStart;
+        visibility <<
+            record.WindowEnd;
+    }
+
+    player->SendDirectMessage(
+        &visibility);
 }
 
 void ManastormClientBridge::SendProgression(Player* player) const

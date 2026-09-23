@@ -1,0 +1,1474 @@
+#include "ManastormRewards.h"
+
+#include "Creature.h"
+#include "Field.h"
+#include "GameTime.h"
+#include "Item.h"
+#include "Log.h"
+#include "Mail.h"
+#include "MailMgr.h"
+#include "Map.h"
+#include "ManastormRun.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Player.h"
+#include "QueryResult.h"
+#include "Random.h"
+
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace
+{
+    constexpr char const* LOG_FILTER =
+        "module.manastorm.endless.rewards";
+
+    constexpr uint32 ITEM_MANASTORM_CACHE = 97884;
+    constexpr uint32 ITEM_BEDLAM_BULLION = 1297307;
+    constexpr uint32 ITEM_BONZO_BOLT = 1297308;
+    constexpr uint32 REWARD_MAIL_SENDER = 80919;
+    constexpr uint32 CACHE_PITY_STEP_PCT = 13;
+    constexpr uint32 BASIS_POINTS = 10000;
+    constexpr float TWO_PI = 6.28318530717958647692f;
+
+    uint8 TrackBit(bool endgame)
+    {
+        return ManastormGetTrackBit(endgame);
+    }
+
+    uint32 SaturatingAdd(uint32 left, uint32 right)
+    {
+        uint64 const value =
+            uint64(left) +
+            uint64(right);
+
+        return value >
+            std::numeric_limits<uint32>::max()
+            ? std::numeric_limits<uint32>::max()
+            : uint32(value);
+    }
+
+    uint64 SaturatingAdd(uint64 left, uint32 right)
+    {
+        if (left >
+            std::numeric_limits<uint64>::max() -
+                uint64(right))
+        {
+            return std::numeric_limits<uint64>::max();
+        }
+
+        return left + uint64(right);
+    }
+}
+
+struct ManastormRewardPublication
+{
+    ObjectGuid::LowType CharacterGuid = 0;
+    Mail MailData{};
+    std::vector<std::unique_ptr<Item>> Items;
+};
+
+ManastormRewards& ManastormRewards::Instance()
+{
+    static ManastormRewards instance;
+    return instance;
+}
+
+bool ManastormRewards::Load()
+{
+    _loaded = false;
+    _bedlam = {};
+    _bonzo = {};
+    _groupRewardRanges.clear();
+    _potentialRewards.clear();
+    _treasureKeeper = {};
+
+    if (!LoadRewardRules() ||
+        !LoadGroupRewardMultipliers() ||
+        !LoadPotentialRewards() ||
+        !LoadTreasureKeeperRule() ||
+        !ValidateCharacterSchema())
+    {
+        return false;
+    }
+
+    _loaded = true;
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Loaded authoritative Manastorm reward policy: "
+        "potentialRewards={} groupRanges={} treasureKeeper={}.",
+        _potentialRewards.size(),
+        _groupRewardRanges.size(),
+        _treasureKeeper.Enabled
+            ? "enabled"
+            : "disabled");
+
+    return true;
+}
+
+bool ManastormRewards::LoadRewardRules()
+{
+    QueryResult result =
+        WorldDatabase.Query(
+            "SELECT "
+            "reward_key, item_entry, base_amount, "
+            "depth_step, amount_per_step, "
+            "first_clear_only, apply_group_multiplier, "
+            "apply_segment_multiplier, enabled "
+            "FROM manastorm_reward_rule "
+            "ORDER BY reward_key");
+
+    if (!result)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to load manastorm_reward_rule. "
+            "Apply 14_manastorm_rewards.sql.");
+
+        return false;
+    }
+
+    bool foundBedlam = false;
+    bool foundBonzo = false;
+
+    do
+    {
+        Field* fields =
+            result->Fetch();
+
+        std::string const key =
+            fields[0].Get<std::string>();
+
+        if (!fields[8].Get<uint8>())
+            continue;
+
+        RewardRule rule;
+        rule.ItemEntry =
+            fields[1].Get<uint32>();
+        rule.BaseAmount =
+            fields[2].Get<uint32>();
+        rule.DepthStep =
+            fields[3].Get<uint32>();
+        rule.AmountPerStep =
+            fields[4].Get<uint32>();
+        rule.FirstClearOnly =
+            fields[5].Get<uint8>() != 0;
+        rule.ApplyGroupMultiplier =
+            fields[6].Get<uint8>() != 0;
+        rule.ApplySegmentMultiplier =
+            fields[7].Get<uint8>() != 0;
+
+        if (!rule.ItemEntry ||
+            !rule.DepthStep ||
+            !sObjectMgr->GetItemTemplate(
+                rule.ItemEntry))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid enabled Manastorm reward rule '{}': "
+                "item={} depthStep={}.",
+                key,
+                rule.ItemEntry,
+                rule.DepthStep);
+
+            return false;
+        }
+
+        if (key == "BEDLAM")
+        {
+            _bedlam = rule;
+            foundBedlam = true;
+        }
+        else if (key == "BONZO")
+        {
+            _bonzo = rule;
+            foundBonzo = true;
+        }
+    }
+    while (result->NextRow());
+
+    if (!foundBedlam ||
+        !foundBonzo ||
+        _bedlam.ItemEntry !=
+            ITEM_BEDLAM_BULLION ||
+        _bonzo.ItemEntry !=
+            ITEM_BONZO_BOLT ||
+        !_bedlam.FirstClearOnly ||
+        _bonzo.FirstClearOnly)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "BEDLAM and BONZO reward rules do not match "
+            "the authoritative reward roles.");
+
+        return false;
+    }
+
+    return true;
+}
+
+bool ManastormRewards::LoadGroupRewardMultipliers()
+{
+    QueryResult result =
+        WorldDatabase.Query(
+            "SELECT "
+            "min_members, max_members, multiplier "
+            "FROM manastorm_reward_group_multiplier "
+            "WHERE enabled = 1 "
+            "ORDER BY min_members, max_members");
+
+    if (!result)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to load manastorm_reward_group_multiplier. "
+            "Apply 14_manastorm_rewards.sql.");
+
+        return false;
+    }
+
+    do
+    {
+        Field* fields =
+            result->Fetch();
+
+        GroupRewardRange range;
+        range.MinMembers =
+            fields[0].Get<uint8>();
+        range.MaxMembers =
+            fields[1].Get<uint8>();
+        range.Multiplier =
+            fields[2].Get<double>();
+
+        if (!range.MinMembers ||
+            range.MaxMembers <
+                range.MinMembers ||
+            range.MaxMembers >
+                ManastormLimits::MaxMembers ||
+            !std::isfinite(
+                range.Multiplier) ||
+            range.Multiplier <= 0.0)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm reward group range "
+                "{}-{} = {}.",
+                uint32(range.MinMembers),
+                uint32(range.MaxMembers),
+                range.Multiplier);
+
+            return false;
+        }
+
+        for (GroupRewardRange const& existing :
+            _groupRewardRanges)
+        {
+            bool const overlaps =
+                range.MinMembers <=
+                    existing.MaxMembers &&
+                range.MaxMembers >=
+                    existing.MinMembers;
+
+            if (overlaps)
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Overlapping Manastorm reward group ranges "
+                    "{}-{} and {}-{}.",
+                    uint32(existing.MinMembers),
+                    uint32(existing.MaxMembers),
+                    uint32(range.MinMembers),
+                    uint32(range.MaxMembers));
+
+                return false;
+            }
+        }
+
+        _groupRewardRanges.push_back(
+            range);
+    }
+    while (result->NextRow());
+
+    return !_groupRewardRanges.empty();
+}
+
+bool ManastormRewards::LoadPotentialRewards()
+{
+    QueryResult result =
+        WorldDatabase.Query(
+            "SELECT "
+            "display_order, item_entry, enabled "
+            "FROM manastorm_potential_reward "
+            "ORDER BY display_order");
+
+    if (!result)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to load manastorm_potential_reward. "
+            "Apply 14_manastorm_rewards.sql.");
+
+        return false;
+    }
+
+    do
+    {
+        Field* fields =
+            result->Fetch();
+
+        PotentialReward reward;
+        reward.DisplayOrder =
+            fields[0].Get<uint8>();
+        reward.ItemEntry =
+            fields[1].Get<uint32>();
+        reward.Enabled =
+            fields[2].Get<uint8>() != 0;
+
+        if (!reward.DisplayOrder ||
+            !reward.ItemEntry ||
+            !sObjectMgr->GetItemTemplate(
+                reward.ItemEntry))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm potential reward "
+                "order={} item={}.",
+                uint32(
+                    reward.DisplayOrder),
+                reward.ItemEntry);
+
+            return false;
+        }
+
+        _potentialRewards.push_back(
+            reward);
+    }
+    while (result->NextRow());
+
+    if (_potentialRewards.size() != 7)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Native Manastorm queue expects seven potential "
+            "reward definitions; loaded {}.",
+            _potentialRewards.size());
+
+        return false;
+    }
+
+    constexpr uint32 expected[] =
+    {
+        97884,
+        1297307,
+        1297308,
+        1278049,
+        1278048,
+        97886,
+        97885
+    };
+
+    for (std::size_t index = 0;
+        index <
+            _potentialRewards.size();
+        ++index)
+    {
+        if (_potentialRewards[index]
+                .DisplayOrder !=
+                index + 1 ||
+            _potentialRewards[index]
+                .ItemEntry !=
+                expected[index])
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Potential reward slot {} must preserve "
+                "native item {}, but loaded order={} item={}.",
+                index + 1,
+                expected[index],
+                uint32(
+                    _potentialRewards[index]
+                        .DisplayOrder),
+                _potentialRewards[index]
+                    .ItemEntry);
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool ManastormRewards::LoadTreasureKeeperRule()
+{
+    QueryResult result =
+        WorldDatabase.Query(
+            "SELECT "
+            "creature_entry, base_chance_bp, "
+            "chance_per_depth_bp, chance_per_kill_bp, "
+            "max_chance_bp, bonus_cache_count, "
+            "ability_case_item, talent_case_item, "
+            "case_count, enabled "
+            "FROM manastorm_treasure_keeper_rule "
+            "WHERE rule_id = 1");
+
+    if (!result)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to load manastorm_treasure_keeper_rule. "
+            "Apply 14_manastorm_rewards.sql.");
+
+        return false;
+    }
+
+    Field* fields =
+        result->Fetch();
+
+    _treasureKeeper.CreatureEntry =
+        fields[0].Get<uint32>();
+    _treasureKeeper.BaseChanceBp =
+        fields[1].Get<uint32>();
+    _treasureKeeper.ChancePerDepthBp =
+        fields[2].Get<uint32>();
+    _treasureKeeper.ChancePerKillBp =
+        fields[3].Get<uint32>();
+    _treasureKeeper.MaxChanceBp =
+        fields[4].Get<uint32>();
+    _treasureKeeper.BonusCacheCount =
+        fields[5].Get<uint32>();
+    _treasureKeeper.AbilityCaseItem =
+        fields[6].Get<uint32>();
+    _treasureKeeper.TalentCaseItem =
+        fields[7].Get<uint32>();
+    _treasureKeeper.CaseCount =
+        fields[8].Get<uint32>();
+    _treasureKeeper.Enabled =
+        fields[9].Get<uint8>() != 0;
+
+    if (!_treasureKeeper.Enabled)
+        return true;
+
+    if (!_treasureKeeper.CreatureEntry ||
+        !_treasureKeeper.MaxChanceBp ||
+        _treasureKeeper.MaxChanceBp >
+            BASIS_POINTS ||
+        !sObjectMgr->GetCreatureTemplate(
+            _treasureKeeper.CreatureEntry) ||
+        (_treasureKeeper.AbilityCaseItem &&
+            !sObjectMgr->GetItemTemplate(
+                _treasureKeeper
+                    .AbilityCaseItem)) ||
+        (_treasureKeeper.TalentCaseItem &&
+            !sObjectMgr->GetItemTemplate(
+                _treasureKeeper
+                    .TalentCaseItem)))
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Enabled Treasure Keeper reward rule is invalid.");
+
+        return false;
+    }
+
+    return true;
+}
+
+bool ManastormRewards::ValidateCharacterSchema() const
+{
+    QueryResult result =
+        CharacterDatabase.Query(
+            "SELECT COUNT(*) "
+            "FROM character_manastorm_reward_state "
+            "WHERE guid = 0");
+
+    if (!result)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Character reward table is missing. "
+            "Apply 02_manastorm_rewards.sql to acore_characters.");
+
+        return false;
+    }
+
+    return true;
+}
+
+bool ManastormRewards::LoadState(
+    ObjectGuid::LowType characterGuid,
+    ManastormMode mode,
+    bool endgame,
+    ManastormRewardStateSnapshot& snapshot,
+    std::string& error) const
+{
+    snapshot = {};
+    error.clear();
+
+    if (!_loaded)
+    {
+        error =
+            "Manastorm reward policy is not loaded.";
+
+        return false;
+    }
+
+    QueryResult result =
+        CharacterDatabase.Query(
+            "SELECT "
+            "cache_chance_pct, "
+            "bedlam_remainder_bp, "
+            "bonzo_remainder_bp, "
+            "caches_earned, "
+            "bedlam_earned, "
+            "bonzo_earned "
+            "FROM character_manastorm_reward_state "
+            "WHERE guid = {} "
+            "AND mode = {} "
+            "AND track = {} "
+            "LIMIT 1",
+            characterGuid,
+            uint32(uint8(mode)),
+            uint32(
+                TrackBit(endgame)));
+
+    if (!result)
+        return true;
+
+    Field* fields =
+        result->Fetch();
+
+    snapshot.CacheChancePct =
+        std::min<uint32>(
+            100,
+            fields[0].Get<uint32>());
+
+    snapshot.BedlamRemainderBp =
+        fields[1].Get<uint32>() %
+            BASIS_POINTS;
+
+    snapshot.BonzoRemainderBp =
+        fields[2].Get<uint32>() %
+            BASIS_POINTS;
+
+    snapshot.CachesEarned =
+        fields[3].Get<uint32>();
+
+    snapshot.BedlamEarned =
+        fields[4].Get<uint64>();
+
+    snapshot.BonzoEarned =
+        fields[5].Get<uint64>();
+
+    return true;
+}
+
+uint32 ManastormRewards::CalculateBaseAmount(
+    RewardRule const& rule,
+    uint32 depth) const
+{
+    if (!depth)
+        return 0;
+
+    uint64 const steps =
+        uint64(depth - 1) /
+        uint64(rule.DepthStep);
+
+    uint64 const amount =
+        uint64(rule.BaseAmount) +
+        steps *
+            uint64(
+                rule.AmountPerStep);
+
+    return amount >
+        std::numeric_limits<uint32>::max()
+        ? std::numeric_limits<uint32>::max()
+        : uint32(amount);
+}
+
+uint32 ManastormRewards::ScaleCurrencyAmount(
+    uint32 baseAmount,
+    RewardRule const& rule,
+    double groupMultiplier,
+    double segmentMultiplier,
+    uint32 previousRemainderBp,
+    uint32& nextRemainderBp) const
+{
+    nextRemainderBp =
+        previousRemainderBp %
+        BASIS_POINTS;
+
+    if (!baseAmount)
+        return 0;
+
+    long double multiplier = 1.0L;
+
+    if (rule.ApplyGroupMultiplier)
+    {
+        multiplier *=
+            static_cast<long double>(
+                std::max(
+                    0.0,
+                    groupMultiplier));
+    }
+
+    if (rule.ApplySegmentMultiplier)
+    {
+        multiplier *=
+            static_cast<long double>(
+                std::max(
+                    0.0,
+                    segmentMultiplier));
+    }
+
+    long double const rawBasisPoints =
+        static_cast<long double>(
+            baseAmount) *
+        multiplier *
+        static_cast<long double>(
+            BASIS_POINTS) +
+        static_cast<long double>(
+            nextRemainderBp);
+
+    if (!std::isfinite(
+            static_cast<double>(
+                rawBasisPoints)) ||
+        rawBasisPoints <= 0.0L)
+    {
+        nextRemainderBp = 0;
+        return 0;
+    }
+
+    long double const capped =
+        std::min<long double>(
+            rawBasisPoints,
+            static_cast<long double>(
+                std::numeric_limits<
+                    uint64>::max()));
+
+    uint64 const scaledBasisPoints =
+        static_cast<uint64>(
+            std::floor(
+                capped + 0.5L));
+
+    uint64 const award =
+        scaledBasisPoints /
+        BASIS_POINTS;
+
+    nextRemainderBp =
+        uint32(
+            scaledBasisPoints %
+            BASIS_POINTS);
+
+    return award >
+        std::numeric_limits<uint32>::max()
+        ? std::numeric_limits<uint32>::max()
+        : uint32(award);
+}
+
+double ManastormRewards::GetGroupRewardMultiplier(
+    uint32 memberCount) const
+{
+    memberCount =
+        std::clamp<uint32>(
+            memberCount,
+            1,
+            ManastormLimits::MaxMembers);
+
+    for (GroupRewardRange const& range :
+        _groupRewardRanges)
+    {
+        if (memberCount >=
+                range.MinMembers &&
+            memberCount <=
+                range.MaxMembers)
+        {
+            return range.Multiplier;
+        }
+    }
+
+    return 1.0;
+}
+
+bool ManastormRewards::PrepareStageCompletion(
+    ManastormRun const& run,
+    CharacterDatabaseTransaction const& transaction,
+    std::vector<std::shared_ptr<ManastormRewardPublication>>& publications,
+    std::string& error) const
+{
+    publications.clear();
+    error.clear();
+
+    if (!_loaded ||
+        !transaction)
+    {
+        error =
+            "Manastorm reward backend is not ready.";
+
+        return false;
+    }
+
+    double const groupMultiplier =
+        GetGroupRewardMultiplier(
+            uint32(
+                run.GetMembers()
+                    .size()));
+
+    double const segmentMultiplier =
+        double(
+            run.GetSegment()
+                .RewardMultiplier);
+
+    uint8 const track =
+        TrackBit(
+            run.IsEndgame());
+
+    for (ObjectGuid::LowType characterGuid :
+        run.GetMembers())
+    {
+        Player* player =
+            ObjectAccessor::FindConnectedPlayer(
+                ObjectGuid::Create<
+                    HighGuid::Player>(
+                        characterGuid));
+
+        if (!player ||
+            !player->GetSession())
+        {
+            error =
+                "A Manastorm member disconnected before "
+                "the stage reward could be prepared.";
+
+            publications.clear();
+            return false;
+        }
+
+        ManastormRewardStateSnapshot state;
+
+        if (!LoadState(
+            characterGuid,
+            run.GetMode(),
+            run.IsEndgame(),
+            state,
+            error))
+        {
+            publications.clear();
+            return false;
+        }
+
+        QueryResult completed =
+            CharacterDatabase.Query(
+                "SELECT 1 "
+                "FROM character_manastorm_completed_depth "
+                "WHERE guid = {} "
+                "AND mode = {} "
+                "AND track = {} "
+                "AND depth = {} "
+                "LIMIT 1",
+                characterGuid,
+                uint32(
+                    uint8(
+                        run.GetMode())),
+                uint32(track),
+                run.GetDepth());
+
+        bool const firstClear =
+            !completed;
+
+        bool const wonNormalCache =
+            state.CacheChancePct >= 100 ||
+            (state.CacheChancePct > 0 &&
+                urand(1, 100) <=
+                    state.CacheChancePct);
+
+        uint32 const nextCacheChance =
+            wonNormalCache
+            ? 0
+            : std::min<uint32>(
+                100,
+                state.CacheChancePct +
+                    CACHE_PITY_STEP_PCT);
+
+        uint32 nextBedlamRemainder =
+            state.BedlamRemainderBp;
+
+        uint32 nextBonzoRemainder =
+            state.BonzoRemainderBp;
+
+        uint32 bedlam = 0;
+
+        if (firstClear)
+        {
+            bedlam =
+                ScaleCurrencyAmount(
+                    CalculateBaseAmount(
+                        _bedlam,
+                        run.GetDepth()),
+                    _bedlam,
+                    groupMultiplier,
+                    segmentMultiplier,
+                    state.BedlamRemainderBp,
+                    nextBedlamRemainder);
+        }
+
+        uint32 const bonzo =
+            ScaleCurrencyAmount(
+                CalculateBaseAmount(
+                    _bonzo,
+                    run.GetDepth()),
+                _bonzo,
+                groupMultiplier,
+                segmentMultiplier,
+                state.BonzoRemainderBp,
+                nextBonzoRemainder);
+
+        uint32 const cacheCount =
+            SaturatingAdd(
+                wonNormalCache
+                    ? 1u
+                    : 0u,
+                run.GetBonusCacheCount());
+
+        uint64 const nextBedlamEarned =
+            SaturatingAdd(
+                state.BedlamEarned,
+                bedlam);
+
+        uint64 const nextBonzoEarned =
+            SaturatingAdd(
+                state.BonzoEarned,
+                bonzo);
+
+        uint32 const nextCachesEarned =
+            SaturatingAdd(
+                state.CachesEarned,
+                cacheCount);
+
+        transaction->Append(
+            "INSERT INTO "
+            "character_manastorm_reward_state "
+            "(guid, mode, track, "
+            "cache_chance_pct, "
+            "bedlam_remainder_bp, "
+            "bonzo_remainder_bp, "
+            "caches_earned, "
+            "bedlam_earned, "
+            "bonzo_earned) "
+            "VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {}) "
+            "ON DUPLICATE KEY UPDATE "
+            "cache_chance_pct = VALUES(cache_chance_pct), "
+            "bedlam_remainder_bp = VALUES(bedlam_remainder_bp), "
+            "bonzo_remainder_bp = VALUES(bonzo_remainder_bp), "
+            "caches_earned = VALUES(caches_earned), "
+            "bedlam_earned = VALUES(bedlam_earned), "
+            "bonzo_earned = VALUES(bonzo_earned), "
+            "updated_at = CURRENT_TIMESTAMP",
+            characterGuid,
+            uint32(
+                uint8(
+                    run.GetMode())),
+            uint32(track),
+            nextCacheChance,
+            nextBedlamRemainder,
+            nextBonzoRemainder,
+            nextCachesEarned,
+            nextBedlamEarned,
+            nextBonzoEarned);
+
+        std::vector<
+            std::pair<uint32, uint32>>
+            stacks;
+
+        auto appendQuantity =
+            [&stacks, &error](
+                uint32 entry,
+                uint32 quantity) -> bool
+            {
+                if (!entry ||
+                    !quantity)
+                {
+                    return true;
+                }
+
+                ItemTemplate const* itemTemplate =
+                    sObjectMgr->
+                        GetItemTemplate(
+                            entry);
+
+                if (!itemTemplate)
+                {
+                    error =
+                        "A configured Manastorm reward item "
+                        "does not exist in item_template.";
+
+                    return false;
+                }
+
+                uint32 const maxStack =
+                    std::max<uint32>(
+                        1,
+                        itemTemplate->
+                            GetMaxStackSize());
+
+                uint32 remaining =
+                    quantity;
+
+                while (remaining)
+                {
+                    uint32 const count =
+                        std::min(
+                            remaining,
+                            maxStack);
+
+                    stacks.emplace_back(
+                        entry,
+                        count);
+
+                    remaining -=
+                        count;
+                }
+
+                return true;
+            };
+
+        if (!appendQuantity(
+                _bonzo.ItemEntry,
+                bonzo) ||
+            !appendQuantity(
+                _bedlam.ItemEntry,
+                bedlam) ||
+            !appendQuantity(
+                ITEM_MANASTORM_CACHE,
+                cacheCount) ||
+            !appendQuantity(
+                _treasureKeeper
+                    .AbilityCaseItem,
+                run.GetBonusAbilityCaseCount()) ||
+            !appendQuantity(
+                _treasureKeeper
+                    .TalentCaseItem,
+                run.GetBonusTalentCaseCount()))
+        {
+            publications.clear();
+            return false;
+        }
+
+        if (stacks.empty())
+        {
+            error =
+                "Manastorm stage completion produced no reward.";
+
+            publications.clear();
+            return false;
+        }
+
+        std::size_t stackIndex = 0;
+        uint32 mailPart = 0;
+
+        while (stackIndex <
+            stacks.size())
+        {
+            ++mailPart;
+
+            auto publication =
+                std::make_shared<
+                    ManastormRewardPublication>();
+
+            publication->CharacterGuid =
+                characterGuid;
+
+            Mail& mail =
+                publication->MailData;
+
+            mail.messageID =
+                sObjectMgr->
+                    GenerateMailID();
+
+            mail.messageType =
+                MAIL_CREATURE;
+
+            mail.stationery =
+                MAIL_STATIONERY_DEFAULT;
+
+            mail.mailTemplateId = 0;
+            mail.sender =
+                REWARD_MAIL_SENDER;
+            mail.receiver =
+                characterGuid;
+
+            mail.subject =
+                "Manastorm: level " +
+                std::to_string(
+                    run.GetDepth());
+
+            if (mailPart > 1)
+            {
+                mail.subject +=
+                    " (" +
+                    std::to_string(
+                        mailPart) +
+                    ")";
+            }
+
+            mail.body =
+                firstClear
+                ? "A new Manastorm depth was conquered. "
+                  "First-clear and repeatable rewards are enclosed."
+                : "Another Manastorm storm was conquered. "
+                  "Repeatable rewards are enclosed.";
+
+            if (wonNormalCache)
+            {
+                mail.body +=
+                    " Your Manastorm Cache protection reset to 0%.";
+            }
+            else
+            {
+                mail.body +=
+                    " Your Manastorm Cache chance is now " +
+                    std::to_string(
+                        nextCacheChance) +
+                    "%.";
+            }
+
+            mail.deliver_time =
+                GameTime::GetGameTime()
+                    .count();
+
+            mail.expire_time =
+                mail.deliver_time +
+                30 * DAY;
+
+            mail.money = 0;
+            mail.COD = 0;
+            mail.checked =
+                MAIL_CHECK_MASK_HAS_BODY;
+
+            mail.state =
+                MAIL_STATE_UNCHANGED;
+
+            uint32 attachmentCount = 0;
+
+            while (stackIndex <
+                    stacks.size() &&
+                attachmentCount <
+                    MAX_MAIL_ITEMS)
+            {
+                auto const [entry, count] =
+                    stacks[stackIndex++];
+
+                std::unique_ptr<Item> item(
+                    Item::CreateItem(
+                        entry,
+                        count,
+                        player));
+
+                if (!item)
+                {
+                    error =
+                        "Unable to create a durable "
+                        "Manastorm reward item.";
+
+                    publications.clear();
+                    return false;
+                }
+
+                item->SaveToDB(
+                    transaction);
+
+                mail.AddItem(
+                    item->GetGUID()
+                        .GetCounter(),
+                    entry);
+
+                auto* attachment =
+                    CharacterDatabase
+                        .GetPreparedStatement(
+                            CHAR_INS_MAIL_ITEM);
+
+                attachment->SetData(
+                    0,
+                    mail.messageID);
+
+                attachment->SetData(
+                    1,
+                    item->GetGUID()
+                        .GetCounter());
+
+                attachment->SetData(
+                    2,
+                    characterGuid);
+
+                transaction->Append(
+                    attachment);
+
+                publication->Items
+                    .push_back(
+                        std::move(
+                            item));
+
+                ++attachmentCount;
+            }
+
+            auto* statement =
+                CharacterDatabase
+                    .GetPreparedStatement(
+                        CHAR_INS_MAIL);
+
+            statement->SetData(
+                0,
+                mail.messageID);
+            statement->SetData(
+                1,
+                mail.messageType);
+            statement->SetData(
+                2,
+                int8(
+                    mail.stationery));
+            statement->SetData(
+                3,
+                mail.mailTemplateId);
+            statement->SetData(
+                4,
+                mail.sender);
+            statement->SetData(
+                5,
+                mail.receiver);
+            statement->SetData(
+                6,
+                mail.subject);
+            statement->SetData(
+                7,
+                mail.body);
+            statement->SetData(
+                8,
+                true);
+            statement->SetData(
+                9,
+                uint32(
+                    mail.expire_time));
+            statement->SetData(
+                10,
+                uint32(
+                    mail.deliver_time));
+            statement->SetData(
+                11,
+                mail.money);
+            statement->SetData(
+                12,
+                mail.COD);
+            statement->SetData(
+                13,
+                uint8(
+                    mail.checked));
+
+            transaction->Append(
+                statement);
+
+            publications.push_back(
+                publication);
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Prepared Manastorm rewards: character={} depth={} "
+            "mode={} track={} firstClear={} bedlam={} bonzo={} "
+            "normalCache={} bonusCaches={} abilityCases={} "
+            "talentCases={} cacheChance={} -> {} "
+            "groupMultiplier={:.3f} segmentMultiplier={:.3f}.",
+            characterGuid,
+            run.GetDepth(),
+            ManastormModeName(
+                run.GetMode()),
+            uint32(track),
+            firstClear,
+            bedlam,
+            bonzo,
+            wonNormalCache,
+            run.GetBonusCacheCount(),
+            run.GetBonusAbilityCaseCount(),
+            run.GetBonusTalentCaseCount(),
+            state.CacheChancePct,
+            nextCacheChance,
+            groupMultiplier,
+            segmentMultiplier);
+    }
+
+    return true;
+}
+
+void ManastormRewards::PublishCommitted(
+    std::vector<std::shared_ptr<ManastormRewardPublication>>& publications) const
+{
+    for (std::shared_ptr<ManastormRewardPublication>& publication :
+        publications)
+    {
+        if (!publication)
+            continue;
+
+        sMailMgr->OnMailSent(
+            publication->
+                CharacterGuid);
+
+        Player* player =
+            ObjectAccessor::
+                FindConnectedPlayer(
+                    ObjectGuid::Create<
+                        HighGuid::Player>(
+                            publication->
+                                CharacterGuid));
+
+        if (!player)
+            continue;
+
+        player->AddNewMailDeliverTime(
+            publication->
+                MailData.deliver_time);
+
+        player->AddMail(
+            new Mail(
+                publication->
+                    MailData));
+
+        for (std::unique_ptr<Item>& item :
+            publication->Items)
+        {
+            if (item)
+            {
+                player->AddMItem(
+                    item.release());
+            }
+        }
+    }
+
+    publications.clear();
+}
+
+std::vector<ManastormRewardVisibilityRecord>
+ManastormRewards::BuildVisibilityRecords() const
+{
+    std::vector<
+        ManastormRewardVisibilityRecord>
+        records;
+
+    records.reserve(
+        _potentialRewards.size());
+
+    for (PotentialReward const& reward :
+        _potentialRewards)
+    {
+        ManastormRewardVisibilityRecord record;
+        record.ItemEntry =
+            reward.ItemEntry;
+
+        // Native action values recovered from Extensions.dll:
+        //   0 = NONE
+        //   1 = HIDE
+        //   2 = LOCKED_RATE_LIMIT_EXHAUSTED
+        //
+        // No reward rate-limit policy is being fabricated here.
+        record.Action =
+            reward.Enabled
+            ? 0
+            : 1;
+
+        records.push_back(
+            record);
+    }
+
+    return records;
+}
+
+bool ManastormRewards::IsTreasureKeeperEntry(
+    uint32 entry) const
+{
+    return _loaded &&
+        _treasureKeeper.Enabled &&
+        entry ==
+            _treasureKeeper
+                .CreatureEntry;
+}
+
+bool ManastormRewards::IsActiveTreasureKeeper(
+    Creature const* creature,
+    ManastormRun const& run) const
+{
+    return creature &&
+        IsTreasureKeeperEntry(
+            creature->GetEntry()) &&
+        !run.GetTreasureKeeperGuid()
+            .IsEmpty() &&
+        run.GetTreasureKeeperGuid() ==
+            creature->GetGUID();
+}
+
+bool ManastormRewards::TrySpawnTreasureKeeper(
+    Creature* killedTrash,
+    ManastormRun& run) const
+{
+    if (!_loaded ||
+        !_treasureKeeper.Enabled ||
+        !killedTrash ||
+        run.GetState() !=
+            ManastormRunState::Active ||
+        run.TreasureKeeperSpawned() ||
+        !run.IsStageCreature(
+            killedTrash->GetGUID()))
+    {
+        return false;
+    }
+
+    uint32 const trashKills =
+        run.IncrementTreasureTrashKills();
+
+    uint64 const rawChance =
+        uint64(
+            _treasureKeeper
+                .BaseChanceBp) +
+        uint64(run.GetDepth()) *
+            uint64(
+                _treasureKeeper
+                    .ChancePerDepthBp) +
+        uint64(trashKills) *
+            uint64(
+                _treasureKeeper
+                    .ChancePerKillBp);
+
+    uint32 const chanceBp =
+        uint32(
+            std::min<uint64>(
+                _treasureKeeper
+                    .MaxChanceBp,
+                rawChance));
+
+    if (!chanceBp ||
+        urand(1, BASIS_POINTS) >
+            chanceBp)
+    {
+        return false;
+    }
+
+    Map* map =
+        killedTrash->GetMap();
+
+    if (!map)
+        return false;
+
+    run.SetTreasureKeeperSpawned(
+        true);
+
+    Position const position =
+        killedTrash->
+            GetFirstCollisionPosition(
+                4.0f,
+                frand(
+                    0.0f,
+                    TWO_PI));
+
+    Creature* keeper =
+        map->SummonCreature(
+            _treasureKeeper
+                .CreatureEntry,
+            position);
+
+    if (!keeper)
+    {
+        run.SetTreasureKeeperSpawned(
+            false);
+
+        LOG_ERROR(
+            LOG_FILTER,
+            "Manastorm run {} rolled Treasure Keeper "
+            "at depth {} but creature {} could not be summoned.",
+            run.GetRunId(),
+            run.GetDepth(),
+            _treasureKeeper
+                .CreatureEntry);
+
+        return false;
+    }
+
+    run.SetTreasureKeeperGuid(
+        keeper->GetGUID());
+
+    keeper->SetFaction(14);
+    keeper->SetReactState(
+        REACT_AGGRESSIVE);
+    keeper->SetLootRewardDisabled(
+        true);
+    keeper->
+        SetReputationRewardDisabled(
+            true);
+    keeper->SetLootMode(0);
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Manastorm run {} spawned Treasure Keeper {} after "
+        "{} eligible trash kills at depth {} "
+        "(chance={:.2f}%).",
+        run.GetRunId(),
+        keeper->GetGUID()
+            .GetRawValue(),
+        trashKills,
+        run.GetDepth(),
+        double(chanceBp) /
+            100.0);
+
+    return true;
+}
+
+void ManastormRewards::OnTreasureKeeperKilled(
+    ManastormRun& run) const
+{
+    if (!_loaded ||
+        !_treasureKeeper.Enabled)
+    {
+        return;
+    }
+
+    run.ClearTreasureKeeperGuid();
+
+    run.AddBonusCaches(
+        _treasureKeeper
+            .BonusCacheCount);
+
+    if (_treasureKeeper.CaseCount &&
+        (_treasureKeeper.AbilityCaseItem ||
+            _treasureKeeper
+                .TalentCaseItem))
+    {
+        bool const ability =
+            !_treasureKeeper
+                .TalentCaseItem ||
+            (_treasureKeeper
+                .AbilityCaseItem &&
+                urand(0, 1) == 0);
+
+        if (ability)
+        {
+            run.AddBonusAbilityCases(
+                _treasureKeeper
+                    .CaseCount);
+        }
+        else
+        {
+            run.AddBonusTalentCases(
+                _treasureKeeper
+                    .CaseCount);
+        }
+    }
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Manastorm run {} secured Treasure Keeper rewards: "
+        "bonusCaches={} abilityCases={} talentCases={}.",
+        run.GetRunId(),
+        run.GetBonusCacheCount(),
+        run.GetBonusAbilityCaseCount(),
+        run.GetBonusTalentCaseCount());
+}

@@ -8,6 +8,7 @@
 #include <limits>
 #include "ManastormDataStore.h"
 #include "ManastormRun.h"
+#include "ManastormRewards.h"
 
 namespace
 {
@@ -493,6 +494,24 @@ bool ManastormProgression::RecordStageCompletion(
 
     CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
 
+    // Rewards and progression are one durable stage-completion unit.
+    //
+    // ManastormRewards appends currency/cache/pity state and the durable
+    // reward mail/items to THIS SAME character transaction. Nothing is
+    // published to the online player until the whole transaction commits.
+    std::vector<std::shared_ptr<ManastormRewardPublication>>
+        rewardPublications;
+
+    if (!ManastormRewards::Instance()
+        .PrepareStageCompletion(
+            run,
+            transaction,
+            rewardPublications,
+            error))
+    {
+        return false;
+    }
+
     for (ObjectGuid::LowType characterGuid :
         run.GetMembers())
     {
@@ -770,9 +789,15 @@ bool ManastormProgression::RecordStageCompletion(
     if (!CharacterDatabase.AsyncCommitTransaction(transaction).m_future.get())
     {
         toastEvents.clear();
-        error = "Unable to commit shared Manastorm progression.";
+        rewardPublications.clear();
+        error =
+            "Unable to commit shared Manastorm progression and rewards.";
         return false;
     }
+
+    ManastormRewards::Instance()
+        .PublishCommitted(
+            rewardPublications);
 
     return true;
 }
