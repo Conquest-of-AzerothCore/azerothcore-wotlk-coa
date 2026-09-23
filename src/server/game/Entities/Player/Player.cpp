@@ -15593,8 +15593,10 @@ void Player::_SaveCharacter(bool create, CharacterDatabaseTransaction trans)
         stmt->SetData(index++, GetByteValue(PLAYER_BYTES_2, 3));
         stmt->SetData(index++, GetPlayerFlags());
 
-        if (_scriptedPrivateMapId && (GetMapId() == _scriptedPrivateMapId
-            || (IsBeingTeleported() && GetTeleportDest().GetMapId() == _scriptedPrivateMapId)))
+        if (_scriptedPrivateMapId != MAPID_INVALID &&
+            (GetMapId() == _scriptedPrivateMapId
+                || (IsBeingTeleported() &&
+                    GetTeleportDest().GetMapId() == _scriptedPrivateMapId)))
         {
             // Private-instance IDs are process-local. Crash recovery always starts outside.
             stmt->SetData(index++, uint16(_scriptedPrivateReturn.GetMapId()));
