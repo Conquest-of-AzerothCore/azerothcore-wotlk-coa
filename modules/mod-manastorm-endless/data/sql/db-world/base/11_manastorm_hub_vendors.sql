@@ -323,7 +323,21 @@ VALUES
     (80919,  0, 100722, 1, 1, 0);
 
 -- ---------------------------------------------------------------------------
--- Native Manastorm hub object
+-- Recovered Manastorm / portal-platform objects
+-- ---------------------------------------------------------------------------
+--
+-- 105189 / display 300510 is the recovered object named "Manastorm", but the
+-- shutdown client cache confirms that its display is the sign/house-style
+-- object seen during earlier testing. Keep the template for archaeology, but
+-- do NOT use it as the portal platform.
+--
+-- 20832 / display 1055964 is the shutdown-cache object literally named
+-- "Teleport Pad". Its exact cached GAMEOBJECT_TYPE_GENERIC payload is:
+--   size 0.7
+--   Data0=57, Data3=1, Data10=1, Data12=1, Data15=1
+--   all other Data fields = 0
+-- This is the portal-platform object to use for the Manastorm hub/portal-pad
+-- presentation.
 -- ---------------------------------------------------------------------------
 
 INSERT INTO `gameobject_template`
@@ -374,11 +388,25 @@ VALUES
     '',
     '',
     1,
-    1,
-    1,
+    1, 1, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0,
+    '',
+    '',
+    0
+),
+(
+    20832,
+    5,
+    1055964,
+    'Teleport Pad',
+    '',
+    '',
+    '',
+    0.7,
+    57, 0, 0, 1, 0, 0, 0, 0,
+    0, 0, 1, 0, 1, 0, 0, 1,
+    0, 0, 0, 0, 0, 0, 0, 0,
     '',
     '',
     0
