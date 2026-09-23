@@ -5112,7 +5112,8 @@ bool ManastormMgr::UseStagePortal(
         return false;
     }
 
-    if (portal->GetEntry() != NPC_STAGE_PORTAL)
+    if (portal->GetEntry() !=
+        NPC_STAGE_PORTAL)
     {
         error =
             "That creature is not the active Manastorm stage portal.";
@@ -5131,142 +5132,341 @@ bool ManastormMgr::UseStagePortal(
         return false;
     }
 
-    if (run->GetState() !=
-        ManastormRunState::StageComplete)
+    ObjectGuid::LowType const playerGuid =
+        player->GetGUID().GetCounter();
+
+    bool const firstCrossing =
+        run->GetState() ==
+            ManastormRunState::StageComplete;
+
+    if (firstCrossing)
     {
-        error =
-            "The current Manastorm stage is not ready to advance.";
+        ManastormSegment const& segment =
+            run->GetSegment();
 
-        return false;
-    }
+        if (player->GetMapId() !=
+                segment.MapId ||
+            player->GetInstanceId() !=
+                run->GetInstanceId() ||
+            portal->GetMapId() !=
+                segment.MapId ||
+            portal->GetInstanceId() !=
+                run->GetInstanceId() ||
+            run->GetPortalGuid().IsEmpty() ||
+            portal->GetGUID() !=
+                run->GetPortalGuid())
+        {
+            error =
+                "That portal does not belong to your current Manastorm stage.";
 
-    ManastormSegment const& segment =
-        run->GetSegment();
+            return false;
+        }
 
-    //
-    // Do not let a copied/stale 80910 outside this exact disposable stage
-    // advance the run.
-    //
-    if (player->GetMapId() !=
-            segment.MapId ||
-        player->GetInstanceId() !=
-            run->GetInstanceId() ||
-        portal->GetMapId() !=
-            segment.MapId ||
-        portal->GetInstanceId() !=
-            run->GetInstanceId())
-    {
-        error =
-            "That portal does not belong to your current Manastorm stage.";
+        uint32 const completedDepth =
+            run->GetDepth();
 
-        return false;
-    }
+        std::string transitionError;
 
-    ObjectGuid const activePortalGuid =
-        run->GetPortalGuid();
+        if (!TransitionToNextStage(
+                *run,
+                transitionError,
+                playerGuid,
+                false))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm run {} failed to prepare the next stage "
+                "after player {} used the portal at depth {}: {}",
+                run->GetRunId(),
+                playerGuid,
+                completedDepth,
+                transitionError);
 
-    if (activePortalGuid.IsEmpty() ||
-        portal->GetGUID() != activePortalGuid)
-    {
-        error =
-            "That is not the active portal for this Manastorm stage.";
+            error =
+                transitionError.empty()
+                ? "The next Manastorm stage could not be prepared."
+                : transitionError;
 
-        return false;
-    }
+            FailRun(
+                *run,
+                std::string(
+                    "Stage transition failed after portal click: ") +
+                    error);
 
-    uint64 const runId =
-        run->GetRunId();
+            return false;
+        }
 
-    uint32 const completedDepth =
-        run->GetDepth();
-
-    //
-    // Clicking wins the race against the fallback timer. The normal timer
-    // path remains untouched when nobody interacts with the portal.
-    //
-    _transitionTimers.erase(
-        runId);
-
-    std::string transitionError;
-
-    if (!TransitionToNextStage(
-            *run,
-            transitionError))
-    {
-        LOG_ERROR(
+        LOG_INFO(
             LOG_FILTER,
-            "Manastorm run {} failed to transition after portal click "
-            "at completed depth {}: {}",
-            runId,
-            completedDepth,
-            transitionError);
+            "Manastorm run {} prepared depth {} after player {} crossed "
+            "the stage portal. Other members remain in the completed stage "
+            "until they use the portal or the five-second fallback expires.",
+            run->GetRunId(),
+            run->GetDepth(),
+            playerGuid);
 
+        return true;
+    }
+
+    if (!run->HasPreviousStage() ||
+        !run->IsPendingStageTransfer(
+            playerGuid))
+    {
         error =
-            transitionError.empty()
-            ? "The next Manastorm stage could not be prepared."
-            : transitionError;
+            "The current Manastorm stage is not waiting for you to cross.";
 
-        FailRun(
+        return false;
+    }
+
+    ManastormSegment const& previous =
+        run->GetPreviousSegment();
+
+    if (player->GetMapId() !=
+            previous.MapId ||
+        player->GetInstanceId() !=
+            run->GetPreviousInstanceId() ||
+        portal->GetMapId() !=
+            previous.MapId ||
+        portal->GetInstanceId() !=
+            run->GetPreviousInstanceId() ||
+        run->GetPreviousPortalGuid().IsEmpty() ||
+        portal->GetGUID() !=
+            run->GetPreviousPortalGuid())
+    {
+        error =
+            "That portal is not the completed-stage portal assigned to you.";
+
+        return false;
+    }
+
+    if (!TransferMemberToCurrentStage(
+            player,
             *run,
-            std::string(
-                "Stage transition failed after portal click: ") +
-                error);
-
+            error))
+    {
         return false;
     }
 
     LOG_INFO(
         LOG_FILTER,
-        "Manastorm run {} advanced immediately from completed depth {} "
-        "because player {} used the recovered stage portal.",
-        runId,
-        completedDepth,
-        player->GetGUID().GetCounter());
+        "Manastorm run {} transferred member {} to prepared depth {} "
+        "after that member used the completed-stage portal.",
+        run->GetRunId(),
+        playerGuid,
+        run->GetDepth());
 
     return true;
 }
 
 bool ManastormMgr::TransitionToNextStage(
     ManastormRun& run,
-    std::string& error)
+    std::string& error,
+    ObjectGuid::LowType immediateMemberGuid,
+    bool transferAll)
 {
     error.clear();
 
-    ObjectGuid::LowType const memberGuid = run.GetOwnerGuid();
-
-    Player* player = ObjectAccessor::FindConnectedPlayer(
-        ObjectGuid::Create<HighGuid::Player>(memberGuid));
-
-    if (!player || !player->GetSession())
+    if (run.HasPreviousStage())
     {
-        error = "The Endless player disconnected before stage transition.";
+        if (!transferAll)
+        {
+            Player* member =
+                ObjectAccessor::FindConnectedPlayer(
+                    ObjectGuid::Create<
+                        HighGuid::Player>(
+                            immediateMemberGuid));
+
+            if (!member)
+            {
+                error =
+                    "The Manastorm member disconnected before crossing the portal.";
+
+                return false;
+            }
+
+            return TransferMemberToCurrentStage(
+                member,
+                run,
+                error);
+        }
+
+        run.AllowStartWithMissingMembers();
+
+        std::vector<ObjectGuid::LowType>
+            pending(
+                run.GetPendingStageTransferMembers()
+                    .begin(),
+                run.GetPendingStageTransferMembers()
+                    .end());
+
+        for (ObjectGuid::LowType guid :
+            pending)
+        {
+            Player* member =
+                ObjectAccessor::FindConnectedPlayer(
+                    ObjectGuid::Create<
+                        HighGuid::Player>(
+                            guid));
+
+            if (!member ||
+                !member->GetSession() ||
+                !member->IsInWorld())
+            {
+                // The five-second fallback has expired. An offline member is
+                // no longer allowed to keep the completed stage alive; on
+                // reconnect OnPlayerLogin routes them into the current stage.
+                run.MarkStageTransferComplete(
+                    guid);
+
+                continue;
+            }
+
+            if (member->IsBeingTeleported())
+                continue;
+
+            std::string transferError;
+
+            if (!TransferMemberToCurrentStage(
+                    member,
+                    run,
+                    transferError))
+            {
+                LOG_WARN(
+                    LOG_FILTER,
+                    "Manastorm run {} could not auto-transfer member {} "
+                    "after the five-second fallback: {}",
+                    run.GetRunId(),
+                    guid,
+                    transferError);
+            }
+        }
+
+        for (ObjectGuid::LowType guid :
+            run.GetMembers())
+        {
+            Player* member =
+                ObjectAccessor::FindConnectedPlayer(
+                    ObjectGuid::Create<
+                        HighGuid::Player>(
+                            guid));
+
+            if (member &&
+                member->IsInWorld() &&
+                !member->IsBeingTeleported() &&
+                member->GetMapId() ==
+                    run.GetSegment().MapId &&
+                member->GetInstanceId() ==
+                    run.GetInstanceId())
+            {
+                OnPlayerEnterMap(
+                    member->FindMap(),
+                    member);
+
+                break;
+            }
+        }
+
+        if (!run.HasPendingStageTransfers())
+        {
+            FinishPreviousStageTransition(
+                run);
+        }
+
+        return true;
+    }
+
+    if (run.GetState() !=
+        ManastormRunState::StageComplete)
+    {
+        error =
+            "The Manastorm run is not ready to prepare another stage.";
+
         return false;
     }
 
-    if (run.GetDepth() == std::numeric_limits<uint32>::max())
+    if (run.GetDepth() ==
+        std::numeric_limits<uint32>::max())
     {
-        error = "The Endless depth counter reached its maximum value.";
+        error =
+            "The Endless depth counter reached its maximum value.";
+
         return false;
     }
 
-    uint32 const previousDepth = run.GetDepth();
+    Player* creator = nullptr;
+
+    if (immediateMemberGuid)
+    {
+        creator =
+            ObjectAccessor::FindConnectedPlayer(
+                ObjectGuid::Create<
+                    HighGuid::Player>(
+                        immediateMemberGuid));
+    }
+
+    if (!creator ||
+        !creator->GetSession() ||
+        !creator->IsInWorld() ||
+        creator->IsBeingTeleported())
+    {
+        creator = nullptr;
+
+        for (ObjectGuid::LowType guid :
+            run.GetMembers())
+        {
+            Player* candidate =
+                ObjectAccessor::FindConnectedPlayer(
+                    ObjectGuid::Create<
+                        HighGuid::Player>(
+                            guid));
+
+            if (candidate &&
+                candidate->GetSession() &&
+                candidate->IsInWorld() &&
+                !candidate->IsBeingTeleported())
+            {
+                creator =
+                    candidate;
+                break;
+            }
+        }
+    }
+
+    if (!creator)
+    {
+        error =
+            "No connected Manastorm member is ready to create the next stage.";
+
+        return false;
+    }
+
+    ObjectGuid::LowType const creatorGuid =
+        creator->GetGUID().GetCounter();
+
+    uint32 const previousDepth =
+        run.GetDepth();
+
     uint32 const previousSegmentId =
         run.GetSegment().SegmentId;
+
     uint32 const previousMapId =
         run.GetSegment().MapId;
+
     uint32 const previousInstanceId =
         run.GetInstanceId();
 
-    uint32 const nextDepth = previousDepth + 1;
+    uint32 const nextDepth =
+        previousDepth + 1;
 
-    ManastormProgressionSnapshot progression;
+    ManastormProgressionSnapshot
+        progression;
 
     if (!ManastormProgression::LoadSnapshot(
-        run.GetOwnerGuid(),
-        run.GetMode(),
-        run.IsEndgame(),
-        progression,
-        error))
+            run.GetOwnerGuid(),
+            run.GetMode(),
+            run.IsEndgame(),
+            progression,
+            error))
     {
         return false;
     }
@@ -5274,10 +5474,13 @@ bool ManastormMgr::TransitionToNextStage(
     ManastormGenerator generator;
 
     uint32 const forcedIntroSegmentId =
-        progression.PendingIntroDepth == nextDepth
+        progression.PendingIntroDepth ==
+            nextDepth
         ? (run.IsEndgame()
-            ? progression.PendingEndgameIntroSegmentId
-            : progression.PendingIntroSegmentId)
+            ? progression
+                .PendingEndgameIntroSegmentId
+            : progression
+                .PendingIntroSegmentId)
         : 0;
 
     ManastormSegment const* nextSegment =
@@ -5291,27 +5494,37 @@ bool ManastormMgr::TransitionToNextStage(
 
     if (!nextSegment)
     {
-        error = "No enabled Manastorm segment is eligible for the next depth.";
+        error =
+            "No enabled Manastorm segment is eligible for the next depth.";
+
         return false;
     }
 
-    ManastormScalingPoint const nextScaling =
-        ManastormDataStore::Instance()
-        .GetScalingForDepth(
-            nextDepth,
-            uint32(run.GetMembers().size()));
+    ManastormScalingPoint const
+        nextScaling =
+            ManastormDataStore::Instance()
+                .GetScalingForDepth(
+                    nextDepth,
+                    uint32(
+                        run.GetMembers()
+                            .size()));
 
+    run.BeginPreviousStageTransition();
+
+    // The completed map remains alive as a five-second portal waiting room,
+    // but it no longer owns combat callbacks once the next stage exists.
     _stageRunIds.erase(
         MakeStageKey(
             previousMapId,
             previousInstanceId));
 
-    run.SetState(ManastormRunState::Transitioning);
+    run.SetState(
+        ManastormRunState::Transitioning);
 
     uint8 const nextCreatureLevel =
         ResolveCreatureLevel(
             run.GetMembers(),
-            player->GetLevel());
+            creator->GetLevel());
 
     run.PrepareNextStage(
         nextCreatureLevel,
@@ -5324,35 +5537,90 @@ bool ManastormMgr::TransitionToNextStage(
             run,
             progression.UnlockedAffixIds);
 
-    bool const prepared = PrepareStage(player, run, error);
-
-    if (Map* previous = sMapMgr->FindMap(previousMapId, previousInstanceId))
-        if (previous->IsScriptedPrivateInstance())
-            previous->RequestScriptedPrivateUnload();
-
-    if (!prepared)
+    if (!PrepareStage(
+            creator,
+            run,
+            error,
+            creatorGuid))
+    {
         return false;
+    }
 
-    LOG_INFO(LOG_FILTER,
-        "Manastorm run {} transitioned from depth {} segment {} "
-        "to depth {} segment {} map={} instance={} encounter={} "
-        "objective={} tele={}.",
+    if (transferAll)
+    {
+        run.AllowStartWithMissingMembers();
+
+        std::vector<ObjectGuid::LowType>
+            pending(
+                run.GetPendingStageTransferMembers()
+                    .begin(),
+                run.GetPendingStageTransferMembers()
+                    .end());
+
+        for (ObjectGuid::LowType guid :
+            pending)
+        {
+            if (guid == creatorGuid)
+                continue;
+
+            Player* member =
+                ObjectAccessor::FindConnectedPlayer(
+                    ObjectGuid::Create<
+                        HighGuid::Player>(
+                            guid));
+
+            if (!member ||
+                !member->GetSession() ||
+                !member->IsInWorld())
+            {
+                run.MarkStageTransferComplete(
+                    guid);
+
+                continue;
+            }
+
+            if (member->IsBeingTeleported())
+                continue;
+
+            std::string transferError;
+
+            if (!TransferMemberToCurrentStage(
+                    member,
+                    run,
+                    transferError))
+            {
+                LOG_WARN(
+                    LOG_FILTER,
+                    "Manastorm run {} could not auto-transfer member {} "
+                    "while opening depth {}: {}",
+                    run.GetRunId(),
+                    guid,
+                    nextDepth,
+                    transferError);
+            }
+        }
+    }
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Manastorm run {} prepared depth {} segment {} from completed "
+        "depth {} segment {}. Previous map={} instance={} remains available "
+        "only for pending portal transfers.",
         run.GetRunId(),
-        previousDepth,
-        previousSegmentId,
         nextDepth,
         nextSegment->SegmentId,
-        nextSegment->MapId,
-        run.GetInstanceId(),
-        nextSegment->DungeonEncounterId,
-        nextSegment->ObjectiveCreatureEntry,
-        nextSegment->StartGameTeleId);
+        previousDepth,
+        previousSegmentId,
+        previousMapId,
+        previousInstanceId);
 
-    player->SendSystemMessage(
-        "Manastorm: next stage prepared. Teleporting now.");
+    creator->SendSystemMessage(
+        "Manastorm: next stage prepared. "
+        "Other members have until the five-second fallback to cross.");
 
     return true;
 }
+
 
 void ManastormMgr::UpdateHeartPickups(uint32 diff)
 {
