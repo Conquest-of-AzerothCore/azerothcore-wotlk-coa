@@ -228,14 +228,11 @@ namespace
     constexpr uint32 SPELL_CHAOTIC_LINK = 93459;
 
     // 80919 is the native Cogsley non-combat companion/vendor summoned by
-    // spell 93418. It must never double as the run's Begin/Continue/Leave NPC.
+    // spell 93418.
     constexpr uint32 NPC_COGSLEY = 80919;
 
-    // Local reconstruction-only controller until the exact native transition
-    // controller is proven. Keeping this distinct protects Cogsley's native
-    // companion semantics.
-    constexpr uint32 NPC_STAGE_GUIDE = 900027;
-
+    // Existing transition placeholder. Native click-to-next-stage portal
+    // reconstruction is deliberately deferred.
     constexpr uint32 NPC_STAGE_PORTAL = 12999;
     constexpr uint32 SPELL_SAFETY_BUBBLE = 93306;
     constexpr uint32 SPELL_SAFETY_BUBBLE_HELPER = 93307;
@@ -1856,74 +1853,46 @@ void ManastormMgr::UpdateManastormPotionCharges(
     }
 }
 
-void ManastormMgr::SpawnStageGuide(Map* map, ManastormRun& run, Position const& position, bool completed)
+void ManastormMgr::SpawnStagePortal(
+    Map* map,
+    ManastormRun& run,
+    Position const& position)
 {
-    if (Creature* previous = map->GetCreature(run.GetGuideGuid()))
-        previous->DespawnOrUnsummon();
-    run.SetGuideGuid(ObjectGuid::Empty);
-    if (Creature* guide = map->SummonCreature(NPC_STAGE_GUIDE, position))
+    if (!map)
+        return;
+
+    if (Creature* previous =
+        map->GetCreature(
+            run.GetPortalGuid()))
     {
-        guide->SetFaction(35);
-        guide->SetReactState(REACT_PASSIVE);
-        guide->ReplaceAllNpcFlags(UNIT_NPC_FLAG_GOSSIP);
-        run.SetGuideGuid(guide->GetGUID());
+        previous->DespawnOrUnsummon();
+    }
+
+    run.SetPortalGuid(
+        ObjectGuid::Empty);
+
+    if (Creature* portal =
+        map->SummonCreature(
+            NPC_STAGE_PORTAL,
+            position))
+    {
+        portal->SetFaction(35);
+        portal->SetReactState(REACT_PASSIVE);
+        portal->AddAura(
+            SPELL_STAGE_PORTAL,
+            portal);
+
+        run.SetPortalGuid(
+            portal->GetGUID());
     }
     else
-        LOG_ERROR(LOG_FILTER, "Cannot summon Manastorm guide {} for run {}", NPC_STAGE_GUIDE, run.GetRunId());
-    if (completed)
     {
-        if (Creature* portal = map->SummonCreature(NPC_STAGE_PORTAL, position))
-        {
-            portal->SetFaction(35);
-            portal->SetReactState(REACT_PASSIVE);
-            portal->AddAura(SPELL_STAGE_PORTAL, portal);
-            run.SetPortalGuid(portal->GetGUID());
-        }
-        else
-            LOG_ERROR(LOG_FILTER, "Cannot summon Manastorm portal {} for run {}", NPC_STAGE_PORTAL, run.GetRunId());
+        LOG_ERROR(
+            LOG_FILTER,
+            "Cannot summon Manastorm transition placeholder {} for run {}.",
+            NPC_STAGE_PORTAL,
+            run.GetRunId());
     }
-}
-
-bool ManastormMgr::HandleGuideGossip(Player* player, Creature* creature, uint32 action)
-{
-    ManastormRun* run = GetRunFor(player);
-    if (!player || !creature || !run || creature->GetGUID() != run->GetGuideGuid() ||
-        player->FindMap() != creature->FindMap() || creature->GetInstanceId() != run->GetInstanceId() ||
-        !player->IsAlive() || !player->IsWithinDistInMap(creature, INTERACTION_DISTANCE))
-        return false;
-    ClearGossipMenuFor(player);
-    if (!action)
-    {
-        if (player->GetGUID().GetCounter() == run->GetOwnerGuid())
-        {
-            if (run->GetState() == ManastormRunState::Preparing)
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Begin the Manastorm", GOSSIP_SENDER_MAIN, 1);
-            else if (run->GetState() == ManastormRunState::StageComplete)
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Continue the Manastorm", GOSSIP_SENDER_MAIN, 2);
-        }
-        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Leave the Manastorm", GOSSIP_SENDER_MAIN, 3);
-        SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
-        return true;
-    }
-    CloseGossipMenuFor(player);
-    if (player->IsInCombat())
-        return true;
-    if (action == 3)
-    {
-        std::string error;
-        if (!StopRun(player, error))
-            player->SendSystemMessage(error);
-    }
-    else if (player->GetGUID().GetCounter() == run->GetOwnerGuid())
-    {
-        // Defer gameplay mutations to the existing world update. Duplicate or
-        // stale gossip selections cannot bypass stage completion or party readiness.
-        if (action == 1 && run->GetState() == ManastormRunState::Preparing)
-            run->RequestStart();
-        else if (action == 2 && run->GetState() == ManastormRunState::StageComplete)
-            _transitionTimers[run->GetRunId()] = 0;
-    }
-    return true;
 }
 
 bool ManastormMgr::PrepareStage(
@@ -2590,7 +2559,6 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             run->SetEntranceInitialized();
             Position const position(entrance->position_x, entrance->position_y,
                 entrance->position_z, entrance->orientation);
-            SpawnStageGuide(map, *run, position, false);
             player->CastSpell(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ(),
                 SPELL_SAFETY_BUBBLE, true);
             // Instance scripts may have loaded creatures during CreateMap, before
@@ -3019,7 +2987,6 @@ void ManastormMgr::OnBeforeCreatureSelectLevel(
     if (!creature ||
         creature->GetEntry() == NPC_MANASTORM_HEART ||
         creature->GetEntry() == NPC_COGSLEY ||
-        creature->GetEntry() == NPC_STAGE_GUIDE ||
         creature->GetEntry() == NPC_STAGE_PORTAL ||
         creature->IsTrigger() ||
         creature->IsPet() ||
@@ -3617,7 +3584,6 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
 {
     if (!creature ||
         creature->GetEntry() == NPC_COGSLEY ||
-        creature->GetEntry() == NPC_STAGE_GUIDE ||
         creature->GetEntry() == NPC_STAGE_PORTAL)
     {
         return;
@@ -4304,7 +4270,14 @@ void ManastormMgr::OnUnitDeath(
 
     run->SetState(
         ManastormRunState::StageComplete);
-    SpawnStageGuide(map, *run, creature->GetPosition(), true);
+
+    // No temporary Begin/Continue/Leave NPC is spawned. The current automatic
+    // transition remains intact while native click-to-next-stage portal behavior
+    // is deferred for a dedicated reconstruction pass.
+    SpawnStagePortal(
+        map,
+        *run,
+        creature->GetPosition());
 
     ManastormClientBridge::Instance()
         .BroadcastStageCompleted(*run);
