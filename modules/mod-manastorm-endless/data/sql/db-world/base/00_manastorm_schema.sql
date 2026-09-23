@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS `manastorm_segment` (
   `weight` INT UNSIGNED NOT NULL DEFAULT 1,
   `min_depth` INT UNSIGNED NOT NULL DEFAULT 1,
   `max_depth` INT UNSIGNED NOT NULL DEFAULT 0,
+  -- Reconstructed/custom-mode reward scalar. In native ClientMode=2 the
+  -- untouched Manastorm.dbc w4/w5 reward values are authoritative for payout;
+  -- this SQL value is retained as the non-native/fallback authoring field.
   `reward_multiplier` FLOAT NOT NULL DEFAULT 1,
   `chaotic_link_stacks` TINYINT UNSIGNED NOT NULL DEFAULT 0,
   `flags` INT UNSIGNED NOT NULL DEFAULT 0,
