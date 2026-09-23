@@ -306,8 +306,8 @@ bool ManastormDataStore::LoadHubReturns()
 
     if (configuredRows != 2 ||
         _hubReturns.size() != 2 ||
-        !_hubReturns.contains(0) ||
-        !_hubReturns.contains(1))
+        _hubReturns.find(0) == _hubReturns.end() ||
+        _hubReturns.find(1) == _hubReturns.end())
     {
         LOG_ERROR(
             LOG_FILTER,
