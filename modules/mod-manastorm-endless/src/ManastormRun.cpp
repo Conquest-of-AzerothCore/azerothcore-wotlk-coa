@@ -93,7 +93,6 @@ void ManastormRun::PrepareNextStage(
         segment.CreaturePoolSourceSpawnIds.end());
 
     _instanceId = 0;
-    _guideGuid.Clear();
     _portalGuid.Clear();
     _entranceInitialized = false;
     _startRequested = false;
