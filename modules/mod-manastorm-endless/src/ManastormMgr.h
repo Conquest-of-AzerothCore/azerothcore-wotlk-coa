@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 class Creature;
@@ -200,11 +201,22 @@ private:
     bool PrepareStage(
         Player* player,
         ManastormRun& run,
+        std::string& error,
+        ObjectGuid::LowType transferOnlyGuid = 0);
+
+    bool TransferMemberToCurrentStage(
+        Player* player,
+        ManastormRun& run,
         std::string& error);
+
+    void FinishPreviousStageTransition(
+        ManastormRun& run);
 
     bool TransitionToNextStage(
         ManastormRun& run,
-        std::string& error);
+        std::string& error,
+        ObjectGuid::LowType immediateMemberGuid = 0,
+        bool transferAll = false);
 
     uint64 _nextRunId = 1;
 
@@ -213,6 +225,13 @@ private:
     std::unordered_map<uint64, uint64> _stageRunIds;
     std::unordered_map<uint64, uint32> _transitionTimers;
     std::unordered_map<ObjectGuid::LowType,ManastormPotionChargeState>_manastormPotionCharges;
+
+    // Only item entries actually created by this process are removed again.
+    // Pre-existing legitimate copies are never destroyed by Manastorm cleanup.
+    std::unordered_map<
+        ObjectGuid::LowType,
+        std::unordered_set<uint32>>
+        _grantedBaselineItems;
 
     uint32 _heartPickupCheckTimer = 0;
     uint32 _runValidationTimer = 0;
