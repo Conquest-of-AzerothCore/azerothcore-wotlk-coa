@@ -426,18 +426,37 @@ VALUES
 -- Their presence is recovered, but this migration does not invent prices.
 
 -- ---------------------------------------------------------------------------
--- Cogsworth <Manastorm Gadget Vendor> — directly validated current-era base
--- prices. Currency item: 1297308 Bonzo Bolt.
+-- Cogsworth <Manastorm Gadget Vendor> — reconstructed full 147-item economy
+-- Currency item: 1297308 Bonzo Bolt.
 --
--- 4208 = 10,000 Bonzo
--- 4230 = 20,000 Bonzo
--- 4231 = 30,000 Bonzo
--- 4232 = 40,000 Bonzo
--- 4233 = 50,000 Bonzo
+-- The Rank-1 prices visible in the later vendor screenshots are authoritative:
+--   4208 = 10,000 Bonzo
+--   4230 = 20,000 Bonzo
+--   4231 = 30,000 Bonzo
+--   4232 = 40,000 Bonzo
+--   4233 = 50,000 Bonzo
 --
--- Historical screenshots also show an older 7,500-Bonzo economy
--- (ItemExtendedCost 4438), so only the item/price pairs visible in the later
--- 10k/20k/30k/40k/50k screenshots are authored below.
+-- Rank 2-8 assignments below are an intentional reconstruction by pattern.
+-- The shutdown-era screenshot proves the low utility tier used 7,500 Bonzo
+-- (ExtendedCost 4438), while ItemExtendedCost.dbc contains five contiguous
+-- 9-step upgrade ladders:
+--
+--   utility / 10k current tier: 4393..4401
+--   sprint  / 20k current tier: 4402..4410
+--   mobility/ 30k current tier: 4411..4419
+--   stat    / 40k current tier: 4420..4428
+--   power   / 50k current tier: 4429..4437
+--
+-- The 147 recovered purchasable items contain exactly eight ranks per ranked
+-- family, so only the first seven rows of each ladder are used for R2-R8.
+-- The final two rows of each 9-step ladder are left unused/reserved rather than
+-- fabricating Rank 9/10 item rows.
+--
+-- Hearty Heal and Freedom Fizz are assigned to the same utility ladder as
+-- Cleanse/Purification/Curing/Interrupt Rod/Motion Lotion because the surviving
+-- old Cogsworth screenshot shows all seven at the same 7,500-Bonzo Rank-1
+-- price. Millhouse Mobility Mixture is assigned to the otherwise-unused middle
+-- (30k current) tier as the best-fit reconstruction.
 -- ---------------------------------------------------------------------------
 
 DELETE FROM `npc_vendor`
@@ -454,39 +473,162 @@ INSERT INTO `npc_vendor`
     `VerifiedBuild`
 )
 VALUES
-    (179539,  0, 339030, 0, 0, 4208, 0), -- Manastorm Cleanse R1, 10,000
-    (179539,  1, 339031, 0, 0, 4208, 0), -- Manastorm Purification R1, 10,000
-    (179539,  2, 339033, 0, 0, 4208, 0), -- Manastorm Curing R1, 10,000
-    (179539,  3, 339041, 0, 0, 4208, 0), -- Interrupt Rod R1, 10,000
-    (179539,  4, 339074, 0, 0, 4208, 0), -- Motion Lotion R1, 10,000
-    (179539,  5, 339042, 0, 0, 4208, 0), -- Frogduck Morph Machine, 10,000
-    (179539,  6, 439124, 0, 0, 4208, 0), -- Purge-O-Matic, 10,000
+    (179539,   0,  339041, 0, 0, 4208, 0), -- Interrupt Rod R1
+    (179539,   1,  439057, 0, 0, 4393, 0), -- Interrupt Rod R2
+    (179539,   2,  439058, 0, 0, 4394, 0), -- Interrupt Rod R3
+    (179539,   3,  439059, 0, 0, 4395, 0), -- Interrupt Rod R4
+    (179539,   4,  439060, 0, 0, 4396, 0), -- Interrupt Rod R5
+    (179539,   5,  439061, 0, 0, 4397, 0), -- Interrupt Rod R6
+    (179539,   6,  439062, 0, 0, 4398, 0), -- Interrupt Rod R7
+    (179539,   7,  439063, 0, 0, 4399, 0), -- Interrupt Rod R8
+    (179539,   8,   99269, 0, 0, 4208, 0), -- Hearty Heal Upgrade R1
+    (179539,   9,   99270, 0, 0, 4393, 0), -- Hearty Heal Upgrade R2
+    (179539,  10,   99271, 0, 0, 4394, 0), -- Hearty Heal Upgrade R3
+    (179539,  11,   99272, 0, 0, 4395, 0), -- Hearty Heal Upgrade R4
+    (179539,  12,   99273, 0, 0, 4396, 0), -- Hearty Heal Upgrade R5
+    (179539,  13,   99274, 0, 0, 4397, 0), -- Hearty Heal Upgrade R6
+    (179539,  14,   99275, 0, 0, 4398, 0), -- Hearty Heal Upgrade R7
+    (179539,  15,   99276, 0, 0, 4399, 0), -- Hearty Heal Upgrade R8
+    (179539,  16,  339030, 0, 0, 4208, 0), -- Cleanse R1
+    (179539,  17,  439030, 0, 0, 4393, 0), -- Cleanse R2
+    (179539,  18,  439031, 0, 0, 4394, 0), -- Cleanse R3
+    (179539,  19,  439032, 0, 0, 4395, 0), -- Cleanse R4
+    (179539,  20,  439033, 0, 0, 4396, 0), -- Cleanse R5
+    (179539,  21,  439034, 0, 0, 4397, 0), -- Cleanse R6
+    (179539,  22,  439045, 0, 0, 4398, 0), -- Cleanse R7
+    (179539,  23,  439046, 0, 0, 4399, 0), -- Cleanse R8
+    (179539,  24,  339031, 0, 0, 4208, 0), -- Purification R1
+    (179539,  25,  539031, 0, 0, 4393, 0), -- Purification R2
+    (179539,  26,  539032, 0, 0, 4394, 0), -- Purification R3
+    (179539,  27,  539033, 0, 0, 4395, 0), -- Purification R4
+    (179539,  28,  539034, 0, 0, 4396, 0), -- Purification R5
+    (179539,  29,  539035, 0, 0, 4397, 0), -- Purification R6
+    (179539,  30,  539036, 0, 0, 4398, 0), -- Purification R7
+    (179539,  31,  539037, 0, 0, 4399, 0), -- Purification R8
+    (179539,  32,  339033, 0, 0, 4208, 0), -- Curing R1
+    (179539,  33,  439035, 0, 0, 4393, 0), -- Curing R2
+    (179539,  34,  439036, 0, 0, 4394, 0), -- Curing R3
+    (179539,  35,  439133, 0, 0, 4395, 0), -- Curing R4
+    (179539,  36,  439134, 0, 0, 4396, 0), -- Curing R5
+    (179539,  37,  439135, 0, 0, 4397, 0), -- Curing R6
+    (179539,  38,  439136, 0, 0, 4398, 0), -- Curing R7
+    (179539,  39,  439137, 0, 0, 4399, 0), -- Curing R8
+    (179539,  40,  339074, 0, 0, 4208, 0), -- Motion Lotion R1
+    (179539,  41,  439113, 0, 0, 4393, 0), -- Motion Lotion R2
+    (179539,  42,  439114, 0, 0, 4394, 0), -- Motion Lotion R3
+    (179539,  43,  439115, 0, 0, 4395, 0), -- Motion Lotion R4
+    (179539,  44,  439116, 0, 0, 4396, 0), -- Motion Lotion R5
+    (179539,  45,  439117, 0, 0, 4397, 0), -- Motion Lotion R6
+    (179539,  46,  439131, 0, 0, 4398, 0), -- Motion Lotion R7
+    (179539,  47,  439132, 0, 0, 4399, 0), -- Motion Lotion R8
+    (179539,  48,   99290, 0, 0, 4208, 0), -- Freedom Fizz R1
+    (179539,  49,   99291, 0, 0, 4393, 0), -- Freedom Fizz R2
+    (179539,  50,   99292, 0, 0, 4394, 0), -- Freedom Fizz R3
+    (179539,  51,   99293, 0, 0, 4395, 0), -- Freedom Fizz R4
+    (179539,  52,   99294, 0, 0, 4396, 0), -- Freedom Fizz R5
+    (179539,  53,   99295, 0, 0, 4397, 0), -- Freedom Fizz R6
+    (179539,  54,   99296, 0, 0, 4398, 0), -- Freedom Fizz R7
+    (179539,  55,   99297, 0, 0, 4399, 0), -- Freedom Fizz R8
+    (179539,  56,  339050, 0, 0, 4230, 0), -- Sprint Serum R1
+    (179539,  57,  439050, 0, 0, 4402, 0), -- Sprint Serum R2
+    (179539,  58,  439051, 0, 0, 4403, 0), -- Sprint Serum R3
+    (179539,  59,  439052, 0, 0, 4404, 0), -- Sprint Serum R4
+    (179539,  60,  439053, 0, 0, 4405, 0), -- Sprint Serum R5
+    (179539,  61,  439054, 0, 0, 4406, 0), -- Sprint Serum R6
+    (179539,  62,  439055, 0, 0, 4407, 0), -- Sprint Serum R7
+    (179539,  63,  439056, 0, 0, 4408, 0), -- Sprint Serum R8
+    (179539,  64, 1300179, 0, 0, 4231, 0), -- Millhouse Mobility Mixture R1
+    (179539,  65, 1300186, 0, 0, 4411, 0), -- Millhouse Mobility Mixture R2
+    (179539,  66, 1300187, 0, 0, 4412, 0), -- Millhouse Mobility Mixture R3
+    (179539,  67, 1300188, 0, 0, 4413, 0), -- Millhouse Mobility Mixture R4
+    (179539,  68, 1300189, 0, 0, 4414, 0), -- Millhouse Mobility Mixture R5
+    (179539,  69, 1300190, 0, 0, 4415, 0), -- Millhouse Mobility Mixture R6
+    (179539,  70, 1300191, 0, 0, 4416, 0), -- Millhouse Mobility Mixture R7
+    (179539,  71, 1300192, 0, 0, 4417, 0), -- Millhouse Mobility Mixture R8
+    (179539,  72,  339077, 0, 0, 4232, 0), -- Taunting Tonic R1
+    (179539,  73,  439125, 0, 0, 4420, 0), -- Taunting Tonic R2
+    (179539,  74,  439126, 0, 0, 4421, 0), -- Taunting Tonic R3
+    (179539,  75,  439127, 0, 0, 4422, 0), -- Taunting Tonic R4
+    (179539,  76,  439128, 0, 0, 4423, 0), -- Taunting Tonic R5
+    (179539,  77,  439129, 0, 0, 4424, 0), -- Taunting Tonic R6
+    (179539,  78,  439130, 0, 0, 4425, 0), -- Taunting Tonic R7
+    (179539,  79,  439138, 0, 0, 4426, 0), -- Taunting Tonic R8
+    (179539,  80,  339034, 0, 0, 4232, 0), -- Muscle Maxer R1
+    (179539,  81,  439037, 0, 0, 4420, 0), -- Muscle Maxer R2
+    (179539,  82,  439038, 0, 0, 4421, 0), -- Muscle Maxer R3
+    (179539,  83,  439039, 0, 0, 4422, 0), -- Muscle Maxer R4
+    (179539,  84,  439041, 0, 0, 4423, 0), -- Muscle Maxer R5
+    (179539,  85,  439042, 0, 0, 4424, 0), -- Muscle Maxer R6
+    (179539,  86,  439043, 0, 0, 4425, 0), -- Muscle Maxer R7
+    (179539,  87,  439044, 0, 0, 4426, 0), -- Muscle Maxer R8
+    (179539,  88,  339035, 0, 0, 4232, 0), -- Genius Juice R1
+    (179539,  89,  439064, 0, 0, 4420, 0), -- Genius Juice R2
+    (179539,  90,  439065, 0, 0, 4421, 0), -- Genius Juice R3
+    (179539,  91,  439066, 0, 0, 4422, 0), -- Genius Juice R4
+    (179539,  92,  439067, 0, 0, 4423, 0), -- Genius Juice R5
+    (179539,  93,  439068, 0, 0, 4424, 0), -- Genius Juice R6
+    (179539,  94,  439069, 0, 0, 4425, 0), -- Genius Juice R7
+    (179539,  95,  439070, 0, 0, 4426, 0), -- Genius Juice R8
+    (179539,  96,  339037, 0, 0, 4232, 0), -- Reflex Booster R1
+    (179539,  97,  439078, 0, 0, 4420, 0), -- Reflex Booster R2
+    (179539,  98,  439079, 0, 0, 4421, 0), -- Reflex Booster R3
+    (179539,  99,  439080, 0, 0, 4422, 0), -- Reflex Booster R4
+    (179539, 100,  439081, 0, 0, 4423, 0), -- Reflex Booster R5
+    (179539, 101,  439082, 0, 0, 4424, 0), -- Reflex Booster R6
+    (179539, 102,  439083, 0, 0, 4425, 0), -- Reflex Booster R7
+    (179539, 103,  439084, 0, 0, 4426, 0), -- Reflex Booster R8
+    (179539, 104,  339036, 0, 0, 4232, 0), -- Chakra Chug R1
+    (179539, 105,  439071, 0, 0, 4420, 0), -- Chakra Chug R2
+    (179539, 106,  439072, 0, 0, 4421, 0), -- Chakra Chug R3
+    (179539, 107,  439073, 0, 0, 4422, 0), -- Chakra Chug R4
+    (179539, 108,  439074, 0, 0, 4423, 0), -- Chakra Chug R5
+    (179539, 109,  439075, 0, 0, 4424, 0), -- Chakra Chug R6
+    (179539, 110,  439076, 0, 0, 4425, 0), -- Chakra Chug R7
+    (179539, 111,  439077, 0, 0, 4426, 0), -- Chakra Chug R8
+    (179539, 112,  339063, 0, 0, 4233, 0), -- Incantation Intensifier R1
+    (179539, 113,  439085, 0, 0, 4429, 0), -- Incantation Intensifier R2
+    (179539, 114,  439086, 0, 0, 4430, 0), -- Incantation Intensifier R3
+    (179539, 115,  439087, 0, 0, 4431, 0), -- Incantation Intensifier R4
+    (179539, 116,  439088, 0, 0, 4432, 0), -- Incantation Intensifier R5
+    (179539, 117,  439089, 0, 0, 4433, 0), -- Incantation Intensifier R6
+    (179539, 118,  439090, 0, 0, 4434, 0), -- Incantation Intensifier R7
+    (179539, 119,  439091, 0, 0, 4435, 0), -- Incantation Intensifier R8
+    (179539, 120,  339070, 0, 0, 4233, 0), -- Long Haul Liquid R1
+    (179539, 121,  439092, 0, 0, 4429, 0), -- Long Haul Liquid R2
+    (179539, 122,  439093, 0, 0, 4430, 0), -- Long Haul Liquid R3
+    (179539, 123,  439094, 0, 0, 4431, 0), -- Long Haul Liquid R4
+    (179539, 124,  439095, 0, 0, 4432, 0), -- Long Haul Liquid R5
+    (179539, 125,  439096, 0, 0, 4433, 0), -- Long Haul Liquid R6
+    (179539, 126,  439097, 0, 0, 4434, 0), -- Long Haul Liquid R7
+    (179539, 127,  439098, 0, 0, 4435, 0), -- Long Haul Liquid R8
+    (179539, 128,  339071, 0, 0, 4233, 0), -- Harm Repellant Remedy R1
+    (179539, 129,  439099, 0, 0, 4429, 0), -- Harm Repellant Remedy R2
+    (179539, 130,  439100, 0, 0, 4430, 0), -- Harm Repellant Remedy R3
+    (179539, 131,  439101, 0, 0, 4431, 0), -- Harm Repellant Remedy R4
+    (179539, 132,  439102, 0, 0, 4432, 0), -- Harm Repellant Remedy R5
+    (179539, 133,  439103, 0, 0, 4433, 0), -- Harm Repellant Remedy R6
+    (179539, 134,  439104, 0, 0, 4434, 0), -- Harm Repellant Remedy R7
+    (179539, 135,  439105, 0, 0, 4435, 0), -- Harm Repellant Remedy R8
+    (179539, 136,  339072, 0, 0, 4233, 0), -- Rage Rush Solution R1
+    (179539, 137,  439106, 0, 0, 4429, 0), -- Rage Rush Solution R2
+    (179539, 138,  439107, 0, 0, 4430, 0), -- Rage Rush Solution R3
+    (179539, 139,  439108, 0, 0, 4431, 0), -- Rage Rush Solution R4
+    (179539, 140,  439109, 0, 0, 4432, 0), -- Rage Rush Solution R5
+    (179539, 141,  439110, 0, 0, 4433, 0), -- Rage Rush Solution R6
+    (179539, 142,  439111, 0, 0, 4434, 0), -- Rage Rush Solution R7
+    (179539, 143,  439112, 0, 0, 4435, 0), -- Rage Rush Solution R8
+    (179539, 144,  339042, 0, 0, 4208, 0), -- Frogduck Morph Machine, 10,000
+    (179539, 145,  439124, 0, 0, 4208, 0), -- Purge-O-Matic, 10,000
+    (179539, 146,  339062, 0, 0, 4231, 0); -- Tiny Ticking Time-Bomb, 30,000
 
-    (179539,  7, 339050, 0, 0, 4230, 0), -- Sprint Serum R1, 20,000
-    (179539,  8, 339062, 0, 0, 4231, 0), -- Tiny Ticking Time-Bomb, 30,000
-
-    (179539,  9, 339034, 0, 0, 4232, 0), -- Muscle Maxer R1, 40,000
-    (179539, 10, 339077, 0, 0, 4232, 0), -- Taunting Tonic R1, 40,000
-    (179539, 11, 339035, 0, 0, 4232, 0), -- Genius Juice R1, 40,000
-    (179539, 12, 339037, 0, 0, 4232, 0), -- Reflex Booster R1, 40,000
-    (179539, 13, 339036, 0, 0, 4232, 0), -- Chakra Chug R1, 40,000
-
-    (179539, 14, 339063, 0, 0, 4233, 0), -- Incantation Intensifier R1, 50,000
-    (179539, 15, 339070, 0, 0, 4233, 0), -- Long Haul Liquid R1, 50,000
-    (179539, 16, 339071, 0, 0, 4233, 0), -- Harm Repellant Remedy R1, 50,000
-    (179539, 17, 339072, 0, 0, 4233, 0); -- Rage Rush Solution R1, 50,000
-
--- Intentionally unresolved/not inserted yet:
---   Hearty Heal Upgrade
---   Freedom Fizz
---   Millhouse Mobility Mixture
---   all Rank 2+ progression items
+-- Unused tail rows of the five 9-step ladders, retained for future evidence:
+--   4400, 4401
+--   4409, 4410
+--   4418, 4419
+--   4427, 4428
+--   4436, 4437
 --
--- ItemExtendedCost 4393..4437 contains five structured Bonzo ladders, but an
--- authoritative item-family -> ladder assignment has not yet been recovered.
--- Keeping those rows out is deliberate: no guessed economy in the live DB.
-
 -- Cogsley (80919) is restored as the native in-Manastorm NPC template/model.
 -- Its screenshot proves that it can expose a combined Millhouse/Cogsworth
--- catalog, but its complete per-item vendor mapping is not authored here until
--- the remaining original assignments are proven.
+-- catalog, but a complete authoritative Cogsley per-item roster is still not
+-- reconstructed here.
