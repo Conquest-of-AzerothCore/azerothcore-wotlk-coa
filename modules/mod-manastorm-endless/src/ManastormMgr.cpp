@@ -2569,7 +2569,47 @@ ManastormRun* ManastormMgr::StartRun(
             return nullptr;
         }
         member->SaveRecallPosition();
-        run->SaveReturnLocation(guid, WorldLocation(member->GetMapId(), member->GetPosition()));
+        run->SaveReturnLocation(
+            guid,
+            WorldLocation(
+                member->GetMapId(),
+                member->GetPosition()));
+
+        ManastormRun::GadgetSlots slots{};
+        auto* loadoutStatement =
+            CharacterDatabase.GetPreparedStatement(
+                CHAR_SEL_MANASTORM_LOADOUT);
+
+        loadoutStatement->SetData(
+            0,
+            guid);
+
+        PreparedQueryResult loadout =
+            CharacterDatabase.Query(
+                loadoutStatement);
+
+        if (loadout)
+        {
+            do
+            {
+                Field* fields =
+                    loadout->Fetch();
+
+                uint8 const slot =
+                    fields[0].Get<uint8>();
+
+                if (slot < slots.size())
+                {
+                    slots[slot] =
+                        fields[1].Get<uint32>();
+                }
+            }
+            while (loadout->NextRow());
+        }
+
+        run->SetMemberGadgetLoadout(
+            guid,
+            slots);
     }
     run->SetEndgame(endgame);
 
