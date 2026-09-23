@@ -6025,6 +6025,19 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
     uint64 const runId = run->GetRunId();
     std::vector<ObjectGuid::LowType> const members = run->GetMembers();
 
+    bool const hadPreviousStage =
+        run->HasPreviousStage();
+
+    uint32 const previousStageMapId =
+        hadPreviousStage
+        ? run->GetPreviousSegment().MapId
+        : MAPID_INVALID;
+
+    uint32 const previousStageInstanceId =
+        hadPreviousStage
+        ? run->GetPreviousInstanceId()
+        : 0;
+
     run->SetState(
         ManastormRunState::Finished);
 
@@ -6165,9 +6178,34 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
         }
     }
 
-    if (Map* stage = sMapMgr->FindMap(run->GetSegment().MapId, run->GetInstanceId()))
+    if (Map* stage =
+        sMapMgr->FindMap(
+            run->GetSegment().MapId,
+            run->GetInstanceId()))
+    {
         if (stage->IsScriptedPrivateInstance())
             stage->RequestScriptedPrivateUnload();
+    }
+
+    if (hadPreviousStage &&
+        previousStageMapId !=
+            MAPID_INVALID &&
+        previousStageInstanceId)
+    {
+        if (Map* previous =
+            sMapMgr->FindMap(
+                previousStageMapId,
+                previousStageInstanceId))
+        {
+            if (previous->
+                IsScriptedPrivateInstance())
+            {
+                previous->
+                    RequestScriptedPrivateUnload();
+            }
+        }
+    }
+
     _transitionTimers.erase(runId);
     _runs.erase(runId);
 
