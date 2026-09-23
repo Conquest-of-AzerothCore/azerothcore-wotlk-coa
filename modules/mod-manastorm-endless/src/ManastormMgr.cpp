@@ -3167,6 +3167,18 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                     OnCreatureAddWorld(spawn.second);
         }
         bool start = run->StartRequested();
+
+        if (run->CanStartWithMissingMembers() &&
+            run->HasPreviousStage() &&
+            run->HasPendingStageTransfers())
+        {
+            SendClientState(
+                player,
+                run);
+
+            return;
+        }
+
         // Normal movement/combat activation waits for the whole party.
         // The real protection timeout and the five-second inter-stage fallback
         // are allowed to activate with disconnected/missing members so
@@ -5397,13 +5409,13 @@ bool ManastormMgr::TransitionToNextStage(
                     run,
                     transferError))
             {
-                LOG_WARN(
-                    LOG_FILTER,
-                    "Manastorm run {} could not auto-transfer member {} "
-                    "after the five-second fallback: {}",
-                    run.GetRunId(),
-                    guid,
-                    transferError);
+                error =
+                    "Could not auto-transfer connected member " +
+                    std::to_string(guid) +
+                    " after the five-second fallback: " +
+                    transferError;
+
+                return false;
             }
         }
 
@@ -5655,14 +5667,13 @@ bool ManastormMgr::TransitionToNextStage(
                     run,
                     transferError))
             {
-                LOG_WARN(
-                    LOG_FILTER,
-                    "Manastorm run {} could not auto-transfer member {} "
-                    "while opening depth {}: {}",
-                    run.GetRunId(),
-                    guid,
-                    nextDepth,
-                    transferError);
+                error =
+                    "Could not auto-transfer connected member " +
+                    std::to_string(guid) +
+                    " while opening the next Manastorm stage: " +
+                    transferError;
+
+                return false;
             }
         }
     }
