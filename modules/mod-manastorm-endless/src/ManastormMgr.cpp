@@ -258,11 +258,46 @@ namespace
     constexpr uint32 SPELL_SAFETY_BUBBLE = 93306;
     constexpr uint32 SPELL_SAFETY_BUBBLE_HELPER = 93307;
 
+    //
+    // Recovered Manastorm Safety Bubble families across the supplied
+    // Ascension revisions. 93306/93307 are the older controller/helper pair
+    // used by this reconstruction; the 21803xx / 31803xx family contains the
+    // later visual/state/combat-preventer variants.
+    //
+    // When the shared backend declares preparation protection finished, no
+    // member may retain one of these combat-prevention auras. Leaving one
+    // behind makes normal dungeon creatures appear unable to hit the player
+    // even though the run has already entered ACTIVE state.
+    //
+    constexpr uint32 SAFETY_BUBBLE_CLEANUP_SPELLS[] =
+    {
+        93304,   // Entering the Manastorm...
+        93306,   // older Safety Bubble
+        93307,   // older Safety Bubble helper
+        2180300, // Safety Bubble Trigger
+        2180301, // Safety Bubble
+        2180302, // Safety Bubble
+        2180304, // Safety Bubble - Combat Preventer
+        2180305, // Safety Bubble Fake
+        3180300, // revision variant
+        3180304, // revision combat-preventer variant
+        3180305  // revision fake variant
+    };
+
     void ClearSafetyBubble(Player* player)
     {
-        player->RemoveDynObject(SPELL_SAFETY_BUBBLE);
-        player->RemoveAurasDueToSpell(SPELL_SAFETY_BUBBLE);
-        player->RemoveAurasDueToSpell(SPELL_SAFETY_BUBBLE_HELPER);
+        if (!player)
+            return;
+
+        for (uint32 spellId :
+            SAFETY_BUBBLE_CLEANUP_SPELLS)
+        {
+            player->RemoveDynObject(
+                spellId);
+
+            player->RemoveAurasDueToSpell(
+                spellId);
+        }
     }
 
     void DespawnCogsleyCompanion(Player* player)
@@ -2809,10 +2844,14 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
 
         LOG_INFO(
             LOG_FILTER,
-            "Manastorm run {} activated stage with HP multiplier {:.3f}x. "
+            "Manastorm run {} activated stage with scaling: "
+            "HP={:.3f}x globalDamage={:.3f}x melee={:.3f}x spell={:.3f}x. "
             "Scaled {} existing stage creatures.",
             run->GetRunId(),
             double(run->GetScaling().HealthMultiplier),
+            double(run->GetScaling().GlobalDamageMultiplier),
+            double(run->GetScaling().MeleeMultiplier),
+            double(run->GetScaling().SpellMultiplier),
             healthScaledCount);
 
         LOG_INFO(LOG_FILTER,
@@ -4125,7 +4164,8 @@ uint32 ManastormMgr::ScaleCreatureDamage(
             map->GetInstanceId());
 
     if (!run ||
-        run->GetState() != ManastormRunState::Active)
+        (run->GetState() != ManastormRunState::Active &&
+            run->GetState() != ManastormRunState::StageComplete))
     {
         return damage;
     }
