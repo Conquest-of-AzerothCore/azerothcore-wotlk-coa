@@ -134,6 +134,64 @@ namespace
         return nullptr;
     }
 
+    void PrimePotentialRewardItems(Player* player)
+    {
+        if (!player ||
+            !player->GetSession())
+        {
+            return;
+        }
+
+        //
+        // The original Manastorm queue hardcodes these item IDs in XML.
+        //
+        // Its ItemIconTemplate path immediately calls Item:CreateFromID()
+        // followed by GetIcon()/GetQuality(), but it does not register an
+        // async item-load callback. On a clean client cache those lookups can
+        // therefore be empty when the queue first opens.
+        //
+        // Reuse AzerothCore's normal item-query response serializer to warm
+        // the client cache. This changes no client files and no DBCs.
+        //
+        static constexpr std::array<uint32, 7>
+            potentialRewardItems =
+            {
+                97884,
+                1297307,
+                1297308,
+                1278049,
+                1278048,
+                97886,
+                97885
+            };
+
+        WorldSession* session =
+            player->GetSession();
+
+        for (uint32 itemEntry :
+            potentialRewardItems)
+        {
+            if (!sObjectMgr->GetItemTemplate(
+                    itemEntry))
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Cannot prime native Manastorm Potential Reward item {}: "
+                    "item_template is missing.",
+                    itemEntry);
+
+                continue;
+            }
+
+            WorldPacket query;
+            query << itemEntry;
+
+            session->
+                HandleItemQuerySingleOpcode(
+                    query);
+        }
+    }
+
     char const* ValidateEnter(Player* player, uint32 depth)
     {
         if (!depth)
@@ -463,8 +521,21 @@ void ManastormClientBridge::SendConfig(Player* player) const
 void ManastormClientBridge::Login(Player* player) const
 {
     SendConfig(player);
-    if (!player || !player->GetSession() || !NativeEnabled())
+
+    if (!player ||
+        !player->GetSession() ||
+        !NativeEnabled())
+    {
         return;
+    }
+
+    //
+    // Prime the seven XML-hardcoded Potential Reward items before the
+    // load-on-demand Manastorm queue is opened.
+    //
+    PrimePotentialRewardItems(
+        player);
+
     Ascension::Manastorm::Progress progress;
     if (LoadProgress(player, progress))
     {
