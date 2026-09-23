@@ -90,6 +90,7 @@ bool ManastormDataStore::Load()
 
     _segments.clear();
     _scalingCurve.clear();
+    _groupScalingRanges.clear();
     _creaturePools.clear();
     _unlocks.clear();
 
@@ -106,6 +107,9 @@ bool ManastormDataStore::Load()
 
     bool const scalingLoaded =
         LoadScalingCurve();
+
+    bool const groupScalingLoaded =
+        LoadGroupScaling();
 
     bool const unlocksLoaded =
         segmentsLoaded &&
@@ -125,6 +129,7 @@ bool ManastormDataStore::Load()
         segmentSpawnsLoaded &&
         creaturePoolsLoaded &&
         scalingLoaded &&
+        groupScalingLoaded &&
         unlocksLoaded &&
         unlockTriggersLoaded &&
         unlockGrantsLoaded;
@@ -134,10 +139,12 @@ bool ManastormDataStore::Load()
         LOG_INFO(
             LOG_FILTER,
             "Manastorm datastore loaded: {} segments, "
-            "{} creature pools, {} scaling points, {} progression unlocks.",
+            "{} creature pools, {} depth scaling points, "
+            "{} group scaling ranges, {} progression unlocks.",
             _segments.size(),
             _creaturePools.size(),
             _scalingCurve.size(),
+            _groupScalingRanges.size(),
             _unlocks.size());
     }
     else
@@ -1744,6 +1751,133 @@ bool ManastormDataStore::LoadScalingCurve()
     return true;
 }
 
+
+bool ManastormDataStore::LoadGroupScaling()
+{
+    QueryResult countResult = WorldDatabase.Query(
+        "SELECT COUNT(*) FROM `manastorm_group_scaling`");
+
+    if (!countResult)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to query `manastorm_group_scaling`. "
+            "The table is missing or inaccessible.");
+        return false;
+    }
+
+    uint64 const configuredRows =
+        countResult->Fetch()[0].Get<uint64>();
+
+    if (!configuredRows)
+    {
+        LOG_INFO(
+            LOG_FILTER,
+            "`manastorm_group_scaling` is empty. "
+            "Member-count scaling will use neutral 1.0 multipliers.");
+        return true;
+    }
+
+    QueryResult result = WorldDatabase.Query(
+        "SELECT "
+        "`min_members`, `max_members`, "
+        "`health_multiplier`, `global_damage_multiplier`, "
+        "`melee_multiplier`, `spell_multiplier` "
+        "FROM `manastorm_group_scaling` "
+        "WHERE `enabled` = 1 "
+        "ORDER BY `min_members`, `max_members`");
+
+    if (!result)
+    {
+        LOG_INFO(
+            LOG_FILTER,
+            "`manastorm_group_scaling` contains no enabled rows. "
+            "Member-count scaling will use neutral 1.0 multipliers.");
+        return true;
+    }
+
+    bool valid = true;
+    uint32 previousMaxMembers = 0;
+    uint64 loadedRows = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        ManastormGroupScalingRange range;
+        range.MinMembers = fields[0].Get<uint8>();
+        range.MaxMembers = fields[1].Get<uint8>();
+        range.HealthMultiplier = fields[2].Get<float>();
+        range.GlobalDamageMultiplier = fields[3].Get<float>();
+        range.MeleeMultiplier = fields[4].Get<float>();
+        range.SpellMultiplier = fields[5].Get<float>();
+
+        if (!range.MinMembers ||
+            range.MaxMembers < range.MinMembers ||
+            range.MaxMembers > ManastormLimits::MaxMembers)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm group scaling range {}-{}. "
+                "Enabled ranges must stay within 1-{}.",
+                uint32(range.MinMembers),
+                uint32(range.MaxMembers),
+                ManastormLimits::MaxMembers);
+
+            valid = false;
+            continue;
+        }
+
+        if (!IsValidPositiveMultiplier(range.HealthMultiplier) ||
+            !IsValidPositiveMultiplier(range.GlobalDamageMultiplier) ||
+            !IsValidPositiveMultiplier(range.MeleeMultiplier) ||
+            !IsValidPositiveMultiplier(range.SpellMultiplier))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm group scaling range {}-{}: "
+                "all multipliers must be finite and greater than 0.",
+                uint32(range.MinMembers),
+                uint32(range.MaxMembers));
+
+            valid = false;
+            continue;
+        }
+
+        if (previousMaxMembers &&
+            range.MinMembers <= previousMaxMembers)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Overlapping Manastorm group scaling range {}-{}. "
+                "Enabled member-count ranges must not overlap.",
+                uint32(range.MinMembers),
+                uint32(range.MaxMembers));
+
+            valid = false;
+            continue;
+        }
+
+        previousMaxMembers =
+            range.MaxMembers;
+
+        _groupScalingRanges.push_back(
+            range);
+
+        ++loadedRows;
+    }
+    while (result->NextRow());
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Loaded {} enabled Manastorm group scaling ranges "
+        "from {} configured rows.",
+        loadedRows,
+        configuredRows);
+
+    return valid;
+}
+
 ManastormScalingPoint ManastormDataStore::GetScalingForDepth(uint32 depth) const
 {
     ManastormScalingPoint neutral;
@@ -1763,6 +1897,44 @@ ManastormScalingPoint ManastormDataStore::GetScalingForDepth(uint32 depth) const
     ManastormScalingPoint point = itr->second;
     point.Depth = depth;
     return point;
+}
+
+
+ManastormScalingPoint ManastormDataStore::GetScalingForDepth(
+    uint32 depth,
+    uint32 memberCount) const
+{
+    ManastormScalingPoint effective =
+        GetScalingForDepth(depth);
+
+    if (!memberCount ||
+        memberCount > ManastormLimits::MaxMembers)
+    {
+        return effective;
+    }
+
+    for (ManastormGroupScalingRange const& range :
+        _groupScalingRanges)
+    {
+        if (!range.Matches(memberCount))
+            continue;
+
+        effective.HealthMultiplier *=
+            range.HealthMultiplier;
+
+        effective.GlobalDamageMultiplier *=
+            range.GlobalDamageMultiplier;
+
+        effective.MeleeMultiplier *=
+            range.MeleeMultiplier;
+
+        effective.SpellMultiplier *=
+            range.SpellMultiplier;
+
+        break;
+    }
+
+    return effective;
 }
 
 ManastormSegment const*
