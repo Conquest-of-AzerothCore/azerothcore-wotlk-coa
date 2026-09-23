@@ -56,6 +56,14 @@ namespace ManastormResurrection
     constexpr uint8 MaxCharges = 5;
 }
 
+namespace ManastormLimits
+{
+    // Recovered native Manastorm UI explicitly supports any composition
+    // from solo through fifteen players. Solo/Duo/Trio remain distinct
+    // progression modes; four through fifteen use Group mode.
+    constexpr uint32 MaxMembers = 15;
+}
+
 namespace ManastormSegmentFlags
 {
     // Segment is available even when the character owns
@@ -371,6 +379,30 @@ struct ManastormScalingPoint
     float GlobalDamageMultiplier = 1.0f;
     float MeleeMultiplier = 1.0f;
     float SpellMultiplier = 1.0f;
+};
+
+// Optional second scaling layer applied after the generic depth curve.
+// Ranges make the authoring model flexible without inventing values:
+//
+//   1-15  = one generic group multiplier for every legal run size
+//   1-1, 2-2, 3-3, 4-15 = Solo/Duo/Trio/Group buckets
+//   1-1 ... 15-15 = exact per-player-count tuning if/when recovered
+//
+// Enabled ranges must not overlap.
+struct ManastormGroupScalingRange
+{
+    uint8 MinMembers = 1;
+    uint8 MaxMembers = 1;
+    float HealthMultiplier = 1.0f;
+    float GlobalDamageMultiplier = 1.0f;
+    float MeleeMultiplier = 1.0f;
+    float SpellMultiplier = 1.0f;
+
+    bool Matches(uint32 memberCount) const
+    {
+        return memberCount >= MinMembers &&
+            memberCount <= MaxMembers;
+    }
 };
 
 inline ManastormMode ManastormModeForMemberCount(uint32 memberCount)
