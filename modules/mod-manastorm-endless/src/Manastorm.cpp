@@ -3,6 +3,7 @@
 #include "ManastormMgr.h"
 
 #include "AllCreatureScript.h"
+#include "AllSpellScript.h"
 #include "UnitScript.h"
 #include "AllMapScript.h"
 #include "Log.h"
@@ -13,8 +14,10 @@
 #include <limits>
 #include "Language.h"
 #include <string>
+#include "Spell.h"
 #include "SpellScript.h"
 #include "Chat.h"
+#include "../../mod-ascension-compat/src/AscensionManastormGadgets.h"
 
 void AddSC_manastorm_commandscript();
 
@@ -537,7 +540,9 @@ public:
                 PLAYERHOOK_ON_LOGIN,
                 PLAYERHOOK_ON_LEVEL_CHANGED,
                 PLAYERHOOK_ON_GIVE_EXP,
-                PLAYERHOOK_ON_BEFORE_SEND_CHAT_MESSAGE
+                PLAYERHOOK_ON_BEFORE_SEND_CHAT_MESSAGE,
+                PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT,
+                PLAYERHOOK_ON_BEFORE_CRITERIA_PROGRESS
             })
     {
     }
@@ -576,6 +581,80 @@ public:
                 amount,
                 victim,
                 xpSource);
+    }
+
+    bool OnPlayerPassedQuestKilledMonsterCredit(
+        Player* player,
+        Quest const* /*quest*/,
+        uint32 /*entry*/,
+        uint32 /*realEntry*/,
+        ObjectGuid /*guid*/) override
+    {
+        if (!ManastormModuleConfig::Enabled() ||
+            !player)
+        {
+            return true;
+        }
+
+        ManastormRun const* run =
+            ManastormMgr::Instance()
+                .GetRunFor(player);
+
+        if (!run)
+            return true;
+
+        bool const currentStage =
+            player->GetMapId() ==
+                run->GetSegment().MapId &&
+            player->GetInstanceId() ==
+                run->GetInstanceId();
+
+        bool const previousStage =
+            run->HasPreviousStage() &&
+            player->GetMapId() ==
+                run->GetPreviousSegment().MapId &&
+            player->GetInstanceId() ==
+                run->GetPreviousInstanceId();
+
+        return !(currentStage ||
+            previousStage);
+    }
+
+    bool OnPlayerBeforeCriteriaProgress(
+        Player* player,
+        AchievementCriteriaEntry const* criteria) override
+    {
+        if (!ManastormModuleConfig::Enabled() ||
+            !player ||
+            !criteria ||
+            criteria->requiredType !=
+                ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE)
+        {
+            return true;
+        }
+
+        ManastormRun const* run =
+            ManastormMgr::Instance()
+                .GetRunFor(player);
+
+        if (!run)
+            return true;
+
+        bool const currentStage =
+            player->GetMapId() ==
+                run->GetSegment().MapId &&
+            player->GetInstanceId() ==
+                run->GetInstanceId();
+
+        bool const previousStage =
+            run->HasPreviousStage() &&
+            player->GetMapId() ==
+                run->GetPreviousSegment().MapId &&
+            player->GetInstanceId() ==
+                run->GetPreviousInstanceId();
+
+        return !(currentStage ||
+            previousStage);
     }
 
     void OnPlayerBeforeSendChatMessage(
@@ -694,6 +773,96 @@ public:
 };
 
 
+class manastorm_gadget_spells : public AllSpellScript
+{
+public:
+    manastorm_gadget_spells()
+        : AllSpellScript(
+            "manastorm_gadget_spells",
+            {ALLSPELLHOOK_ON_SPELL_CHECK_CAST})
+    {
+    }
+
+    void OnSpellCheckCast(
+        Spell* spell,
+        bool /*strict*/,
+        SpellCastResult& result) override
+    {
+        if (!ManastormModuleConfig::Enabled() ||
+            !spell ||
+            !spell->GetCaster())
+        {
+            return;
+        }
+
+        Player* player =
+            spell->GetCaster()->ToPlayer();
+
+        if (!player)
+            return;
+
+        Ascension::Manastorm::Gadget const* gadget =
+            nullptr;
+
+        for (auto const& candidate :
+            Ascension::Manastorm::Gadgets)
+        {
+            if (candidate.spell ==
+                spell->GetSpellInfo()->Id)
+            {
+                gadget =
+                    &candidate;
+
+                break;
+            }
+        }
+
+        if (!gadget ||
+            gadget->passive)
+        {
+            return;
+        }
+
+        ManastormRun const* run =
+            ManastormMgr::Instance()
+                .GetRunFor(player);
+
+        if (!run ||
+            (run->GetState() !=
+                ManastormRunState::Preparing &&
+             run->GetState() !=
+                ManastormRunState::Active &&
+             run->GetState() !=
+                ManastormRunState::StageComplete))
+        {
+            result =
+                SPELL_FAILED_NOT_HERE;
+
+            return;
+        }
+
+        if (player->GetMapId() !=
+                run->GetSegment().MapId ||
+            player->GetInstanceId() !=
+                run->GetInstanceId())
+        {
+            result =
+                SPELL_FAILED_NOT_HERE;
+
+            return;
+        }
+
+        if (!run->IsGadgetEquipped(
+                player->GetGUID()
+                    .GetCounter(),
+                gadget->spell))
+        {
+            result =
+                SPELL_FAILED_NOT_READY;
+        }
+    }
+};
+
 class npc_manastorm_stage_portal : public CreatureScript
 {
 public:
@@ -763,6 +932,7 @@ void AddSC_manastorm()
     new manastorm_creaturescript();
     new manastorm_unitscript();
     new manastorm_playerscript();
+    new manastorm_gadget_spells();
     new npc_manastorm_stage_portal();
     new manastorm_mapscript();
 
