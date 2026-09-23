@@ -3543,9 +3543,9 @@ bool ManastormMgr::TrySpawnTrashHeart(
 }
 
 void ManastormMgr::OnDamage(
-    Unit* /*attacker*/,
+    Unit* attacker,
     Unit* victim,
-    uint32 damage)
+    uint32& damage)
 {
     if (!victim || !damage)
         return;
@@ -3558,18 +3558,6 @@ void ManastormMgr::OnDamage(
         creature->IsTrigger() ||
         creature->IsPet() ||
         IsPlayerControlledCreature(creature))
-    {
-        return;
-    }
-
-    uint32 const currentHealth =
-        creature->GetHealth();
-
-    uint32 const maxHealth =
-        creature->GetMaxHealth();
-
-    if (!currentHealth ||
-        !maxHealth)
     {
         return;
     }
@@ -3589,13 +3577,88 @@ void ManastormMgr::OnDamage(
             map->GetInstanceId());
 
     if (!run ||
-        run->GetState() != ManastormRunState::Active)
+        !run->IsStageCreature(
+            creature->GetGUID()))
     {
         return;
     }
 
-    if (!run->IsStageCreature(
-        creature->GetGUID()))
+    //
+    // A protected PREPARING stage must not allow the player to kill the
+    // objective while the shared backend is still suppressing incoming
+    // creature damage. That creates the exact bad state where enemies appear
+    // harmless, the objective death is ignored by OnUnitDeath(), and combat
+    // only becomes normal after the player later crosses the entrance radius.
+    //
+    // Treat the first real player/player-controlled hit as explicit intent to
+    // start. If the party is not fully ready yet, suppress this outgoing hit as
+    // well so no stage creature can die before ACTIVE owns the combat.
+    //
+    if (run->GetState() ==
+        ManastormRunState::Preparing)
+    {
+        Player* attackingPlayer =
+            attacker
+            ? attacker->
+                GetCharmerOrOwnerPlayerOrPlayerItself()
+            : nullptr;
+
+        ManastormRun* playerRun =
+            attackingPlayer
+            ? GetRunFor(
+                attackingPlayer)
+            : nullptr;
+
+        bool const exactStageMember =
+            attackingPlayer &&
+            playerRun == run &&
+            attackingPlayer->GetMapId() ==
+                run->GetSegment().MapId &&
+            attackingPlayer->GetInstanceId() ==
+                run->GetInstanceId();
+
+        if (exactStageMember)
+        {
+            run->RequestStart();
+
+            OnPlayerEnterMap(
+                attackingPlayer->FindMap(),
+                attackingPlayer);
+        }
+
+        if (run->GetState() !=
+            ManastormRunState::Active)
+        {
+            damage = 0;
+            return;
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Manastorm run {} collapsed preparation protection because "
+            "player {} engaged stage creature entry={} guid={}.",
+            run->GetRunId(),
+            attackingPlayer
+                ? attackingPlayer->GetGUID().GetCounter()
+                : 0,
+            creature->GetEntry(),
+            creature->GetGUID().GetRawValue());
+    }
+
+    if (run->GetState() !=
+        ManastormRunState::Active)
+    {
+        return;
+    }
+
+    uint32 const currentHealth =
+        creature->GetHealth();
+
+    uint32 const maxHealth =
+        creature->GetMaxHealth();
+
+    if (!currentHealth ||
+        !maxHealth)
     {
         return;
     }
@@ -3870,6 +3933,45 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
         creature->SetReputationRewardDisabled(
             true);
         creature->SetLootMode(0);
+
+        //
+        // The recovered client identity does not prove original server-side
+        // level/stat values. Our fallback creature_template row is level 1,
+        // so the special encounter must enter the same player-level
+        // normalization path as every other Manastorm creature before depth
+        // HP scaling is applied.
+        //
+        if (creature->GetLevel() !=
+            run->GetCreatureLevel())
+        {
+            creature->SelectLevel();
+
+            CreatureTemplate const* creatureTemplate =
+                creature->GetCreatureTemplate();
+
+            if (creatureTemplate)
+            {
+                CreatureBaseStats const* stats =
+                    sObjectMgr->GetCreatureBaseStats(
+                        run->GetCreatureLevel(),
+                        creatureTemplate->unit_class);
+
+                if (stats)
+                {
+                    creature->SetStatFlatModifier(
+                        UNIT_MOD_ARMOR,
+                        BASE_VALUE,
+                        stats->GenerateArmor(
+                            creatureTemplate));
+                }
+            }
+
+            creature->UpdateArmor();
+            creature->UpdateAttackPowerAndDamage(
+                false);
+            creature->UpdateAttackPowerAndDamage(
+                true);
+        }
 
         if (run->GetState() ==
             ManastormRunState::Active)
@@ -4975,22 +5077,89 @@ void ManastormMgr::Update(uint32 diff)
             ++itr;
             if (run.GetInstanceId() &&
                 !sMapMgr->FindMap(run.GetSegment().MapId, run.GetInstanceId()))
-                FailRun(run, "The private stage instance has expired.");
-            else if (run.GetState() == ManastormRunState::Preparing && run.GetInstanceId())
             {
-                for (auto guid : run.GetMembers())
-                    if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
-                        if (member->IsInWorld() && !member->IsBeingTeleported() &&
-                            member->GetMapId() == run.GetSegment().MapId && member->GetInstanceId() == run.GetInstanceId())
-                        {
-                            GameTele const* entrance = sObjectMgr->GetGameTele(run.GetSegment().StartGameTeleId);
-                            if (run.StartRequested() || (entrance && member->IsAlive() &&
-                                member->GetExactDist(entrance->position_x, entrance->position_y, entrance->position_z) > 8.0f))
-                            {
-                                OnPlayerEnterMap(member->FindMap(), member);
-                                break;
-                            }
-                        }
+                FailRun(
+                    run,
+                    "The private stage instance has expired.");
+            }
+            else if (run.GetState() ==
+                    ManastormRunState::Preparing &&
+                run.GetInstanceId())
+            {
+                for (auto guid :
+                    run.GetMembers())
+                {
+                    Player* member =
+                        ObjectAccessor::FindConnectedPlayer(
+                            ObjectGuid::Create<
+                                HighGuid::Player>(
+                                    guid));
+
+                    if (!member ||
+                        !member->IsInWorld() ||
+                        member->IsBeingTeleported() ||
+                        member->GetMapId() !=
+                            run.GetSegment().MapId ||
+                        member->GetInstanceId() !=
+                            run.GetInstanceId())
+                    {
+                        continue;
+                    }
+
+                    GameTele const* entrance =
+                        sObjectMgr->GetGameTele(
+                            run.GetSegment()
+                                .StartGameTeleId);
+
+                    if (run.StartRequested() ||
+                        (entrance &&
+                            member->IsAlive() &&
+                            member->GetExactDist(
+                                entrance->position_x,
+                                entrance->position_y,
+                                entrance->position_z) >
+                                8.0f))
+                    {
+                        OnPlayerEnterMap(
+                            member->FindMap(),
+                            member);
+
+                        break;
+                    }
+                }
+            }
+            else if ((run.GetState() ==
+                        ManastormRunState::Active ||
+                    run.GetState() ==
+                        ManastormRunState::StageComplete) &&
+                run.GetInstanceId())
+            {
+                //
+                // Safety Bubble protection belongs only to PREPARING.
+                // Remove any stale/re-applied controller or combat-preventer
+                // aura while the authoritative stage is already active.
+                //
+                for (auto guid :
+                    run.GetMembers())
+                {
+                    Player* member =
+                        ObjectAccessor::FindConnectedPlayer(
+                            ObjectGuid::Create<
+                                HighGuid::Player>(
+                                    guid));
+
+                    if (member &&
+                        member->IsInWorld() &&
+                        !member->IsBeingTeleported() &&
+                        member->GetMapId() ==
+                            run.GetSegment().MapId &&
+                        member->GetInstanceId() ==
+                            run.GetInstanceId())
+                    {
+                        ClearSafetyBubble(
+                            member);
+                    }
+                }
             }
         }
     }
