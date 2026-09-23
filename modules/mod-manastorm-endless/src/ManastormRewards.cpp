@@ -9,6 +9,7 @@
 #include "MailMgr.h"
 #include "Map.h"
 #include "ManastormRun.h"
+#include "ManastormModuleConfig.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -719,10 +720,79 @@ bool ManastormRewards::PrepareStageCompletion(
                 run.GetMembers()
                     .size()));
 
-    double const segmentMultiplier =
+    ManastormSegment const& segment =
+        run.GetSegment();
+
+    double segmentMultiplier =
         double(
-            run.GetSegment()
-                .RewardMultiplier);
+            segment.RewardMultiplier);
+
+    //
+    // Native Mode 2 must pay the same stage/map reward percentage that the
+    // untouched Ascension client derives from Manastorm.dbc:
+    //
+    //     max(endReward, encounterReward)
+    //
+    // SQL reward_multiplier remains the reconstructed/custom-mode authority,
+    // but it must never silently override the original DBC presentation in
+    // native mode.
+    //
+    if (ManastormModuleConfig::
+        IsNativeClientMode())
+    {
+        double const nativeEnd =
+            double(
+                segment
+                    .NativeRewardEndMultiplier);
+
+        double const nativeEncounter =
+            double(
+                segment
+                    .NativeRewardEncounterMultiplier);
+
+        double const nativeMultiplier =
+            std::max(
+                nativeEnd,
+                nativeEncounter);
+
+        if (!std::isfinite(
+                nativeMultiplier) ||
+            nativeMultiplier <= 0.0)
+        {
+            error =
+                "Native Manastorm reward multiplier is invalid "
+                "for the active segment.";
+
+            LOG_ERROR(
+                LOG_FILTER,
+                "Cannot prepare native Manastorm rewards for segment {}: "
+                "DBC endMultiplier={} encounterMultiplier={}.",
+                segment.SegmentId,
+                nativeEnd,
+                nativeEncounter);
+
+            publications.clear();
+            return false;
+        }
+
+        if (std::fabs(
+                nativeMultiplier -
+                segmentMultiplier) >
+            0.0001)
+        {
+            LOG_WARN(
+                LOG_FILTER,
+                "Native Manastorm segment {} reward multiplier mismatch: "
+                "DBC={:.4f} SQL={:.4f}. Native DBC value is authoritative "
+                "for payout in ClientMode=2.",
+                segment.SegmentId,
+                nativeMultiplier,
+                segmentMultiplier);
+        }
+
+        segmentMultiplier =
+            nativeMultiplier;
+    }
 
     uint8 const track =
         TrackBit(
