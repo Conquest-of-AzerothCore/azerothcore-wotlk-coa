@@ -52,8 +52,6 @@ public:
     }
 
     uint32 GetDepth() const { return _depth; }
-    ObjectGuid GetGuideGuid() const { return _guideGuid; }
-    void SetGuideGuid(ObjectGuid guid) { _guideGuid = guid; }
     ObjectGuid GetPortalGuid() const { return _portalGuid; }
     void SetPortalGuid(ObjectGuid guid) { _portalGuid = guid; }
     bool EntranceInitialized() const { return _entranceInitialized; }
@@ -417,7 +415,6 @@ private:
 
     uint32 _instanceId = 0;
 
-    ObjectGuid _guideGuid;
     ObjectGuid _portalGuid;
     bool _entranceInitialized = false;
     bool _startRequested = false;
