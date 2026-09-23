@@ -807,16 +807,15 @@ bool ManastormRewards::PrepareStageCompletion(
                     HighGuid::Player>(
                         characterGuid));
 
-        if (!player ||
-            !player->GetSession())
-        {
-            error =
-                "A Manastorm member disconnected before "
-                "the stage reward could be prepared.";
-
-            publications.clear();
-            return false;
-        }
+        // Reward persistence is character-owned, not connection-owned.
+        // A member may disconnect after participating in the completed stage;
+        // their durable reward mail must still be prepared atomically with
+        // progression. Online players merely provide richer item creation
+        // context and receive the post-commit inventory fast path.
+        Player const* itemOwner =
+            player && player->GetSession()
+            ? player
+            : nullptr;
 
         ManastormRewardStateSnapshot state;
 
@@ -1136,7 +1135,15 @@ bool ManastormRewards::PrepareStageCompletion(
                     Item::CreateItem(
                         entry,
                         count,
-                        player));
+                        itemOwner));
+
+                if (item)
+                {
+                    item->SetOwnerGUID(
+                        ObjectGuid::Create<
+                            HighGuid::Player>(
+                                characterGuid));
+                }
 
                 if (!item)
                 {
