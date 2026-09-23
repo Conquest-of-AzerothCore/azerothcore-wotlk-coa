@@ -116,9 +116,12 @@ Map* MapInstanced::CreateInstanceForPlayer(const uint32 mapId, Player* player)
 
     if (player->GetScriptedPrivateMapId() == mapId)
     {
-        if ((!IsNonRaidDungeon() && !(IsDungeon() && player->LoadsScriptedPrivateDatabaseSpawns()))
-            || player->GetScriptedPrivateMembers().size() > 5)
+        if (!IsNonRaidDungeon() &&
+            !(IsDungeon() &&
+                player->LoadsScriptedPrivateDatabaseSpawns()))
+        {
             return nullptr;
+        }
 
         uint32 id = player->GetScriptedPrivateInstanceId();
         if (id)
