@@ -32,6 +32,9 @@
 --
 -- No capital spawn coordinates are authored here. We have recovered the
 -- templates/object identity, but not an authoritative SW/Org GUID+XYZ+O set.
+-- No Begin/Continue/Leave stage-controller NPC is authored. Stage flow is
+-- owned by the Manastorm runtime; native click-to-next-stage portal work is
+-- intentionally deferred until that portal is reconstructed separately.
 
 -- ---------------------------------------------------------------------------
 -- Creature model support
@@ -284,47 +287,8 @@ ON DUPLICATE KEY UPDATE
     `flags_extra` = VALUES(`flags_extra`),
     `ScriptName` = VALUES(`ScriptName`);
 
--- ---------------------------------------------------------------------------
--- Local Manastorm stage controller
--- ---------------------------------------------------------------------------
---
--- 80919 is the native Cogsley companion and MUST NOT be reused for the
--- Begin / Continue / Leave stage-control gossip. 900027 is a module-private
--- reconstruction placeholder until the exact native transition controller is
--- proven. It is deliberately not a vendor and is never a world spawn.
---
-INSERT INTO `creature_template`
-(
-    `entry`, `name`, `subname`, `IconName`, `gossip_menu_id`,
-    `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`,
-    `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`,
-    `detection_range`, `rank`, `dmgschool`, `DamageModifier`,
-    `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`,
-    `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`,
-    `family`, `type`, `type_flags`, `AIName`, `MovementType`,
-    `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`,
-    `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`,
-    `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`
-)
-VALUES
-(
-    900027, 'Manastorm Stage Controller', 'Temporary Stage Controller', '',
-    0, 1, 1, 0, 35, 1,
-    1, 1.14286, 1, 1, 20, 0, 0, 1,
-    2000, 2000, 1, 1, 1, 0, 0, 0,
-    0, 10, 0, '', 0, 1, 1, 1, 1,
-    1, 0, 0, 1, 0, 0, '', 0
-)
-ON DUPLICATE KEY UPDATE
-    `name` = VALUES(`name`),
-    `subname` = VALUES(`subname`),
-    `faction` = VALUES(`faction`),
-    `npcflag` = VALUES(`npcflag`),
-    `type` = VALUES(`type`),
-    `ScriptName` = VALUES(`ScriptName`);
-
 DELETE FROM `creature_template_model`
-WHERE `CreatureID` IN (179538, 179539, 80919, 900027);
+WHERE `CreatureID` IN (179538, 179539, 80919);
 
 INSERT INTO `creature_template_model`
 (
@@ -338,8 +302,7 @@ INSERT INTO `creature_template_model`
 VALUES
     (179538, 0, 19942,  1, 1, 0),
     (179539, 0, 100722, 1, 1, 0),
-    (80919,  0, 100722, 1, 1, 0),
-    (900027, 0, 10045, 1, 1, 0);
+    (80919,  0, 100722, 1, 1, 0);
 
 -- ---------------------------------------------------------------------------
 -- Native Manastorm hub object
