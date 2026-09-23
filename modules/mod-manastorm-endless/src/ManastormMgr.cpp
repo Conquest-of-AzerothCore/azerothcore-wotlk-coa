@@ -1879,6 +1879,11 @@ void ManastormMgr::GrantBaselineRunItems(
                 "of your Manastorm tools in your bags. "
                 "Make sure you have free inventory space.");
         }
+        else
+        {
+            _grantedBaselineItems[playerGuid]
+                .insert(itemId);
+        }
     }
 }
 
@@ -1898,24 +1903,45 @@ void ManastormMgr::RemoveBaselineRunItems(
         ManastormBaseline::ItemMagicalEscape
     };
 
-    for (uint32 itemId : items)
+    ObjectGuid::LowType const playerGuid =
+        player->GetGUID().GetCounter();
+
+    auto grantedItr =
+        _grantedBaselineItems.find(
+            playerGuid);
+
+    if (grantedItr !=
+        _grantedBaselineItems.end())
     {
-        if (player->HasItemCount(
-            itemId,
-            1,
-            false))
+        for (uint32 itemId : items)
         {
-            player->DestroyItemCount(
+            if (grantedItr->second.find(
+                    itemId) ==
+                grantedItr->second.end())
+            {
+                continue;
+            }
+
+            if (player->HasItemCount(
                 itemId,
                 1,
-                true);
+                false))
+            {
+                player->DestroyItemCount(
+                    itemId,
+                    1,
+                    true);
+            }
         }
+
+        _grantedBaselineItems.erase(
+            grantedItr);
     }
 
     if (clearPotionState)
     {
         _manastormPotionCharges.erase(
-            player->GetGUID().GetCounter());
+            playerGuid);
     }
 }
 
