@@ -139,8 +139,7 @@ Map* MapMgr::CreateScriptedPrivateWorldMap(
     if (!entry ||
         entry->Instanceable() ||
         entry->IsBattlegroundOrArena() ||
-        player->GetScriptedPrivateMembers().empty() ||
-        player->GetScriptedPrivateMembers().size() > 5)
+        player->GetScriptedPrivateMembers().empty())
     {
         return nullptr;
     }
@@ -302,8 +301,7 @@ Map::EnterState MapMgr::PlayerCannotEnter(uint32 mapid, Player* player, bool log
     // an otherwise public world map without changing Map.dbc semantics.
     if (player->GetScriptedPrivateMapId() == mapid)
     {
-        if (player->GetScriptedPrivateMembers().empty() ||
-            player->GetScriptedPrivateMembers().size() > 5)
+        if (player->GetScriptedPrivateMembers().empty())
         {
             return Map::CANNOT_ENTER_INSTANCE_BIND_MISMATCH;
         }
