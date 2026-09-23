@@ -96,6 +96,7 @@ void ManastormRun::PrepareNextStage(
     _portalGuid.Clear();
     _entranceInitialized = false;
     _startRequested = false;
+    ResetPreparationProtection();
     _objectiveCreatureGuid.Clear();
     _stageCreatureGuids.clear();
     _trashHeartRolls.clear();
