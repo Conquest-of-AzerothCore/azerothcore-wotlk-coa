@@ -82,6 +82,8 @@ def main() -> None:
     assert "damage = 0;" in mgr_cpp
     assert "SAFETY_BUBBLE_CLEANUP_SPELLS" in mgr_cpp
     assert "ManastormRunState::StageComplete" in mgr_cpp
+    assert "PreparationProtectionMs = 120000" in run_h
+    assert "UpdatePreparationProtection" in mgr_cpp
 
     # The recovered Treasure Keeper client row is only an identity fallback.
     # Runtime stats must be normalized to the current Manastorm creature level.
