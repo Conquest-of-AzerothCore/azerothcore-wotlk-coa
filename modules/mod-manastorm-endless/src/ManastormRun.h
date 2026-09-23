@@ -246,6 +246,74 @@ public:
     ManastormSegment const& GetSegment() const { return _segment; }
     ManastormScalingPoint const& GetScaling() const { return _scaling; }
 
+    void BeginPreviousStageTransition()
+    {
+        _previousSegment = _segment;
+        _previousInstanceId = _instanceId;
+        _previousPortalGuid = _portalGuid;
+        _pendingStageTransferMembers.clear();
+
+        for (ObjectGuid::LowType guid :
+            _members)
+        {
+            _pendingStageTransferMembers.insert(guid);
+        }
+
+        _hasPreviousStage = true;
+    }
+
+    bool HasPreviousStage() const
+    {
+        return _hasPreviousStage;
+    }
+
+    ManastormSegment const& GetPreviousSegment() const
+    {
+        return _previousSegment;
+    }
+
+    uint32 GetPreviousInstanceId() const
+    {
+        return _previousInstanceId;
+    }
+
+    ObjectGuid GetPreviousPortalGuid() const
+    {
+        return _previousPortalGuid;
+    }
+
+    bool IsPendingStageTransfer(
+        ObjectGuid::LowType guid) const
+    {
+        return _pendingStageTransferMembers.find(guid) !=
+            _pendingStageTransferMembers.end();
+    }
+
+    void MarkStageTransferComplete(
+        ObjectGuid::LowType guid)
+    {
+        _pendingStageTransferMembers.erase(guid);
+    }
+
+    std::unordered_set<ObjectGuid::LowType> const&
+        GetPendingStageTransferMembers() const
+    {
+        return _pendingStageTransferMembers;
+    }
+
+    bool HasPendingStageTransfers() const
+    {
+        return !_pendingStageTransferMembers.empty();
+    }
+
+    void ClearPreviousStageTransition()
+    {
+        _hasPreviousStage = false;
+        _previousInstanceId = 0;
+        _previousPortalGuid.Clear();
+        _pendingStageTransferMembers.clear();
+    }
+
     void PrepareNextStage(
         uint8 creatureLevel,
         uint32 depth,
@@ -604,6 +672,17 @@ private:
         _chaoticLinkUnusedSpawnIds;
 
     uint32 _instanceId = 0;
+
+    // During the five-second portal window the run may own the completed
+    // stage and the prepared next stage at the same time. The completed
+    // stage remains only as a portal waiting room; all combat authority
+    // moves to _segment/_instanceId.
+    bool _hasPreviousStage = false;
+    ManastormSegment _previousSegment;
+    uint32 _previousInstanceId = 0;
+    ObjectGuid _previousPortalGuid;
+    std::unordered_set<ObjectGuid::LowType>
+        _pendingStageTransferMembers;
 
     ObjectGuid _portalGuid;
     bool _entranceInitialized = false;
