@@ -4,11 +4,13 @@
 
 #include "AllCreatureScript.h"
 #include "AllSpellScript.h"
+#include "DBCStructure.h"
 #include "UnitScript.h"
 #include "AllMapScript.h"
 #include "Log.h"
 #include "Map.h"
 #include "Player.h"
+#include "QuestDef.h"
 #include "ScriptMgr.h"
 #include "PlayerScript.h"
 #include <limits>
