@@ -121,6 +121,12 @@ private:
     void BroadcastClientState(
         ManastormRun const& run) const;
 
+    enum class ManastormFailureExit : uint8
+    {
+        SavedLocation = 0,
+        FactionHub = 1,
+    };
+
     struct ManastormPotionChargeState
     {
         uint8 Charges =
@@ -135,7 +141,9 @@ private:
     void FailRun(
         ManastormRun& run,
         std::string const& reason,
-        ObjectGuid::LowType externalDepartureGuid = 0);
+        ObjectGuid::LowType externalDepartureGuid = 0,
+        ManastormFailureExit failureExit =
+            ManastormFailureExit::SavedLocation);
 
     void GrantBaselineRunItems(
         Player* player);

@@ -92,6 +92,7 @@ bool ManastormDataStore::Load()
     _scalingCurve.clear();
     _groupScalingRanges.clear();
     _creaturePools.clear();
+    _hubReturns.clear();
     _unlocks.clear();
 
     bool const segmentsLoaded =
@@ -110,6 +111,9 @@ bool ManastormDataStore::Load()
 
     bool const groupScalingLoaded =
         LoadGroupScaling();
+
+    bool const hubReturnsLoaded =
+        LoadHubReturns();
 
     bool const unlocksLoaded =
         segmentsLoaded &&
@@ -130,6 +134,7 @@ bool ManastormDataStore::Load()
         creaturePoolsLoaded &&
         scalingLoaded &&
         groupScalingLoaded &&
+        hubReturnsLoaded &&
         unlocksLoaded &&
         unlockTriggersLoaded &&
         unlockGrantsLoaded;
@@ -140,11 +145,13 @@ bool ManastormDataStore::Load()
             LOG_FILTER,
             "Manastorm datastore loaded: {} segments, "
             "{} creature pools, {} depth scaling points, "
-            "{} group scaling ranges, {} progression unlocks.",
+            "{} group scaling ranges, {} hub return pads, "
+            "{} progression unlocks.",
             _segments.size(),
             _creaturePools.size(),
             _scalingCurve.size(),
             _groupScalingRanges.size(),
+            _hubReturns.size(),
             _unlocks.size());
     }
     else
@@ -157,6 +164,175 @@ bool ManastormDataStore::Load()
     }
 
     return _loaded;
+}
+
+
+bool ManastormDataStore::LoadHubReturns()
+{
+    QueryResult countResult = WorldDatabase.Query(
+        "SELECT COUNT(*) FROM `manastorm_hub_return`");
+
+    if (!countResult)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to query `manastorm_hub_return`. "
+            "Apply 12_manastorm_hub_spawns.sql before starting Manastorm.");
+        return false;
+    }
+
+    uint64 const configuredRows =
+        countResult->Fetch()[0].Get<uint64>();
+
+    QueryResult result = WorldDatabase.Query(
+        "SELECT "
+        "r.`team_id`, r.`gameobject_guid`, r.`z_offset`, "
+        "g.`map`, g.`position_x`, g.`position_y`, "
+        "g.`position_z`, g.`orientation` "
+        "FROM `manastorm_hub_return` r "
+        "INNER JOIN `gameobject` g "
+        "ON g.`guid` = r.`gameobject_guid` "
+        "AND g.`id` = 20832 "
+        "ORDER BY r.`team_id`");
+
+    if (!result)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "No valid Manastorm hub return pads were resolved. "
+            "The configured GUIDs must point to gameobject entry 20832.");
+        return false;
+    }
+
+    bool valid = true;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint8 const teamId =
+            fields[0].Get<uint8>();
+
+        uint64 const spawnIdRaw =
+            fields[1].Get<uint64>();
+
+        float const zOffset =
+            fields[2].Get<float>();
+
+        uint32 const mapId =
+            fields[3].Get<uint32>();
+
+        if (teamId > 1)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm hub return team_id {}. "
+                "Only 0=Alliance and 1=Horde are supported.",
+                uint32(teamId));
+
+            valid = false;
+            continue;
+        }
+
+        if (!spawnIdRaw ||
+            spawnIdRaw >
+                uint64(std::numeric_limits<
+                    ObjectGuid::LowType>::max()))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm hub return gameobject GUID {} "
+                "for team_id {}.",
+                spawnIdRaw,
+                uint32(teamId));
+
+            valid = false;
+            continue;
+        }
+
+        if (!std::isfinite(zOffset) ||
+            zOffset < 0.0f ||
+            zOffset > 10.0f)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm hub return z_offset {} "
+                "for team_id {}. Expected a finite value from 0 to 10.",
+                zOffset,
+                uint32(teamId));
+
+            valid = false;
+            continue;
+        }
+
+        if (!sMapStore.LookupEntry(mapId))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm hub return map {} "
+                "for team_id {}.",
+                mapId,
+                uint32(teamId));
+
+            valid = false;
+            continue;
+        }
+
+        ManastormHubReturn hubReturn;
+        hubReturn.TeamId = teamId;
+        hubReturn.GameObjectSpawnId =
+            ObjectGuid::LowType(spawnIdRaw);
+        hubReturn.MapId = mapId;
+        hubReturn.PositionX = fields[4].Get<float>();
+        hubReturn.PositionY = fields[5].Get<float>();
+        hubReturn.PositionZ = fields[6].Get<float>();
+        hubReturn.Orientation = fields[7].Get<float>();
+        hubReturn.ZOffset = zOffset;
+
+        if (!_hubReturns.emplace(
+            teamId,
+            hubReturn).second)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Duplicate Manastorm hub return mapping "
+                "for team_id {}.",
+                uint32(teamId));
+
+            valid = false;
+        }
+    }
+    while (result->NextRow());
+
+    if (configuredRows != 2 ||
+        _hubReturns.size() != 2 ||
+        !_hubReturns.contains(0) ||
+        !_hubReturns.contains(1))
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Manastorm hub returns require exactly two valid rows: "
+            "team_id 0=Alliance and team_id 1=Horde. "
+            "Configured rows={}, valid resolved rows={}.",
+            configuredRows,
+            _hubReturns.size());
+
+        valid = false;
+    }
+
+    if (valid)
+    {
+        LOG_INFO(
+            LOG_FILTER,
+            "Loaded Manastorm wipe return pads: "
+            "Alliance GO={} map={}, Horde GO={} map={}.",
+            _hubReturns.at(0).GameObjectSpawnId,
+            _hubReturns.at(0).MapId,
+            _hubReturns.at(1).GameObjectSpawnId,
+            _hubReturns.at(1).MapId);
+    }
+
+    return valid;
 }
 
 bool ManastormDataStore::LoadSegments()
@@ -1935,6 +2111,19 @@ ManastormScalingPoint ManastormDataStore::GetScalingForDepth(
     }
 
     return effective;
+}
+
+
+ManastormHubReturn const*
+ManastormDataStore::GetHubReturn(
+    uint8 teamId) const
+{
+    auto itr =
+        _hubReturns.find(teamId);
+
+    return itr == _hubReturns.end()
+        ? nullptr
+        : &itr->second;
 }
 
 ManastormSegment const*

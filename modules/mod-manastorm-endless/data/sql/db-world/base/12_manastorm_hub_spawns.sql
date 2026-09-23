@@ -42,6 +42,33 @@ SET @MS_ORG_PORTAL_GUID := 6901536;
 SET @MS_SW_PORTAL_GUID  := 6901535;
 
 -- ---------------------------------------------------------------------------
+-- Death/wipe return routing
+-- ---------------------------------------------------------------------------
+--
+-- Native-style failed-run ejection is anchored to the actual capital Teleport
+-- Pad spawn, not a duplicated game_tele/XYZ. The Manastorm datastore joins this
+-- GUID back to `gameobject` when it loads.
+--
+-- team_id uses AzerothCore TeamId:
+--   0 = Alliance
+--   1 = Horde
+--
+-- z_offset is added to the pad's database Z so resurrected players appear
+-- above the platform rather than inside its model. Tune this one value if a
+-- client model later proves to need a slightly different standing height.
+--
+CREATE TABLE IF NOT EXISTS `manastorm_hub_return`
+(
+    `team_id` TINYINT UNSIGNED NOT NULL,
+    `gameobject_guid` BIGINT UNSIGNED NOT NULL,
+    `z_offset` FLOAT NOT NULL DEFAULT 1.0,
+    PRIMARY KEY (`team_id`)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COMMENT='Faction Teleport Pad anchors used only for Manastorm death/wipe ejection';
+
+-- ---------------------------------------------------------------------------
 -- Preflight: creature GUID availability
 -- ---------------------------------------------------------------------------
 
@@ -365,6 +392,59 @@ WHERE NOT EXISTS
     WHERE `guid` = @MS_SW_PORTAL_GUID
 );
 
+
+-- ---------------------------------------------------------------------------
+-- Bind death/wipe returns to the actual Teleport Pad spawn GUIDs
+-- ---------------------------------------------------------------------------
+--
+-- The SELECT guards matter: a GUID collision must never make Manastorm point
+-- at unrelated world content. The mapping is created/updated only if the GUID
+-- currently resolves to the exact expected Teleport Pad placement.
+--
+INSERT INTO `manastorm_hub_return`
+(
+    `team_id`,
+    `gameobject_guid`,
+    `z_offset`
+)
+SELECT
+    0,
+    @MS_SW_PORTAL_GUID,
+    1.0
+FROM `gameobject`
+WHERE `guid` = @MS_SW_PORTAL_GUID
+  AND `id` = 20832
+  AND `map` = 0
+  AND ABS(`position_x` - (-8888.36)) < 0.01
+  AND ABS(`position_y` - 590.391) < 0.01
+  AND ABS(`position_z` - 93.5542) < 0.01
+  AND ABS(`orientation` - 2.21732) < 0.01
+ON DUPLICATE KEY UPDATE
+    `gameobject_guid` = VALUES(`gameobject_guid`),
+    `z_offset` = VALUES(`z_offset`);
+
+INSERT INTO `manastorm_hub_return`
+(
+    `team_id`,
+    `gameobject_guid`,
+    `z_offset`
+)
+SELECT
+    1,
+    @MS_ORG_PORTAL_GUID,
+    1.0
+FROM `gameobject`
+WHERE `guid` = @MS_ORG_PORTAL_GUID
+  AND `id` = 20832
+  AND `map` = 1
+  AND ABS(`position_x` - 1648.1) < 0.01
+  AND ABS(`position_y` - (-4431.11)) < 0.01
+  AND ABS(`position_z` - 16.9532) < 0.01
+  AND ABS(`orientation` - 2.18527) < 0.01
+ON DUPLICATE KEY UPDATE
+    `gameobject_guid` = VALUES(`gameobject_guid`),
+    `z_offset` = VALUES(`z_offset`);
+
 -- ---------------------------------------------------------------------------
 -- Post-run verification
 --
@@ -430,3 +510,24 @@ FROM
 LEFT JOIN `gameobject` AS existing
     ON existing.`guid` = desired.`guid`
 ORDER BY `location`;
+
+
+-- Verify the runtime death/wipe anchors after the spawn checks above.
+SELECT
+    CASE `r`.`team_id`
+        WHEN 0 THEN 'Alliance'
+        WHEN 1 THEN 'Horde'
+        ELSE CONCAT('Unknown team ', `r`.`team_id`)
+    END AS `team`,
+    `r`.`gameobject_guid`,
+    `g`.`id` AS `gameobject_entry`,
+    `g`.`map`,
+    `g`.`position_x`,
+    `g`.`position_y`,
+    `g`.`position_z`,
+    `r`.`z_offset`,
+    `g`.`position_z` + `r`.`z_offset` AS `player_return_z`
+FROM `manastorm_hub_return` AS `r`
+LEFT JOIN `gameobject` AS `g`
+    ON `g`.`guid` = `r`.`gameobject_guid`
+ORDER BY `r`.`team_id`;

@@ -6,6 +6,18 @@
 #include <map>
 #include <vector>
 
+struct ManastormHubReturn
+{
+    uint8 TeamId = 0;
+    ObjectGuid::LowType GameObjectSpawnId = 0;
+    uint32 MapId = 0;
+    float PositionX = 0.0f;
+    float PositionY = 0.0f;
+    float PositionZ = 0.0f;
+    float Orientation = 0.0f;
+    float ZOffset = 1.0f;
+};
+
 class ManastormDataStore
 {
 public:
@@ -23,6 +35,9 @@ public:
 
     ManastormCreaturePoolDefinition const* GetCreaturePoolById(
         uint32 poolId) const;
+
+    ManastormHubReturn const* GetHubReturn(
+        uint8 teamId) const;
 
     ManastormUnlockDefinition const* GetUnlockForTrigger(
         uint32 completedDepth,
@@ -65,6 +80,7 @@ private:
     bool LoadCreaturePools();
     bool LoadScalingCurve();
     bool LoadGroupScaling();
+    bool LoadHubReturns();
     bool LoadUnlocks();
     bool LoadUnlockTriggers();
     bool LoadUnlockGrants();
@@ -73,6 +89,7 @@ private:
     std::vector<ManastormSegment> _segments;
     std::map<uint32, ManastormScalingPoint> _scalingCurve;
     std::vector<ManastormGroupScalingRange> _groupScalingRanges;
+    std::map<uint8, ManastormHubReturn> _hubReturns;
     std::map<uint32, ManastormCreaturePoolDefinition> _creaturePools;
     std::map<uint32, ManastormUnlockDefinition> _unlocks;
 

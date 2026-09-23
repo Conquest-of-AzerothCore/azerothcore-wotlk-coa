@@ -1272,7 +1272,8 @@ bool ManastormMgr::ConsumeRegenerationMatrixCharge(
 void ManastormMgr::FailRun(
     ManastormRun& run,
     std::string const& reason,
-    ObjectGuid::LowType externalDepartureGuid)
+    ObjectGuid::LowType externalDepartureGuid,
+    ManastormFailureExit failureExit)
 {
     if (run.GetState() ==
         ManastormRunState::Failed ||
@@ -1494,28 +1495,85 @@ void ManastormMgr::FailRun(
             member->m_recallO = location->GetOrientation();
         }
 
-        uint32 const returnMap =
+        uint32 returnMap =
             member->m_recallMap;
 
-        float const returnX =
+        float returnX =
             member->m_recallX;
 
-        float const returnY =
+        float returnY =
             member->m_recallY;
 
-        float const returnZ =
+        float returnZ =
             member->m_recallZ;
 
-        float const returnO =
+        float returnO =
             member->m_recallO;
+
+        char const* destinationName =
+            "saved location";
+
+        //
+        // Native death/wipe failure:
+        //
+        // Ascension returns failed players to the faction Manastorm hub.
+        // Resolve that destination from the persistent Teleport Pad spawn,
+        // not from duplicated hard-coded XYZ coordinates.
+        //
+        // Other FailRun causes deliberately retain the saved pre-Manastorm
+        // location, and StopRun() is completely separate below.
+        //
+        if (failureExit ==
+            ManastormFailureExit::FactionHub)
+        {
+            uint8 const teamId =
+                static_cast<uint8>(
+                    member->GetTeamId());
+
+            if (ManastormHubReturn const* hubReturn =
+                ManastormDataStore::Instance()
+                    .GetHubReturn(teamId))
+            {
+                returnMap =
+                    hubReturn->MapId;
+
+                returnX =
+                    hubReturn->PositionX;
+
+                returnY =
+                    hubReturn->PositionY;
+
+                returnZ =
+                    hubReturn->PositionZ +
+                    hubReturn->ZOffset;
+
+                returnO =
+                    hubReturn->Orientation;
+
+                destinationName =
+                    "faction Manastorm Teleport Pad";
+            }
+            else
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Manastorm failed run {} could not resolve "
+                    "a faction hub return for player {} team_id={}; "
+                    "falling back to the saved entry location.",
+                    runId,
+                    memberGuid,
+                    uint32(teamId));
+            }
+        }
 
         LOG_INFO(
             LOG_FILTER,
             "Manastorm ejecting player {} from "
-            "failed run {} to saved location "
+            "failed run {} to {} "
             "map={} position=({}, {}, {}, {}).",
             memberGuid,
             runId,
+            destinationName,
             returnMap,
             returnX,
             returnY,
@@ -1535,10 +1593,11 @@ void ManastormMgr::FailRun(
             LOG_ERROR(
                 LOG_FILTER,
                 "Manastorm failed to eject player {} "
-                "from failed run {} to saved location "
+                "from failed run {} to {} "
                 "map={} position=({}, {}, {}, {}).",
                 memberGuid,
                 runId,
+                destinationName,
                 returnMap,
                 returnX,
                 returnY,
@@ -1547,8 +1606,8 @@ void ManastormMgr::FailRun(
 
             member->SendSystemMessage(
                 "Manastorm: the run failed, but "
-                "returning you to your previous "
-                "location failed.");
+                "ejecting you from the failed "
+                "Manastorm did not succeed.");
         }
     }
 
@@ -1669,7 +1728,9 @@ void ManastormMgr::HandlePlayerDeath(
     //
     FailRun(
         *run,
-        "All run members are dead.");
+        "All run members are dead.",
+        0,
+        ManastormFailureExit::FactionHub);
 }
 
 void ManastormMgr::GrantBaselineRunItems(
