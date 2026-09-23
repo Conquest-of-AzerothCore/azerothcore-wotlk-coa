@@ -37,6 +37,7 @@ def main() -> None:
     assert "CanStartWithMissingMembers" in run_h
     assert "AllowStartWithMissingMembers" in run_h
     assert "run->AllowStartWithMissingMembers();" in mgr
+    assert "run->CanStartWithMissingMembers()" in mgr
 
     # Portal crossing is per-player. The first member prepares the next stage,
     # while the completed-stage portal remains valid for pending members until
@@ -49,7 +50,13 @@ def main() -> None:
     assert "Other members remain in the completed stage" in mgr
     assert "five-second fallback" in mgr
     assert "run.HasPreviousStage()" in mgr
-    assert "true))" in mgr  # fallback calls TransitionToNextStage(..., transferAll=true)
+    assert """TransitionToNextStage(
+                run,
+                error,
+                0,
+                true)""" in mgr
+    assert "FinishPreviousStageTransition" in mgr
+    assert "previousStageInstanceId" in mgr
 
     # Boss Heart thresholds use only the exact registered objective GUID.
     damage_start = mgr.index("void ManastormMgr::OnDamage(")
