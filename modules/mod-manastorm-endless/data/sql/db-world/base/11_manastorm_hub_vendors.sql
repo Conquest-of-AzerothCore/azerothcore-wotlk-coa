@@ -400,30 +400,26 @@ VALUES
     (179538,  2,  453836, 0, 0, 4207, 0), -- Millhouse Mixtape, 500
     (179538,  3,  509890, 0, 0, 4207, 0), -- Manastorm's Duplicator, 500
     (179538,  4,  980060, 0, 0, 4207, 0), -- Beastmaster's Whistle: Pink Elekk, 500
-    (179538,  5,  233223, 0, 0, 4210, 0), -- Millhouse's Mystical Transportation Device, 1500
-    (179538,  6,  532570, 0, 0, 4210, 0), -- Pip, 1500
-    (179538,  7,  532571, 0, 0, 4210, 0), -- Boomer, 1500
-    (179538,  8,  309907, 0, 0, 4211, 0), -- Recalibrator Pylon, 2000
-    (179538,  9, 2903513, 0, 0, 4213, 0), -- Mechanical Mystic Altar, 3000
-    (179538, 10,  236415, 0, 0, 4216, 0), -- Celestial Glitterplume, 5000
-    (179538, 11, 1500126, 0, 0, 4221, 0), -- Tome of Eye of Kilrogg, 150
-    (179538, 12, 1500128, 0, 0, 4221, 0), -- Tome of Mind Soothe, 150
-    (179538, 13, 1500134, 0, 0, 4221, 0), -- Tome of Levitate, 150
-    (179538, 14, 1500135, 0, 0, 4221, 0), -- Tome of Safe Fall, 150
-    (179538, 15, 1500136, 0, 0, 4221, 0), -- Tome of Mind Vision, 150
-    (179538, 16, 1500141, 0, 0, 4221, 0), -- Tome of Teleport: Moonglade, 150
-    (179538, 17, 1500153, 0, 0, 4221, 0); -- Tome of Call of the Elements, 150
+    (179538,  5,  222739, 0, 0, 4207, 0), -- Tome of Polymorph: Frogduck, 500
+    (179538,  6,  233223, 0, 0, 4210, 0), -- Millhouse's Mystical Transportation Device, 1500
+    (179538,  7,  532570, 0, 0, 4210, 0), -- Pip, 1500
+    (179538,  8,  532571, 0, 0, 4210, 0), -- Boomer, 1500
+    (179538,  9,  309907, 0, 0, 4211, 0), -- Recalibrator Pylon, 2000
+    (179538, 10, 2903513, 0, 0, 4213, 0), -- Mechanical Mystic Altar, 3000
+    (179538, 11,  236415, 0, 0, 4216, 0), -- Celestial Glitterplume, 5000
+    (179538, 12, 1500126, 0, 0, 4221, 0), -- Tome of Eye of Kilrogg, 150
+    (179538, 13, 1500128, 0, 0, 4221, 0), -- Tome of Mind Soothe, 150
+    (179538, 14, 1500134, 0, 0, 4221, 0), -- Tome of Levitate, 150
+    (179538, 15, 1500135, 0, 0, 4221, 0), -- Tome of Safe Fall, 150
+    (179538, 16, 1500136, 0, 0, 4221, 0), -- Tome of Mind Vision, 150
+    (179538, 17, 1500141, 0, 0, 4221, 0), -- Tome of Teleport: Moonglade, 150
+    (179538, 18, 1500153, 0, 0, 4221, 0); -- Tome of Call of the Elements, 150
 
--- Not inserted yet because the exact item->ExtendedCost link is not proven:
---   Tome of Polymorph: Frogduck (visible at 500 Bedlam, item ID not recovered
---   from the supplied shutdown item cache)
---   Purple Desert Satin set
---   S.A.V.I.O.R
---   Alchemist's Brewing Staff
---   Tinkertrot
---   Reins of Silvershine Sentinel
---
--- Their presence is recovered, but this migration does not invent prices.
+-- This is the complete 19-item catalog visible across the supplied current
+-- Millhouse Page 1/2 and Page 2/2 screenshots. The older db.exil screenshot
+-- contains a different historical catalog (Purple Desert Satin, S.A.V.I.O.R,
+-- Alchemist's Brewing Staff, Tinkertrot, Silvershine Sentinel, etc.); those
+-- are intentionally not mixed into this later/current vendor revision.
 
 -- ---------------------------------------------------------------------------
 -- Cogsworth <Manastorm Gadget Vendor> — reconstructed full 147-item economy
@@ -632,3 +628,40 @@ VALUES
 -- Its screenshot proves that it can expose a combined Millhouse/Cogsworth
 -- catalog, but a complete authoritative Cogsley per-item roster is still not
 -- reconstructed here.
+
+
+-- ---------------------------------------------------------------------------
+-- Cogsley <Manastorm Gadget Vendor> — screenshot-confirmed Page 1 subset
+-- ---------------------------------------------------------------------------
+--
+-- The supplied screenshot is explicitly Page 1 of 3. These nine visible rows
+-- are therefore authored exactly; Pages 2-3 remain unresolved and are not
+-- silently invented here.
+--
+-- Bedlam: 4217=200, 4207=500, 4210=1500
+-- Bonzo:  4208=10,000
+-- ---------------------------------------------------------------------------
+
+DELETE FROM `npc_vendor`
+WHERE `entry` = 80919;
+
+INSERT INTO `npc_vendor`
+(
+    `entry`,
+    `slot`,
+    `item`,
+    `maxcount`,
+    `incrtime`,
+    `ExtendedCost`,
+    `VerifiedBuild`
+)
+VALUES
+    (80919, 0,   53834, 0, 0, 4217, 0), -- Empty Heart Container, 200 Bedlam
+    (80919, 1,  222739, 0, 0, 4207, 0), -- Tome of Polymorph: Frogduck, 500 Bedlam
+    (80919, 2,  233223, 0, 0, 4210, 0), -- Millhouse's Mystical Transportation Device, 1500 Bedlam
+    (80919, 3,  339030, 0, 0, 4208, 0), -- Manastorm Cleanse R1, 10,000 Bonzo
+    (80919, 4,  427920, 0, 0, 4217, 0), -- Millhouse's Goggles of Imminent Peril, 200 Bedlam
+    (80919, 5,  453836, 0, 0, 4207, 0), -- Millhouse Mixtape, 500 Bedlam
+    (80919, 6,  339031, 0, 0, 4208, 0), -- Manastorm Purification R1, 10,000 Bonzo
+    (80919, 7,  980060, 0, 0, 4207, 0), -- Beastmaster's Whistle: Pink Elekk, 500 Bedlam
+    (80919, 8,  339033, 0, 0, 4208, 0); -- Manastorm Curing R1, 10,000 Bonzo
