@@ -1384,6 +1384,19 @@ void ManastormMgr::FailRun(
     uint32 const stageInstanceId =
         run.GetInstanceId();
 
+    bool const hadPreviousStage =
+        run.HasPreviousStage();
+
+    uint32 const previousStageMapId =
+        hadPreviousStage
+        ? run.GetPreviousSegment().MapId
+        : MAPID_INVALID;
+
+    uint32 const previousStageInstanceId =
+        hadPreviousStage
+        ? run.GetPreviousInstanceId()
+        : 0;
+
     std::vector<ObjectGuid::LowType> const members =
         run.GetMembers();
 
@@ -1707,9 +1720,34 @@ void ManastormMgr::FailRun(
     _transitionTimers.erase(
         runId);
 
-    if (Map* stage = sMapMgr->FindMap(stageMapId, stageInstanceId))
+    if (Map* stage =
+        sMapMgr->FindMap(
+            stageMapId,
+            stageInstanceId))
+    {
         if (stage->IsScriptedPrivateInstance())
             stage->RequestScriptedPrivateUnload();
+    }
+
+    if (hadPreviousStage &&
+        previousStageMapId !=
+            MAPID_INVALID &&
+        previousStageInstanceId)
+    {
+        if (Map* previous =
+            sMapMgr->FindMap(
+                previousStageMapId,
+                previousStageInstanceId))
+        {
+            if (previous->
+                IsScriptedPrivateInstance())
+            {
+                previous->
+                    RequestScriptedPrivateUnload();
+            }
+        }
+    }
+
     _runs.erase(
         runId);
 
