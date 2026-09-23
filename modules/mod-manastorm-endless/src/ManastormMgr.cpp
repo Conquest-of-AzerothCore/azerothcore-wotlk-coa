@@ -2412,6 +2412,17 @@ bool ManastormMgr::TransferMemberToCurrentStage(
     ManastormSegment const& segment =
         run.GetSegment();
 
+    if (player->GetMapId() ==
+            segment.MapId &&
+        player->GetInstanceId() ==
+            run.GetInstanceId())
+    {
+        run.MarkStageTransferComplete(
+            guid);
+
+        return true;
+    }
+
     GameTele const* tele =
         sObjectMgr->GetGameTele(
             segment.StartGameTeleId);
@@ -5753,7 +5764,8 @@ void ManastormMgr::Update(uint32 diff)
 
         if (!run ||
             run->GetState() !=
-                ManastormRunState::Preparing)
+                ManastormRunState::Preparing ||
+            run->CanStartWithMissingMembers())
         {
             continue;
         }
