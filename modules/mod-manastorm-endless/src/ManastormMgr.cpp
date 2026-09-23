@@ -223,7 +223,7 @@ namespace
     // that controller at the objective corpse's ground Z buries roughly half
     // of the recovered portal effect below the terrain, so lift only the
     // temporary portal anchor while preserving the boss X/Y/orientation.
-    constexpr float STAGE_PORTAL_Z_OFFSET = 2.0f;
+    constexpr float STAGE_PORTAL_Z_OFFSET = 3.5f;
 
     constexpr uint32 NPC_MANASTORM_HEART = 900025;
 
