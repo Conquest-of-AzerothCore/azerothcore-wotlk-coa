@@ -147,49 +147,49 @@ VALUES
 --
 -- INSERT IGNORE deliberately preserves a more complete original server row
 -- if one is already present.
-INSERT IGNORE INTO creature_template
+INSERT IGNORE INTO `creature_template`
 (
-    entry,
-    name,
-    subname,
-    minlevel,
-    maxlevel,
-    exp,
-    faction,
-    npcflag,
-    speed_walk,
-    speed_run,
-    speed_swim,
-    speed_flight,
-    detection_range,
-    rank,
-    dmgschool,
-    DamageModifier,
-    BaseAttackTime,
-    RangeAttackTime,
-    BaseVariance,
-    RangeVariance,
-    unit_class,
-    unit_flags,
-    unit_flags2,
-    dynamicflags,
-    family,
-    type,
-    type_flags,
-    AIName,
-    MovementType,
-    HoverHeight,
-    HealthModifier,
-    ManaModifier,
-    ArmorModifier,
-    ExperienceModifier,
-    RacialLeader,
-    movementId,
-    RegenHealth,
-    CreatureImmunitiesId,
-    flags_extra,
-    ScriptName,
-    VerifiedBuild
+    `entry`,
+    `name`,
+    `subname`,
+    `minlevel`,
+    `maxlevel`,
+    `exp`,
+    `faction`,
+    `npcflag`,
+    `speed_walk`,
+    `speed_run`,
+    `speed_swim`,
+    `speed_flight`,
+    `detection_range`,
+    `rank`,
+    `dmgschool`,
+    `DamageModifier`,
+    `BaseAttackTime`,
+    `RangeAttackTime`,
+    `BaseVariance`,
+    `RangeVariance`,
+    `unit_class`,
+    `unit_flags`,
+    `unit_flags2`,
+    `dynamicflags`,
+    `family`,
+    `type`,
+    `type_flags`,
+    `AIName`,
+    `MovementType`,
+    `HoverHeight`,
+    `HealthModifier`,
+    `ManaModifier`,
+    `ArmorModifier`,
+    `ExperienceModifier`,
+    `RacialLeader`,
+    `movementId`,
+    `RegenHealth`,
+    `CreatureImmunitiesId`,
+    `flags_extra`,
+    `ScriptName`,
+    `VerifiedBuild`
 )
 VALUES
 (
@@ -236,14 +236,14 @@ VALUES
     0
 );
 
-INSERT IGNORE INTO creature_template_model
+INSERT IGNORE INTO `creature_template_model`
 (
-    CreatureID,
-    Idx,
-    CreatureDisplayID,
-    DisplayScale,
-    Probability,
-    VerifiedBuild
+    `CreatureID`,
+    `Idx`,
+    `CreatureDisplayID`,
+    `DisplayScale`,
+    `Probability`,
+    `VerifiedBuild`
 )
 VALUES
     (10111377, 0, 48611, 1, 1, 0);
@@ -255,18 +255,18 @@ SELECT * FROM manastorm_potential_reward ORDER BY display_order;
 SELECT * FROM manastorm_treasure_keeper_rule WHERE rule_id = 1;
 
 SELECT
-    ct.entry,
-    ct.name,
-    ct.rank,
-    ct.type,
-    ct.type_flags,
-    ct.family,
-    ct.HealthModifier,
-    ct.ManaModifier,
-    ct.movementId,
-    ctm.CreatureDisplayID
-FROM creature_template ct
-LEFT JOIN creature_template_model ctm
-    ON ctm.CreatureID = ct.entry
-    AND ctm.Idx = 0
-WHERE ct.entry = 10111377;
+    ct.`entry`,
+    ct.`name`,
+    ct.`rank`,
+    ct.`type`,
+    ct.`type_flags`,
+    ct.`family`,
+    ct.`HealthModifier`,
+    ct.`ManaModifier`,
+    ct.`movementId`,
+    ctm.`CreatureDisplayID`
+FROM `creature_template` ct
+LEFT JOIN `creature_template_model` ctm
+    ON ctm.`CreatureID` = ct.`entry`
+    AND ctm.`Idx` = 0
+WHERE ct.`entry` = 10111377;
