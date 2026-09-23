@@ -60,6 +60,15 @@ def main() -> None:
     assert "CACHE_PITY_STEP_PCT = 13" in rewards_cpp
     assert "PrepareStageCompletion" in progression_cpp
     assert "PublishCommitted" in progression_cpp
+
+    # Stage rewards prefer direct inventory delivery after the durable reward
+    # transaction commits. Only attachments that cannot fit remain in mail.
+    assert "CanStoreItem(" in rewards_cpp
+    assert "MoveItemToInventory" in rewards_cpp
+    assert "CHAR_DEL_MAIL_ITEM" in rewards_cpp
+    assert "SaveInventoryAndGoldToDB" in rewards_cpp
+    assert "mailedOverflowStacks" in rewards_cpp
+
     assert "RewardVisibility" in bridge_cpp
     assert "BuildVisibilityRecords" in bridge_cpp
     assert "TrySpawnTreasureKeeper" in mgr_cpp
