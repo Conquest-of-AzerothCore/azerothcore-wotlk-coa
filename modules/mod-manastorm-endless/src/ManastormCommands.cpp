@@ -239,7 +239,9 @@ namespace
             segment.RewardMultiplier);
 
         handler->PSendSysMessage(
-            "Scaling: HP={:.3f}x GlobalDamage={:.3f}x Melee={:.3f}x Spell={:.3f}x",
+            "Effective scaling (depth x {} members): "
+            "HP={:.3f}x GlobalDamage={:.3f}x Melee={:.3f}x Spell={:.3f}x",
+            run.GetMembers().size(),
             scaling.HealthMultiplier,
             scaling.GlobalDamageMultiplier,
             scaling.MeleeMultiplier,
