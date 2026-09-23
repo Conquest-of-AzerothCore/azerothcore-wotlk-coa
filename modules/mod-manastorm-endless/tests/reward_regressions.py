@@ -74,6 +74,30 @@ def main() -> None:
     assert "TrySpawnTreasureKeeper" in mgr_cpp
     assert "GetBonusCacheCount" in run_h
 
+    # PREPARING protection cannot coexist with killable stage creatures.
+    # The first real player/player-controlled hit explicitly starts the stage;
+    # if the party cannot activate yet, outgoing damage is suppressed.
+    assert "GetCharmerOrOwnerPlayerOrPlayerItself" in mgr_cpp
+    assert "run->RequestStart();" in mgr_cpp
+    assert "damage = 0;" in mgr_cpp
+    assert "SAFETY_BUBBLE_CLEANUP_SPELLS" in mgr_cpp
+    assert "ManastormRunState::StageComplete" in mgr_cpp
+
+    # The recovered Treasure Keeper client row is only an identity fallback.
+    # Runtime stats must be normalized to the current Manastorm creature level.
+    keeper_pos = mgr_cpp.index("IsTreasureKeeperEntry")
+    keeper_end = mgr_cpp.index("Recovered Mana Bomb helper", keeper_pos)
+    keeper_block = mgr_cpp[keeper_pos:keeper_end]
+    assert "creature->SelectLevel();" in keeper_block
+    assert "UpdateAttackPowerAndDamage" in keeper_block
+
+    # Native Mode 2 payout follows the same untouched Manastorm.dbc multiplier
+    # shown by the original client, not a divergent SQL mirror.
+    assert "IsNativeClientMode()" in rewards_cpp
+    assert "NativeRewardEndMultiplier" in rewards_cpp
+    assert "NativeRewardEncounterMultiplier" in rewards_cpp
+    assert "nativeMultiplier" in rewards_cpp
+
     print("Manastorm reward regressions: PASS")
 
 
