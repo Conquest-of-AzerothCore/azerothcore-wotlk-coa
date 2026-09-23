@@ -5066,6 +5066,38 @@ void ManastormMgr::UpdateHeartPickups(uint32 diff)
 
 void ManastormMgr::Update(uint32 diff)
 {
+    //
+    // Live Ascension entry protection has a ~2 minute maximum. Movement or
+    // player combat can request activation earlier; timeout is only the final
+    // safeguard against an indefinitely protected PREPARING stage.
+    //
+    for (auto const& pair :
+        _runs)
+    {
+        ManastormRun* run =
+            pair.second.get();
+
+        if (!run ||
+            run->GetState() !=
+                ManastormRunState::Preparing ||
+            run->StartRequested())
+        {
+            continue;
+        }
+
+        if (run->UpdatePreparationProtection(
+                diff))
+        {
+            run->RequestStart();
+
+            LOG_INFO(
+                LOG_FILTER,
+                "Manastorm run {} reached the 2-minute preparation "
+                "protection limit; stage activation requested.",
+                run->GetRunId());
+        }
+    }
+
     // Empty private instances expire after disconnects. Release their run and
     // membership indexes even if no player reconnects to trigger recovery.
     if (_runValidationTimer <= diff)
