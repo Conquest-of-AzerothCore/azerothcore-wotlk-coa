@@ -226,7 +226,16 @@ namespace
 
     // Recovered Ascension Manastorm Chaotic Link boss aura.
     constexpr uint32 SPELL_CHAOTIC_LINK = 93459;
-    constexpr uint32 NPC_STAGE_GUIDE = 80919;
+
+    // 80919 is the native Cogsley non-combat companion/vendor summoned by
+    // spell 93418. It must never double as the run's Begin/Continue/Leave NPC.
+    constexpr uint32 NPC_COGSLEY = 80919;
+
+    // Local reconstruction-only controller until the exact native transition
+    // controller is proven. Keeping this distinct protects Cogsley's native
+    // companion semantics.
+    constexpr uint32 NPC_STAGE_GUIDE = 900027;
+
     constexpr uint32 NPC_STAGE_PORTAL = 12999;
     constexpr uint32 SPELL_SAFETY_BUBBLE = 93306;
     constexpr uint32 SPELL_SAFETY_BUBBLE_HELPER = 93307;
@@ -237,6 +246,31 @@ namespace
         player->RemoveDynObject(SPELL_SAFETY_BUBBLE);
         player->RemoveAurasDueToSpell(SPELL_SAFETY_BUBBLE);
         player->RemoveAurasDueToSpell(SPELL_SAFETY_BUBBLE_HELPER);
+    }
+
+    void DespawnCogsleyCompanion(Player* player)
+    {
+        if (!player)
+            return;
+
+        ObjectGuid const critterGuid =
+            player->GetCritterGUID();
+
+        if (critterGuid.IsEmpty())
+            return;
+
+        Creature* critter =
+            ObjectAccessor::GetCreature(
+                *player,
+                critterGuid);
+
+        if (!critter ||
+            critter->GetEntry() != NPC_COGSLEY)
+        {
+            return;
+        }
+
+        critter->DespawnOrUnsummon();
     }
 
     // Recovered spell values:
@@ -1344,6 +1378,12 @@ void ManastormMgr::FailRun(
         RemoveBaselineRunItems(
             member,
             true);
+
+        // Cogsley (80919) is a Manastorm-only non-combat companion.
+        // Remove it before leaving the private stage so it cannot leak into
+        // the normal world after a stop/failure teleport.
+        DespawnCogsleyCompanion(
+            member);
 
         // A terminal ejection can return to the same native map ID as the
         // private stage (for example private Kalimdor -> public Kalimdor).
@@ -2978,7 +3018,9 @@ void ManastormMgr::OnBeforeCreatureSelectLevel(
 {
     if (!creature ||
         creature->GetEntry() == NPC_MANASTORM_HEART ||
-        creature->GetEntry() == NPC_STAGE_GUIDE || creature->GetEntry() == NPC_STAGE_PORTAL ||
+        creature->GetEntry() == NPC_COGSLEY ||
+        creature->GetEntry() == NPC_STAGE_GUIDE ||
+        creature->GetEntry() == NPC_STAGE_PORTAL ||
         creature->IsTrigger() ||
         creature->IsPet() ||
         IsPlayerControlledCreature(creature))
@@ -3573,8 +3615,13 @@ bool ManastormMgr::ForceStageAffix(
 
 void ManastormMgr::OnCreatureAddWorld(Creature* creature)
 {
-    if (!creature || creature->GetEntry() == NPC_STAGE_GUIDE || creature->GetEntry() == NPC_STAGE_PORTAL)
+    if (!creature ||
+        creature->GetEntry() == NPC_COGSLEY ||
+        creature->GetEntry() == NPC_STAGE_GUIDE ||
+        creature->GetEntry() == NPC_STAGE_PORTAL)
+    {
         return;
+    }
 
     Map* map =
         creature->GetMap();
@@ -4707,6 +4754,12 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
         RemoveBaselineRunItems(
             member,
             true);
+
+        // Cogsley (80919) is a Manastorm-only non-combat companion.
+        // Remove it before leaving the private stage so it cannot leak into
+        // the normal world after a stop/failure teleport.
+        DespawnCogsleyCompanion(
+            member);
 
         // Returning from a private world copy to the public copy can use the
         // same map ID. Force a far transfer in that case; otherwise TeleportTo
