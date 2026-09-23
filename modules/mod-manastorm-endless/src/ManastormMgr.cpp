@@ -1947,9 +1947,13 @@ bool ManastormMgr::PrepareStage(
         }
         connected.push_back(member);
     }
-    if (connected.empty() || connected.size() > 5)
+    if (connected.empty() ||
+        connected.size() > ManastormLimits::MaxMembers)
     {
-        error = "Private Manastorm stages require one to five members.";
+        error =
+            "Private Manastorm stages require one to " +
+            std::to_string(ManastormLimits::MaxMembers) +
+            " members.";
         return false;
     }
     ObjectGuid const owner = ObjectGuid::Create<HighGuid::Player>(run.GetOwnerGuid());
@@ -2109,6 +2113,15 @@ ManastormRun* ManastormMgr::StartRun(
         return nullptr;
     }
 
+    if (members.size() > ManastormLimits::MaxMembers)
+    {
+        error =
+            "Manastorm supports up to " +
+            std::to_string(ManastormLimits::MaxMembers) +
+            " players.";
+        return nullptr;
+    }
+
     for (ObjectGuid::LowType memberGuid : members)
     {
         if (_memberRunIds.find(memberGuid) != _memberRunIds.end())
@@ -2265,7 +2278,9 @@ ManastormRun* ManastormMgr::StartRun(
 
     ManastormScalingPoint const scaling =
         ManastormDataStore::Instance()
-        .GetScalingForDepth(depth);
+        .GetScalingForDepth(
+            depth,
+            uint32(members.size()));
 
     uint8 const creatureLevel =
         ResolveCreatureLevel(
@@ -4340,7 +4355,9 @@ bool ManastormMgr::TransitionToNextStage(
 
     ManastormScalingPoint const nextScaling =
         ManastormDataStore::Instance()
-        .GetScalingForDepth(nextDepth);
+        .GetScalingForDepth(
+            nextDepth,
+            uint32(run.GetMembers().size()));
 
     _stageRunIds.erase(
         MakeStageKey(
