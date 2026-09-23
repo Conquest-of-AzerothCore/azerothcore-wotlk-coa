@@ -15,7 +15,6 @@
 #include <string>
 #include "SpellScript.h"
 #include "Chat.h"
-#include "ScriptedGossip.h"
 
 void AddSC_manastorm_commandscript();
 
@@ -412,18 +411,6 @@ public:
 
         ManastormMgr::Instance()
             .OnCreatureAddWorld(creature);
-    }
-
-    bool CanCreatureGossipHello(Player* player, Creature* creature) override
-    {
-        return ManastormModuleConfig::Enabled() &&
-            ManastormMgr::Instance().HandleGuideGossip(player, creature, 0);
-    }
-
-    bool CanCreatureGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
-    {
-        return ManastormModuleConfig::Enabled() && sender == GOSSIP_SENDER_MAIN &&
-            ManastormMgr::Instance().HandleGuideGossip(player, creature, action);
     }
 
     void OnCreatureRemoveWorld(
