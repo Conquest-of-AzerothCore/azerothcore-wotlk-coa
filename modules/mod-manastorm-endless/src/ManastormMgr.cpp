@@ -3069,6 +3069,23 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         return;
     }
 
+    if (run->HasPreviousStage() &&
+        run->IsPendingStageTransfer(
+            player->GetGUID().GetCounter()))
+    {
+        run->MarkStageTransferComplete(
+            player->GetGUID().GetCounter());
+
+        if (!run->HasPendingStageTransfers())
+        {
+            _transitionTimers.erase(
+                run->GetRunId());
+
+            FinishPreviousStageTransition(
+                *run);
+        }
+    }
+
     //
     // Exact owned map + instance.
     //
@@ -5736,8 +5753,7 @@ void ManastormMgr::Update(uint32 diff)
 
         if (!run ||
             run->GetState() !=
-                ManastormRunState::Preparing ||
-            run->StartRequested())
+                ManastormRunState::Preparing)
         {
             continue;
         }
@@ -5887,25 +5903,18 @@ void ManastormMgr::Update(uint32 diff)
 
         ManastormRun& run = *runItr->second;
 
-        if (run.GetState() != ManastormRunState::StageComplete)
-        {
-            itr = _transitionTimers.erase(itr);
-            continue;
-        }
+        bool const waitingForPortal =
+            run.GetState() ==
+                ManastormRunState::StageComplete ||
+            (run.HasPreviousStage() &&
+             run.GetState() ==
+                ManastormRunState::Preparing);
 
-        bool ready = true;
-        for (auto guid : run.GetMembers())
+        if (!waitingForPortal)
         {
-            Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
-            if (!member || !member->IsInWorld() || member->IsBeingTeleported())
-            {
-                ready = false;
-                break;
-            }
-        }
-        if (!ready)
-        {
-            ++itr;
+            itr = _transitionTimers.erase(
+                itr);
+
             continue;
         }
 
@@ -5916,22 +5925,32 @@ void ManastormMgr::Update(uint32 diff)
             continue;
         }
 
-        itr = _transitionTimers.erase(itr);
+        itr = _transitionTimers.erase(
+            itr);
 
         std::string error;
-        if (TransitionToNextStage(run, error))
+
+        if (TransitionToNextStage(
+                run,
+                error,
+                0,
+                true))
+        {
             continue;
+        }
 
         LOG_ERROR(
             LOG_FILTER,
-            "Manastorm run {} failed to transition after depth {}: {}",
+            "Manastorm run {} failed the five-second stage fallback "
+            "at depth {}: {}",
             run.GetRunId(),
             run.GetDepth(),
             error);
 
         FailRun(
             run,
-            std::string("Stage transition failed: ") +
+            std::string(
+                "Stage transition fallback failed: ") +
             error);
     }
 }
