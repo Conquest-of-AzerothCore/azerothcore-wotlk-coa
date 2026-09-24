@@ -29,7 +29,6 @@ namespace
     constexpr char const* LOG_FILTER =
         "module.manastorm.endless.rewards";
 
-    constexpr uint32 ITEM_MANASTORM_CACHE = 97884;
     constexpr uint32 ITEM_BEDLAM_BULLION = 1297307;
     constexpr uint32 ITEM_BONZO_BOLT = 1297308;
     constexpr uint32 REWARD_MAIL_SENDER = 80919;
@@ -83,13 +82,15 @@ ManastormRewards& ManastormRewards::Instance()
 bool ManastormRewards::Load()
 {
     _loaded = false;
+    _cacheBrackets.clear();
     _bedlam = {};
     _bonzo = {};
     _groupRewardRanges.clear();
     _potentialRewards.clear();
     _treasureKeeper = {};
 
-    if (!LoadRewardRules() ||
+    if (!LoadCacheBrackets() ||
+        !LoadRewardRules() ||
         !LoadGroupRewardMultipliers() ||
         !LoadPotentialRewards() ||
         !LoadTreasureKeeperRule() ||
@@ -103,7 +104,8 @@ bool ManastormRewards::Load()
     LOG_INFO(
         LOG_FILTER,
         "Loaded authoritative Manastorm reward policy: "
-        "potentialRewards={} groupRanges={} treasureKeeper={}.",
+        "cacheBrackets={} potentialRewards={} groupRanges={} treasureKeeper={}.",
+        _cacheBrackets.size(),
         _potentialRewards.size(),
         _groupRewardRanges.size(),
         _treasureKeeper.Enabled
@@ -111,6 +113,230 @@ bool ManastormRewards::Load()
             : "disabled");
 
     return true;
+}
+
+bool ManastormRewards::LoadCacheBrackets()
+{
+    QueryResult result =
+        WorldDatabase.Query(
+            "SELECT "
+            "bracket_id, track, selector_kind, "
+            "min_value, max_value, cache_item_entry "
+            "FROM manastorm_cache_bracket "
+            "WHERE enabled = 1 "
+            "ORDER BY track, selector_kind, min_value, "
+            "max_value, bracket_id");
+
+    if (!result)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to load manastorm_cache_bracket. "
+            "Apply 15_manastorm_cache_brackets.sql.");
+
+        return false;
+    }
+
+    bool foundNormal = false;
+    bool foundEndgame = false;
+
+    do
+    {
+        Field* fields =
+            result->Fetch();
+
+        CacheBracket bracket;
+        bracket.BracketId =
+            fields[0].Get<uint32>();
+        bracket.Track =
+            fields[1].Get<uint8>();
+
+        uint8 const selector =
+            fields[2].Get<uint8>();
+
+        bracket.MinValue =
+            fields[3].Get<uint32>();
+        bracket.MaxValue =
+            fields[4].Get<uint32>();
+        bracket.CacheItemEntry =
+            fields[5].Get<uint32>();
+
+        if (selector ==
+            uint8(
+                CacheSelector::CharacterLevel))
+        {
+            bracket.Selector =
+                CacheSelector::CharacterLevel;
+        }
+        else if (selector ==
+            uint8(
+                CacheSelector::Depth))
+        {
+            bracket.Selector =
+                CacheSelector::Depth;
+        }
+        else
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm cache bracket {}: "
+                "selector_kind={} is unknown.",
+                bracket.BracketId,
+                uint32(selector));
+
+            return false;
+        }
+
+        bool const normalTrack =
+            bracket.Track ==
+                ManastormTrackBits::Normal;
+
+        bool const endgameTrack =
+            bracket.Track ==
+                ManastormTrackBits::Endgame;
+
+        CacheSelector const expectedSelector =
+            normalTrack
+            ? CacheSelector::CharacterLevel
+            : CacheSelector::Depth;
+
+        if (!bracket.BracketId ||
+            (!normalTrack && !endgameTrack) ||
+            bracket.MinValue >
+                bracket.MaxValue ||
+            !bracket.CacheItemEntry ||
+            bracket.Selector !=
+                expectedSelector ||
+            !sObjectMgr->GetItemTemplate(
+                bracket.CacheItemEntry))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid enabled Manastorm cache bracket {}: "
+                "track={} selector={} range={}-{} item={}.",
+                bracket.BracketId,
+                uint32(bracket.Track),
+                uint32(selector),
+                bracket.MinValue,
+                bracket.MaxValue,
+                bracket.CacheItemEntry);
+
+            return false;
+        }
+
+        for (CacheBracket const& existing :
+            _cacheBrackets)
+        {
+            if (existing.Track !=
+                    bracket.Track ||
+                existing.Selector !=
+                    bracket.Selector)
+            {
+                continue;
+            }
+
+            bool const overlaps =
+                bracket.MinValue <=
+                    existing.MaxValue &&
+                bracket.MaxValue >=
+                    existing.MinValue;
+
+            if (overlaps)
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Overlapping enabled Manastorm cache brackets "
+                    "{} ({}-{}) and {} ({}-{}) for track={} "
+                    "selector={}.",
+                    existing.BracketId,
+                    existing.MinValue,
+                    existing.MaxValue,
+                    bracket.BracketId,
+                    bracket.MinValue,
+                    bracket.MaxValue,
+                    uint32(bracket.Track),
+                    uint32(selector));
+
+                return false;
+            }
+        }
+
+        foundNormal |=
+            normalTrack;
+
+        foundEndgame |=
+            endgameTrack;
+
+        _cacheBrackets.push_back(
+            bracket);
+    }
+    while (result->NextRow());
+
+    if (!foundNormal ||
+        !foundEndgame)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Manastorm cache brackets must contain at least "
+            "one enabled Normal/level and one Endgame/depth "
+            "mapping.");
+
+        return false;
+    }
+
+    return true;
+}
+
+bool ManastormRewards::ResolveCacheItemEntry(
+    bool endgame,
+    uint32 depth,
+    uint32 playerLevel,
+    uint32& itemEntry) const
+{
+    itemEntry = 0;
+
+    if (!_loaded)
+        return false;
+
+    uint8 const track =
+        TrackBit(
+            endgame);
+
+    CacheSelector const selector =
+        endgame
+        ? CacheSelector::Depth
+        : CacheSelector::CharacterLevel;
+
+    uint32 const value =
+        endgame
+        ? depth
+        : playerLevel;
+
+    if (!value)
+        return false;
+
+    for (CacheBracket const& bracket :
+        _cacheBrackets)
+    {
+        if (bracket.Track !=
+                track ||
+            bracket.Selector !=
+                selector ||
+            value <
+                bracket.MinValue ||
+            value >
+                bracket.MaxValue)
+        {
+            continue;
+        }
+
+        itemEntry =
+            bracket.CacheItemEntry;
+
+        return true;
+    }
+
+    return false;
 }
 
 bool ManastormRewards::LoadRewardRules()
@@ -903,6 +1129,70 @@ bool ManastormRewards::PrepareStageCompletion(
                     : 0u,
                 run.GetBonusCacheCount());
 
+        uint32 cacheItemEntry = 0;
+
+        if (cacheCount)
+        {
+            uint32 playerLevel =
+                player
+                ? uint32(
+                    player->GetLevel())
+                : 0;
+
+            if (!run.IsEndgame() &&
+                !playerLevel)
+            {
+                QueryResult levelResult =
+                    CharacterDatabase.Query(
+                        "SELECT level "
+                        "FROM characters "
+                        "WHERE guid = {} "
+                        "LIMIT 1",
+                        characterGuid);
+
+                if (levelResult)
+                {
+                    playerLevel =
+                        uint32(
+                            levelResult->
+                                Fetch()[0]
+                                .Get<uint8>());
+                }
+            }
+
+            if (!ResolveCacheItemEntry(
+                    run.IsEndgame(),
+                    run.GetDepth(),
+                    playerLevel,
+                    cacheItemEntry))
+            {
+                error =
+                    "No enabled Manastorm cache bracket matches "
+                    "track=" +
+                    std::to_string(
+                        uint32(track)) +
+                    " depth=" +
+                    std::to_string(
+                        run.GetDepth()) +
+                    " level=" +
+                    std::to_string(
+                        playerLevel) +
+                    ".";
+
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Cannot resolve physical Manastorm cache for "
+                    "character {}: track={} depth={} level={}.",
+                    characterGuid,
+                    uint32(track),
+                    run.GetDepth(),
+                    playerLevel);
+
+                publications.clear();
+                return false;
+            }
+        }
+
         uint64 const nextBedlamEarned =
             SaturatingAdd(
                 state.BedlamEarned,
@@ -1012,7 +1302,7 @@ bool ManastormRewards::PrepareStageCompletion(
                 _bedlam.ItemEntry,
                 bedlam) ||
             !appendQuantity(
-                ITEM_MANASTORM_CACHE,
+                cacheItemEntry,
                 cacheCount) ||
             !appendQuantity(
                 _treasureKeeper

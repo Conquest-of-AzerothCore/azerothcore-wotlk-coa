@@ -63,10 +63,11 @@ public:
     std::vector<ManastormRewardVisibilityRecord>
         BuildVisibilityRecords() const;
 
-    uint32 GetCacheItemEntry() const
-    {
-        return 97884;
-    }
+    bool ResolveCacheItemEntry(
+        bool endgame,
+        uint32 depth,
+        uint32 playerLevel,
+        uint32& itemEntry) const;
 
     double GetGroupRewardMultiplier(
         uint32 memberCount) const;
@@ -87,6 +88,23 @@ public:
 
 private:
     ManastormRewards() = default;
+
+    enum class CacheSelector : uint8
+    {
+        CharacterLevel = 1,
+        Depth = 2,
+    };
+
+    struct CacheBracket
+    {
+        uint32 BracketId = 0;
+        uint8 Track = 0;
+        CacheSelector Selector =
+            CacheSelector::CharacterLevel;
+        uint32 MinValue = 0;
+        uint32 MaxValue = 0;
+        uint32 CacheItemEntry = 0;
+    };
 
     struct RewardRule
     {
@@ -127,6 +145,7 @@ private:
         uint32 CaseCount = 0;
     };
 
+    bool LoadCacheBrackets();
     bool LoadRewardRules();
     bool LoadGroupRewardMultipliers();
     bool LoadPotentialRewards();
@@ -145,6 +164,7 @@ private:
         uint32 previousRemainderBp,
         uint32& nextRemainderBp) const;
 
+    std::vector<CacheBracket> _cacheBrackets;
     RewardRule _bedlam;
     RewardRule _bonzo;
     std::vector<GroupRewardRange> _groupRewardRanges;

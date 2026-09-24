@@ -368,10 +368,6 @@ void ManastormClientBridge::SendState(Player* player, ManastormRun const* run) c
             cacheChancePct =
                 float(
                     rewardState.CacheChancePct);
-
-            cacheItem =
-                ManastormRewards::Instance()
-                    .GetCacheItemEntry();
         }
         else
         {
@@ -380,6 +376,29 @@ void ManastormClientBridge::SendState(Player* player, ManastormRun const* run) c
                 "Cannot load native Manastorm reward state for {}: {}",
                 player->GetGUID().ToString(),
                 rewardError);
+        }
+
+        if (!ManastormRewards::Instance()
+            .ResolveCacheItemEntry(
+                run->IsEndgame(),
+                run->GetDepth(),
+                uint32(
+                    player->GetLevel()),
+                cacheItem))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Cannot resolve native Manastorm cache item for {}: "
+                "track={} depth={} level={}.",
+                player->GetGUID().ToString(),
+                run->IsEndgame()
+                    ? uint32(
+                        ManastormTrackBits::Endgame)
+                    : uint32(
+                        ManastormTrackBits::Normal),
+                run->GetDepth(),
+                uint32(
+                    player->GetLevel()));
         }
     }
 
