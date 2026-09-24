@@ -608,9 +608,30 @@ void ManastormMgr::SendClientState(
         uint32 guaranteedCaches =
             run->GetBonusCacheCount();
 
-        uint32 cacheItemId =
-            ManastormRewards::Instance()
-                .GetCacheItemEntry();
+        uint32 cacheItemId = 0;
+
+        if (!ManastormRewards::Instance()
+            .ResolveCacheItemEntry(
+                run->IsEndgame(),
+                run->GetDepth(),
+                uint32(
+                    player->GetLevel()),
+                cacheItemId))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Unable to resolve addon Manastorm cache item for {}: "
+                "track={} depth={} level={}.",
+                player->GetGUID().GetCounter(),
+                run->IsEndgame()
+                    ? uint32(
+                        ManastormTrackBits::Endgame)
+                    : uint32(
+                        ManastormTrackBits::Normal),
+                run->GetDepth(),
+                uint32(
+                    player->GetLevel()));
+        }
 
         if (ManastormRewards::Instance()
             .LoadState(

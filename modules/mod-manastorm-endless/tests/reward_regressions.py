@@ -116,8 +116,10 @@ def main() -> None:
     assert "LoadCacheBrackets()" in rewards_cpp
     assert "ResolveCacheItemEntry(" in rewards_cpp
     assert "ResolveCacheItemEntry(" in bridge_cpp
+    assert "ResolveCacheItemEntry(" in mgr_cpp
     assert "ITEM_MANASTORM_CACHE" not in rewards_cpp
     assert "GetCacheItemEntry" not in bridge_cpp
+    assert "GetCacheItemEntry" not in mgr_cpp
     assert "SELECT level " in rewards_cpp
     assert "PrepareStageCompletion" in progression_cpp
     assert "PublishCommitted" in progression_cpp
