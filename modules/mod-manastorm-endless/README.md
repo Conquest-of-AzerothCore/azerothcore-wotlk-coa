@@ -50,12 +50,19 @@ specified client installation; no addon or C_Config override is needed.
 The original client's `ToggleLFDParentFrame` allows low-level players to open
 PVE only while `C_Manastorm.CanEnter(1)` is true. That is false inside a run.
 `client/build_keybind_patch.py` changes that guard to also accept
-`C_Manastorm.IsInManastorm()`. It builds a readback-verified one-file MPQ overlay
-from a hash-pinned installed UIParent, preserving all other code and normal
-Dungeon Finder level checks. `client/patch-ZZ.MPQ` was installed into the
-user-specified Acension/Data folder. Original MPQs are untouched. Restart the
-client to load it; remove this overlay to revert the keybinding change.
-Rebuild/restart the server for native config publication, then relog.
+`C_Manastorm.IsInManastorm()`. The same overlay now also carries one verified
+Ascension_Manastorm FrameXML correction: the Potential Rewards divider is exposed
+as `parentKey="RewardDiv"`. The stock queue Lua anchors Reward1 to
+`self.RewardDiv`; without that parent key the value is nil and the reward row
+anchors below UIParent/off-screen even though its item data and 0x6AD visibility
+state are valid. This is a client layout defect, not a reward opcode/data defect.
+
+The builder creates a readback-verified MPQ containing only the patched
+`Interface\\FrameXML\\UIParent.lua` and
+`Interface\\AddOns\\Ascension_Manastorm\\ManastormQueue.xml`. Original
+client MPQs are untouched. Restart the client after replacing
+`client/patch-ZZ.MPQ`; removing the overlay reverts both client fixes. No
+server packet is used to mutate FrameXML or execute arbitrary Lua.
 
 The packet receiver overrides the **const** WorldPacket hook actually dispatched
 by this core. Overriding the other overload compiles but silently misses requests.

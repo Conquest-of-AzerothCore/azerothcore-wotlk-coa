@@ -6,8 +6,12 @@ base = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('patch', base/'client/build_keybind_patch.py')
 module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
 api = module.ArchiveAPI(Path(sys.argv[1]))
-data = api.read(base/'client/patch-ZZ.MPQ').decode('utf-8')
+data = api.read(base/'client/patch-ZZ.MPQ', module.UI_MEMBER).decode('utf-8')
 function = data[data.index('function ToggleLFDParentFrame()'):data.index('function ToggleLFRParentFrame()')]
+
+queue_source = module.load_queue_patch().decode('utf-8')
+assert 'name="$parentRewardDiv" parentKey="RewardDiv"' in queue_source
+assert 'name="$parentRewardDiv" file="Interface\\Common\\ui-tooltipdivider-transparent"' not in queue_source
 test = r"""
 local visible, level, active, eligible = false, 10, true, false
 local shown, hidden, checks = 0, 0, 0
