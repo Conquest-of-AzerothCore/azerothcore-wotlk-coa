@@ -1676,6 +1676,12 @@ void ManastormRewards::PublishCommitted(
             // mail storage and let SaveInventoryAndGoldToDB persist its exact
             // bag/slot placement in this follow-up transaction.
             //
+            uint32 const deliveredEntry =
+                item->GetEntry();
+
+            uint32 const deliveredCount =
+                item->GetCount();
+
             item->SetState(
                 ITEM_UNCHANGED);
 
@@ -1684,6 +1690,58 @@ void ManastormRewards::PublishCommitted(
                     destination,
                     item.release(),
                     true);
+
+            //
+            // MoveItemToInventory performs the real inventory transfer, but it
+            // does not send SMSG_ITEM_PUSH_RESULT. Ascension's native toast
+            // system listens to the resulting CHAT_MSG_LOOT event, so notify
+            // the client through AzerothCore's normal new-item path after the
+            // reward has actually reached the player's bags.
+            //
+            Item* notificationItem = nullptr;
+
+            for (ItemPosCount const& position :
+                destination)
+            {
+                Item* storedItem =
+                    player->
+                        GetItemByPos(
+                            position.pos);
+
+                if (storedItem &&
+                    storedItem->GetEntry() ==
+                        deliveredEntry)
+                {
+                    notificationItem =
+                        storedItem;
+
+                    break;
+                }
+            }
+
+            if (notificationItem)
+            {
+                player->
+                    SendNewItem(
+                        notificationItem,
+                        deliveredCount,
+                        true,
+                        false,
+                        false,
+                        true);
+            }
+            else
+            {
+                LOG_WARN(
+                    LOG_FILTER,
+                    "Manastorm delivered item {} x{} to character {} "
+                    "but could not resolve the stored stack for the "
+                    "native item-push notification.",
+                    deliveredEntry,
+                    deliveredCount,
+                    publication->
+                        CharacterGuid);
+            }
 
             ++inventoryStacks;
         }
