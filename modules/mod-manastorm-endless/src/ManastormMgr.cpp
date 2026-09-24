@@ -4048,15 +4048,10 @@ void ManastormMgr::OnDamage(
     }
 
     //
-    // A protected PREPARING stage must not allow the player to kill the
-    // objective while the shared backend is still suppressing incoming
-    // creature damage. That creates the exact bad state where enemies appear
-    // harmless, the objective death is ignored by OnUnitDeath(), and combat
-    // only becomes normal after the player later crosses the entrance radius.
-    //
     // Treat the first real player/player-controlled hit as explicit intent to
-    // start. If the party is not fully ready yet, suppress this outgoing hit as
-    // well so no stage creature can die before ACTIVE owns the combat.
+    // start the stage. Entrance safety itself is owned by the real Ascension
+    // Safety Bubble spell; do not add a second server-side damage immunity
+    // layer while PREPARING.
     //
     if (run->GetState() ==
         ManastormRunState::Preparing)
@@ -4090,17 +4085,10 @@ void ManastormMgr::OnDamage(
                 attackingPlayer);
         }
 
-        if (run->GetState() !=
-            ManastormRunState::Active)
-        {
-            damage = 0;
-            return;
-        }
-
         LOG_INFO(
             LOG_FILTER,
-            "Manastorm run {} collapsed preparation protection because "
-            "player {} engaged stage creature entry={} guid={}.",
+            "Manastorm run {} activated because player {} engaged "
+            "stage creature entry={} guid={}.",
             run->GetRunId(),
             attackingPlayer
                 ? attackingPlayer->GetGUID().GetCounter()
@@ -4724,13 +4712,6 @@ uint32 ManastormMgr::ScaleCreatureDamage(
 {
     if (!attacker || !victim || !damage)
         return damage;
-
-    Map* stageMap = victim->FindMap();
-    if (stageMap && stageMap->GetInstanceId())
-        if (ManastormRun* stage = GetRunForStage(stageMap->GetId(), stageMap->GetInstanceId()))
-            if (stage->GetState() == ManastormRunState::Preparing
-                || stage->GetState() == ManastormRunState::Transitioning)
-                return 0;
 
     Creature* creature = attacker->ToCreature();
     if (!creature ||
