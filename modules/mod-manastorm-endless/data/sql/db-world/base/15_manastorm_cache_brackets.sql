@@ -17,6 +17,9 @@
 --   * TBC endgame ranges below follow the recovered/public TBC progression
 --     used by this reconstruction. The historical 51-100 vs 51-105 boundary
 --     discrepancy is resolved here as 51-105 so Karazhan begins at 106.
+--   * The 826+ tail is taken directly from the preserved physical-cache
+--     item descriptions: Mythic Hyjal 826-875, Mythic Black Temple 876-925,
+--     and Mythic Sunwell Plateau 926 onward.
 --   * 97884 remains the generic Potential Rewards UI identity and is NOT a
 --     physical-cache fallback.
 --   * Missing ranges intentionally fail resolution; do not silently award
@@ -95,7 +98,9 @@ VALUES
     (123, 2, 2, 736, 765, 1288071, 1, 'TBC_BRACKET: Heroic Black Temple'),
     (124, 2, 2, 766, 795, 1288072, 1, 'TBC_BRACKET: Sunwell Plateau'),
     (125, 2, 2, 796, 825, 1288074, 1, 'TBC_BRACKET: Heroic Sunwell Plateau'),
-    (126, 2, 2, 826, 855, 1289074, 1, 'TBC_BRACKET: Mythic Sunwell Plateau')
+    (126, 2, 2, 826, 875, 1289070, 1, 'TBC_BRACKET: Mythic Hyjal Summit'),
+    (127, 2, 2, 876, 925, 1289071, 1, 'TBC_BRACKET: Mythic Black Temple'),
+    (128, 2, 2, 926, 4294967295, 1289074, 1, 'TBC_BRACKET: Mythic Sunwell Plateau')
 ON DUPLICATE KEY UPDATE
     `track` = VALUES(`track`),
     `selector_kind` = VALUES(`selector_kind`),
