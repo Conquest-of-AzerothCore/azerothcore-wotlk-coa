@@ -8,6 +8,7 @@
 #include "LootMgr.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Spell.h"
 #include "Util.h"
 
 #include <array>
@@ -77,25 +78,6 @@ namespace
         }
 
         return best;
-    }
-
-    ItemModType ToItemMod(
-        ManastormPreferredPrimaryStat preference)
-    {
-        switch (preference)
-        {
-        case ManastormPreferredPrimaryStat::Strength:
-            return ITEM_MOD_STRENGTH;
-        case ManastormPreferredPrimaryStat::Agility:
-            return ITEM_MOD_AGILITY;
-        case ManastormPreferredPrimaryStat::Intellect:
-            return ITEM_MOD_INTELLECT;
-        case ManastormPreferredPrimaryStat::Spirit:
-            return ITEM_MOD_SPIRIT;
-        case ManastormPreferredPrimaryStat::None:
-        default:
-            return ITEM_MOD_STAMINA;
-        }
     }
 
     uint32 GetItemPrimaryStatAmount(
