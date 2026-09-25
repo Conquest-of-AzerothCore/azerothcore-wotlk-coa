@@ -9,7 +9,6 @@
 #include "GameTime.h"
 #include "Group.h"
 #include "InstanceSaveMgr.h"
-#include "InstanceScript.h"
 #include "Log.h"
 #include "Map.h"
 #include "MapMgr.h"
@@ -289,24 +288,32 @@ namespace
     // Event-driven dungeon objectives
     // --------------------------------
     //
-    // Some native Manastorm objectives do not exist as persistent DB spawns.
-    // Their dungeon scripts create the real boss only after an encounter event
-    // has been started. Keep those exceptions centralized here so the generic
-    // Manastorm objective/scaling/Chaotic-Link path remains unchanged.
+    // Some native Manastorm objectives are normally produced by prerequisite
+    // dungeon events rather than persistent DB spawns. Endless stages should
+    // not depend on quest items, long ritual chains, or encounter-specific
+    // failure mechanics just to make their selected objective exist.
+    //
+    // Keep those exceptions centralized here and bootstrap the selected
+    // objective directly using the dungeon's own native spawn data. The
+    // generic Manastorm objective/scaling/Chaotic-Link path then takes over
+    // exactly as it does for every other boss.
     //
     // Sunken Temple:
     //   675 = Avatar of Hakkar (Normal)
     //   678 = Avatar of Hakkar (Endgame)
     //
-    // AzerothCore's native Awaken the Soulflayer script starts this encounter
-    // by summoning Shade of Hakkar (8440) and setting TYPE_HAKKAR_EVENT to
-    // IN_PROGRESS. Manastorm reproduces that server-side bootstrap directly;
-    // no player spell cast, item, position lock, or movement timing is needed.
+    // AzerothCore world event script 8502 summons Avatar of Hakkar (8443)
+    // at this exact position after the four-flame ritual succeeds:
+    //
+    //   -466.86, 272.31, -90.74, 3.52
+    //
+    // The normal ritual can be failed by its own suppressor mechanics and is
+    // currently known to have very fast add respawns on AzerothCore. For an
+    // Endless objective, summon the final native boss directly instead of
+    // starting that prerequisite event.
     //
     constexpr uint32 MAP_SUNKEN_TEMPLE = 109;
-    constexpr uint32 NPC_SHADE_OF_HAKKAR = 8440;
     constexpr uint32 NPC_AVATAR_OF_HAKKAR = 8443;
-    constexpr uint32 DATA_SUNKEN_TEMPLE_HAKKAR_EVENT = 2;
     constexpr uint32 SEGMENT_HAKKAR_NORMAL = 675;
     constexpr uint32 SEGMENT_HAKKAR_ENDGAME = 678;
 
@@ -345,97 +352,44 @@ namespace
             return false;
         }
 
-        InstanceMap* instanceMap =
-            map->ToInstanceMap();
-
-        if (!instanceMap)
+        Position const avatarPosition =
         {
-            error = "Sunken Temple Hakkar bootstrap is not running on an InstanceMap.";
-            return false;
-        }
-
-        InstanceScript* instance =
-            instanceMap->GetInstanceScript();
-
-        if (!instance)
-        {
-            error = "Sunken Temple Hakkar bootstrap has no instance script.";
-            return false;
-        }
-
-        uint32 const state =
-            instance->GetData(
-                DATA_SUNKEN_TEMPLE_HAKKAR_EVENT);
-
-        //
-        // Duplicate-safe for group-member entry/re-entry. Normally the
-        // Manastorm entrance guard calls this only once, but the native event
-        // state remains the final authority.
-        //
-        if (state == IN_PROGRESS)
-            return true;
-
-        if (state != NOT_STARTED)
-        {
-            std::ostringstream message;
-
-            message
-                << "Sunken Temple Hakkar event is in unexpected state "
-                << state
-                << " before Manastorm bootstrap.";
-
-            error = message.str();
-            return false;
-        }
-
-        Position const shadePosition =
-        {
-            -466.795f,
-             272.863f,
-             -90.447f,
-               1.57f
+            -466.86f,
+             272.31f,
+             -90.74f,
+               3.52f
         };
 
-        TempSummon* shade =
+        TempSummon* avatar =
             map->SummonCreature(
-                NPC_SHADE_OF_HAKKAR,
-                shadePosition);
+                NPC_AVATAR_OF_HAKKAR,
+                avatarPosition);
 
-        if (!shade)
+        if (!avatar)
         {
-            error = "Manastorm could not summon Shade of Hakkar (8440).";
+            error = "Manastorm could not summon Avatar of Hakkar (8443).";
             return false;
         }
 
-        shade->SetTempSummonType(
+        //
+        // Own this boss for the lifetime of the disposable Manastorm stage.
+        // OnCreatureAddWorld() will register this exact runtime GUID as the
+        // objective, apply the Skull marker, scale it, and synchronize its
+        // Chaotic Link aura.
+        //
+        avatar->SetTempSummonType(
             TEMPSUMMON_MANUAL_DESPAWN);
-
-        instance->SetData(
-            DATA_SUNKEN_TEMPLE_HAKKAR_EVENT,
-            IN_PROGRESS);
-
-        if (instance->GetData(
-                DATA_SUNKEN_TEMPLE_HAKKAR_EVENT) !=
-            IN_PROGRESS)
-        {
-            shade->DespawnOrUnsummon();
-
-            error =
-                "Sunken Temple did not accept the Hakkar IN_PROGRESS state.";
-
-            return false;
-        }
 
         LOG_INFO(
             LOG_FILTER,
-            "Bootstrapped Manastorm special encounter: run={} segment={} "
-            "map={} instance={} ShadeOfHakkar={} objective={}.",
+            "Bootstrapped Manastorm event objective directly: run={} "
+            "segment={} map={} instance={} objective={} guid={}.",
             run.GetRunId(),
             segment.SegmentId,
             segment.MapId,
             run.GetInstanceId(),
-            NPC_SHADE_OF_HAKKAR,
-            segment.ObjectiveCreatureEntry);
+            segment.ObjectiveCreatureEntry,
+            avatar->GetGUID().GetRawValue());
 
         return true;
     }
