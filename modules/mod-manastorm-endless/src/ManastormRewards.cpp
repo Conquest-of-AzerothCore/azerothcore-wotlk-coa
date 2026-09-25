@@ -339,6 +339,28 @@ bool ManastormRewards::ResolveCacheItemEntry(
     return false;
 }
 
+bool ManastormRewards::IsCacheItemEntry(
+    uint32 itemEntry) const
+{
+    if (!_loaded ||
+        !itemEntry)
+    {
+        return false;
+    }
+
+    for (CacheBracket const& bracket :
+        _cacheBrackets)
+    {
+        if (bracket.CacheItemEntry ==
+            itemEntry)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool ManastormRewards::LoadRewardRules()
 {
     QueryResult result =
