@@ -246,6 +246,13 @@ public:
     ManastormSegment const& GetSegment() const { return _segment; }
     ManastormScalingPoint const& GetScaling() const { return _scaling; }
 
+    static constexpr std::size_t RecentObjectiveHistoryLimit = 3;
+
+    std::vector<uint64> const& GetRecentObjectiveKeys() const
+    {
+        return _recentObjectiveKeys;
+    }
+
     void BeginPreviousStageTransition()
     {
         _previousSegment = _segment;
@@ -592,6 +599,9 @@ public:
     }
 
 private:
+    void RecordRecentObjective(
+        ManastormSegment const& segment);
+
     bool _endgame = false;
     std::unordered_map<ObjectGuid::LowType, WorldLocation> _returnLocations;
     uint64 _runId = 0;
@@ -607,6 +617,11 @@ private:
     uint8 _creatureLevel = 1;
 
     uint32 _depth = 1;
+
+    // Oldest -> newest native Manastorm objective identities. Alternate
+    // segment routes to the same boss share one identity and therefore cannot
+    // immediately recycle that boss while other eligible objectives exist.
+    std::vector<uint64> _recentObjectiveKeys;
 
     // Live Ascension observation: entry protection lasts at most ~2 minutes.
     // Movement / explicit combat may collapse it earlier.
