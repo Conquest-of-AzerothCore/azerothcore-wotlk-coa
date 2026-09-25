@@ -358,7 +358,15 @@ bool ManastormRewards::IsCacheItemEntry(
         }
     }
 
-    return false;
+    //
+    // Preserved Classic dungeon caches targeted by the donor cache selector.
+    // They are not part of the active TBC depth resolver but already-owned or
+    // manually granted copies must continue to use personalized opening after
+    // mod-ascension-compat is removed.
+    //
+    return
+        itemEntry == 1278050 ||
+        itemEntry == 1278051;
 }
 
 bool ManastormRewards::LoadRewardRules()
