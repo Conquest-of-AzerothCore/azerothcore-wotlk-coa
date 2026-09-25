@@ -24,7 +24,8 @@ ManastormGenerator::SelectSegment(
     unlockedSegmentIds,
     bool endgame,
     uint32 excludedSegmentId,
-    uint32 forcedSegmentId) const
+    uint32 forcedSegmentId,
+    std::vector<uint64> const& recentObjectiveKeys) const
 {
     if (!depth)
         return nullptr;
@@ -106,97 +107,150 @@ ManastormGenerator::SelectSegment(
     uint8 const expectedDifficulty =
         endgame ? uint8(2) : uint8(0);
 
-    for (ManastormSegment const& segment :
-        ManastormDataStore::Instance()
-        .GetSegments())
+    //
+    // Recent-objective protection is intentionally softer than eligibility.
+    //
+    // History is stored oldest -> newest. First try excluding the full
+    // window, then relax the oldest objective one at a time. This keeps
+    // alternate routes to the same boss from appearing as repetitive stages
+    // without ever dead-ending an Endless run when the accessible pool is
+    // small.
+    //
+    std::size_t protectedObjectiveCount =
+        recentObjectiveKeys.size();
+
+    bool allowExactSegmentRepeat =
+        false;
+
+    while (true)
     {
-        if (excludedSegmentId &&
-            segment.SegmentId ==
+        candidates.clear();
+        totalWeight = 0;
+
+        std::size_t const protectedStart =
+            recentObjectiveKeys.size() -
+            protectedObjectiveCount;
+
+        for (ManastormSegment const& segment :
+            ManastormDataStore::Instance()
+            .GetSegments())
+        {
+            if (!allowExactSegmentRepeat &&
+                excludedSegmentId &&
+                segment.SegmentId ==
+                excludedSegmentId)
+            {
+                continue;
+            }
+
+            //
+            // Patch-M/native Manastorm has two distinct stage tracks:
+            //
+            //   difficulty 0 = normal
+            //   difficulty 2 = end-game
+            //
+            // Never allow the generator to cross-select between them.
+            //
+            if (segment.Difficulty !=
+                expectedDifficulty)
+            {
+                continue;
+            }
+
+            if (depth < segment.MinDepth)
+                continue;
+
+            if (segment.MaxDepth &&
+                depth > segment.MaxDepth)
+            {
+                continue;
+            }
+
+            if (!segment.Weight)
+                continue;
+
+            bool const startingUnlocked =
+                (segment.Flags &
+                    ManastormSegmentFlags::StartingUnlocked) != 0;
+
+            bool const progressionUnlocked =
+                unlockedSegmentIds.find(
+                    segment.SegmentId) !=
+                unlockedSegmentIds.end();
+
+            if (!startingUnlocked &&
+                !progressionUnlocked)
+            {
+                continue;
+            }
+
+            uint64 const objectiveKey =
+                MakeManastormObjectiveKey(
+                    segment);
+
+            bool recentObjective =
+                false;
+
+            for (std::size_t index =
+                    protectedStart;
+                index <
+                    recentObjectiveKeys.size();
+                ++index)
+            {
+                if (recentObjectiveKeys[index] ==
+                    objectiveKey)
+                {
+                    recentObjective = true;
+                    break;
+                }
+            }
+
+            if (recentObjective)
+                continue;
+
+            if (std::numeric_limits<uint64>::max() -
+                totalWeight <
+                segment.Weight)
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Manastorm candidate weight overflow "
+                    "while selecting depth {}.",
+                    depth);
+
+                return nullptr;
+            }
+
+            candidates.push_back(
+                &segment);
+
+            totalWeight +=
+                segment.Weight;
+        }
+
+        if (!candidates.empty() &&
+            totalWeight)
+        {
+            break;
+        }
+
+        if (protectedObjectiveCount)
+        {
+            --protectedObjectiveCount;
+            continue;
+        }
+
+        //
+        // Preserve the previous exact-segment fallback as the final safety
+        // net. If the exact previous segment is literally the only accessible
+        // segment, repeat it rather than terminating the run.
+        //
+        if (!allowExactSegmentRepeat &&
             excludedSegmentId)
         {
+            allowExactSegmentRepeat =
+                true;
             continue;
-        }
-
-        //
-        // Patch-M/native Manastorm has two distinct stage tracks:
-        //
-        //   difficulty 0 = normal
-        //   difficulty 2 = end-game
-        //
-        // Never allow the generator to cross-select between them.
-        //
-        if (segment.Difficulty !=
-            expectedDifficulty)
-        {
-            continue;
-        }
-
-        if (depth < segment.MinDepth)
-            continue;
-
-        if (segment.MaxDepth &&
-            depth > segment.MaxDepth)
-        {
-            continue;
-        }
-
-        if (!segment.Weight)
-            continue;
-
-        bool const startingUnlocked =
-            (segment.Flags &
-                ManastormSegmentFlags::StartingUnlocked) != 0;
-
-        bool const progressionUnlocked =
-            unlockedSegmentIds.find(
-                segment.SegmentId) !=
-            unlockedSegmentIds.end();
-
-        if (!startingUnlocked &&
-            !progressionUnlocked)
-        {
-            continue;
-        }
-
-        if (std::numeric_limits<uint64>::max() -
-            totalWeight <
-            segment.Weight)
-        {
-            LOG_ERROR(
-                LOG_FILTER,
-                "Manastorm candidate weight overflow "
-                "while selecting depth {}.",
-                depth);
-
-            return nullptr;
-        }
-
-        candidates.push_back(
-            &segment);
-
-        totalWeight +=
-            segment.Weight;
-    }
-
-    if (candidates.empty() ||
-        !totalWeight)
-    {
-        //
-        // Avoid immediate repetition whenever another
-        // accessible segment exists.
-        //
-        // If only one segment is actually accessible,
-        // allow it to repeat rather than killing the run.
-        //
-        if (excludedSegmentId)
-        {
-            return SelectSegment(
-                depth,
-                runSeed,
-                unlockedSegmentIds,
-                endgame,
-                0,
-                0);
         }
 
         return nullptr;
