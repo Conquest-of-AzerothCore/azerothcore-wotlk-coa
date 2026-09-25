@@ -3,6 +3,7 @@
 
 #include "GlobalScript.h"
 #include "Item.h"
+#include "ItemScript.h"
 #include "ItemTemplate.h"
 #include "LootMgr.h"
 #include "ObjectMgr.h"
@@ -222,6 +223,35 @@ namespace
         uint32 Weight = 0;
     };
 
+    class item_manastorm_cache final :
+        public ItemScript
+    {
+    public:
+        item_manastorm_cache()
+            : ItemScript(
+                "item_manastorm_cache")
+        {
+        }
+
+        bool OnUse(
+            Player* player,
+            Item* item,
+            SpellCastTargets const&) override
+        {
+            if (player &&
+                item &&
+                player->IsAlive() &&
+                !player->IsInCombat())
+            {
+                player->SendLoot(
+                    item->GetGUID(),
+                    LOOT_CORPSE);
+            }
+
+            return true;
+        }
+    };
+
     class manastorm_cache_loot_selector final :
         public GlobalScript
     {
@@ -244,7 +274,8 @@ namespace
             if (!ManastormModuleConfig::Enabled() ||
                 !player ||
                 entries.empty() ||
-                &store != &LootTemplates_Reference)
+                (&store != &LootTemplates_Item &&
+                 &store != &LootTemplates_Reference))
             {
                 return true;
             }
@@ -355,5 +386,6 @@ namespace
 
 void AddSC_manastorm_cache_loot()
 {
+    new item_manastorm_cache();
     new manastorm_cache_loot_selector();
 }
