@@ -41,6 +41,14 @@ namespace
         { ManastormPreferredPrimaryStat::Spirit, STAT_SPIRIT }
     }};
 
+    //
+    // Ascension's client exposes a selectable loot specialization / Primary Stat,
+    // but this reconstructed core does not yet expose that native selection as
+    // server state. Until that opcode/state is recovered, use the opener's
+    // dominant live primary stat as the personalization preference. Keeping this
+    // decision isolated here makes the native preference a drop-in replacement
+    // later without changing cache SQL or pool selection.
+    //
     ManastormPreferredPrimaryStat ResolvePreferredPrimaryStat(
         Player const* player)
     {
