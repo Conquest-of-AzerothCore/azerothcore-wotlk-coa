@@ -69,6 +69,9 @@ public:
         uint32 playerLevel,
         uint32& itemEntry) const;
 
+    bool IsCacheItemEntry(
+        uint32 itemEntry) const;
+
     double GetGroupRewardMultiplier(
         uint32 memberCount) const;
 
