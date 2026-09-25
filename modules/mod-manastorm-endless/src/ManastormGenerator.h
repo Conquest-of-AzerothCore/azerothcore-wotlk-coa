@@ -4,6 +4,7 @@
 #include "ManastormDefines.h"
 
 #include <unordered_set>
+#include <vector>
 
 class ManastormGenerator
 {
@@ -15,7 +16,8 @@ public:
         unlockedSegmentIds,
         bool endgame,
         uint32 excludedSegmentId = 0,
-        uint32 forcedSegmentId = 0) const;
+        uint32 forcedSegmentId = 0,
+        std::vector<uint64> const& recentObjectiveKeys = {}) const;
 };
 
 #endif
