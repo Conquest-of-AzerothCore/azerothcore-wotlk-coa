@@ -23,6 +23,9 @@ ManastormRun::ManastormRun(
     _segment(segment),
     _scaling(scaling)
 {
+    RecordRecentObjective(
+        segment);
+
     _routeConfiguredSpawnIds.insert(
         segment.RouteSpawnIds.begin(),
         segment.RouteSpawnIds.end());
@@ -44,6 +47,24 @@ ManastormRun::ManastormRun(
         segment.CreaturePoolSourceSpawnIds.end());
 }
 
+void ManastormRun::RecordRecentObjective(
+    ManastormSegment const& segment)
+{
+    uint64 const objectiveKey =
+        MakeManastormObjectiveKey(
+            segment);
+
+    if (_recentObjectiveKeys.size() >=
+        RecentObjectiveHistoryLimit)
+    {
+        _recentObjectiveKeys.erase(
+            _recentObjectiveKeys.begin());
+    }
+
+    _recentObjectiveKeys.push_back(
+        objectiveKey);
+}
+
 void ManastormRun::PrepareNextStage(
     uint8 creatureLevel,
     uint32 depth,
@@ -54,6 +75,9 @@ void ManastormRun::PrepareNextStage(
     _depth = depth;
     _segment = segment;
     _scaling = scaling;
+
+    RecordRecentObjective(
+        segment);
 
     // Resurrection resources belong to the stage,
     // not the entire Endless run.
