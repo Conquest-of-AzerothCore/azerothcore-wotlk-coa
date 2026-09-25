@@ -9,6 +9,7 @@
 #include "GameTime.h"
 #include "Group.h"
 #include "InstanceSaveMgr.h"
+#include "InstanceScript.h"
 #include "Log.h"
 #include "Map.h"
 #include "MapMgr.h"
@@ -283,6 +284,172 @@ namespace
         3180304, // revision combat-preventer variant
         3180305  // revision fake variant
     };
+
+    //
+    // Event-driven dungeon objectives
+    // --------------------------------
+    //
+    // Some native Manastorm objectives do not exist as persistent DB spawns.
+    // Their dungeon scripts create the real boss only after an encounter event
+    // has been started. Keep those exceptions centralized here so the generic
+    // Manastorm objective/scaling/Chaotic-Link path remains unchanged.
+    //
+    // Sunken Temple:
+    //   675 = Avatar of Hakkar (Normal)
+    //   678 = Avatar of Hakkar (Endgame)
+    //
+    // AzerothCore's native Awaken the Soulflayer script starts this encounter
+    // by summoning Shade of Hakkar (8440) and setting TYPE_HAKKAR_EVENT to
+    // IN_PROGRESS. Manastorm reproduces that server-side bootstrap directly;
+    // no player spell cast, item, position lock, or movement timing is needed.
+    //
+    constexpr uint32 MAP_SUNKEN_TEMPLE = 109;
+    constexpr uint32 NPC_SHADE_OF_HAKKAR = 8440;
+    constexpr uint32 NPC_AVATAR_OF_HAKKAR = 8443;
+    constexpr uint32 DATA_SUNKEN_TEMPLE_HAKKAR_EVENT = 2;
+    constexpr uint32 SEGMENT_HAKKAR_NORMAL = 675;
+    constexpr uint32 SEGMENT_HAKKAR_ENDGAME = 678;
+
+    bool BootstrapSunkenTempleHakkarEncounter(
+        Map* map,
+        ManastormRun const& run,
+        std::string& error)
+    {
+        error.clear();
+
+        if (!map)
+        {
+            error = "Sunken Temple Hakkar bootstrap has no destination map.";
+            return false;
+        }
+
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (segment.MapId != MAP_SUNKEN_TEMPLE ||
+            segment.ObjectiveCreatureEntry != NPC_AVATAR_OF_HAKKAR)
+        {
+            std::ostringstream message;
+
+            message
+                << "Sunken Temple Hakkar bootstrap was requested for "
+                << "segment "
+                << segment.SegmentId
+                << " but runtime map/objective is "
+                << segment.MapId
+                << "/"
+                << segment.ObjectiveCreatureEntry
+                << ".";
+
+            error = message.str();
+            return false;
+        }
+
+        InstanceScript* instance =
+            map->GetInstanceScript();
+
+        if (!instance)
+        {
+            error = "Sunken Temple Hakkar bootstrap has no instance script.";
+            return false;
+        }
+
+        uint32 const state =
+            instance->GetData(
+                DATA_SUNKEN_TEMPLE_HAKKAR_EVENT);
+
+        //
+        // Duplicate-safe for group-member entry/re-entry. Normally the
+        // Manastorm entrance guard calls this only once, but the native event
+        // state remains the final authority.
+        //
+        if (state == IN_PROGRESS)
+            return true;
+
+        if (state != NOT_STARTED)
+        {
+            std::ostringstream message;
+
+            message
+                << "Sunken Temple Hakkar event is in unexpected state "
+                << state
+                << " before Manastorm bootstrap.";
+
+            error = message.str();
+            return false;
+        }
+
+        Position const shadePosition =
+        {
+            -466.795f,
+             272.863f,
+             -90.447f,
+               1.57f
+        };
+
+        TempSummon* shade =
+            map->SummonCreature(
+                NPC_SHADE_OF_HAKKAR,
+                shadePosition);
+
+        if (!shade)
+        {
+            error = "Manastorm could not summon Shade of Hakkar (8440).";
+            return false;
+        }
+
+        shade->SetTempSummonType(
+            TEMPSUMMON_MANUAL_DESPAWN);
+
+        instance->SetData(
+            DATA_SUNKEN_TEMPLE_HAKKAR_EVENT,
+            IN_PROGRESS);
+
+        if (instance->GetData(
+                DATA_SUNKEN_TEMPLE_HAKKAR_EVENT) !=
+            IN_PROGRESS)
+        {
+            shade->DespawnOrUnsummon();
+
+            error =
+                "Sunken Temple did not accept the Hakkar IN_PROGRESS state.";
+
+            return false;
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped Manastorm special encounter: run={} segment={} "
+            "map={} instance={} ShadeOfHakkar={} objective={}.",
+            run.GetRunId(),
+            segment.SegmentId,
+            segment.MapId,
+            run.GetInstanceId(),
+            NPC_SHADE_OF_HAKKAR,
+            segment.ObjectiveCreatureEntry);
+
+        return true;
+    }
+
+    bool BootstrapSpecialEncounter(
+        Map* map,
+        ManastormRun const& run,
+        std::string& error)
+    {
+        switch (run.GetSegment().SegmentId)
+        {
+        case SEGMENT_HAKKAR_NORMAL:
+        case SEGMENT_HAKKAR_ENDGAME:
+            return BootstrapSunkenTempleHakkarEncounter(
+                map,
+                run,
+                error);
+
+        default:
+            error.clear();
+            return true;
+        }
+    }
 
     void ClearSafetyBubble(Player* player)
     {
@@ -3176,6 +3343,21 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             return;
         if (!run->EntranceInitialized())
         {
+            std::string bootstrapError;
+
+            if (!BootstrapSpecialEncounter(
+                    map,
+                    *run,
+                    bootstrapError))
+            {
+                FailRun(
+                    *run,
+                    "Special encounter bootstrap failed: " +
+                        bootstrapError);
+
+                return;
+            }
+
             run->SetEntranceInitialized();
             Position const position(entrance->position_x, entrance->position_y,
                 entrance->position_z, entrance->orientation);
