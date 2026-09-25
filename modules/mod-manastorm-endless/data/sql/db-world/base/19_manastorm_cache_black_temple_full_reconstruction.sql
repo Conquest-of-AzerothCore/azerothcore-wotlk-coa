@@ -377,7 +377,21 @@ UNION ALL SELECT 'TBC Mythic Dungeon 31-40', COUNT(*) FROM `tmp_ms_dungeon_31_40
 -- ---------------------------------------------------------------------------
 
 DELETE FROM `reference_loot_template`
-WHERE `Entry` BETWEEN 9001001 AND 9001042;
+WHERE `Entry` IN
+(
+    9001001,
+    9001002,
+    9001003,
+    9001010,
+    9001011,
+    9001012,
+    9001021,
+    9001031,
+    9001032,
+    9001033,
+    9001041,
+    9001042
+);
 
 INSERT INTO `reference_loot_template`
 (`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
