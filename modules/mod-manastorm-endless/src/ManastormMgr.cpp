@@ -9,6 +9,7 @@
 #include "GameTime.h"
 #include "Group.h"
 #include "InstanceSaveMgr.h"
+#include "InstanceScript.h"
 #include "Log.h"
 #include "Map.h"
 #include "MapMgr.h"
@@ -313,9 +314,14 @@ namespace
     // starting that prerequisite event.
     //
     constexpr uint32 MAP_SUNKEN_TEMPLE = 109;
+    constexpr uint32 NPC_JAMMALAN_THE_PROPHET = 5710;
     constexpr uint32 NPC_AVATAR_OF_HAKKAR = 8443;
+    constexpr uint32 DATA_SUNKEN_TEMPLE_DEFENDER_KILLED = 11;
+    constexpr uint32 SUNKEN_TEMPLE_DEFENDERS_COUNT = 6;
     constexpr uint32 SEGMENT_HAKKAR_NORMAL = 675;
+    constexpr uint32 SEGMENT_JAMMALAN_NORMAL = 676;
     constexpr uint32 SEGMENT_HAKKAR_ENDGAME = 678;
+    constexpr uint32 SEGMENT_JAMMALAN_ENDGAME = 679;
 
     bool BootstrapSunkenTempleHakkarEncounter(
         Map* map,
@@ -394,6 +400,119 @@ namespace
         return true;
     }
 
+    bool BootstrapSunkenTempleJammalanEncounter(
+        Map* map,
+        ManastormRun const& run,
+        std::string& error)
+    {
+        error.clear();
+
+        if (!map)
+        {
+            error = "Sunken Temple Jammal'an bootstrap has no destination map.";
+            return false;
+        }
+
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (segment.MapId != MAP_SUNKEN_TEMPLE ||
+            segment.ObjectiveCreatureEntry != NPC_JAMMALAN_THE_PROPHET)
+        {
+            std::ostringstream message;
+
+            message
+                << "Sunken Temple Jammal'an bootstrap was requested for "
+                << "segment "
+                << segment.SegmentId
+                << " but runtime map/objective is "
+                << segment.MapId
+                << "/"
+                << segment.ObjectiveCreatureEntry
+                << ".";
+
+            error = message.str();
+            return false;
+        }
+
+        InstanceMap* instanceMap =
+            map->ToInstanceMap();
+
+        if (!instanceMap)
+        {
+            error =
+                "Sunken Temple Jammal'an bootstrap is not running on an InstanceMap.";
+            return false;
+        }
+
+        InstanceScript* instance =
+            instanceMap->GetInstanceScript();
+
+        if (!instance)
+        {
+            error =
+                "Sunken Temple Jammal'an bootstrap has no instance script.";
+            return false;
+        }
+
+        uint32 defendersKilled =
+            instance->GetData(
+                DATA_SUNKEN_TEMPLE_DEFENDER_KILLED);
+
+        if (defendersKilled >=
+            SUNKEN_TEMPLE_DEFENDERS_COUNT)
+        {
+            return true;
+        }
+
+        //
+        // The native Sunken Temple instance increments this value once for
+        // each of its six Atal'ai defenders. Reaching six opens GO 149431 and
+        // fires Jammal'an's normal "shield be down" progression event.
+        //
+        // Manastorm starts this stage behind that prerequisite route, so move
+        // only the native instance state forward to the state the dungeon
+        // would have after those six defenders were defeated. The existing
+        // persistent Jammal'an spawn remains the objective; no duplicate boss
+        // is created.
+        //
+        while (defendersKilled <
+            SUNKEN_TEMPLE_DEFENDERS_COUNT)
+        {
+            uint32 const previous =
+                defendersKilled;
+
+            instance->SetData(
+                DATA_SUNKEN_TEMPLE_DEFENDER_KILLED,
+                1);
+
+            defendersKilled =
+                instance->GetData(
+                    DATA_SUNKEN_TEMPLE_DEFENDER_KILLED);
+
+            if (defendersKilled <= previous)
+            {
+                error =
+                    "Sunken Temple defender state did not advance during Jammal'an bootstrap.";
+                return false;
+            }
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped Manastorm Sunken Temple progression: run={} "
+            "segment={} map={} instance={} defenders={}/{} objective={}.",
+            run.GetRunId(),
+            segment.SegmentId,
+            segment.MapId,
+            run.GetInstanceId(),
+            defendersKilled,
+            SUNKEN_TEMPLE_DEFENDERS_COUNT,
+            segment.ObjectiveCreatureEntry);
+
+        return true;
+    }
+
     bool BootstrapSpecialEncounter(
         Map* map,
         ManastormRun const& run,
@@ -404,6 +523,13 @@ namespace
         case SEGMENT_HAKKAR_NORMAL:
         case SEGMENT_HAKKAR_ENDGAME:
             return BootstrapSunkenTempleHakkarEncounter(
+                map,
+                run,
+                error);
+
+        case SEGMENT_JAMMALAN_NORMAL:
+        case SEGMENT_JAMMALAN_ENDGAME:
+            return BootstrapSunkenTempleJammalanEncounter(
                 map,
                 run,
                 error);
