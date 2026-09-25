@@ -462,7 +462,9 @@ FROM `tmp_ms_bt_heroic` p;
 -- ---------------------------------------------------------------------------
 -- 5) Replace the physical Black Temple cache policies.
 --
--- Item=1 is the conventional non-dropping placeholder for reference rows.
+-- Reference rows still participate in item_loot_template's (Entry, Item)
+-- primary key. Item is therefore a unique non-dropping placeholder key within
+-- each physical cache (1,2,3,...); Reference points at the real gear pool.
 -- ---------------------------------------------------------------------------
 
 DELETE FROM `item_loot_template`
@@ -472,26 +474,26 @@ INSERT INTO `item_loot_template`
 (`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
 VALUES
 (1288068, 1, 9001002, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS BT - Chance: Heroic Hyjal'),
-(1288068, 1, 9001010, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS BT - Chance: Normal Black Temple'),
-(1288068, 1, 9001031, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS BT - Chance: Mythic Dungeon 11-20'),
-(1288068, 1, 9001001, 0,                       0, 1, 1, 1, 1, 'MS BT - Contains: Normal Hyjal');
+(1288068, 2, 9001010, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS BT - Chance: Normal Black Temple'),
+(1288068, 3, 9001031, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS BT - Chance: Mythic Dungeon 11-20'),
+(1288068, 4, 9001001, 0,                       0, 1, 1, 1, 1, 'MS BT - Contains: Normal Hyjal');
 
 INSERT INTO `item_loot_template`
 (`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
 VALUES
 (1288071, 1, 9001002, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Heroic BT - Chance: Heroic Hyjal'),
-(1288071, 1, 9001011, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Heroic BT - Chance: Heroic Black Temple'),
-(1288071, 1, 9001032, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Heroic BT - Chance: Mythic Dungeon 21-30'),
-(1288071, 1, 9001041, 0,                       0, 1, 1, 1, 1, 'MS Heroic BT - Contains: Normal BT or Hyjal');
+(1288071, 2, 9001011, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Heroic BT - Chance: Heroic Black Temple'),
+(1288071, 3, 9001032, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Heroic BT - Chance: Mythic Dungeon 21-30'),
+(1288071, 4, 9001041, 0,                       0, 1, 1, 1, 1, 'MS Heroic BT - Contains: Normal BT or Hyjal');
 
 INSERT INTO `item_loot_template`
 (`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
 VALUES
 (1289071, 1, 9001021, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Heroic Sunwell'),
-(1289071, 1, 9001003, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Mythic Hyjal'),
-(1289071, 1, 9001012, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Mythic Black Temple'),
-(1289071, 1, 9001033, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Mythic Dungeon 31-40'),
-(1289071, 1, 9001042, 0,                       0, 1, 1, 1, 1, 'MS Mythic BT - Contains: Heroic BT or Hyjal');
+(1289071, 2, 9001003, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Mythic Hyjal'),
+(1289071, 3, 9001012, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Mythic Black Temple'),
+(1289071, 4, 9001033, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Mythic Dungeon 31-40'),
+(1289071, 5, 9001042, 0,                       0, 1, 1, 1, 1, 'MS Mythic BT - Contains: Heroic BT or Hyjal');
 
 -- ---------------------------------------------------------------------------
 -- 6) Verification.
