@@ -345,8 +345,17 @@ namespace
             return false;
         }
 
+        InstanceMap* instanceMap =
+            map->ToInstanceMap();
+
+        if (!instanceMap)
+        {
+            error = "Sunken Temple Hakkar bootstrap is not running on an InstanceMap.";
+            return false;
+        }
+
         InstanceScript* instance =
-            map->GetInstanceScript();
+            instanceMap->GetInstanceScript();
 
         if (!instance)
         {
