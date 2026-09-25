@@ -1,7 +1,7 @@
 -- ============================================================================
 -- Conquest of AzerothCore / mod-manastorm-endless
--- Full Black Temple Manastorm cache loot reconstruction
--- Generated 2026-09-25
+-- Black Temple Manastorm cache reconstruction - reference-pool model
+-- Updated 2026-09-25 after Manastorm cache archaeology
 --
 -- Reconstructs:
 --   1288068  Manastorm Cache: Black Temple
@@ -10,49 +10,61 @@
 --
 -- SOURCE MODEL
 -- ------------
--- Cache-family membership comes from the cache descriptions in the user's full
--- item_template dump.
+-- Cache-family membership comes from the recovered Ascension item_template
+-- descriptions. Raid membership comes from the current Ascension AtlasLoot TBC
+-- encounter tables, with non-equipment rows removed. Difficulty variants are
+-- resolved from item_template through the recovered @Heroic Raid@ / @Mythic Raid@
+-- markers. TBC Mythic dungeon families are restricted to real AtlasLoot TBC
+-- dungeon item names and the @Mythic N@ variants.
 --
--- Raid membership comes from the current Ascension AtlasLoot TBC encounter
--- tables, with non-equipment rows removed. Difficulty variants are resolved
--- from the user's own item_template via:
---   @Heroic Raid@
---   @Mythic Raid@
+-- IMPLEMENTATION MODEL
+-- --------------------
+-- This version supersedes the earlier flattened physical-cache layout.
 --
--- TBC Mythic dungeon families are restricted to item names originating from
--- actual Ascension AtlasLoot TBC dungeon encounters, then resolved through:
---   @Mythic 11@ ... @Mythic 20@
---   @Mythic 21@ ... @Mythic 30@
---   @Mythic 31@ ... @Mythic 40@
+-- Physical cache rows now choose a FAMILY by reference:
+--   * positive Chance rows = optional "Chance to contain" families
+--   * Chance=0 row         = advertised "Contains" fallback family
+--
+-- The referenced family contains equal-chance candidate gear. The
+-- mod-manastorm-endless GLOBALHOOK_ON_BEFORE_LOOT_EQUAL_CHANCED selector then
+-- personalizes the winning gear item for the opener. SQL therefore owns WHAT can
+-- appear and the family probabilities; C++ owns HOW one item is selected inside
+-- the chosen family.
 --
 -- IMPORTANT CHANCE NOTE
 -- ---------------------
--- The item_template descriptions prove WHICH families are guaranteed and which
--- are "Chance to contain", but they do not expose Ascension's original numeric
--- chance for those optional families.
---
--- This migration therefore uses an explicit reconstruction parameter:
+-- Ascension's original optional-family percentages were not recovered.
+-- 10% per optional family is a deliberate CoA reconstruction value and can be
+-- rebalanced later without changing C++.
 --
 SET @MS_OPTIONAL_FAMILY_PCT := 10.0;
---
--- Each optional family receives this TOTAL probability inside the cache's
--- single loot group. The primary "Contains" rows use Chance=0 and therefore act
--- as AzerothCore equal-chance fallback rows when no optional family wins.
 --
 -- With the default 10%:
 --   1288068: 3 optional families = 30% optional / 70% primary fallback
 --   1288071: 3 optional families = 30% optional / 70% primary fallback
 --   1289071: 4 optional families = 40% optional / 60% primary fallback
 --
--- Keep this value <= 25.0 because Mythic Black Temple has four optional
--- families. Change it later if direct Ascension cache percentages are recovered.
+-- Keep @MS_OPTIONAL_FAMILY_PCT <= 25.0 while Mythic BT has four optional
+-- families in the same GroupId.
 --
--- Exactly ONE equipment item is selected from GroupId=1 when a cache is opened.
--- No currencies, tier tokens, sigils, mounts, nested caches, raid commendations,
--- Heart of Darkness, Rune of Ascension, or other non-equipment rows are added.
+-- Reserved Manastorm reference-loot namespace used by this migration:
+--   9001001 Normal Hyjal
+--   9001002 Heroic Hyjal
+--   9001003 Mythic Hyjal
+--   9001010 Normal Black Temple
+--   9001011 Heroic Black Temple
+--   9001012 Mythic Black Temple
+--   9001021 Heroic Sunwell
+--   9001031 TBC Mythic Dungeon 11-20
+--   9001032 TBC Mythic Dungeon 21-30
+--   9001033 TBC Mythic Dungeon 31-40
+--   9001041 Normal BT + Normal Hyjal fallback
+--   9001042 Heroic BT + Heroic Hyjal fallback
 --
--- This script replaces ONLY item_loot_template rows for the three cache entries.
--- It does not alter item_template, Manastorm brackets, reward logic, or Ascended BT.
+-- This script replaces ONLY the three BT physical-cache item_loot_template rows
+-- plus the reserved reference pools above. It does not alter item_template,
+-- Manastorm brackets, cache pity/chance, mail delivery, Treasure Keeper, or
+-- Ascended Black Temple.
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
@@ -357,188 +369,127 @@ UNION ALL SELECT 'TBC Mythic Dungeon 21-30', COUNT(*) FROM `tmp_ms_dungeon_21_30
 UNION ALL SELECT 'TBC Mythic Dungeon 31-40', COUNT(*) FROM `tmp_ms_dungeon_31_40`;
 
 -- ---------------------------------------------------------------------------
--- 4) Replace the three Black Temple cache loot tables.
+-- 4) Build reusable personalized gear reference pools.
+--
+-- Every leaf pool is GroupId=1 / Chance=0. AzerothCore therefore exposes the
+-- equal-chance candidate list to mod-manastorm-endless, which selects one item
+-- using the opener's current primary-stat profile.
+-- ---------------------------------------------------------------------------
+
+DELETE FROM `reference_loot_template`
+WHERE `Entry` BETWEEN 9001001 AND 9001042;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001001, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - Normal Hyjal'
+FROM `tmp_ms_hyjal_normal` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001002, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - Heroic Hyjal'
+FROM `tmp_ms_hyjal_heroic` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001003, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - Mythic Hyjal'
+FROM `tmp_ms_hyjal_mythic` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001010, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - Normal Black Temple'
+FROM `tmp_ms_bt_normal` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001011, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - Heroic Black Temple'
+FROM `tmp_ms_bt_heroic` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001012, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - Mythic Black Temple'
+FROM `tmp_ms_bt_mythic` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001021, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - Heroic Sunwell'
+FROM `tmp_ms_sunwell_heroic` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001031, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - TBC Mythic Dungeon 11-20'
+FROM `tmp_ms_dungeon_11_20` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001032, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - TBC Mythic Dungeon 21-30'
+FROM `tmp_ms_dungeon_21_30` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001033, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS pool - TBC Mythic Dungeon 31-40'
+FROM `tmp_ms_dungeon_31_40` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001041, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS fallback - Normal Hyjal'
+FROM `tmp_ms_hyjal_normal` p
+UNION ALL
+SELECT 9001041, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS fallback - Normal Black Temple'
+FROM `tmp_ms_bt_normal` p;
+
+INSERT INTO `reference_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+SELECT 9001042, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS fallback - Heroic Hyjal'
+FROM `tmp_ms_hyjal_heroic` p
+UNION ALL
+SELECT 9001042, p.`item`, 0, 0, 0, 1, 1, 1, 1, 'MS fallback - Heroic Black Temple'
+FROM `tmp_ms_bt_heroic` p;
+
+-- ---------------------------------------------------------------------------
+-- 5) Replace the physical Black Temple cache policies.
+--
+-- Item=1 is the conventional non-dropping placeholder for reference rows.
 -- ---------------------------------------------------------------------------
 
 DELETE FROM `item_loot_template`
 WHERE `Entry` IN (1288068, 1288071, 1289071);
 
--- ===========================================================================
--- 1288068 - Manastorm Cache: Black Temple
---
--- Contains:
---   Normal Mount Hyjal Gear                       (Chance=0 fallback)
---
--- Chance to contain:
---   Heroic Mount Hyjal Gear                       (@MS_OPTIONAL_FAMILY_PCT)
---   Normal Black Temple Gear                      (@MS_OPTIONAL_FAMILY_PCT)
---   Mythic 11-20 Dungeon Gear                     (@MS_OPTIONAL_FAMILY_PCT)
--- ===========================================================================
+INSERT INTO `item_loot_template`
+(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
+VALUES
+(1288068, 1, 9001002, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS BT - Chance: Heroic Hyjal'),
+(1288068, 1, 9001010, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS BT - Chance: Normal Black Temple'),
+(1288068, 1, 9001031, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS BT - Chance: Mythic Dungeon 11-20'),
+(1288068, 1, 9001001, 0,                       0, 1, 1, 1, 1, 'MS BT - Contains: Normal Hyjal');
 
 INSERT INTO `item_loot_template`
 (`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1288068, p.`item`, 0, 0, 0, 1, 1, 1, 1,
-    'MS BT Normal - Contains: Normal Hyjal'
-FROM `tmp_ms_hyjal_normal` p;
+VALUES
+(1288071, 1, 9001002, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Heroic BT - Chance: Heroic Hyjal'),
+(1288071, 1, 9001011, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Heroic BT - Chance: Heroic Black Temple'),
+(1288071, 1, 9001032, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Heroic BT - Chance: Mythic Dungeon 21-30'),
+(1288071, 1, 9001041, 0,                       0, 1, 1, 1, 1, 'MS Heroic BT - Contains: Normal BT or Hyjal');
 
 INSERT INTO `item_loot_template`
 (`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1288068, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_hyjal_heroic`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Normal - Chance: Heroic Hyjal'
-FROM `tmp_ms_hyjal_heroic` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1288068, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_bt_normal`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Normal - Chance: Normal Black Temple'
-FROM `tmp_ms_bt_normal` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1288068, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_dungeon_11_20`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Normal - Chance: Mythic Dungeon 11-20'
-FROM `tmp_ms_dungeon_11_20` p;
-
--- ===========================================================================
--- 1288071 - Manastorm Cache: Heroic Black Temple
---
--- Contains:
---   Normal Black Temple OR Normal Mount Hyjal Gear (Chance=0 fallback union)
---
--- Chance to contain:
---   Heroic Mount Hyjal Gear
---   Heroic Black Temple Gear
---   Mythic 21-30 Dungeon Gear
--- ===========================================================================
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1288071, p.`item`, 0, 0, 0, 1, 1, 1, 1,
-    'MS BT Heroic - Contains: Normal Hyjal'
-FROM `tmp_ms_hyjal_normal` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1288071, p.`item`, 0, 0, 0, 1, 1, 1, 1,
-    'MS BT Heroic - Contains: Normal Black Temple'
-FROM `tmp_ms_bt_normal` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1288071, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_hyjal_heroic`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Heroic - Chance: Heroic Hyjal'
-FROM `tmp_ms_hyjal_heroic` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1288071, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_bt_heroic`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Heroic - Chance: Heroic Black Temple'
-FROM `tmp_ms_bt_heroic` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1288071, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_dungeon_21_30`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Heroic - Chance: Mythic Dungeon 21-30'
-FROM `tmp_ms_dungeon_21_30` p;
-
--- ===========================================================================
--- 1289071 - Manastorm Cache: Mythic Black Temple
---
--- Contains:
---   Heroic Black Temple OR Heroic Mount Hyjal Gear (Chance=0 fallback union)
---
--- Chance to contain:
---   Heroic Sunwell Plateau Gear
---   Mythic Mount Hyjal Gear
---   Mythic Black Temple Gear
---   Mythic 31-40 Dungeon Gear
--- ===========================================================================
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1289071, p.`item`, 0, 0, 0, 1, 1, 1, 1,
-    'MS BT Mythic - Contains: Heroic Hyjal'
-FROM `tmp_ms_hyjal_heroic` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1289071, p.`item`, 0, 0, 0, 1, 1, 1, 1,
-    'MS BT Mythic - Contains: Heroic Black Temple'
-FROM `tmp_ms_bt_heroic` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1289071, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_sunwell_heroic`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Mythic - Chance: Heroic Sunwell'
-FROM `tmp_ms_sunwell_heroic` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1289071, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_hyjal_mythic`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Mythic - Chance: Mythic Hyjal'
-FROM `tmp_ms_hyjal_mythic` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1289071, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_bt_mythic`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Mythic - Chance: Mythic Black Temple'
-FROM `tmp_ms_bt_mythic` p;
-
-INSERT INTO `item_loot_template`
-(`Entry`,`Item`,`Reference`,`Chance`,`QuestRequired`,`LootMode`,`GroupId`,`MinCount`,`MaxCount`,`Comment`)
-SELECT
-    1289071, p.`item`, 0,
-    @MS_OPTIONAL_FAMILY_PCT / NULLIF((SELECT COUNT(*) FROM `tmp_ms_dungeon_31_40`),0),
-    0, 1, 1, 1, 1,
-    'MS BT Mythic - Chance: Mythic Dungeon 31-40'
-FROM `tmp_ms_dungeon_31_40` p;
+VALUES
+(1289071, 1, 9001021, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Heroic Sunwell'),
+(1289071, 1, 9001003, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Mythic Hyjal'),
+(1289071, 1, 9001012, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Mythic Black Temple'),
+(1289071, 1, 9001033, @MS_OPTIONAL_FAMILY_PCT, 0, 1, 1, 1, 1, 'MS Mythic BT - Chance: Mythic Dungeon 31-40'),
+(1289071, 1, 9001042, 0,                       0, 1, 1, 1, 1, 'MS Mythic BT - Contains: Heroic BT or Hyjal');
 
 -- ---------------------------------------------------------------------------
--- 5) Final verification.
---
--- Expected total rows:
---   1288068 = 2540
---   1288071 = 2642
---   1289071 = 2750
+-- 6) Verification.
 -- ---------------------------------------------------------------------------
 
 SELECT
     `Entry`,
-    COUNT(*) AS `loot_rows`,
-    ROUND(SUM(CASE WHEN `Chance` > 0 THEN `Chance` ELSE 0 END), 6) AS `explicit_chance_total_pct`,
-    SUM(CASE WHEN `Chance` = 0 THEN 1 ELSE 0 END) AS `fallback_rows`
+    COUNT(*) AS `physical_policy_rows`,
+    ROUND(SUM(CASE WHEN `Chance` > 0 THEN `Chance` ELSE 0 END), 6)
+        AS `optional_family_total_pct`,
+    SUM(CASE WHEN `Chance` = 0 THEN 1 ELSE 0 END)
+        AS `fallback_references`
 FROM `item_loot_template`
 WHERE `Entry` IN (1288068,1288071,1289071)
 GROUP BY `Entry`
@@ -546,16 +497,33 @@ ORDER BY `Entry`;
 
 SELECT
     `Entry`,
-    `Comment`,
-    COUNT(*) AS `rows`,
-    ROUND(SUM(`Chance`), 6) AS `family_total_chance_pct`
-FROM `item_loot_template`
-WHERE `Entry` IN (1288068,1288071,1289071)
-GROUP BY `Entry`,`Comment`
-ORDER BY `Entry`,`Comment`;
+    COUNT(*) AS `pool_rows`
+FROM `reference_loot_template`
+WHERE `Entry` BETWEEN 9001001 AND 9001042
+GROUP BY `Entry`
+ORDER BY `Entry`;
+
+-- Expected physical policy rows:
+--   1288068 = 4
+--   1288071 = 4
+--   1289071 = 5
+--
+-- Expected reference pool rows:
+--   9001001 =   79
+--   9001002 =   79
+--   9001003 =   79
+--   9001010 =  102
+--   9001011 =  102
+--   9001012 =  102
+--   9001021 =  108
+--   9001031 = 2280
+--   9001032 = 2280
+--   9001033 = 2280
+--   9001041 =  181
+--   9001042 =  181
 
 -- ---------------------------------------------------------------------------
--- 6) Cleanup temporary tables.
+-- 7) Cleanup temporary tables.
 -- ---------------------------------------------------------------------------
 
 DROP TEMPORARY TABLE IF EXISTS `tmp_ms_hyjal_normal`;
