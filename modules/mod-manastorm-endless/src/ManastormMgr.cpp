@@ -5841,7 +5841,8 @@ bool ManastormMgr::TransitionToNextStage(
             progression.UnlockedSegmentIds,
             run.IsEndgame(),
             previousSegmentId,
-            forcedIntroSegmentId);
+            forcedIntroSegmentId,
+            run.GetRecentObjectiveKeys());
 
     if (!nextSegment)
     {
