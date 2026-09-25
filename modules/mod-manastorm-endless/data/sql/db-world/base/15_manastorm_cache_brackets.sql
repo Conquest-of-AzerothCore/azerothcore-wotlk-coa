@@ -5,7 +5,9 @@
 --   Endgame track -> select by Manastorm depth.
 --
 -- This table selects WHICH physical cache item is awarded/displayed.
--- Cache CONTENTS remain ordinary AzerothCore item_loot_template data.
+-- Cache CONTENTS remain data-driven loot-table data. Reconstructed caches may
+-- route through reference_loot_template, while mod-manastorm-endless
+-- personalizes equal-chance gear candidates at open time.
 --
 -- selector_kind:
 --   1 = character level
@@ -25,9 +27,9 @@
 --   * Missing ranges intentionally fail resolution; do not silently award
 --     97884 or guess another cache.
 --
--- Applying this migration does not populate item_loot_template. A physical
--- cache may therefore exist and resolve correctly before its contents have
--- been reconstructed.
+-- Applying this migration does not populate cache loot pools. A physical cache
+-- may therefore exist and resolve correctly before its contents have been
+-- reconstructed.
 
 CREATE TABLE IF NOT EXISTS `manastorm_cache_bracket`
 (
