@@ -372,6 +372,13 @@ struct ManastormSegment
     uint32 Flags = 0;
 };
 
+inline uint64 MakeManastormObjectiveKey(
+    ManastormSegment const& segment)
+{
+    return (uint64(segment.NativeMapId) << 32) |
+        uint64(segment.NativeObjectiveCreatureEntry);
+}
+
 struct ManastormScalingPoint
 {
     uint32 Depth = 0;
