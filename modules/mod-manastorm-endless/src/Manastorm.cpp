@@ -441,6 +441,7 @@ public:
                 UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
                 UNITHOOK_MODIFY_MELEE_DAMAGE,
                 UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
+                UNITHOOK_ON_UNIT_ENTER_COMBAT,
                 UNITHOOK_ON_UNIT_DEATH
             })
     {
@@ -517,6 +518,19 @@ public:
                 target,
                 damage,
                 DOT);
+    }
+
+    void OnUnitEnterCombat(
+        Unit* unit,
+        Unit* victim) override
+    {
+        if (!ManastormModuleConfig::Enabled())
+            return;
+
+        ManastormMgr::Instance()
+            .OnUnitEnterCombat(
+                unit,
+                victim);
     }
 
     void OnUnitDeath(
