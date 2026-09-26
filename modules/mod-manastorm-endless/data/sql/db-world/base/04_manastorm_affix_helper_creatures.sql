@@ -1,7 +1,9 @@
 -- Recovered Manastorm affix helper creatures.
 -- Evidence:
 --   * AscensionDB preserved Exiles NPC pages (name/display/Hostile-or-Neutral/Boss presentation)
+--   * client Creature.dbc rows (entry/name/display linkage)
 --   * client creature-cache captures (rank/type/type_flags/family/models/HealthModifier/ManaModifier/movementId)
+--   * 2026-09-13 preserved Exiles creature export (Vortex/Creeping Frost identity metadata)
 --
 -- IMPORTANT EVIDENCE BOUNDARY:
 -- The original numeric server faction, unit_flags, flags_extra, AIName, level range,
@@ -36,6 +38,27 @@ INSERT IGNORE INTO `creature_template`
     `flags_extra`, `ScriptName`, `VerifiedBuild`
 )
 VALUES
+-- 663025 Manastorm Meteor Dummy
+-- Recovered client Creature.dbc: exact entry/name/display=11686.
+-- Original numeric server faction/flags/AI were not preserved.  This is an
+-- inert visual helper, so use the same safe world-trigger treatment as other
+-- Manastorm visual indicators.
+(663025,'Manastorm Meteor Dummy','',1,1,0,35,1,1.14286,1,1,0,0,0,1,2000,2000,1,1,1,
+ 33554434,10,0,0,'NullCreatureAI',0,1,1.0,1.0,1,1,0,0,64,'',NULL),
+
+-- 663026 Shards of Magic
+-- Recovered client Creature.dbc: exact entry/name/display=11686.
+-- The helper is summoned by Shards of Magic Precast; original server-only
+-- combat fields were not preserved.
+(663026,'Shards of Magic','',1,1,0,35,1,1.14286,1,1,0,0,0,1,2000,2000,1,1,1,
+ 33554434,10,0,0,'NullCreatureAI',0,1,1.0,1.0,1,1,0,0,64,'',NULL),
+
+-- 663029 Vortex
+-- Preserved Exiles: Neutral, subname Visual Indicator, display=11686.
+-- Spell.dbc proves 93382 summons this exact entry with SummonProperties 64.
+(663029,'Vortex','Visual Indicator',1,1,0,7,1,1.14286,1,1,0,0,0,1,2000,2000,1,1,1,
+ 33554434,10,0,0,'NullCreatureAI',0,1,1.0,1.0,1,1,0,0,64,'',NULL),
+
 -- 80913 Bonestorm
 -- Recovered: Hostile, Boss/rank=3, type_flags=4, type=10, family=0,
 -- display 14501, HP mod 0.7, mana mod 1.0, client movementId=999.
@@ -47,6 +70,14 @@ VALUES
 -- display 14501, HP mod 0.7, mana mod 1.0, client movementId=999.
 (80914,'Mushroom','',1,1,0,14,1,1.14286,1,1,0,3,0,1,2000,2000,1,1,1,
  33554434,10,4,0,'NullCreatureAI',0,1,0.7,1.0,1,1,0,0,64,'',NULL),
+
+-- 80916 Creeping Frost
+-- Preserved Exiles/client evidence: Hostile, Boss/rank=3, type_flags=4,
+-- type=10, family=0, display=14501.  Original numeric server faction/AI
+-- were not preserved; use the same inert hostile-helper treatment as the
+-- neighboring recovered Manastorm hazard helpers.
+(80916,'Creeping Frost','',1,1,0,14,1,1.14286,1,1,0,3,0,1,2000,2000,1,1,1,
+ 33554434,10,4,0,'NullCreatureAI',0,1,1.0,1.0,1,1,0,0,64,'',NULL),
 
 -- 80917 Overwhelming Energy
 -- Recovered: subname Cosmetic, Hostile, Boss/rank=3, type_flags=4, type=10,
@@ -82,8 +113,12 @@ VALUES
 INSERT IGNORE INTO `creature_template_model`
 (`CreatureID`,`Idx`,`CreatureDisplayID`,`DisplayScale`,`Probability`,`VerifiedBuild`)
 VALUES
+(663025,0,11686,1,1,NULL),
+(663026,0,11686,1,1,NULL),
+(663029,0,11686,1,1,NULL),
 (80913,0,14501,1,1,NULL),
 (80914,0,14501,1,1,NULL),
+(80916,0,14501,1,1,NULL),
 (80917,0,14501,1,1,NULL),
 (80922,0,24890,1,1,NULL),
 (80922,1,24895,1,1,NULL),
