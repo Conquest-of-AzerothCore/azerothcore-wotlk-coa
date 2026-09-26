@@ -45,6 +45,10 @@ ManastormRun::ManastormRun(
     _creaturePoolSourceSpawnIds.insert(
         segment.CreaturePoolSourceSpawnIds.begin(),
         segment.CreaturePoolSourceSpawnIds.end());
+
+    _affixEligibleConfiguredSpawnIds.insert(
+        segment.AffixEligibleSpawnIds.begin(),
+        segment.AffixEligibleSpawnIds.end());
 }
 
 void ManastormRun::RecordRecentObjective(
@@ -95,6 +99,7 @@ void ManastormRun::PrepareNextStage(
     _chaoticLinkUnusedSpawnIds.clear();
     _randomizationConfiguredSpawnIds.clear();
     _creaturePoolSourceSpawnIds.clear();
+    _affixEligibleConfiguredSpawnIds.clear();
 
     _routeConfiguredSpawnIds.insert(
         segment.RouteSpawnIds.begin(),
@@ -115,6 +120,10 @@ void ManastormRun::PrepareNextStage(
     _creaturePoolSourceSpawnIds.insert(
         segment.CreaturePoolSourceSpawnIds.begin(),
         segment.CreaturePoolSourceSpawnIds.end());
+
+    _affixEligibleConfiguredSpawnIds.insert(
+        segment.AffixEligibleSpawnIds.begin(),
+        segment.AffixEligibleSpawnIds.end());
 
     _instanceId = 0;
     _portalGuid.Clear();
