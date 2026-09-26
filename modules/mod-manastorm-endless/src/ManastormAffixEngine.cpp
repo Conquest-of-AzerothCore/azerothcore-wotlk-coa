@@ -2,73 +2,23 @@
 
 #include "Creature.h"
 #include "Log.h"
+#include "ManastormDataStore.h"
 #include "ManastormRun.h"
 #include "ObjectMgr.h"
+#include "Player.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 
-#include <array>
-#include <string_view>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace
 {
 constexpr char const* LOG_FILTER = "module.manastorm.endless";
-
-struct RecoveredAffixMetadata
-{
-    ManastormAffixDefinition Definition;
-    std::string_view Name;
-    uint32 UnlockDepth = 0;
-    uint32 DeathTriggerSpellId = 0;
-    uint32 SecondaryDeathTriggerSpellId = 0;
-    uint32 HelperCreatureEntry1 = 0;
-    uint32 HelperCreatureEntry2 = 0;
-    uint32 PrimaryRankFirstSpellId = 0;
-    uint32 SecondaryRankFirstSpellId = 0;
-    uint8 MaxRank = 0;
-    bool ApplyMarkerAura = true;
-    bool BoundedRuntime = false;
-};
-
-constexpr std::array<RecoveredAffixMetadata, 14> RECOVERED_AFFIXES =
-{{
-    {{ ManastormAffixIds::ManaBomb, 93363, ManastormAffixRuntimeType::OnDeath },
-        "Mana Bomb", 11, 93364, 0, 663028, 0, 93490, 115211, 20, true, true},
-    {{ ManastormAffixIds::LightningRod, 93354, ManastormAffixRuntimeType::OnDeath },
-        "Lightning Rod", 13, 93355, 0, 0, 0, 115151, 115171, 20, true, true},
-    {{ ManastormAffixIds::Rampaging, 94758, ManastormAffixRuntimeType::Passive },
-        "Rampaging", 16, 0, 0, 0, 0, 115551, 0, 20, true, true},
-    {{ ManastormAffixIds::AethyricWinds, 94749, ManastormAffixRuntimeType::OnDeath },
-        "Aethyric Winds", 19, 94764, 0, 0, 0, 0, 0, 0, true, true},
-    {{ ManastormAffixIds::ColdSnap, 93444, ManastormAffixRuntimeType::OnDeath },
-        "Cold Snap", 21, 93445, 0, 80924, 80925, 115451, 0, 20, true, false},
-    {{ ManastormAffixIds::TribalFury, 93422, ManastormAffixRuntimeType::Passive },
-        "Tribal Fury", 23, 0, 0, 0, 0, 115391, 0, 20, true, true},
-    {{ ManastormAffixIds::Vortex, 93381, ManastormAffixRuntimeType::OnDeath },
-        "Vortex", 26, 93382, 0, 0, 0, 115371, 0, 20, true, true},
-    {{ ManastormAffixIds::Stalwart, 94760, ManastormAffixRuntimeType::Passive },
-        "Stalwart", 28, 0, 0, 0, 0, 115571, 0, 20, true, true},
-    {{ ManastormAffixIds::Fungal, 93377, ManastormAffixRuntimeType::OnDeath },
-        "Fungal", 31, 93378, 0, 80914, 0, 115271, 0, 20, false, false},
-    {{ ManastormAffixIds::WildMagics, 93425, ManastormAffixRuntimeType::Passive },
-        "Wild Magics", 33, 0, 0, 80922, 80923, 115431, 0, 20, true, false},
-    {{ ManastormAffixIds::RunesOfPower, 94752, ManastormAffixRuntimeType::OnDeath },
-        "Runes of Power", 39, 94753, 94762, 0, 0, 0, 0, 0, true, true},
-    {{ ManastormAffixIds::Reflecting, 93360, ManastormAffixRuntimeType::Passive },
-        "Reflecting", 41, 0, 0, 0, 0, 115191, 0, 20, true, false},
-    {{ ManastormAffixIds::BoneStorm, 93366, ManastormAffixRuntimeType::OnDeath },
-        "Bone Storm", 61, 93367, 0, 80913, 0, 115231, 0, 20, true, false},
-    {{ ManastormAffixIds::OverwhelmingEnergy, 93383, ManastormAffixRuntimeType::OnDeath },
-        "Overwhelming Energy", 101, 93408, 0, 80917, 0, 115291, 0, 20, true, false}
-}};
-
-RecoveredAffixMetadata const* GetRecoveredMetadata(uint32 affixId)
-{
-    for (RecoveredAffixMetadata const& metadata : RECOVERED_AFFIXES)
-        if (metadata.Definition.AffixId == affixId)
-            return &metadata;
-    return nullptr;
-}
 
 bool IsPlayerControlledCreature(Creature const* creature)
 {
@@ -76,6 +26,78 @@ bool IsPlayerControlledCreature(Creature const* creature)
         (creature->IsControlledByPlayer() ||
          creature->IsCreatedByPlayer() ||
          creature->IsCharmedOwnedByPlayerOrPlayer());
+}
+
+uint64 Mix64(uint64 value)
+{
+    value += 0x9e3779b97f4a7c15ULL;
+    value = (value ^ (value >> 30)) *
+        0xbf58476d1ce4e5b9ULL;
+    value = (value ^ (value >> 27)) *
+        0x94d049bb133111ebULL;
+    return value ^ (value >> 31);
+}
+
+uint64 SelectionKey(
+    ManastormRun const& run,
+    uint32 affixId,
+    uint64 salt,
+    uint32 weight)
+{
+    uint64 const mixed =
+        Mix64(
+            run.GetSeed() ^
+            (uint64(run.GetDepth()) << 32) ^
+            uint64(affixId) ^
+            salt);
+
+    return mixed /
+        std::max<uint32>(
+            1,
+            weight);
+}
+
+bool PassChance(
+    ManastormRun const& run,
+    Creature const* creature,
+    uint32 affixId,
+    float chancePct,
+    uint64 salt)
+{
+    if (chancePct <= 0.0f)
+        return false;
+
+    if (chancePct >= 100.0f)
+        return true;
+
+    uint64 identity =
+        creature
+        ? creature->GetGUID().GetRawValue()
+        : 0;
+
+    if (creature &&
+        creature->GetSpawnId())
+    {
+        identity =
+            uint64(creature->GetSpawnId());
+    }
+
+    uint64 const mixed =
+        Mix64(
+            run.GetSeed() ^
+            (uint64(run.GetDepth()) << 32) ^
+            identity ^
+            (uint64(affixId) << 1) ^
+            salt);
+
+    uint32 const roll =
+        uint32(mixed % 10000ULL);
+
+    uint32 const threshold =
+        uint32(std::round(
+            chancePct * 100.0f));
+
+    return roll < threshold;
 }
 }
 
@@ -85,11 +107,12 @@ ManastormAffixEngine& ManastormAffixEngine::Instance()
     return instance;
 }
 
-ManastormAffixDefinition const* ManastormAffixEngine::GetDefinition(uint32 affixId) const
+ManastormAffixDefinition const*
+ManastormAffixEngine::GetDefinition(
+    uint32 affixId) const
 {
-    if (RecoveredAffixMetadata const* metadata = GetRecoveredMetadata(affixId))
-        return &metadata->Definition;
-    return nullptr;
+    return ManastormDataStore::Instance()
+        .GetAffixById(affixId);
 }
 
 bool ManastormAffixEngine::ValidateDefinition(
@@ -97,74 +120,86 @@ bool ManastormAffixEngine::ValidateDefinition(
     std::string& error) const
 {
     error.clear();
-    RecoveredAffixMetadata const* metadata = GetRecoveredMetadata(definition.AffixId);
-    if (!metadata)
-    {
-        error = "Affix is not part of the recovered Manastorm catalogue.";
-        return false;
-    }
 
-    if (!definition.MarkerSpellId || !sSpellMgr->GetSpellInfo(definition.MarkerSpellId))
+    if (!definition.AffixId ||
+        !definition.MarkerSpellId ||
+        !sSpellMgr->GetSpellInfo(
+            definition.MarkerSpellId))
     {
-        error = "Affix root spell " + std::to_string(definition.MarkerSpellId) + " is not loaded.";
+        error =
+            "Affix root spell " +
+            std::to_string(
+                definition.MarkerSpellId) +
+            " is not loaded.";
+
         return false;
     }
 
     uint32 const triggers[] =
     {
-        metadata->DeathTriggerSpellId,
-        metadata->SecondaryDeathTriggerSpellId
+        definition.DeathTriggerSpellId,
+        definition.SecondaryDeathTriggerSpellId
     };
+
     for (uint32 spellId : triggers)
     {
-        if (spellId && !sSpellMgr->GetSpellInfo(spellId))
+        if (spellId &&
+            !sSpellMgr->GetSpellInfo(spellId))
         {
-            error = "Affix " + std::string(metadata->Name) +
-                " requires trigger spell " + std::to_string(spellId) + ".";
+            error =
+                "Affix " +
+                definition.Name +
+                " requires trigger spell " +
+                std::to_string(spellId) +
+                ".";
+
             return false;
         }
     }
 
     uint32 const helpers[] =
     {
-        metadata->HelperCreatureEntry1,
-        metadata->HelperCreatureEntry2
+        definition.HelperCreatureEntry1,
+        definition.HelperCreatureEntry2
     };
+
     for (uint32 entry : helpers)
     {
-        if (entry && !sObjectMgr->GetCreatureTemplate(entry))
+        if (entry &&
+            !sObjectMgr->GetCreatureTemplate(
+                entry))
         {
-            error = "Affix " + std::string(metadata->Name) +
-                " requires helper creature " + std::to_string(entry) + ".";
+            error =
+                "Affix " +
+                definition.Name +
+                " requires helper creature " +
+                std::to_string(entry) +
+                ".";
+
             return false;
         }
     }
 
-    if (metadata->MaxRank)
+    for (ManastormAffixRankSpell const& rankSpell :
+        definition.RankSpells)
     {
-        uint32 const firstSpells[] =
+        if (!sSpellMgr->GetSpellInfo(
+                rankSpell.SpellId))
         {
-            metadata->PrimaryRankFirstSpellId,
-            metadata->SecondaryRankFirstSpellId
-        };
-
-        for (uint32 firstSpell : firstSpells)
-        {
-            if (!firstSpell)
-                continue;
-
-            for (uint8 rank = 0; rank < metadata->MaxRank; ++rank)
-            {
-                uint32 const spellId = firstSpell + uint32(rank);
-                if (!sSpellMgr->GetSpellInfo(spellId))
-                    LOG_WARN(LOG_FILTER,
-                        "Recovered affix {} ({}) is missing rank spell {} (rank {}).",
-                        definition.AffixId, metadata->Name, spellId, uint32(rank) + 1);
-            }
+            LOG_WARN(
+                LOG_FILTER,
+                "Recovered affix {} ({}) is missing "
+                "rank spell {} (role {} rank {}).",
+                definition.AffixId,
+                definition.Name,
+                rankSpell.SpellId,
+                uint32(rankSpell.Role),
+                uint32(rankSpell.Rank));
         }
     }
 
-    if (definition.AffixId == ManastormAffixIds::ManaBomb)
+    if (definition.AffixId ==
+        ManastormAffixIds::ManaBomb)
     {
         uint32 const spells[] =
         {
@@ -172,12 +207,20 @@ bool ManastormAffixEngine::ValidateDefinition(
             ManastormManaBomb::DispatcherSpell,
             ManastormManaBomb::DebuffSpell
         };
+
         for (uint32 spellId : spells)
-            if (!sSpellMgr->GetSpellInfo(spellId))
+        {
+            if (!sSpellMgr->GetSpellInfo(
+                    spellId))
             {
-                error = "Mana Bomb requires spell " + std::to_string(spellId) + ".";
+                error =
+                    "Mana Bomb requires spell " +
+                    std::to_string(spellId) +
+                    ".";
+
                 return false;
             }
+        }
     }
 
     return true;
@@ -185,20 +228,197 @@ bool ManastormAffixEngine::ValidateDefinition(
 
 void ManastormAffixEngine::InitializeStage(
     ManastormRun& run,
-    std::unordered_set<uint32> const& unlockedAffixIds)
+    std::unordered_set<uint32> const&
+        unlockedAffixIds)
 {
     run.ClearStageAffixState();
 
-    std::size_t recognizedAffixes = 0;
-    for (uint32 affixId : unlockedAffixIds)
-        if (GetDefinition(affixId))
-            ++recognizedAffixes;
+    ManastormDataStore const& store =
+        ManastormDataStore::Instance();
 
-    LOG_INFO(LOG_FILTER,
+    ManastormAffixPolicy const* policy =
+        store.GetAffixPolicyForDepth(
+            run.GetDepth());
+
+    if (!policy)
+    {
+        LOG_INFO(
+            LOG_FILTER,
+            "Manastorm run {} depth {} has no enabled "
+            "affix policy; automatic selection is disabled.",
+            run.GetRunId(),
+            run.GetDepth());
+
+        return;
+    }
+
+    std::vector<
+        ManastormAffixDefinition const*>
+        creatureCandidates;
+
+    std::vector<
+        ManastormAffixDefinition const*>
+        environmentCandidates;
+
+    for (auto const& pair :
+        store.GetAffixes())
+    {
+        ManastormAffixDefinition const& definition =
+            pair.second;
+
+        if (!definition.AutomaticSelection ||
+            definition.Availability ==
+                ManastormAffixAvailabilityKind::ForcedOnly)
+        {
+            continue;
+        }
+
+        if (definition.Availability ==
+                ManastormAffixAvailabilityKind::ProgressionUnlock &&
+            unlockedAffixIds.find(
+                definition.AffixId) ==
+                unlockedAffixIds.end())
+        {
+            continue;
+        }
+
+        if (definition.Targets(
+                ManastormAffixTargetBits::RouteCreature) ||
+            definition.Targets(
+                ManastormAffixTargetBits::Boss))
+        {
+            creatureCandidates.push_back(
+                &definition);
+        }
+
+        if (definition.Targets(
+                ManastormAffixTargetBits::Player) ||
+            definition.Targets(
+                ManastormAffixTargetBits::Environment))
+        {
+            environmentCandidates.push_back(
+                &definition);
+        }
+    }
+
+    auto orderCandidates =
+        [&run](
+            std::vector<
+                ManastormAffixDefinition const*>& candidates,
+            uint64 salt)
+    {
+        std::sort(
+            candidates.begin(),
+            candidates.end(),
+            [&run, salt](
+                ManastormAffixDefinition const* left,
+                ManastormAffixDefinition const* right)
+            {
+                uint64 const leftKey =
+                    SelectionKey(
+                        run,
+                        left->AffixId,
+                        salt,
+                        left->SelectionWeight);
+
+                uint64 const rightKey =
+                    SelectionKey(
+                        run,
+                        right->AffixId,
+                        salt,
+                        right->SelectionWeight);
+
+                if (leftKey != rightKey)
+                    return leftKey < rightKey;
+
+                return left->AffixId <
+                    right->AffixId;
+            });
+    };
+
+    orderCandidates(
+        creatureCandidates,
+        0x4352454154555245ULL);
+
+    orderCandidates(
+        environmentCandidates,
+        0x454e5649524f4e4dULL);
+
+    auto addCandidates =
+        [&run, policy, this](
+            std::vector<
+                ManastormAffixDefinition const*> const& candidates,
+            uint8 wanted)
+    {
+        uint8 added = 0;
+
+        for (ManastormAffixDefinition const* definition :
+            candidates)
+        {
+            if (!definition ||
+                added >= wanted)
+            {
+                break;
+            }
+
+            std::string validationError;
+
+            if (!ValidateDefinition(
+                    *definition,
+                    validationError))
+            {
+                LOG_WARN(
+                    LOG_FILTER,
+                    "Skipping automatic Manastorm affix {} ({}): {}",
+                    definition->AffixId,
+                    definition->Name,
+                    validationError);
+
+                continue;
+            }
+
+            uint8 rank =
+                definition->MaxRank
+                ? std::min<uint8>(
+                    policy->DefaultRank,
+                    definition->MaxRank)
+                : 1;
+
+            if (run.AddStageAffix(
+                    definition->AffixId,
+                    rank))
+            {
+                ++added;
+            }
+        }
+    };
+
+    addCandidates(
+        creatureCandidates,
+        policy->CreatureStageAffixCount);
+
+    addCandidates(
+        environmentCandidates,
+        policy->EnvironmentStageAffixCount);
+
+    LOG_INFO(
+        LOG_FILTER,
         "Manastorm run {} initialized affix state for depth {}: "
-        "ownedAffixes={} recognizedCandidates={} activeAffixes=0. "
-        "Historical automatic selection/density/rank policy remains disabled.",
-        run.GetRunId(), run.GetDepth(), unlockedAffixIds.size(), recognizedAffixes);
+        "ownedUnlockAffixes={} creatureCandidates={} "
+        "environmentCandidates={} activeAffixes={} "
+        "policy={} creatureChance={:.2f}% secondChance={:.2f}% "
+        "bossChance={:.2f}% defaultRank={}.",
+        run.GetRunId(),
+        run.GetDepth(),
+        unlockedAffixIds.size(),
+        creatureCandidates.size(),
+        environmentCandidates.size(),
+        run.GetActiveStageAffixIds().size(),
+        policy->PolicyId,
+        policy->CreatureAffixChancePct,
+        policy->SecondAffixChancePct,
+        policy->BossAffixChancePct,
+        uint32(policy->DefaultRank));
 }
 
 bool ManastormAffixEngine::ForceStageAffix(
@@ -208,35 +428,80 @@ bool ManastormAffixEngine::ForceStageAffix(
 {
     error.clear();
 
-    ManastormAffixDefinition const* definition = GetDefinition(affixId);
+    ManastormAffixDefinition const* definition =
+        GetDefinition(affixId);
+
     if (!definition)
     {
-        error = "Unknown or unsupported Manastorm affix " + std::to_string(affixId) + ".";
+        error =
+            "Unknown or disabled Manastorm affix " +
+            std::to_string(affixId) +
+            ".";
+
         return false;
     }
 
-    if (!ValidateDefinition(*definition, error))
+    if (!ValidateDefinition(
+            *definition,
+            error))
+    {
         return false;
+    }
 
-    if (RecoveredAffixMetadata const* metadata = GetRecoveredMetadata(affixId))
-        if (!metadata->BoundedRuntime)
-            LOG_WARN(LOG_FILTER,
-                "Forcing recovered affix {} ({}) with an unresolved original runtime edge.",
-                affixId, metadata->Name);
+    if (!definition->BoundedRuntime)
+    {
+        LOG_WARN(
+            LOG_FILTER,
+            "Forcing recovered affix {} ({}) "
+            "with an unresolved original runtime edge.",
+            affixId,
+            definition->Name);
+    }
 
-    run.AddStageAffix(affixId);
+    uint8 rank = 1;
+
+    if (ManastormAffixPolicy const* policy =
+        ManastormDataStore::Instance()
+            .GetAffixPolicyForDepth(
+                run.GetDepth()))
+    {
+        if (definition->MaxRank)
+        {
+            rank =
+                std::min<uint8>(
+                    policy->DefaultRank,
+                    definition->MaxRank);
+        }
+    }
+
+    run.AddStageAffix(
+        affixId,
+        rank);
+
     return true;
 }
 
-bool ManastormAffixEngine::IsAffixHelperCreature(uint32 creatureEntry) const
+bool ManastormAffixEngine::IsAffixHelperCreature(
+    uint32 creatureEntry) const
 {
     if (!creatureEntry)
         return false;
 
-    for (RecoveredAffixMetadata const& metadata : RECOVERED_AFFIXES)
-        if (metadata.HelperCreatureEntry1 == creatureEntry ||
-            metadata.HelperCreatureEntry2 == creatureEntry)
+    for (auto const& pair :
+        ManastormDataStore::Instance()
+            .GetAffixes())
+    {
+        ManastormAffixDefinition const& definition =
+            pair.second;
+
+        if (definition.HelperCreatureEntry1 ==
+                creatureEntry ||
+            definition.HelperCreatureEntry2 ==
+                creatureEntry)
+        {
             return true;
+        }
+    }
 
     return false;
 }
@@ -245,104 +510,409 @@ bool ManastormAffixEngine::IsEligibleStageCreature(
     Creature const* creature,
     ManastormRun const& run) const
 {
-    if (!creature || creature->IsTrigger() || creature->IsPet() ||
-        IsAffixHelperCreature(creature->GetEntry()) ||
-        IsPlayerControlledCreature(creature))
+    if (!creature ||
+        creature->IsTrigger() ||
+        creature->IsPet() ||
+        IsAffixHelperCreature(
+            creature->GetEntry()) ||
+        IsPlayerControlledCreature(
+            creature))
+    {
         return false;
+    }
 
-    if (!run.IsStageCreature(creature->GetGUID()))
+    return run.IsStageCreature(
+        creature->GetGUID());
+}
+
+bool ManastormAffixEngine::IsEligibleTrashTarget(
+    Creature const* creature,
+    ManastormRun const& run) const
+{
+    if (!IsEligibleStageCreature(
+            creature,
+            run))
+    {
         return false;
+    }
 
-    ObjectGuid const objectiveGuid = run.GetObjectiveCreatureGuid();
-    return objectiveGuid.IsEmpty() || creature->GetGUID() != objectiveGuid;
+    ObjectGuid const objectiveGuid =
+        run.GetObjectiveCreatureGuid();
+
+    if (!objectiveGuid.IsEmpty() &&
+        creature->GetGUID() ==
+            objectiveGuid)
+    {
+        return false;
+    }
+
+    ObjectGuid::LowType const spawnId =
+        creature->GetSpawnId();
+
+    return spawnId &&
+        run.IsAffixEligibleSpawn(
+            spawnId);
+}
+
+bool ManastormAffixEngine::IsEligibleBossTarget(
+    Creature const* creature,
+    ManastormRun const& run) const
+{
+    if (!IsEligibleStageCreature(
+            creature,
+            run))
+    {
+        return false;
+    }
+
+    ObjectGuid const objectiveGuid =
+        run.GetObjectiveCreatureGuid();
+
+    return !objectiveGuid.IsEmpty() &&
+        creature->GetGUID() ==
+            objectiveGuid;
 }
 
 bool ManastormAffixEngine::IsEligibleForManaBomb(
     Creature const* creature,
     ManastormRun const& run) const
 {
-    if (!IsEligibleStageCreature(creature, run))
+    if (!IsEligibleTrashTarget(
+            creature,
+            run))
+    {
         return false;
+    }
 
-    ObjectGuid::LowType const spawnId = creature->GetSpawnId();
-    return spawnId && run.IsChaoticLinkSpawn(spawnId);
+    ObjectGuid::LowType const spawnId =
+        creature->GetSpawnId();
+
+    return spawnId &&
+        run.IsChaoticLinkSpawn(
+            spawnId);
+}
+
+bool ManastormAffixEngine::AssignAffixToCreature(
+    Creature* creature,
+    ManastormRun& run,
+    ManastormAffixDefinition const& definition,
+    bool force)
+{
+    bool const boss =
+        IsEligibleBossTarget(
+            creature,
+            run);
+
+    bool const trash =
+        !boss &&
+        IsEligibleTrashTarget(
+            creature,
+            run);
+
+    if (boss)
+    {
+        if (!definition.Targets(
+                ManastormAffixTargetBits::Boss))
+        {
+            return false;
+        }
+    }
+    else if (trash)
+    {
+        if (!definition.Targets(
+                ManastormAffixTargetBits::RouteCreature))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+
+    if (definition.AffixId ==
+            ManastormAffixIds::ManaBomb &&
+        !IsEligibleForManaBomb(
+            creature,
+            run))
+    {
+        return false;
+    }
+
+    if (!force)
+    {
+        ManastormAffixPolicy const* policy =
+            ManastormDataStore::Instance()
+                .GetAffixPolicyForDepth(
+                    run.GetDepth());
+
+        if (!policy)
+            return false;
+
+        float chance = 0.0f;
+
+        if (boss)
+        {
+            chance =
+                policy->BossAffixChancePct;
+        }
+        else
+        {
+            std::unordered_set<uint32> const*
+                existing =
+                    run.GetCreatureAffixIds(
+                        creature->GetGUID());
+
+            chance =
+                (!existing ||
+                 existing->empty())
+                ? policy->CreatureAffixChancePct
+                : policy->SecondAffixChancePct;
+        }
+
+        if (!PassChance(
+                run,
+                creature,
+                definition.AffixId,
+                chance,
+                boss
+                    ? 0x424f5353ULL
+                    : 0x5452415348ULL))
+        {
+            return false;
+        }
+    }
+
+    if (!run.AssignCreatureAffix(
+            creature->GetGUID(),
+            definition.AffixId))
+    {
+        return false;
+    }
+
+    if (definition.ApplyMarkerAura &&
+        definition.MarkerSpellId &&
+        !creature->HasAura(
+            definition.MarkerSpellId))
+    {
+        creature->CastSpell(
+            creature,
+            definition.MarkerSpellId,
+            true);
+    }
+
+    LOG_DEBUG(
+        LOG_FILTER,
+        "Manastorm run {} assigned affix {} ({}) rank {} "
+        "to {} entry={} spawn={} guid={}.",
+        run.GetRunId(),
+        definition.AffixId,
+        definition.Name,
+        uint32(
+            run.GetStageAffixRank(
+                definition.AffixId)),
+        boss ? "boss" : "route creature",
+        creature->GetEntry(),
+        creature->GetSpawnId(),
+        creature->GetGUID().GetRawValue());
+
+    return true;
+}
+
+bool ManastormAffixEngine::ForceAffixOnCreature(
+    Creature* creature,
+    ManastormRun& run,
+    uint32 affixId)
+{
+    ManastormAffixDefinition const* definition =
+        GetDefinition(affixId);
+
+    return definition &&
+        AssignAffixToCreature(
+            creature,
+            run,
+            *definition,
+            true);
 }
 
 void ManastormAffixEngine::AssignActiveAffixes(
     Creature* creature,
     ManastormRun& run)
 {
-    if (!IsEligibleStageCreature(creature, run))
-        return;
-
-    for (uint32 affixId : run.GetActiveStageAffixIds())
+    if (!IsEligibleStageCreature(
+            creature,
+            run))
     {
-        ManastormAffixDefinition const* definition = GetDefinition(affixId);
-        RecoveredAffixMetadata const* metadata = GetRecoveredMetadata(affixId);
-        if (!definition || !metadata)
+        return;
+    }
+
+    for (uint32 affixId :
+        run.GetActiveStageAffixIds())
+    {
+        ManastormAffixDefinition const* definition =
+            GetDefinition(affixId);
+
+        if (!definition)
             continue;
 
-        if (affixId == ManastormAffixIds::ManaBomb &&
-            !IsEligibleForManaBomb(creature, run))
-            continue;
-
-        if (!run.AssignCreatureAffix(creature->GetGUID(), affixId))
-            continue;
-
-        if (metadata->ApplyMarkerAura &&
-            definition->MarkerSpellId &&
-            !creature->HasAura(definition->MarkerSpellId))
-            creature->CastSpell(creature, definition->MarkerSpellId, true);
+        AssignAffixToCreature(
+            creature,
+            run,
+            *definition,
+            false);
     }
 }
 
-void ManastormAffixEngine::OnCreatureAdded(Creature* creature, ManastormRun& run)
+void ManastormAffixEngine::ApplyActivePlayerAffixes(
+    Player* player,
+    ManastormRun& run)
+{
+    if (!player ||
+        !player->IsInWorld())
+    {
+        return;
+    }
+
+    for (uint32 affixId :
+        run.GetActiveStageAffixIds())
+    {
+        ManastormAffixDefinition const* definition =
+            GetDefinition(affixId);
+
+        if (!definition ||
+            (!definition->Targets(
+                ManastormAffixTargetBits::Player) &&
+             !definition->Targets(
+                ManastormAffixTargetBits::Environment)) ||
+            !definition->ApplyMarkerAura ||
+            !definition->MarkerSpellId)
+        {
+            continue;
+        }
+
+        if (!player->HasAura(
+                definition->MarkerSpellId))
+        {
+            player->CastSpell(
+                player,
+                definition->MarkerSpellId,
+                true);
+        }
+    }
+}
+
+void ManastormAffixEngine::RemoveActivePlayerAffixes(
+    Player* player,
+    ManastormRun const& run)
+{
+    if (!player)
+        return;
+
+    for (uint32 affixId :
+        run.GetActiveStageAffixIds())
+    {
+        ManastormAffixDefinition const* definition =
+            GetDefinition(affixId);
+
+        if (!definition ||
+            (!definition->Targets(
+                ManastormAffixTargetBits::Player) &&
+             !definition->Targets(
+                ManastormAffixTargetBits::Environment)) ||
+            !definition->MarkerSpellId)
+        {
+            continue;
+        }
+
+        player->RemoveAurasDueToSpell(
+            definition->MarkerSpellId);
+    }
+}
+
+void ManastormAffixEngine::OnCreatureAdded(
+    Creature* creature,
+    ManastormRun& run)
 {
     if (!creature)
         return;
 
-    if (IsAffixHelperCreature(creature->GetEntry()))
+    if (IsAffixHelperCreature(
+            creature->GetEntry()))
     {
-        // Mana Bomb's existing visual helper historically follows its summoner.
-        // The recovered 80913/80914/80917 helpers are Hostile templates, while
-        // 80922/80923/80924/80925 are explicitly Neutral in preserved data.
-        // Do not overwrite those recovered template-side dispositions.
-        if (creature->GetEntry() == 663028 && creature->IsSummon())
+        // Mana Bomb's existing visual helper historically follows its
+        // summoner. Preserve recovered dispositions for the other helpers.
+        if (creature->GetEntry() ==
+                ManastormManaBomb::HelperCreature &&
+            creature->IsSummon())
         {
-            if (TempSummon* summon = creature->ToTempSummon())
-                if (Unit* summoner = summon->GetSummonerUnit())
-                    creature->SetFaction(summoner->GetFaction());
+            if (TempSummon* summon =
+                creature->ToTempSummon())
+            {
+                if (Unit* summoner =
+                    summon->GetSummonerUnit())
+                {
+                    creature->SetFaction(
+                        summoner->GetFaction());
+                }
+            }
         }
+
         return;
     }
 
-    AssignActiveAffixes(creature, run);
+    AssignActiveAffixes(
+        creature,
+        run);
 }
 
-void ManastormAffixEngine::OnCreatureRemoved(Creature* creature, ManastormRun& run)
+void ManastormAffixEngine::OnCreatureRemoved(
+    Creature* creature,
+    ManastormRun& run)
 {
-    if (!creature || IsAffixHelperCreature(creature->GetEntry()))
+    if (!creature ||
+        IsAffixHelperCreature(
+            creature->GetEntry()))
+    {
         return;
+    }
 
-    run.ClearCreatureAffixes(creature->GetGUID());
+    run.ClearCreatureAffixes(
+        creature->GetGUID());
 }
 
-void ManastormAffixEngine::OnCreatureDeath(Creature* creature, ManastormRun& run)
+void ManastormAffixEngine::OnCreatureDeath(
+    Creature* creature,
+    ManastormRun& run)
 {
-    if (!IsEligibleStageCreature(creature, run))
+    if (!IsEligibleStageCreature(
+            creature,
+            run))
+    {
         return;
+    }
 
     std::unordered_set<uint32> const* affixes =
-        run.GetCreatureAffixIds(creature->GetGUID());
+        run.GetCreatureAffixIds(
+            creature->GetGUID());
+
     if (!affixes)
         return;
 
-    for (uint32 affixId : *affixes)
+    for (uint32 affixId :
+        *affixes)
     {
-        ManastormAffixDefinition const* definition = GetDefinition(affixId);
+        ManastormAffixDefinition const* definition =
+            GetDefinition(affixId);
+
         if (definition &&
-            definition->RuntimeType == ManastormAffixRuntimeType::OnDeath)
-            DispatchOnDeath(creature, run, affixId);
+            definition->RuntimeType ==
+                ManastormAffixRuntimeType::OnDeath)
+        {
+            DispatchOnDeath(
+                creature,
+                run,
+                affixId);
+        }
     }
 }
 
@@ -354,37 +924,59 @@ void ManastormAffixEngine::DispatchOnDeath(
     if (!creature)
         return;
 
-    if (affixId == ManastormAffixIds::ManaBomb)
+    if (affixId ==
+        ManastormAffixIds::ManaBomb)
     {
-        StartManaBomb(creature, run);
+        StartManaBomb(
+            creature,
+            run);
+
         return;
     }
 
-    RecoveredAffixMetadata const* metadata = GetRecoveredMetadata(affixId);
-    if (!metadata)
+    ManastormAffixDefinition const* definition =
+        GetDefinition(affixId);
+
+    if (!definition)
         return;
 
     uint32 const triggers[] =
     {
-        metadata->DeathTriggerSpellId,
-        metadata->SecondaryDeathTriggerSpellId
+        definition->DeathTriggerSpellId,
+        definition->SecondaryDeathTriggerSpellId
     };
 
     for (uint32 spellId : triggers)
+    {
         if (spellId)
-            creature->CastSpell(creature, spellId, true);
+        {
+            creature->CastSpell(
+                creature,
+                spellId,
+                true);
+        }
+    }
 }
 
-void ManastormAffixEngine::StartManaBomb(Creature* creature, ManastormRun& run)
+void ManastormAffixEngine::StartManaBomb(
+    Creature* creature,
+    ManastormRun& run)
 {
     if (!creature)
         return;
 
-    creature->CastSpell(creature, ManastormManaBomb::PrecastSpell, true);
+    creature->CastSpell(
+        creature,
+        ManastormManaBomb::PrecastSpell,
+        true);
 
-    LOG_INFO(LOG_FILTER,
-        "Manastorm Mana Bomb started: run={} depth={} creatureEntry={} "
-        "creatureGuid={} spell={}.",
-        run.GetRunId(), run.GetDepth(), creature->GetEntry(),
-        creature->GetGUID().GetRawValue(), ManastormManaBomb::PrecastSpell);
+    LOG_INFO(
+        LOG_FILTER,
+        "Manastorm Mana Bomb started: run={} depth={} "
+        "creatureEntry={} creatureGuid={} spell={}.",
+        run.GetRunId(),
+        run.GetDepth(),
+        creature->GetEntry(),
+        creature->GetGUID().GetRawValue(),
+        ManastormManaBomb::PrecastSpell);
 }
