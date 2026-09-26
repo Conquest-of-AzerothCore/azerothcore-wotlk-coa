@@ -3578,6 +3578,31 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             ++healthScaledCount;
         }
 
+        // Affix ownership may have been decided while PREPARING, but marker
+        // auras are deliberately dormant until the safety bubble collapses.
+        // Replay creature initialization now to activate the already-selected
+        // affixes without changing their deterministic ownership rolls.
+        for (ObjectGuid const& guid :
+            run->GetStageCreatureGuids())
+        {
+            Creature* creature =
+                ObjectAccessor::GetCreature(
+                    *player,
+                    guid);
+
+            if (!creature ||
+                !creature->IsInWorld() ||
+                !creature->IsAlive())
+            {
+                continue;
+            }
+
+            ManastormAffixEngine::Instance()
+                .OnCreatureAdded(
+                    creature,
+                    *run);
+        }
+
         //
         // Ensure the exact objective boss has the real recovered
         // Chaotic Link aura and correct visible stack count.
