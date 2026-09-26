@@ -4,6 +4,7 @@
 
 #include "ObjectAccessor.h"
 #include "Creature.h"
+#include "CreatureAI.h"
 #include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
@@ -5233,6 +5234,107 @@ uint32 ManastormMgr::ScaleCreatureDamage(
     return ScaleUnsignedValue(
         damage,
         multiplier);
+}
+
+void ManastormMgr::OnUnitEnterCombat(
+    Unit* unit,
+    Unit* /*victim*/)
+{
+    if (!unit)
+        return;
+
+    Creature* creature =
+        unit->ToCreature();
+
+    if (!creature ||
+        !creature->IsAlive())
+    {
+        return;
+    }
+
+    Map* map =
+        creature->GetMap();
+
+    if (!map ||
+        !map->GetInstanceId())
+    {
+        return;
+    }
+
+    ManastormRun* run =
+        GetRunForStage(
+            map->GetId(),
+            map->GetInstanceId());
+
+    if (!run ||
+        run->GetState() !=
+            ManastormRunState::Active)
+    {
+        return;
+    }
+
+    ManastormSegment const& segment =
+        run->GetSegment();
+
+    //
+    // Native Shade of Eranikus aggro sets DATA_ERANIKUS_FIGHT, which
+    // calls SetInCombatWithZone() on every living Dragonkin registered
+    // by the Sunken Temple instance. In a normal clear most of those
+    // creatures are already dead. In an isolated Manastorm stage they
+    // are still alive across the dungeon and would all rush the party.
+    //
+    // Preserve Eranikus' own SmartAI and abilities, but suppress only
+    // that dungeon-wide assist side effect inside the private Manastorm
+    // Eranikus stage. Normal Sunken Temple remains untouched.
+    //
+    if (segment.NativeMapId !=
+            MAP_SUNKEN_TEMPLE ||
+        segment.NativeObjectiveCreatureEntry !=
+            NPC_SHADE_OF_ERANIKUS ||
+        creature->GetEntry() ==
+            NPC_SHADE_OF_ERANIKUS ||
+        creature->GetCreatureType() !=
+            CREATURE_TYPE_DRAGONKIN)
+    {
+        return;
+    }
+
+    ObjectGuid const objectiveGuid =
+        run->GetObjectiveCreatureGuid();
+
+    if (objectiveGuid.IsEmpty())
+        return;
+
+    Creature* eranikus =
+        ObjectAccessor::GetCreature(
+            *creature,
+            objectiveGuid);
+
+    if (!eranikus ||
+        eranikus->GetEntry() !=
+            NPC_SHADE_OF_ERANIKUS ||
+        !eranikus->IsInCombat())
+    {
+        return;
+    }
+
+    CreatureAI* ai =
+        creature->AI();
+
+    if (!ai)
+        return;
+
+    LOG_DEBUG(
+        LOG_FILTER,
+        "Suppressed native Eranikus dungeon-wide Dragonkin assist in "
+        "Manastorm: run={} segment={} spawn={} entry={} guid={}.",
+        run->GetRunId(),
+        segment.SegmentId,
+        creature->GetSpawnId(),
+        creature->GetEntry(),
+        creature->GetGUID().GetRawValue());
+
+    ai->EnterEvadeMode();
 }
 
 void ManastormMgr::OnUnitDeath(
