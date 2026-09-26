@@ -639,7 +639,13 @@ bool ManastormAffixEngine::AssignAffixToCreature(
         return false;
     }
 
-    if (!force)
+    bool const alreadyAssigned =
+        run.HasCreatureAffix(
+            creature->GetGUID(),
+            definition.AffixId);
+
+    if (!alreadyAssigned &&
+        !force)
     {
         ManastormAffixPolicy const* policy =
             ManastormDataStore::Instance()
@@ -684,7 +690,9 @@ bool ManastormAffixEngine::AssignAffixToCreature(
     }
 
     bool const newlyAssigned =
-        run.AssignCreatureAffix(
+        alreadyAssigned
+        ? false
+        : run.AssignCreatureAffix(
             creature->GetGUID(),
             definition.AffixId);
 
