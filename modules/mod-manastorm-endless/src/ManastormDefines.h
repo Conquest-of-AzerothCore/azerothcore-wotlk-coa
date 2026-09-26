@@ -165,11 +165,17 @@ namespace ManastormSegmentSpawnFlags
     // content pool sourced from this segment.
     constexpr uint32 CreaturePoolSource = 1u << 3;
 
+    // This exact authored route spawn may receive creature-owned Manastorm
+    // affixes.  Kept separate from ChaoticLinkEligible so the two systems can
+    // evolve independently after the initial DB backfill.
+    constexpr uint32 AffixEligible = 1u << 4;
+
     constexpr uint32 KnownMask =
         RouteCreature |
         ChaoticLinkEligible |
         RandomizationSlot |
-        CreaturePoolSource;
+        CreaturePoolSource |
+        AffixEligible;
 }
 
 enum class ManastormAffixRuntimeType : uint8
@@ -180,6 +186,30 @@ enum class ManastormAffixRuntimeType : uint8
     Environmental = 4,
     SpawnedHazard = 5,
 };
+
+enum class ManastormAffixAvailabilityKind : uint8
+{
+    // Eligible without character progression ownership.
+    Baseline = 0,
+
+    // Eligible only after the character owns the recovered affix unlock.
+    ProgressionUnlock = 1,
+
+    // Preserved/recovered definition that is not automatically selected.
+    // Useful for legacy affixes such as Guardian until revision parity is
+    // proven, while still allowing GM force-tests.
+    ForcedOnly = 2,
+};
+
+namespace ManastormAffixTargetBits
+{
+    constexpr uint8 RouteCreature = 1u << 0;
+    constexpr uint8 Boss = 1u << 1;
+    constexpr uint8 Player = 1u << 2;
+    constexpr uint8 Environment = 1u << 3;
+    constexpr uint8 KnownMask =
+        RouteCreature | Boss | Player | Environment;
+}
 
 namespace ManastormAffixIds
 {
@@ -204,6 +234,22 @@ namespace ManastormAffixIds
     constexpr uint32 Reflecting = 41;
     constexpr uint32 BoneStorm = 61;
     constexpr uint32 OverwhelmingEnergy = 101;
+
+    // Non-checkpoint reconstructed IDs use the recovered root spell ID.
+    // This keeps the namespace unique and directly traceable to Spell.dbc.
+    constexpr uint32 Meteor = 93316;
+    constexpr uint32 CreepingFrost = 93341;
+    constexpr uint32 Leeching = 93344;
+    constexpr uint32 Cleaving = 93352;
+    constexpr uint32 UnrelentingSpeed = 93353;
+    constexpr uint32 Juggernaut = 93359;
+    constexpr uint32 ShardsOfMagic = 93403;
+    constexpr uint32 ArmorPenetration = 93424;
+    constexpr uint32 Evasive = 93510;
+    constexpr uint32 Regenerative = 94755;
+    constexpr uint32 Formidable = 94756;
+    constexpr uint32 Hasty = 94757;
+    constexpr uint32 Guardian = 2100261;
 }
 
 namespace ManastormManaBomb
@@ -222,13 +268,87 @@ namespace ManastormManaBomb
     constexpr uint32 HelperCreature = 663028;
 }
 
+struct ManastormAffixRankSpell
+{
+    uint8 Role = 0;
+    uint8 Rank = 0;
+    uint32 SpellId = 0;
+};
+
 struct ManastormAffixDefinition
 {
     uint32 AffixId = 0;
-    uint32 MarkerSpellId = 0;
+    std::string Name;
+
+    uint32 UnlockDepth = 0;
+
+    ManastormAffixAvailabilityKind Availability =
+        ManastormAffixAvailabilityKind::Baseline;
+
+    uint8 TargetMask =
+        ManastormAffixTargetBits::RouteCreature;
 
     ManastormAffixRuntimeType RuntimeType =
         ManastormAffixRuntimeType::Passive;
+
+    uint32 MarkerSpellId = 0;
+    uint32 DeathTriggerSpellId = 0;
+    uint32 SecondaryDeathTriggerSpellId = 0;
+
+    uint32 HelperCreatureEntry1 = 0;
+    uint32 HelperCreatureEntry2 = 0;
+
+    uint8 MaxRank = 0;
+    bool ApplyMarkerAura = true;
+    bool BoundedRuntime = false;
+    bool AutomaticSelection = true;
+    uint32 SelectionWeight = 100;
+
+    uint32 NormalMessageId = 0;
+    uint32 EndgameMessageId = 0;
+
+    std::vector<ManastormAffixRankSpell> RankSpells;
+
+    bool Targets(uint8 targetBit) const
+    {
+        return (TargetMask & targetBit) != 0;
+    }
+
+    uint32 GetRankSpell(uint8 role, uint8 rank) const
+    {
+        for (ManastormAffixRankSpell const& spell :
+            RankSpells)
+        {
+            if (spell.Role == role &&
+                spell.Rank == rank)
+            {
+                return spell.SpellId;
+            }
+        }
+
+        return 0;
+    }
+};
+
+struct ManastormAffixPolicy
+{
+    uint32 PolicyId = 0;
+    uint32 MinDepth = 1;
+    uint32 MaxDepth = 0; // 0 = no upper bound.
+
+    uint8 CreatureStageAffixCount = 1;
+    float CreatureAffixChancePct = 35.0f;
+    float SecondAffixChancePct = 0.0f;
+    float BossAffixChancePct = 0.0f;
+
+    uint8 EnvironmentStageAffixCount = 0;
+    uint8 DefaultRank = 1;
+
+    bool Matches(uint32 depth) const
+    {
+        return depth >= MinDepth &&
+            (!MaxDepth || depth <= MaxDepth);
+    }
 };
 
 struct ManastormUnlockGrant
@@ -352,6 +472,7 @@ struct ManastormSegment
     std::vector<ObjectGuid::LowType> ChaoticLinkSpawnIds;
     std::vector<ObjectGuid::LowType> RandomizationSpawnIds;
     std::vector<ObjectGuid::LowType> CreaturePoolSourceSpawnIds;
+    std::vector<ObjectGuid::LowType> AffixEligibleSpawnIds;
 
     // Native Manastorm.dbc evidence carried with the selected segment in
     // native-client mode. These values are not used to invent gameplay.
