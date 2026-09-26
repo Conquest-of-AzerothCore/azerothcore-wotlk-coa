@@ -1833,6 +1833,21 @@ bool ManastormDataStore::LoadUnlockGrants()
         }
 
         if (grantType ==
+                ManastormUnlockGrantType::Affix &&
+            !GetAffixById(contentId))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm unlock {} grants affix {}, "
+                "but that affix is not enabled/valid.",
+                unlockId,
+                contentId);
+
+            valid = false;
+            continue;
+        }
+
+        if (grantType ==
             ManastormUnlockGrantType::BossPool)
         {
             LOG_WARN(
@@ -1875,6 +1890,404 @@ bool ManastormDataStore::LoadUnlockGrants()
     LOG_INFO(
         LOG_FILTER,
         "Loaded {} enabled Manastorm unlock grants "
+        "from {} configured rows.",
+        loadedRows,
+        configuredRows);
+
+    return valid;
+}
+
+
+bool ManastormDataStore::LoadAffixes()
+{
+    QueryResult countResult =
+        WorldDatabase.Query(
+            "SELECT COUNT(*) FROM `manastorm_affix_catalog`");
+
+    if (!countResult)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to query `manastorm_affix_catalog`. "
+            "Apply the Manastorm affix SQL before starting.");
+
+        return false;
+    }
+
+    uint64 const configuredRows =
+        countResult->Fetch()[0].Get<uint64>();
+
+    QueryResult result =
+        WorldDatabase.Query(
+            "SELECT "
+            "`affix_id`, `name`, `unlock_depth`, "
+            "`availability_kind`, `target_mask`, `runtime_type`, "
+            "`root_spell_id`, `death_trigger_spell_id`, "
+            "`secondary_death_trigger_spell_id`, "
+            "`helper_creature_entry_1`, `helper_creature_entry_2`, "
+            "`max_rank`, `apply_marker_aura`, `bounded_runtime`, "
+            "`automatic_selection`, `selection_weight`, "
+            "`normal_message_id`, `endgame_message_id` "
+            "FROM `manastorm_affix_catalog` "
+            "WHERE `enabled` = 1 "
+            "ORDER BY `affix_id`");
+
+    if (!result)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Manastorm affix catalog contains no enabled rows.");
+
+        return false;
+    }
+
+    bool valid = true;
+    uint64 loadedRows = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        ManastormAffixDefinition definition;
+        definition.AffixId = fields[0].Get<uint32>();
+        definition.Name = fields[1].Get<std::string>();
+        definition.UnlockDepth = fields[2].Get<uint32>();
+
+        uint8 const availabilityRaw =
+            fields[3].Get<uint8>();
+
+        definition.TargetMask =
+            fields[4].Get<uint8>();
+
+        uint8 const runtimeRaw =
+            fields[5].Get<uint8>();
+
+        definition.MarkerSpellId =
+            fields[6].Get<uint32>();
+
+        definition.DeathTriggerSpellId =
+            fields[7].Get<uint32>();
+
+        definition.SecondaryDeathTriggerSpellId =
+            fields[8].Get<uint32>();
+
+        definition.HelperCreatureEntry1 =
+            fields[9].Get<uint32>();
+
+        definition.HelperCreatureEntry2 =
+            fields[10].Get<uint32>();
+
+        definition.MaxRank =
+            fields[11].Get<uint8>();
+
+        definition.ApplyMarkerAura =
+            fields[12].Get<uint8>() != 0;
+
+        definition.BoundedRuntime =
+            fields[13].Get<uint8>() != 0;
+
+        definition.AutomaticSelection =
+            fields[14].Get<uint8>() != 0;
+
+        definition.SelectionWeight =
+            fields[15].Get<uint32>();
+
+        definition.NormalMessageId =
+            fields[16].Get<uint32>();
+
+        definition.EndgameMessageId =
+            fields[17].Get<uint32>();
+
+        if (!definition.AffixId ||
+            !definition.MarkerSpellId ||
+            availabilityRaw >
+                uint8(ManastormAffixAvailabilityKind::ForcedOnly) ||
+            !definition.TargetMask ||
+            (definition.TargetMask &
+                ~ManastormAffixTargetBits::KnownMask) ||
+            runtimeRaw <
+                uint8(ManastormAffixRuntimeType::OnDeath) ||
+            runtimeRaw >
+                uint8(ManastormAffixRuntimeType::SpawnedHazard) ||
+            definition.MaxRank > 20 ||
+            (definition.AutomaticSelection &&
+                !definition.SelectionWeight))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm affix catalogue row id={} name='{}'.",
+                definition.AffixId,
+                definition.Name);
+
+            valid = false;
+            continue;
+        }
+
+        definition.Availability =
+            ManastormAffixAvailabilityKind(
+                availabilityRaw);
+
+        definition.RuntimeType =
+            ManastormAffixRuntimeType(
+                runtimeRaw);
+
+        if (definition.Availability ==
+                ManastormAffixAvailabilityKind::ProgressionUnlock &&
+            !definition.UnlockDepth)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Progression-owned Manastorm affix {} ({}) "
+                "has unlock_depth=0.",
+                definition.AffixId,
+                definition.Name);
+
+            valid = false;
+            continue;
+        }
+
+        if (!_affixes.emplace(
+                definition.AffixId,
+                std::move(definition)).second)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Duplicate Manastorm affix id {}.",
+                fields[0].Get<uint32>());
+
+            valid = false;
+            continue;
+        }
+
+        ++loadedRows;
+    }
+    while (result->NextRow());
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Loaded {} enabled Manastorm affixes from {} configured rows.",
+        loadedRows,
+        configuredRows);
+
+    return valid;
+}
+
+bool ManastormDataStore::LoadAffixRankSpells()
+{
+    QueryResult countResult =
+        WorldDatabase.Query(
+            "SELECT COUNT(*) FROM `manastorm_affix_rank_spell`");
+
+    if (!countResult)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to query `manastorm_affix_rank_spell`.");
+
+        return false;
+    }
+
+    uint64 const configuredRows =
+        countResult->Fetch()[0].Get<uint64>();
+
+    if (!configuredRows)
+        return true;
+
+    QueryResult result =
+        WorldDatabase.Query(
+            "SELECT `affix_id`, `role`, `rank`, `spell_id` "
+            "FROM `manastorm_affix_rank_spell` "
+            "ORDER BY `affix_id`, `role`, `rank`");
+
+    if (!result)
+        return true;
+
+    bool valid = true;
+    uint64 loadedRows = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 const affixId =
+            fields[0].Get<uint32>();
+
+        uint8 const role =
+            fields[1].Get<uint8>();
+
+        uint8 const rank =
+            fields[2].Get<uint8>();
+
+        uint32 const spellId =
+            fields[3].Get<uint32>();
+
+        auto itr =
+            _affixes.find(affixId);
+
+        if (itr == _affixes.end())
+        {
+            LOG_WARN(
+                LOG_FILTER,
+                "Ignoring rank spell for disabled/unknown "
+                "Manastorm affix {}.",
+                affixId);
+
+            continue;
+        }
+
+        if (!role ||
+            !rank ||
+            !spellId ||
+            (itr->second.MaxRank &&
+                rank > itr->second.MaxRank))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid Manastorm affix rank row: "
+                "affix={} role={} rank={} spell={}.",
+                affixId,
+                uint32(role),
+                uint32(rank),
+                spellId);
+
+            valid = false;
+            continue;
+        }
+
+        itr->second.RankSpells.push_back(
+            { role, rank, spellId });
+
+        ++loadedRows;
+    }
+    while (result->NextRow());
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Loaded {} Manastorm affix rank-spell rows "
+        "from {} configured rows.",
+        loadedRows,
+        configuredRows);
+
+    return valid;
+}
+
+bool ManastormDataStore::LoadAffixPolicies()
+{
+    QueryResult countResult =
+        WorldDatabase.Query(
+            "SELECT COUNT(*) FROM `manastorm_affix_policy`");
+
+    if (!countResult)
+    {
+        LOG_ERROR(
+            LOG_FILTER,
+            "Unable to query `manastorm_affix_policy`. "
+            "Apply 21_manastorm_affix_engine_v6.sql.");
+
+        return false;
+    }
+
+    uint64 const configuredRows =
+        countResult->Fetch()[0].Get<uint64>();
+
+    QueryResult result =
+        WorldDatabase.Query(
+            "SELECT "
+            "`policy_id`, `min_depth`, `max_depth`, "
+            "`creature_stage_affix_count`, "
+            "`creature_affix_chance_pct`, "
+            "`second_affix_chance_pct`, "
+            "`boss_affix_chance_pct`, "
+            "`environment_stage_affix_count`, "
+            "`default_rank` "
+            "FROM `manastorm_affix_policy` "
+            "WHERE `enabled` = 1 "
+            "ORDER BY `min_depth`, `policy_id`");
+
+    if (!result)
+    {
+        LOG_WARN(
+            LOG_FILTER,
+            "No enabled Manastorm affix policy rows. "
+            "Automatic affix selection will remain disabled.");
+
+        return true;
+    }
+
+    bool valid = true;
+    uint32 previousMaxDepth = 0;
+    bool previousUnbounded = false;
+    uint64 loadedRows = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        ManastormAffixPolicy policy;
+        policy.PolicyId = fields[0].Get<uint32>();
+        policy.MinDepth = fields[1].Get<uint32>();
+        policy.MaxDepth = fields[2].Get<uint32>();
+        policy.CreatureStageAffixCount =
+            fields[3].Get<uint8>();
+        policy.CreatureAffixChancePct =
+            fields[4].Get<float>();
+        policy.SecondAffixChancePct =
+            fields[5].Get<float>();
+        policy.BossAffixChancePct =
+            fields[6].Get<float>();
+        policy.EnvironmentStageAffixCount =
+            fields[7].Get<uint8>();
+        policy.DefaultRank =
+            fields[8].Get<uint8>();
+
+        auto validChance = [](float value)
+        {
+            return std::isfinite(value) &&
+                value >= 0.0f &&
+                value <= 100.0f;
+        };
+
+        if (!policy.PolicyId ||
+            !policy.MinDepth ||
+            (policy.MaxDepth &&
+                policy.MaxDepth < policy.MinDepth) ||
+            !validChance(policy.CreatureAffixChancePct) ||
+            !validChance(policy.SecondAffixChancePct) ||
+            !validChance(policy.BossAffixChancePct) ||
+            !policy.DefaultRank ||
+            policy.DefaultRank > 20 ||
+            previousUnbounded ||
+            (previousMaxDepth &&
+                policy.MinDepth <= previousMaxDepth))
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Invalid/overlapping Manastorm affix policy id={} "
+                "depth={}..{}.",
+                policy.PolicyId,
+                policy.MinDepth,
+                policy.MaxDepth);
+
+            valid = false;
+            continue;
+        }
+
+        previousMaxDepth =
+            policy.MaxDepth;
+
+        previousUnbounded =
+            policy.MaxDepth == 0;
+
+        _affixPolicies.push_back(
+            policy);
+
+        ++loadedRows;
+    }
+    while (result->NextRow());
+
+    LOG_INFO(
+        LOG_FILTER,
+        "Loaded {} enabled Manastorm affix policies "
         "from {} configured rows.",
         loadedRows,
         configuredRows);
@@ -2179,6 +2592,33 @@ ManastormDataStore::GetCreaturePoolById(
     return itr == _creaturePools.end()
         ? nullptr
         : &itr->second;
+}
+
+
+ManastormAffixDefinition const*
+ManastormDataStore::GetAffixById(
+    uint32 affixId) const
+{
+    auto itr =
+        _affixes.find(affixId);
+
+    return itr == _affixes.end()
+        ? nullptr
+        : &itr->second;
+}
+
+ManastormAffixPolicy const*
+ManastormDataStore::GetAffixPolicyForDepth(
+    uint32 depth) const
+{
+    for (ManastormAffixPolicy const& policy :
+        _affixPolicies)
+    {
+        if (policy.Matches(depth))
+            return &policy;
+    }
+
+    return nullptr;
 }
 
 ManastormUnlockDefinition const*
