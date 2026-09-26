@@ -93,6 +93,8 @@ bool ManastormDataStore::Load()
     _groupScalingRanges.clear();
     _creaturePools.clear();
     _hubReturns.clear();
+    _affixes.clear();
+    _affixPolicies.clear();
     _unlocks.clear();
 
     bool const segmentsLoaded =
@@ -115,6 +117,17 @@ bool ManastormDataStore::Load()
     bool const hubReturnsLoaded =
         LoadHubReturns();
 
+    bool const affixesLoaded =
+        LoadAffixes();
+
+    bool const affixRanksLoaded =
+        affixesLoaded &&
+        LoadAffixRankSpells();
+
+    bool const affixPoliciesLoaded =
+        affixesLoaded &&
+        LoadAffixPolicies();
+
     bool const unlocksLoaded =
         segmentsLoaded &&
         LoadUnlocks();
@@ -135,6 +148,9 @@ bool ManastormDataStore::Load()
         scalingLoaded &&
         groupScalingLoaded &&
         hubReturnsLoaded &&
+        affixesLoaded &&
+        affixRanksLoaded &&
+        affixPoliciesLoaded &&
         unlocksLoaded &&
         unlockTriggersLoaded &&
         unlockGrantsLoaded;
@@ -146,12 +162,14 @@ bool ManastormDataStore::Load()
             "Manastorm datastore loaded: {} segments, "
             "{} creature pools, {} depth scaling points, "
             "{} group scaling ranges, {} hub return pads, "
-            "{} progression unlocks.",
+            "{} affixes, {} affix policies, {} progression unlocks.",
             _segments.size(),
             _creaturePools.size(),
             _scalingCurve.size(),
             _groupScalingRanges.size(),
             _hubReturns.size(),
+            _affixes.size(),
+            _affixPolicies.size(),
             _unlocks.size());
     }
     else
@@ -742,7 +760,8 @@ bool ManastormDataStore::LoadSegmentSpawns()
                 uint32 const dependentRoles =
                     ManastormSegmentSpawnFlags::ChaoticLinkEligible |
                     ManastormSegmentSpawnFlags::RandomizationSlot |
-                    ManastormSegmentSpawnFlags::CreaturePoolSource;
+                    ManastormSegmentSpawnFlags::CreaturePoolSource |
+                    ManastormSegmentSpawnFlags::AffixEligible;
 
                 if (!routeCreature &&
                     (flags & dependentRoles))
@@ -750,7 +769,7 @@ bool ManastormDataStore::LoadSegmentSpawns()
                     LOG_ERROR(
                         LOG_FILTER,
                         "Invalid authored spawn {} for segment {}: "
-                        "Chaotic Link/randomization/pool-source roles require "
+                        "Chaotic Link/randomization/pool-source/affix roles require "
                         "RouteCreature.",
                         spawnGuid,
                         segmentId);
@@ -832,6 +851,13 @@ bool ManastormDataStore::LoadSegmentSpawns()
                     ManastormSegmentSpawnFlags::CreaturePoolSource)
                 {
                     segment->CreaturePoolSourceSpawnIds.push_back(
+                        spawnGuid);
+                }
+
+                if (flags &
+                    ManastormSegmentSpawnFlags::AffixEligible)
+                {
+                    segment->AffixEligibleSpawnIds.push_back(
                         spawnGuid);
                 }
 
