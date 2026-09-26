@@ -89,6 +89,10 @@ public:
         Unit* unit,
         Unit* killer);
 
+    void OnUnitEnterCombat(
+        Unit* unit,
+        Unit* victim);
+
     void OnDamage(
         Unit* attacker,
         Unit* victim,
