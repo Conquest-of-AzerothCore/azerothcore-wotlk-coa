@@ -314,7 +314,7 @@ namespace
     // Endless objective, summon the final native boss directly instead of
     // starting that prerequisite event.
     //
-    constexpr uint32 MAP_SUNKEN_TEMPLE = 109;
+    constexpr uint32 MANASTORM_MAP_SUNKEN_TEMPLE = 109;
     constexpr uint32 NPC_SHADE_OF_ERANIKUS = 5709;
     constexpr uint32 NPC_JAMMALAN_THE_PROPHET = 5710;
     constexpr uint32 NPC_AVATAR_OF_HAKKAR = 8443;
@@ -343,7 +343,7 @@ namespace
         ManastormSegment const& segment =
             run.GetSegment();
 
-        if (segment.MapId != MAP_SUNKEN_TEMPLE ||
+        if (segment.MapId != MANASTORM_MAP_SUNKEN_TEMPLE ||
             segment.ObjectiveCreatureEntry != NPC_AVATAR_OF_HAKKAR)
         {
             std::ostringstream message;
@@ -420,7 +420,7 @@ namespace
         ManastormSegment const& segment =
             run.GetSegment();
 
-        if (segment.MapId != MAP_SUNKEN_TEMPLE ||
+        if (segment.MapId != MANASTORM_MAP_SUNKEN_TEMPLE ||
             segment.ObjectiveCreatureEntry != NPC_JAMMALAN_THE_PROPHET)
         {
             std::ostringstream message;
@@ -533,7 +533,7 @@ namespace
         ManastormSegment const& segment =
             run.GetSegment();
 
-        if (segment.MapId != MAP_SUNKEN_TEMPLE ||
+        if (segment.MapId != MANASTORM_MAP_SUNKEN_TEMPLE ||
             segment.ObjectiveCreatureEntry != NPC_SHADE_OF_ERANIKUS)
         {
             std::ostringstream message;
@@ -5288,7 +5288,7 @@ void ManastormMgr::OnUnitEnterCombat(
     // Eranikus stage. Normal Sunken Temple remains untouched.
     //
     if (segment.NativeMapId !=
-            MAP_SUNKEN_TEMPLE ||
+            MANASTORM_MAP_SUNKEN_TEMPLE ||
         segment.NativeObjectiveCreatureEntry !=
             NPC_SHADE_OF_ERANIKUS ||
         creature->GetEntry() ==
