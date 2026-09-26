@@ -289,6 +289,7 @@ public:
         {
             { "randomslot", HandleSpawnRandomSlotCommand, SEC_GAMEMASTER, Console::No },
             { "poolsource", HandleSpawnPoolSourceCommand, SEC_GAMEMASTER, Console::No },
+            { "affix",      HandleSpawnAffixCommand,      SEC_GAMEMASTER, Console::No },
             { "info",       HandleSpawnInfoCommand,       SEC_GAMEMASTER, Console::No },
             { "list",       HandleSpawnListCommand,       SEC_GAMEMASTER, Console::No },
         };
@@ -636,6 +637,27 @@ public:
             "CreaturePoolSource");
     }
 
+    static bool HandleSpawnAffixCommand(
+        ChatHandler* handler,
+        uint32 segmentId,
+        uint32 enabled)
+    {
+        if (enabled > 1)
+        {
+            handler->SendErrorMessage(
+                "Manastorm: affix value must be 0 or 1.");
+
+            return false;
+        }
+
+        return SetSelectedSpawnRole(
+            handler,
+            segmentId,
+            ManastormSegmentSpawnFlags::AffixEligible,
+            enabled != 0,
+            "AffixEligible");
+    }
+
     static bool HandleSpawnInfoCommand(
         ChatHandler* handler,
         uint32 segmentId)
@@ -692,7 +714,7 @@ public:
 
         handler->PSendSysMessage(
             "Manastorm spawn roles | segment={} spawn={} entry={} "
-            "flags=0x{:X} enabled={} route={} link={} randomslot={} poolsource={}",
+            "flags=0x{:X} enabled={} route={} link={} randomslot={} poolsource={} affix={}",
             segmentId,
             spawnId,
             creature->GetEntry(),
@@ -701,7 +723,8 @@ public:
             (flags & ManastormSegmentSpawnFlags::RouteCreature) ? "yes" : "no",
             (flags & ManastormSegmentSpawnFlags::ChaoticLinkEligible) ? "yes" : "no",
             (flags & ManastormSegmentSpawnFlags::RandomizationSlot) ? "yes" : "no",
-            (flags & ManastormSegmentSpawnFlags::CreaturePoolSource) ? "yes" : "no");
+            (flags & ManastormSegmentSpawnFlags::CreaturePoolSource) ? "yes" : "no",
+            (flags & ManastormSegmentSpawnFlags::AffixEligible) ? "yes" : "no");
 
         return true;
     }
