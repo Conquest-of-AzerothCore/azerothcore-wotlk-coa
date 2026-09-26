@@ -39,6 +39,18 @@ public:
     ManastormHubReturn const* GetHubReturn(
         uint8 teamId) const;
 
+    ManastormAffixDefinition const* GetAffixById(
+        uint32 affixId) const;
+
+    std::map<uint32, ManastormAffixDefinition> const&
+    GetAffixes() const
+    {
+        return _affixes;
+    }
+
+    ManastormAffixPolicy const* GetAffixPolicyForDepth(
+        uint32 depth) const;
+
     ManastormUnlockDefinition const* GetUnlockForTrigger(
         uint32 completedDepth,
         ManastormMode mode,
@@ -69,7 +81,8 @@ public:
     std::size_t GetSegmentCount() const { return _segments.size(); }
     std::size_t GetScalingPointCount() const { return _scalingCurve.size(); }
     std::size_t GetGroupScalingRangeCount() const { return _groupScalingRanges.size(); }
-
+    std::size_t GetAffixCount() const { return _affixes.size(); }
+    std::size_t GetAffixPolicyCount() const { return _affixPolicies.size(); }
 
 
 private:
@@ -81,6 +94,9 @@ private:
     bool LoadScalingCurve();
     bool LoadGroupScaling();
     bool LoadHubReturns();
+    bool LoadAffixes();
+    bool LoadAffixRankSpells();
+    bool LoadAffixPolicies();
     bool LoadUnlocks();
     bool LoadUnlockTriggers();
     bool LoadUnlockGrants();
@@ -91,6 +107,8 @@ private:
     std::vector<ManastormGroupScalingRange> _groupScalingRanges;
     std::map<uint8, ManastormHubReturn> _hubReturns;
     std::map<uint32, ManastormCreaturePoolDefinition> _creaturePools;
+    std::map<uint32, ManastormAffixDefinition> _affixes;
+    std::vector<ManastormAffixPolicy> _affixPolicies;
     std::map<uint32, ManastormUnlockDefinition> _unlocks;
 
 };
