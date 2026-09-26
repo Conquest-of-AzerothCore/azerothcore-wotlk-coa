@@ -1748,6 +1748,11 @@ void ManastormMgr::FailRun(
             continue;
         }
 
+        ManastormAffixEngine::Instance()
+            .RemoveActivePlayerAffixes(
+                member,
+                run);
+
         RemoveBaselineRunItems(
             member,
             true);
@@ -3515,6 +3520,28 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                 ClearSafetyBubble(member);
         run->SetState(ManastormRunState::Active);
 
+        for (auto guid : run->GetMembers())
+        {
+            if (Player* member =
+                ObjectAccessor::FindConnectedPlayer(
+                    ObjectGuid::Create<
+                        HighGuid::Player>(
+                            guid)))
+            {
+                if (member->IsInWorld() &&
+                    member->GetMapId() ==
+                        map->GetId() &&
+                    member->GetInstanceId() ==
+                        map->GetInstanceId())
+                {
+                    ManastormAffixEngine::Instance()
+                        .ApplyActivePlayerAffixes(
+                            member,
+                            *run);
+                }
+            }
+        }
+
         std::size_t healthScaledCount = 0;
 
         for (ObjectGuid const& guid :
@@ -4530,9 +4557,10 @@ bool ManastormMgr::ForceStageAffix(
                 affixId);
 
         ManastormAffixEngine::Instance()
-            .OnCreatureAdded(
+            .ForceAffixOnCreature(
                 creature,
-                *run);
+                *run,
+                affixId);
 
         if (!alreadyAssigned &&
             run->HasCreatureAffix(
@@ -4540,6 +4568,28 @@ bool ManastormMgr::ForceStageAffix(
                 affixId))
         {
             ++assignedCount;
+        }
+    }
+
+    for (ObjectGuid::LowType memberGuid :
+        run->GetMembers())
+    {
+        Player* member =
+            ObjectAccessor::FindConnectedPlayer(
+                ObjectGuid::Create<HighGuid::Player>(
+                    memberGuid));
+
+        if (member &&
+            member->IsInWorld() &&
+            member->GetMapId() ==
+                run->GetSegment().MapId &&
+            member->GetInstanceId() ==
+                run->GetInstanceId())
+        {
+            ManastormAffixEngine::Instance()
+                .ApplyActivePlayerAffixes(
+                    member,
+                    *run);
         }
     }
 
@@ -5861,6 +5911,23 @@ bool ManastormMgr::TransitionToNextStage(
                         run.GetMembers()
                             .size()));
 
+    for (ObjectGuid::LowType memberGuid :
+        run.GetMembers())
+    {
+        Player* member =
+            ObjectAccessor::FindConnectedPlayer(
+                ObjectGuid::Create<HighGuid::Player>(
+                    memberGuid));
+
+        if (member)
+        {
+            ManastormAffixEngine::Instance()
+                .RemoveActivePlayerAffixes(
+                    member,
+                    run);
+        }
+    }
+
     run.BeginPreviousStageTransition();
 
     // The completed map remains alive as a five-second portal waiting room,
@@ -6359,6 +6426,11 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
 
             continue;
         }
+
+        ManastormAffixEngine::Instance()
+            .RemoveActivePlayerAffixes(
+                member,
+                *run);
 
         //
         // Endless-only tools disappear when the
