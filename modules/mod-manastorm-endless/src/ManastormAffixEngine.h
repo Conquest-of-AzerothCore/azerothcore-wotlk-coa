@@ -8,6 +8,7 @@
 
 class Creature;
 class ManastormRun;
+class Player;
 
 class ManastormAffixEngine
 {
@@ -22,6 +23,19 @@ public:
         ManastormRun& run,
         uint32 affixId,
         std::string& error);
+
+    bool ForceAffixOnCreature(
+        Creature* creature,
+        ManastormRun& run,
+        uint32 affixId);
+
+    void ApplyActivePlayerAffixes(
+        Player* player,
+        ManastormRun& run);
+
+    void RemoveActivePlayerAffixes(
+        Player* player,
+        ManastormRun const& run);
 
     bool IsAffixHelperCreature(
         uint32 creatureEntry) const;
@@ -52,9 +66,23 @@ private:
         Creature const* creature,
         ManastormRun const& run) const;
 
+    bool IsEligibleTrashTarget(
+        Creature const* creature,
+        ManastormRun const& run) const;
+
+    bool IsEligibleBossTarget(
+        Creature const* creature,
+        ManastormRun const& run) const;
+
     bool IsEligibleForManaBomb(
         Creature const* creature,
         ManastormRun const& run) const;
+
+    bool AssignAffixToCreature(
+        Creature* creature,
+        ManastormRun& run,
+        ManastormAffixDefinition const& definition,
+        bool force);
 
     void AssignActiveAffixes(
         Creature* creature,
