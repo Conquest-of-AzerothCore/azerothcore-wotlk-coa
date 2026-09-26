@@ -228,6 +228,17 @@ public:
             _creaturePoolSourceSpawnIds.end();
     }
 
+    bool IsAffixEligibleSpawn(
+        ObjectGuid::LowType spawnId) const
+    {
+        if (!spawnId)
+            return false;
+
+        return _affixEligibleConfiguredSpawnIds.find(
+            spawnId) !=
+            _affixEligibleConfiguredSpawnIds.end();
+    }
+
     bool ConsumeChaoticLinkSpawn(
         ObjectGuid::LowType spawnId)
     {
@@ -528,16 +539,25 @@ public:
     void ClearStageAffixState()
     {
         _activeStageAffixIds.clear();
+        _activeStageAffixRanks.clear();
         _creatureAffixIds.clear();
     }
 
-    bool AddStageAffix(uint32 affixId)
+    bool AddStageAffix(
+        uint32 affixId,
+        uint8 rank = 1)
     {
         if (!affixId)
             return false;
 
-        return _activeStageAffixIds.insert(
-            affixId).second;
+        bool const inserted =
+            _activeStageAffixIds.insert(
+                affixId).second;
+
+        _activeStageAffixRanks[affixId] =
+            rank ? rank : 1;
+
+        return inserted;
     }
 
     bool HasStageAffix(uint32 affixId) const
@@ -551,6 +571,18 @@ public:
         GetActiveStageAffixIds() const
     {
         return _activeStageAffixIds;
+    }
+
+    uint8 GetStageAffixRank(
+        uint32 affixId) const
+    {
+        auto const itr =
+            _activeStageAffixRanks.find(
+                affixId);
+
+        return itr == _activeStageAffixRanks.end()
+            ? 1
+            : itr->second;
     }
 
     bool AssignCreatureAffix(
@@ -674,6 +706,9 @@ private:
     std::unordered_set<ObjectGuid::LowType>
         _creaturePoolSourceSpawnIds;
 
+    std::unordered_set<ObjectGuid::LowType>
+        _affixEligibleConfiguredSpawnIds;
+
     // Remaining authored spawns that may still consume one boss Link.
     //
     // This is deliberately separate from the configured set:
@@ -722,6 +757,9 @@ private:
     // Affixes selected for the CURRENT disposable stage.
     std::unordered_set<uint32>
         _activeStageAffixIds;
+
+    std::unordered_map<uint32, uint8>
+        _activeStageAffixRanks;
 
     // Exact runtime creatures -> affixes assigned to them.
     //
