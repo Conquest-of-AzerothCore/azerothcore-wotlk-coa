@@ -314,14 +314,17 @@ namespace
     // starting that prerequisite event.
     //
     constexpr uint32 MAP_SUNKEN_TEMPLE = 109;
+    constexpr uint32 NPC_SHADE_OF_ERANIKUS = 5709;
     constexpr uint32 NPC_JAMMALAN_THE_PROPHET = 5710;
     constexpr uint32 NPC_AVATAR_OF_HAKKAR = 8443;
     constexpr uint32 DATA_SUNKEN_TEMPLE_DEFENDER_KILLED = 11;
     constexpr uint32 SUNKEN_TEMPLE_DEFENDERS_COUNT = 6;
     constexpr uint32 SEGMENT_HAKKAR_NORMAL = 675;
     constexpr uint32 SEGMENT_JAMMALAN_NORMAL = 676;
+    constexpr uint32 SEGMENT_ERANIKUS_NORMAL = 677;
     constexpr uint32 SEGMENT_HAKKAR_ENDGAME = 678;
     constexpr uint32 SEGMENT_JAMMALAN_ENDGAME = 679;
+    constexpr uint32 SEGMENT_ERANIKUS_ENDGAME = 680;
 
     bool BootstrapSunkenTempleHakkarEncounter(
         Map* map,
@@ -513,6 +516,94 @@ namespace
         return true;
     }
 
+    bool BootstrapSunkenTempleEranikusEncounter(
+        Map* map,
+        ManastormRun const& run,
+        std::string& error)
+    {
+        error.clear();
+
+        if (!map)
+        {
+            error = "Sunken Temple Eranikus bootstrap has no destination map.";
+            return false;
+        }
+
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (segment.MapId != MAP_SUNKEN_TEMPLE ||
+            segment.ObjectiveCreatureEntry != NPC_SHADE_OF_ERANIKUS)
+        {
+            std::ostringstream message;
+
+            message
+                << "Sunken Temple Eranikus bootstrap was requested for "
+                << "segment "
+                << segment.SegmentId
+                << " but runtime map/objective is "
+                << segment.MapId
+                << "/"
+                << segment.ObjectiveCreatureEntry
+                << ".";
+
+            error = message.str();
+            return false;
+        }
+
+        Creature* eranikus = nullptr;
+
+        for (auto const& spawn :
+            map->GetCreatureBySpawnIdStore())
+        {
+            Creature* creature =
+                spawn.second;
+
+            if (!creature ||
+                !creature->IsInWorld() ||
+                creature->GetEntry() !=
+                    NPC_SHADE_OF_ERANIKUS)
+            {
+                continue;
+            }
+
+            eranikus = creature;
+            break;
+        }
+
+        if (!eranikus)
+        {
+            error =
+                "Sunken Temple Eranikus bootstrap could not find the persistent Shade of Eranikus (5709) spawn.";
+            return false;
+        }
+
+        //
+        // AzerothCore marks Shade of Eranikus NOT_SELECTABLE when the
+        // instance creates him. In the normal dungeon, Jammal'an's death
+        // removes exactly this flag and makes Eranikus available for combat.
+        //
+        // The Manastorm Eranikus segment begins after that prerequisite,
+        // so reproduce only the native unlock state. Do not duplicate the
+        // boss and do not bypass Eranikus' own SmartAI/combat mechanics.
+        //
+        eranikus->RemoveUnitFlag(
+            UNIT_FLAG_NOT_SELECTABLE);
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped Manastorm Sunken Temple Eranikus unlock: run={} "
+            "segment={} map={} instance={} objective={} guid={}.",
+            run.GetRunId(),
+            segment.SegmentId,
+            segment.MapId,
+            run.GetInstanceId(),
+            segment.ObjectiveCreatureEntry,
+            eranikus->GetGUID().GetRawValue());
+
+        return true;
+    }
+
     bool BootstrapSpecialEncounter(
         Map* map,
         ManastormRun const& run,
@@ -530,6 +621,13 @@ namespace
         case SEGMENT_JAMMALAN_NORMAL:
         case SEGMENT_JAMMALAN_ENDGAME:
             return BootstrapSunkenTempleJammalanEncounter(
+                map,
+                run,
+                error);
+
+        case SEGMENT_ERANIKUS_NORMAL:
+        case SEGMENT_ERANIKUS_ENDGAME:
+            return BootstrapSunkenTempleEranikusEncounter(
                 map,
                 run,
                 error);
