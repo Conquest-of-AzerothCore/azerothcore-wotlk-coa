@@ -761,8 +761,16 @@ void ManastormAffixEngine::AssignActiveAffixes(
         return;
     }
 
+    std::vector<uint32> orderedAffixes(
+        run.GetActiveStageAffixIds().begin(),
+        run.GetActiveStageAffixIds().end());
+
+    std::sort(
+        orderedAffixes.begin(),
+        orderedAffixes.end());
+
     for (uint32 affixId :
-        run.GetActiveStageAffixIds())
+        orderedAffixes)
     {
         ManastormAffixDefinition const* definition =
             GetDefinition(affixId);
