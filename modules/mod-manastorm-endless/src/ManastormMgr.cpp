@@ -579,16 +579,23 @@ namespace
         }
 
         //
-        // AzerothCore marks Shade of Eranikus NOT_SELECTABLE when the
-        // instance creates him. In the normal dungeon, Jammal'an's death
-        // removes exactly this flag and makes Eranikus available for combat.
+        // Native Sunken Temple progression leaves Eranikus unavailable until
+        // Jammal'an is completed. The instance progression removes
+        // NOT_SELECTABLE, while Eranikus' own SmartAI removes the player/NPC
+        // immunity flags (mask 768) before the fight becomes usable.
         //
-        // The Manastorm Eranikus segment begins after that prerequisite,
-        // so reproduce only the native unlock state. Do not duplicate the
-        // boss and do not bypass Eranikus' own SmartAI/combat mechanics.
+        // The Manastorm Eranikus segment begins after that prerequisite, so
+        // reproduce that complete post-Jammal'an unlock state. Do not
+        // duplicate the boss and do not bypass Eranikus' own combat AI.
         //
         eranikus->RemoveUnitFlag(
             UNIT_FLAG_NOT_SELECTABLE);
+
+        eranikus->RemoveUnitFlag(
+            UNIT_FLAG_IMMUNE_TO_PC);
+
+        eranikus->RemoveUnitFlag(
+            UNIT_FLAG_IMMUNE_TO_NPC);
 
         LOG_INFO(
             LOG_FILTER,
