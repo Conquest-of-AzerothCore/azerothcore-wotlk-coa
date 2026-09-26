@@ -683,14 +683,26 @@ bool ManastormAffixEngine::AssignAffixToCreature(
         }
     }
 
-    if (!run.AssignCreatureAffix(
+    bool const newlyAssigned =
+        run.AssignCreatureAffix(
+            creature->GetGUID(),
+            definition.AffixId);
+
+    if (!newlyAssigned &&
+        !run.HasCreatureAffix(
             creature->GetGUID(),
             definition.AffixId))
     {
         return false;
     }
 
-    if (definition.ApplyMarkerAura &&
+    // Creatures are discovered while the disposable stage is PREPARING.
+    // Record ownership then, but do not start periodic/hazard auras inside
+    // the two-minute safety bubble.  OnCreatureAdded() is intentionally
+    // replayed when the stage becomes ACTIVE.
+    if (run.GetState() ==
+            ManastormRunState::Active &&
+        definition.ApplyMarkerAura &&
         definition.MarkerSpellId &&
         !creature->HasAura(
             definition.MarkerSpellId))
@@ -701,22 +713,25 @@ bool ManastormAffixEngine::AssignAffixToCreature(
             true);
     }
 
-    LOG_DEBUG(
-        LOG_FILTER,
-        "Manastorm run {} assigned affix {} ({}) rank {} "
-        "to {} entry={} spawn={} guid={}.",
-        run.GetRunId(),
-        definition.AffixId,
-        definition.Name,
-        uint32(
-            run.GetStageAffixRank(
-                definition.AffixId)),
-        boss ? "boss" : "route creature",
-        creature->GetEntry(),
-        creature->GetSpawnId(),
-        creature->GetGUID().GetRawValue());
+    if (newlyAssigned)
+    {
+        LOG_DEBUG(
+            LOG_FILTER,
+            "Manastorm run {} assigned affix {} ({}) rank {} "
+            "to {} entry={} spawn={} guid={}.",
+            run.GetRunId(),
+            definition.AffixId,
+            definition.Name,
+            uint32(
+                run.GetStageAffixRank(
+                    definition.AffixId)),
+            boss ? "boss" : "route creature",
+            creature->GetEntry(),
+            creature->GetSpawnId(),
+            creature->GetGUID().GetRawValue());
+    }
 
-    return true;
+    return newlyAssigned;
 }
 
 bool ManastormAffixEngine::ForceAffixOnCreature(
