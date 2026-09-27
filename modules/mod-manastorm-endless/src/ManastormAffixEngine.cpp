@@ -35,7 +35,8 @@ constexpr uint32 SPELL_CREEPING_FROST_EFFECT = 93342;
 constexpr uint32 SPELL_COLD_SNAP_AURA = 93446;
 constexpr uint32 SPELL_COLD_SNAP_EFFECT_AURA = 93448;
 constexpr uint32 SPELL_FUNGAL_AURA = 93379;
-constexpr uint32 SPELL_BONESTORM_PRE_AURA = 93371;
+constexpr uint32 SPELL_BONESTORM_AURA = 93369;
+constexpr float BONESTORM_RUN_SPEED_RATE = 0.85f;
 constexpr uint32 SPELL_OVERWHELMING_COSMETIC_AURA = 93414;
 
 
@@ -957,16 +958,23 @@ void ManastormAffixEngine::OnCreatureAdded(
             if (run.HasStageAffix(
                     ManastormAffixIds::BoneStorm))
             {
+                // Recovered 93371 is only a 1 ms periodic bridge into the
+                // actual 8-second Bonestorm hazard aura (93369). AzerothCore
+                // can expire that bridge before it produces a reliable tick,
+                // so attach the recovered hazard aura directly to the helper.
                 activationSpell =
-                    SPELL_BONESTORM_PRE_AURA;
+                    SPELL_BONESTORM_AURA;
 
                 // The recovered Bonestorm tooltip explicitly says that the
-                // storm chases the player. The client data does not contain
-                // that movement controller, so bind the summoned helper to
-                // the nearest Hero in this private stage. Bonestorm is a
-                // hazard rather than a combat attacker, so use follow
-                // movement; MoveChase requires the target to be the
-                // creature's current victim.
+                // storm chases the player. The original proprietary movement
+                // speed was not recovered. Keep the hazard escapable instead
+                // of using the helper template's 1.14286 run rate, which is
+                // faster than a normal player's 1.0 run rate.
+                creature->SetSpeed(
+                    MOVE_RUN,
+                    BONESTORM_RUN_SPEED_RATE,
+                    true);
+
                 if (Player* target =
                     creature->SelectNearestPlayer(
                         100.0f))
