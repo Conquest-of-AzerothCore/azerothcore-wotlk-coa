@@ -963,15 +963,23 @@ void ManastormAffixEngine::OnCreatureAdded(
                 // The recovered Bonestorm tooltip explicitly says that the
                 // storm chases the player. The client data does not contain
                 // that movement controller, so bind the summoned helper to
-                // the nearest Hero in this private stage.
+                // the nearest Hero in this private stage. Bonestorm is a
+                // hazard rather than a combat attacker, so use follow
+                // movement; MoveChase requires the target to be the
+                // creature's current victim.
                 if (Player* target =
                     creature->SelectNearestPlayer(
                         100.0f))
                 {
                     if (target->IsAlive())
                     {
-                        creature->GetMotionMaster()
-                            ->MoveChase(target);
+                        creature->GetMotionMaster()->MoveFollow(
+                            target,
+                            0.01f,
+                            0.0f,
+                            MOTION_SLOT_ACTIVE,
+                            false,
+                            false);
                     }
                 }
             }
