@@ -2716,13 +2716,13 @@ bool ManastormMgr::PrepareStage(
             {
                 member->SetRaidDifficulty(
                     Difficulty(
-                        segment.Difficulty));
+                        segment.RuntimeDifficulty));
             }
             else
             {
                 member->SetDungeonDifficulty(
                     Difficulty(
-                        segment.Difficulty));
+                        segment.RuntimeDifficulty));
             }
         }
 
@@ -2806,12 +2806,13 @@ bool ManastormMgr::PrepareStage(
     LOG_INFO(
         LOG_FILTER,
         "Prepared Manastorm run {} stage: segment={} map={} instance={} "
-        "difficulty={} tele={} immediateTransfer={} destination=({}, {}, {}, {}).",
+        "difficulty={} runtimeDifficulty={} tele={} immediateTransfer={} destination=({}, {}, {}, {}).",
         run.GetRunId(),
         segment.SegmentId,
         segment.MapId,
         instanceId,
         segment.Difficulty,
+        segment.RuntimeDifficulty,
         segment.StartGameTeleId,
         transferAll
             ? 0
@@ -2914,13 +2915,13 @@ bool ManastormMgr::TransferMemberToCurrentStage(
         {
             player->SetRaidDifficulty(
                 Difficulty(
-                    segment.Difficulty));
+                    segment.RuntimeDifficulty));
         }
         else
         {
             player->SetDungeonDifficulty(
                 Difficulty(
-                    segment.Difficulty));
+                    segment.RuntimeDifficulty));
         }
     }
 
@@ -3416,9 +3417,9 @@ void ManastormMgr::OnPlayerLogin(Player* player)
     player->m_recallZ = location->GetPositionZ();
     player->m_recallO = location->GetOrientation();
     if (map->IsRaid())
-        player->SetRaidDifficulty(Difficulty(run->GetSegment().Difficulty));
+        player->SetRaidDifficulty(Difficulty(run->GetSegment().RuntimeDifficulty));
     else
-        player->SetDungeonDifficulty(Difficulty(run->GetSegment().Difficulty));
+        player->SetDungeonDifficulty(Difficulty(run->GetSegment().RuntimeDifficulty));
     player->PrepareScriptedPrivateInstance(map->GetId(), *location,
         ObjectGuid::Create<HighGuid::Player>(run->GetOwnerGuid()), members, true);
     player->SetScriptedPrivateInstanceId(run->GetInstanceId());

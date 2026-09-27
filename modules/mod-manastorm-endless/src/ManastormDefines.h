@@ -440,7 +440,16 @@ struct ManastormSegment
     // manastorm_segment.runtime_map_id is 0.
     uint32 MapId = 0;
 
+    // Native Patch-M Manastorm track identity.
+    // 0 = Normal, 2 = Endgame. Do not use this directly as a WotLK
+    // instance spawn mode.
     uint8 Difficulty = 0;
+
+    // Physical AzerothCore instance difficulty/spawn mode. Ascension's
+    // difficulty-2 Endgame track reuses the base WotLK dungeon population;
+    // Manastorm supplies the Endgame progression/scaling layer itself.
+    uint8 RuntimeDifficulty = 0;
+
     uint32 DungeonEncounterId = 0;
 
     // Original recovered objective identity from the imported/native segment

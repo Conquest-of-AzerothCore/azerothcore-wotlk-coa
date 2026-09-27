@@ -416,6 +416,15 @@ bool ManastormDataStore::LoadSegments()
             : segment.NativeMapId;
 
         segment.Difficulty = fields[3].Get<uint8>();
+
+        // Patch-M difficulty 2 is the native Manastorm Endgame track, not a
+        // physical WotLK dungeon spawn mode. Keep the native identity intact
+        // while loading the base dungeon population at runtime.
+        segment.RuntimeDifficulty =
+            segment.Difficulty == 2
+            ? 0
+            : segment.Difficulty;
+
         segment.DungeonEncounterId = fields[4].Get<uint32>();
         segment.NativeObjectiveCreatureEntry = fields[5].Get<uint32>();
 
@@ -628,7 +637,7 @@ bool ManastormDataStore::LoadSegments()
              !GetMapDifficultyData(
                  segment.MapId,
                  Difficulty(
-                     segment.Difficulty))))
+                     segment.RuntimeDifficulty))))
         {
             LOG_ERROR(
                 LOG_FILTER,
