@@ -475,6 +475,11 @@ public:
                 target,
                 damage,
                 DIRECT_DAMAGE);
+
+        ManastormMgr::Instance().OnMeleeDamage(
+            attacker,
+            target,
+            damage);
     }
 
     void ModifySpellDamageTaken(

@@ -17,6 +17,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 #include "ManastormDataStore.h"
 #include "ManastormGenerator.h"
 #include "ManastormProgression.h"
@@ -236,6 +237,12 @@ namespace
 
     // Recovered Ascension Manastorm Chaotic Link boss aura.
     constexpr uint32 SPELL_CHAOTIC_LINK = 93459;
+
+    // Recovered Cleaving proc spell. Spell.dbc defines 93352 as a
+    // PROC_TRIGGER_SPELL aura pointing at 93351. 93351 is 100% weapon
+    // damage with EffectChainTargets=3.
+    constexpr uint32 SPELL_MANASTORM_CLEAVE = 93351;
+    constexpr uint8 MANASTORM_AFFIX_PRIMARY_RANK_ROLE = 1;
 
     // 80919 is the native Cogsley non-combat companion/vendor summoned by
     // spell 93418.
@@ -4443,6 +4450,126 @@ void ManastormMgr::OnDamage(
     if (!victim || !damage)
         return;
 
+    //
+    // LEECHING
+    //
+    // Recovered behavior:
+    //     successful damage dealt by an affixed Manastorm creature
+    //     -> heal the attacker for the affix percentage of actual damage.
+    //
+    // Spell.dbc stores Leeching as a DUMMY aura, so stock AzerothCore has
+    // no generic handler that can infer this behavior. The base/root spell
+    // 93344 encodes 30% (base points 29 => value 30); the recovered
+    // 115091..115110 rank family carries the higher-rank percentages.
+    //
+    // Cap the source damage by the victim's current health so overkill does
+    // not create extra healing. This matches the recovered donor behavior.
+    //
+    if (Creature* attackingCreature =
+        attacker
+        ? attacker->ToCreature()
+        : nullptr)
+    {
+        if (attackingCreature->IsAlive() &&
+            attackingCreature->GetEntry() !=
+                NPC_MANASTORM_HEART &&
+            !attackingCreature->IsTrigger() &&
+            !attackingCreature->IsPet() &&
+            !IsPlayerControlledCreature(
+                attackingCreature))
+        {
+            Map* attackerMap =
+                attackingCreature->GetMap();
+
+            if (attackerMap &&
+                attackerMap->GetInstanceId() &&
+                victim->GetMap() ==
+                    attackerMap)
+            {
+                ManastormRun* attackerRun =
+                    GetRunForStage(
+                        attackerMap->GetId(),
+                        attackerMap->GetInstanceId());
+
+                if (attackerRun &&
+                    attackerRun->GetState() ==
+                        ManastormRunState::Active &&
+                    attackerRun->IsStageCreature(
+                        attackingCreature->GetGUID()) &&
+                    attackerRun->HasCreatureAffix(
+                        attackingCreature->GetGUID(),
+                        ManastormAffixIds::Leeching))
+                {
+                    ManastormAffixDefinition const*
+                        definition =
+                            ManastormDataStore::Instance()
+                                .GetAffixById(
+                                    ManastormAffixIds::Leeching);
+
+                    uint32 leechSpellId =
+                        definition &&
+                        definition->MarkerSpellId
+                        ? definition->MarkerSpellId
+                        : ManastormAffixIds::Leeching;
+
+                    if (definition)
+                    {
+                        uint8 const rank =
+                            attackerRun->GetStageAffixRank(
+                                ManastormAffixIds::Leeching);
+
+                        uint32 const rankSpellId =
+                            definition->GetRankSpell(
+                                MANASTORM_AFFIX_PRIMARY_RANK_ROLE,
+                                rank);
+
+                        if (rankSpellId)
+                            leechSpellId =
+                                rankSpellId;
+                    }
+
+                    if (SpellInfo const* leechInfo =
+                        sSpellMgr->GetSpellInfo(
+                            leechSpellId))
+                    {
+                        int32 const leechPct =
+                            leechInfo->Effects[EFFECT_0]
+                                .CalcValue(
+                                    attackingCreature);
+
+                        if (leechPct > 0)
+                        {
+                            uint32 const actualDamage =
+                                std::min(
+                                    damage,
+                                    victim->GetHealth());
+
+                            uint32 const healAmount =
+                                uint32(
+                                    uint64(actualDamage) *
+                                    uint32(leechPct) /
+                                    100ULL);
+
+                            if (healAmount)
+                            {
+                                HealInfo healInfo(
+                                    attackingCreature,
+                                    attackingCreature,
+                                    healAmount,
+                                    leechInfo,
+                                    leechInfo->GetSchoolMask());
+
+                                attackingCreature->HealBySpell(
+                                    healInfo,
+                                    false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Creature* creature =
         victim->ToCreature();
 
@@ -5154,6 +5281,85 @@ void ManastormMgr::OnCreatureRemoveWorld(Creature* creature)
 
     run->ClearObjectiveCreatureGuid();
 
+}
+
+void ManastormMgr::OnMeleeDamage(
+    Unit* attacker,
+    Unit* victim,
+    uint32 damage)
+{
+    if (!attacker ||
+        !victim ||
+        !damage)
+    {
+        return;
+    }
+
+    Creature* creature =
+        attacker->ToCreature();
+
+    if (!creature ||
+        !creature->IsAlive() ||
+        creature->GetEntry() ==
+            NPC_MANASTORM_HEART ||
+        creature->IsTrigger() ||
+        creature->IsPet() ||
+        IsPlayerControlledCreature(
+            creature))
+    {
+        return;
+    }
+
+    Map* map =
+        creature->GetMap();
+
+    if (!map ||
+        !map->GetInstanceId() ||
+        victim->GetMap() !=
+            map)
+    {
+        return;
+    }
+
+    ManastormRun* run =
+        GetRunForStage(
+            map->GetId(),
+            map->GetInstanceId());
+
+    if (!run ||
+        run->GetState() !=
+            ManastormRunState::Active ||
+        !run->IsStageCreature(
+            creature->GetGUID()) ||
+        !run->HasCreatureAffix(
+            creature->GetGUID(),
+            ManastormAffixIds::Cleaving))
+    {
+        return;
+    }
+
+    //
+    // Spell.dbc:
+    //
+    //     93352 Cleaving
+    //       Aura 42 = PROC_TRIGGER_SPELL
+    //       TriggerSpell = 93351
+    //       ProcChance = 100
+    //
+    //     93351 Cleave
+    //       Effect 31 = WEAPON_PERCENT_DAMAGE
+    //       amount = 100%
+    //       EffectChainTargets = 3
+    //
+    // Ascension's DBC leaves the proc type mask at zero, so stock
+    // AzerothCore never supplies the missing outgoing-melee event.
+    // Supply only that event here and let the recovered 93351 spell own
+    // its weapon damage and chain-target selection.
+    //
+    creature->CastSpell(
+        victim,
+        SPELL_MANASTORM_CLEAVE,
+        true);
 }
 
 uint32 ManastormMgr::ScaleCreatureDamage(

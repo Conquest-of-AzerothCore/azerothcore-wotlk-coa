@@ -98,6 +98,11 @@ public:
         Unit* victim,
         uint32& damage);
 
+    void OnMeleeDamage(
+        Unit* attacker,
+        Unit* victim,
+        uint32 damage);
+
     uint32 ScaleCreatureDamage(
         Unit* attacker,
         Unit* victim,
