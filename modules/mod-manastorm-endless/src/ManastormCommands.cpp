@@ -1,4 +1,5 @@
 #include "ManastormMgr.h"
+#include "ManastormGreedyDemon.h"
 
 #include "Chat.h"
 #include "CommandScript.h"
@@ -313,6 +314,11 @@ public:
             { "force", HandleAffixForceCommand, SEC_GAMEMASTER, Console::No },
         };
 
+        static ChatCommandTable greedyCommandTable =
+        {
+            { "spawn", HandleGreedySpawnCommand, SEC_GAMEMASTER, Console::No },
+        };
+
         static ChatCommandTable endlessCommandTable =
         {
             { "ui",          HandleUICommand,          SEC_PLAYER,     Console::No },
@@ -327,6 +333,7 @@ public:
             { "pool",    poolCommandTable },
             { "segment", segmentCommandTable },
             { "affix",   affixCommandTable },
+            { "greedy",  greedyCommandTable },
 
             { "reload", HandleReloadCommand, SEC_ADMINISTRATOR, Console::Yes },
         };
@@ -1747,6 +1754,43 @@ public:
             store.GetSegmentCount(),
             store.GetScalingPointCount(),
             ManastormMgr::Instance().GetActiveRunCount());
+
+        return true;
+    }
+
+    static bool HandleGreedySpawnCommand(
+        ChatHandler* handler)
+    {
+        Player* player =
+            handler->GetSession()
+            ? handler->GetSession()->GetPlayer()
+            : nullptr;
+
+        if (!player)
+        {
+            handler->SendErrorMessage(
+                "Manastorm: this command requires "
+                "an in-game player.");
+
+            return false;
+        }
+
+        std::string error;
+
+        if (!ManastormGreedyDemon::Instance()
+            .ForceSpawn(
+                player,
+                error))
+        {
+            handler->PSendSysMessage(
+                "Manastorm: {}",
+                error);
+
+            return true;
+        }
+
+        handler->SendSysMessage(
+            "Manastorm: forced Greedy Demon encounter.");
 
         return true;
     }
