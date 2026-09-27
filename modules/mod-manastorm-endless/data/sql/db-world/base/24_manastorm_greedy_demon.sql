@@ -51,9 +51,9 @@ CREATE TABLE IF NOT EXISTS `manastorm_greedy_demon_rule`
     `confusion_interval_ms`  INT UNSIGNED NOT NULL DEFAULT 12000,
     `gold_min_copper`        INT UNSIGNED NOT NULL DEFAULT 0,
     `gold_max_copper`        INT UNSIGNED NOT NULL DEFAULT 0,
-    `uncommon_weight`        INT UNSIGNED NOT NULL DEFAULT 70,
-    `rare_weight`            INT UNSIGNED NOT NULL DEFAULT 25,
-    `epic_weight`            INT UNSIGNED NOT NULL DEFAULT 5,
+    `uncommon_weight`        INT UNSIGNED NOT NULL DEFAULT 95,
+    `rare_weight`            INT UNSIGNED NOT NULL DEFAULT 4,
+    `epic_weight`            INT UNSIGNED NOT NULL DEFAULT 1,
     `enabled`                TINYINT UNSIGNED NOT NULL DEFAULT 1,
 
     PRIMARY KEY (`rule_id`)
@@ -94,11 +94,22 @@ VALUES
     12000,
     200000,
     250000,
-    70,
-    25,
-    5,
+    95,
+    4,
+    1,
     1
 );
+
+-- Classic+ reconstruction: keep higher-quality Greedy Demon swords uncommon.
+-- Exact shutdown-era Ascension percentages have not been recovered.
+-- UPDATE is intentional so existing installs that already ran this base file
+-- receive the corrected Classic+ tier weighting as well.
+UPDATE `manastorm_greedy_demon_rule`
+SET
+    `uncommon_weight` = 95,
+    `rare_weight` = 4,
+    `epic_weight` = 1
+WHERE `rule_id` = 1;
 
 CREATE TABLE IF NOT EXISTS `manastorm_greedy_demon_loot_pool`
 (
