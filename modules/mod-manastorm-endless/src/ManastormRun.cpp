@@ -137,6 +137,10 @@ void ManastormRun::PrepareNextStage(
     _treasureTrashKills = 0;
     _treasureKeeperSpawned = false;
     _treasureKeeperGuid.Clear();
+
+    _greedyDemonRolled = false;
+    _greedyDemonGuid.Clear();
+
     _bonusCacheCount = 0;
     _bonusAbilityCaseCount = 0;
     _bonusTalentCaseCount = 0;
