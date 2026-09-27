@@ -452,6 +452,31 @@ public:
         _treasureKeeperGuid.Clear();
     }
 
+    bool GreedyDemonRolled() const
+    {
+        return _greedyDemonRolled;
+    }
+
+    void SetGreedyDemonRolled(bool value)
+    {
+        _greedyDemonRolled = value;
+    }
+
+    ObjectGuid GetGreedyDemonGuid() const
+    {
+        return _greedyDemonGuid;
+    }
+
+    void SetGreedyDemonGuid(ObjectGuid guid)
+    {
+        _greedyDemonGuid = guid;
+    }
+
+    void ClearGreedyDemonGuid()
+    {
+        _greedyDemonGuid.Clear();
+    }
+
     uint32 GetBonusCacheCount() const
     {
         return _bonusCacheCount;
@@ -747,6 +772,11 @@ private:
     uint32 _treasureTrashKills = 0;
     bool _treasureKeeperSpawned = false;
     ObjectGuid _treasureKeeperGuid;
+
+    // Greedy Demon is a separate stage-level treasure encounter.
+    // Roll once per disposable stage; never attach ordinary trash roles.
+    bool _greedyDemonRolled = false;
+    ObjectGuid _greedyDemonGuid;
 
     // Treasure Keeper rewards are secured during the stage and committed
     // atomically with the objective-completion reward.
