@@ -981,9 +981,14 @@ void ManastormAffixEngine::OnCreatureAdded(
                 {
                     if (target->IsAlive())
                     {
+                        // FollowMovementGenerator adds the follower's own
+                        // combat reach to this range. Cancel that built-in
+                        // separation so the Bonestorm center can actually
+                        // pass over the Hero, matching the recovered 1-yard
+                        // damage radius around the helper.
                         creature->GetMotionMaster()->MoveFollow(
                             target,
-                            0.01f,
+                            -creature->GetCombatReach(),
                             0.0f,
                             MOTION_SLOT_ACTIVE,
                             false,
