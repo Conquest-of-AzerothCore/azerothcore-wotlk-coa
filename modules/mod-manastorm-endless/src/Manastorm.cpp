@@ -822,8 +822,7 @@ public:
             spell->GetCaster()->ToCreature();
 
         if (!caster ||
-            !caster->HasAura(
-                ManastormAffixIds::Fungal))
+            !caster->HasAura(93377))
         {
             return;
         }
