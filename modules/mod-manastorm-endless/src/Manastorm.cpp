@@ -794,6 +794,56 @@ public:
 };
 
 
+class manastorm_affix_spell_guard : public AllSpellScript
+{
+public:
+    manastorm_affix_spell_guard()
+        : AllSpellScript(
+            "manastorm_affix_spell_guard",
+            {ALLSPELLHOOK_ON_SPELL_CHECK_CAST})
+    {
+    }
+
+    void OnSpellCheckCast(
+        Spell* spell,
+        bool /*strict*/,
+        SpellCastResult& result) override
+    {
+        if (!ManastormModuleConfig::Enabled() ||
+            result != SPELL_CAST_OK ||
+            !spell ||
+            !spell->GetCaster() ||
+            spell->GetSpellInfo()->Id != 93378)
+        {
+            return;
+        }
+
+        Creature* caster =
+            spell->GetCaster()->ToCreature();
+
+        if (!caster ||
+            !caster->HasAura(
+                ManastormAffixIds::Fungal))
+        {
+            return;
+        }
+
+        // Recovered Fungal gate:
+        //
+        // 93378 also applies 293370 "Fungal Eruption" (enabled window).
+        // At its terminal tick 293370 applies 293371, the disabled window.
+        // Without the original server gate, 93377's one-second periodic
+        // trigger refreshes 293370 forever and summons a mushroom every
+        // second. Suppress the summon while either gate marker is active.
+        if (caster->HasAura(293370) ||
+            caster->HasAura(293371))
+        {
+            result =
+                SPELL_FAILED_DONT_REPORT;
+        }
+    }
+};
+
 class manastorm_gadget_spells : public AllSpellScript
 {
 public:
@@ -953,6 +1003,7 @@ void AddSC_manastorm()
     new manastorm_creaturescript();
     new manastorm_unitscript();
     new manastorm_playerscript();
+    new manastorm_affix_spell_guard();
     new manastorm_gadget_spells();
     new npc_manastorm_stage_portal();
     new manastorm_mapscript();

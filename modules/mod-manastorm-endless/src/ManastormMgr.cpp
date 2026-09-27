@@ -244,6 +244,12 @@ namespace
     constexpr uint32 SPELL_MANASTORM_CLEAVE = 93351;
     constexpr uint8 MANASTORM_AFFIX_PRIMARY_RANK_ROLE = 1;
 
+    constexpr uint32 SPELL_MANASTORM_REFLECTIVE = 93361;
+
+    // Prevent reflected damage from recursively re-entering Manastorm
+    // damage callbacks (Reflecting -> Reflecting, Leeching, etc.).
+    thread_local bool sManastormReflectDamageDispatch = false;
+
     // 80919 is the native Cogsley non-combat companion/vendor summoned by
     // spell 93418.
     constexpr uint32 NPC_COGSLEY = 80919;
@@ -4449,6 +4455,147 @@ void ManastormMgr::OnDamage(
 {
     if (!victim || !damage)
         return;
+
+    if (sManastormReflectDamageDispatch)
+        return;
+
+    //
+    // REFLECTING
+    //
+    // Recovered DBC flow:
+    //   93360 -> every 12s -> 9336100 charge -> 93361 Reflective for 5s.
+    //
+    // 93361 is Aura 4 (DUMMY), so stock AzerothCore cannot infer the
+    // reflection callback. The recovered amount is BP29 => 30 at rank 1;
+    // the user-approved reconstruction interprets that amount as the
+    // percentage of actual incoming damage reflected to the attacker.
+    //
+    if (attacker &&
+        attacker != victim &&
+        attacker->IsAlive())
+    {
+        if (Creature* reflectingCreature =
+            victim->ToCreature())
+        {
+            if (reflectingCreature->IsAlive() &&
+                reflectingCreature->GetEntry() !=
+                    NPC_MANASTORM_HEART &&
+                !reflectingCreature->IsTrigger() &&
+                !reflectingCreature->IsPet() &&
+                !IsPlayerControlledCreature(
+                    reflectingCreature) &&
+                reflectingCreature->HasAura(
+                    SPELL_MANASTORM_REFLECTIVE))
+            {
+                Map* reflectMap =
+                    reflectingCreature->GetMap();
+
+                if (reflectMap &&
+                    reflectMap->GetInstanceId() &&
+                    attacker->GetMap() ==
+                        reflectMap)
+                {
+                    ManastormRun* reflectRun =
+                        GetRunForStage(
+                            reflectMap->GetId(),
+                            reflectMap->GetInstanceId());
+
+                    if (reflectRun &&
+                        reflectRun->GetState() ==
+                            ManastormRunState::Active &&
+                        reflectRun->IsStageCreature(
+                            reflectingCreature->GetGUID()) &&
+                        reflectRun->HasCreatureAffix(
+                            reflectingCreature->GetGUID(),
+                            ManastormAffixIds::Reflecting))
+                    {
+                        ManastormAffixDefinition const*
+                            definition =
+                                ManastormDataStore::Instance()
+                                    .GetAffixById(
+                                        ManastormAffixIds::Reflecting);
+
+                        uint32 reflectiveSpellId =
+                            SPELL_MANASTORM_REFLECTIVE;
+
+                        if (definition)
+                        {
+                            uint8 const rank =
+                                reflectRun->GetStageAffixRank(
+                                    ManastormAffixIds::Reflecting);
+
+                            uint32 const rankSpellId =
+                                definition->GetRankSpell(
+                                    MANASTORM_AFFIX_PRIMARY_RANK_ROLE,
+                                    rank);
+
+                            if (rankSpellId)
+                                reflectiveSpellId =
+                                    rankSpellId;
+                        }
+
+                        if (SpellInfo const* reflectiveInfo =
+                            sSpellMgr->GetSpellInfo(
+                                reflectiveSpellId))
+                        {
+                            int32 const reflectPct =
+                                reflectiveInfo->Effects[EFFECT_0]
+                                    .CalcValue(
+                                        reflectingCreature);
+
+                            if (reflectPct > 0)
+                            {
+                                uint32 const actualDamage =
+                                    std::min(
+                                        damage,
+                                        victim->GetHealth());
+
+                                uint32 const reflectedDamage =
+                                    uint32(
+                                        uint64(actualDamage) *
+                                        uint32(reflectPct) /
+                                        100ULL);
+
+                                if (reflectedDamage)
+                                {
+                                    sManastormReflectDamageDispatch =
+                                        true;
+
+                                    reflectingCreature
+                                        ->SendSpellNonMeleeDamageLog(
+                                            attacker,
+                                            reflectiveInfo,
+                                            reflectedDamage,
+                                            reflectiveInfo
+                                                ->GetSchoolMask(),
+                                            0,
+                                            0,
+                                            true,
+                                            0,
+                                            false,
+                                            true);
+
+                                    Unit::DealDamage(
+                                        reflectingCreature,
+                                        attacker,
+                                        reflectedDamage,
+                                        nullptr,
+                                        NODAMAGE,
+                                        reflectiveInfo
+                                            ->GetSchoolMask(),
+                                        reflectiveInfo,
+                                        false);
+
+                                    sManastormReflectDamageDispatch =
+                                        false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     //
     // LEECHING

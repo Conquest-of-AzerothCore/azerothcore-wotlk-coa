@@ -2,6 +2,7 @@
 
 #include "Creature.h"
 #include "Log.h"
+#include "MotionMaster.h"
 #include "ManastormDataStore.h"
 #include "ManastormRun.h"
 #include "ObjectMgr.h"
@@ -19,6 +20,24 @@
 namespace
 {
 constexpr char const* LOG_FILTER = "module.manastorm.endless";
+
+// Recovered helper-controller edges absent from the client DBC graph itself.
+// The DBC supplies the summon and payload spells; these bounded server edges
+// attach each summoned helper to the spell it is supposed to own.
+constexpr uint32 NPC_CREEPING_FROST = 80916;
+constexpr uint32 NPC_COLD_SNAP = 80924;
+constexpr uint32 NPC_COLD_SNAP_EFFECT = 80925;
+constexpr uint32 NPC_FUNGAL_MUSHROOM = 80914;
+constexpr uint32 NPC_BONESTORM = 80913;
+constexpr uint32 NPC_OVERWHELMING_ENERGY = 80917;
+
+constexpr uint32 SPELL_CREEPING_FROST_EFFECT = 93342;
+constexpr uint32 SPELL_COLD_SNAP_AURA = 93446;
+constexpr uint32 SPELL_COLD_SNAP_EFFECT_AURA = 93448;
+constexpr uint32 SPELL_FUNGAL_AURA = 93379;
+constexpr uint32 SPELL_BONESTORM_PRE_AURA = 93371;
+constexpr uint32 SPELL_OVERWHELMING_COSMETIC_AURA = 93414;
+
 
 bool IsPlayerControlledCreature(Creature const* creature)
 {
@@ -886,6 +905,106 @@ void ManastormAffixEngine::OnCreatureAdded(
                         summoner->GetFaction());
                 }
             }
+        }
+
+        if (run.GetState() !=
+            ManastormRunState::Active)
+        {
+            return;
+        }
+
+        uint32 activationSpell = 0;
+
+        switch (creature->GetEntry())
+        {
+        case NPC_CREEPING_FROST:
+            if (run.HasStageAffix(
+                    ManastormAffixIds::CreepingFrost))
+            {
+                activationSpell =
+                    SPELL_CREEPING_FROST_EFFECT;
+            }
+            break;
+
+        case NPC_COLD_SNAP:
+            if (run.HasStageAffix(
+                    ManastormAffixIds::ColdSnap))
+            {
+                activationSpell =
+                    SPELL_COLD_SNAP_AURA;
+            }
+            break;
+
+        case NPC_COLD_SNAP_EFFECT:
+            if (run.HasStageAffix(
+                    ManastormAffixIds::ColdSnap))
+            {
+                activationSpell =
+                    SPELL_COLD_SNAP_EFFECT_AURA;
+            }
+            break;
+
+        case NPC_FUNGAL_MUSHROOM:
+            if (run.HasStageAffix(
+                    ManastormAffixIds::Fungal))
+            {
+                activationSpell =
+                    SPELL_FUNGAL_AURA;
+            }
+            break;
+
+        case NPC_BONESTORM:
+            if (run.HasStageAffix(
+                    ManastormAffixIds::BoneStorm))
+            {
+                activationSpell =
+                    SPELL_BONESTORM_PRE_AURA;
+
+                // The recovered Bonestorm tooltip explicitly says that the
+                // storm chases the player. The client data does not contain
+                // that movement controller, so bind the summoned helper to
+                // the nearest Hero in this private stage.
+                if (Player* target =
+                    creature->SelectNearestPlayer(
+                        100.0f))
+                {
+                    if (target->IsAlive())
+                    {
+                        creature->GetMotionMaster()
+                            ->MoveChase(target);
+                    }
+                }
+            }
+            break;
+
+        case NPC_OVERWHELMING_ENERGY:
+            if (run.HasStageAffix(
+                    ManastormAffixIds::OverwhelmingEnergy))
+            {
+                activationSpell =
+                    SPELL_OVERWHELMING_COSMETIC_AURA;
+            }
+            break;
+
+        default:
+            break;
+        }
+
+        if (activationSpell)
+        {
+            creature->CastSpell(
+                creature,
+                activationSpell,
+                true);
+
+            LOG_DEBUG(
+                LOG_FILTER,
+                "Manastorm run {} activated affix helper "
+                "entry={} guid={} spell={}.",
+                run.GetRunId(),
+                creature->GetEntry(),
+                creature->GetGUID().GetRawValue(),
+                activationSpell);
         }
 
         return;
