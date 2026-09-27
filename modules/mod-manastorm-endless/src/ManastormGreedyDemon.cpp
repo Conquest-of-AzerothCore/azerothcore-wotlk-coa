@@ -1014,13 +1014,22 @@ bool ManastormGreedyDemon::ClaimLoot(
         return true;
     }
 
-    uint32 const goldCopper =
-        _rule.GoldMinCopper ==
-            _rule.GoldMaxCopper
-        ? _rule.GoldMinCopper
-        : urand(
-            _rule.GoldMinCopper,
-            _rule.GoldMaxCopper);
+    uint32 goldCopper = 0;
+
+    switch (quality)
+    {
+        case GREEDY_ITEM_QUALITY_UNCOMMON:
+            goldCopper = 280000; // 3g + 5g + 20g visual burst.
+            break;
+        case GREEDY_ITEM_QUALITY_RARE:
+            goldCopper = 920000; // 13g + 37g + 42g visual burst.
+            break;
+        case GREEDY_ITEM_QUALITY_EPIC:
+            goldCopper = 930000; // 12g + 23g + 58g visual burst.
+            break;
+        default:
+            break;
+    }
 
     if (goldCopper)
     {
