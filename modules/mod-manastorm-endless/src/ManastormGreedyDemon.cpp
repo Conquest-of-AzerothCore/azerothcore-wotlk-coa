@@ -595,6 +595,21 @@ bool ManastormGreedyDemon::SpawnForStage(
             continue;
         }
 
+        ObjectGuid::LowType const spawnId =
+            creature->GetSpawnId();
+
+        // Reconstruction placement policy:
+        // anchor Greedy Demon near authored Chaotic-Link route creatures.
+        // This keeps the treasure encounter on the intended path from the
+        // stage entrance toward the objective without tying its mechanics
+        // to Chaotic Link itself.
+        if (!spawnId ||
+            !run.IsChaoticLinkSpawn(
+                spawnId))
+        {
+            continue;
+        }
+
         anchors.push_back(
             creature);
     }
@@ -687,7 +702,7 @@ bool ManastormGreedyDemon::SpawnForStage(
     LOG_INFO(
         LOG_FILTER,
         "Manastorm run {} {} Greedy Demon {} at depth {} "
-        "(chance={:.2f}%).",
+        "near a Chaotic-Link route anchor (chance={:.2f}%).",
         run.GetRunId(),
         force ? "force-spawned" : "spawned",
         demon->GetGUID()
