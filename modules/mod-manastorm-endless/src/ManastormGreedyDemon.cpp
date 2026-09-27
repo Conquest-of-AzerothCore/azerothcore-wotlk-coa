@@ -48,9 +48,9 @@ namespace
     constexpr uint32 GO_GREEDY_LOOT_RARE = 710015;
     constexpr uint32 GO_GREEDY_LOOT_EPIC = 710016;
 
-    constexpr uint8 ITEM_QUALITY_UNCOMMON = 2;
-    constexpr uint8 ITEM_QUALITY_RARE = 3;
-    constexpr uint8 ITEM_QUALITY_EPIC = 4;
+    constexpr uint8 GREEDY_ITEM_QUALITY_UNCOMMON = 2;
+    constexpr uint8 GREEDY_ITEM_QUALITY_RARE = 3;
+    constexpr uint8 GREEDY_ITEM_QUALITY_EPIC = 4;
 
     constexpr uint32 ESCAPE_IMMUNITY_PREP_MS = 2500;
     constexpr uint32 ESCAPE_RUN_MS = 2000;
@@ -59,11 +59,11 @@ namespace
     {
         switch (quality)
         {
-            case ITEM_QUALITY_UNCOMMON:
+            case GREEDY_ITEM_QUALITY_UNCOMMON:
                 return SPELL_UNCOMMON_LOOT_EXPLOSION;
-            case ITEM_QUALITY_RARE:
+            case GREEDY_ITEM_QUALITY_RARE:
                 return SPELL_RARE_LOOT_EXPLOSION;
-            case ITEM_QUALITY_EPIC:
+            case GREEDY_ITEM_QUALITY_EPIC:
                 return SPELL_EPIC_LOOT_EXPLOSION;
             default:
                 return 0;
@@ -74,11 +74,11 @@ namespace
     {
         switch (quality)
         {
-            case ITEM_QUALITY_UNCOMMON:
+            case GREEDY_ITEM_QUALITY_UNCOMMON:
                 return GO_GREEDY_LOOT_UNCOMMON;
-            case ITEM_QUALITY_RARE:
+            case GREEDY_ITEM_QUALITY_RARE:
                 return GO_GREEDY_LOOT_RARE;
-            case ITEM_QUALITY_EPIC:
+            case GREEDY_ITEM_QUALITY_EPIC:
                 return GO_GREEDY_LOOT_EPIC;
             default:
                 return 0;
@@ -90,11 +90,11 @@ namespace
         switch (entry)
         {
             case GO_GREEDY_LOOT_UNCOMMON:
-                return ITEM_QUALITY_UNCOMMON;
+                return GREEDY_ITEM_QUALITY_UNCOMMON;
             case GO_GREEDY_LOOT_RARE:
-                return ITEM_QUALITY_RARE;
+                return GREEDY_ITEM_QUALITY_RARE;
             case GO_GREEDY_LOOT_EPIC:
-                return ITEM_QUALITY_EPIC;
+                return GREEDY_ITEM_QUALITY_EPIC;
             default:
                 return 0;
         }
@@ -104,7 +104,7 @@ namespace
     {
         return std::size_t(
             quality -
-            ITEM_QUALITY_UNCOMMON);
+            GREEDY_ITEM_QUALITY_UNCOMMON);
     }
 }
 
@@ -301,9 +301,9 @@ bool ManastormGreedyDemon::Load()
             lootFields[4].Get<uint32>();
 
         if (candidate.Quality <
-                ITEM_QUALITY_UNCOMMON ||
+                GREEDY_ITEM_QUALITY_UNCOMMON ||
             candidate.Quality >
-                ITEM_QUALITY_EPIC ||
+                GREEDY_ITEM_QUALITY_EPIC ||
             !candidate.ItemEntry ||
             !candidate.Weight ||
             !candidate.MinPlayerLevel ||
@@ -346,9 +346,9 @@ bool ManastormGreedyDemon::Load()
     } while (lootResult->NextRow());
 
     for (uint8 quality =
-            ITEM_QUALITY_UNCOMMON;
+            GREEDY_ITEM_QUALITY_UNCOMMON;
         quality <=
-            ITEM_QUALITY_EPIC;
+            GREEDY_ITEM_QUALITY_EPIC;
         ++quality)
     {
         if (_lootPools[
@@ -741,17 +741,17 @@ uint8 ManastormGreedyDemon::RollLootQuality() const
     if (roll <=
         _rule.UncommonWeight)
     {
-        return ITEM_QUALITY_UNCOMMON;
+        return GREEDY_ITEM_QUALITY_UNCOMMON;
     }
 
     if (roll <=
         _rule.UncommonWeight +
         _rule.RareWeight)
     {
-        return ITEM_QUALITY_RARE;
+        return GREEDY_ITEM_QUALITY_RARE;
     }
 
-    return ITEM_QUALITY_EPIC;
+    return GREEDY_ITEM_QUALITY_EPIC;
 }
 
 void ManastormGreedyDemon::OnKilled(
@@ -843,9 +843,9 @@ uint32 ManastormGreedyDemon::SelectLootItem(
     uint8 playerLevel) const
 {
     if (quality <
-            ITEM_QUALITY_UNCOMMON ||
+            GREEDY_ITEM_QUALITY_UNCOMMON ||
         quality >
-            ITEM_QUALITY_EPIC)
+            GREEDY_ITEM_QUALITY_EPIC)
     {
         return 0;
     }
