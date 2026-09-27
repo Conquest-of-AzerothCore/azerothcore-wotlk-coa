@@ -22,6 +22,7 @@
 #include "../../mod-ascension-compat/src/AscensionManastormGadgets.h"
 
 void AddSC_manastorm_commandscript();
+void AddSC_manastorm_greedy_demon();
 
 namespace
 {
@@ -1009,5 +1010,6 @@ void AddSC_manastorm()
 
     RegisterSpellScript(spell_manastorm_baseline_tool);
 
+    AddSC_manastorm_greedy_demon();
     AddSC_manastorm_commandscript();
 }
