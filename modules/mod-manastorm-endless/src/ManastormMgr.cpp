@@ -23,6 +23,7 @@
 #include "ManastormProgression.h"
 #include "ManastormRewards.h"
 #include "ManastormAffixEngine.h"
+#include "ManastormGreedyDemon.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -1508,7 +1509,10 @@ bool ManastormMgr::ReloadData()
     if (!ManastormDataStore::Instance().Load())
         return false;
 
-    return ManastormRewards::Instance().Load();
+    if (!ManastormRewards::Instance().Load())
+        return false;
+
+    return ManastormGreedyDemon::Instance().Load();
 }
 
 uint64 ManastormMgr::BuildRunSeed(
@@ -3744,6 +3748,14 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             }
         }
 
+        // Greedy Demon is selected once when the disposable stage becomes
+        // active. Spawning after the PREPARING-affix replay guarantees the
+        // special creature can never inherit ordinary stage affixes.
+        ManastormGreedyDemon::Instance()
+            .TrySpawnForStage(
+                map,
+                *run);
+
         SendClientState(
             player,
             run);
@@ -5081,6 +5093,85 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
     }
 
     //
+    // Greedy Demon is a stage-level treasure encounter. It participates in
+    // Manastorm level/health normalization, but never receives ordinary
+    // affixes, Heart rolls, route roles, loot or reputation.
+    //
+    if (ManastormGreedyDemon::Instance()
+        .IsGreedyDemonEntry(
+            creature->GetEntry()))
+    {
+        if (run->GetState() !=
+                ManastormRunState::Preparing &&
+            run->GetState() !=
+                ManastormRunState::Active)
+        {
+            return;
+        }
+
+        run->RegisterStageCreature(
+            creature->GetGUID());
+
+        if (run->GreedyDemonRolled())
+        {
+            run->SetGreedyDemonGuid(
+                creature->GetGUID());
+        }
+
+        creature->SetFaction(14);
+        creature->SetReactState(
+            REACT_PASSIVE);
+        creature->SetLootRewardDisabled(
+            true);
+        creature->SetReputationRewardDisabled(
+            true);
+        creature->SetLootMode(0);
+
+        if (creature->GetLevel() !=
+            run->GetCreatureLevel())
+        {
+            creature->SelectLevel();
+
+            CreatureTemplate const* creatureTemplate =
+                creature->GetCreatureTemplate();
+
+            if (creatureTemplate)
+            {
+                CreatureBaseStats const* stats =
+                    sObjectMgr->GetCreatureBaseStats(
+                        run->GetCreatureLevel(),
+                        creatureTemplate->unit_class);
+
+                if (stats)
+                {
+                    creature->SetStatFlatModifier(
+                        UNIT_MOD_ARMOR,
+                        BASE_VALUE,
+                        stats->GenerateArmor(
+                            creatureTemplate));
+                }
+            }
+
+            creature->UpdateArmor();
+            creature->UpdateAttackPowerAndDamage(
+                false);
+            creature->UpdateAttackPowerAndDamage(
+                true);
+        }
+
+        if (run->GetState() ==
+            ManastormRunState::Active)
+        {
+            ApplyCreatureHealthScaling(
+                creature,
+                *run,
+                1.0);
+        }
+
+        return;
+    }
+
+    //
     // Treasure Keeper is a real hostile special encounter, but it must not
     // inherit ordinary trash affixes, Heart rolls, or authored route roles.
     //
@@ -5377,6 +5468,22 @@ void ManastormMgr::OnCreatureRemoveWorld(Creature* creature)
             creature->GetGUID())
         {
             run->ClearTreasureKeeperGuid();
+        }
+
+        return;
+    }
+
+    if (ManastormGreedyDemon::Instance()
+        .IsGreedyDemonEntry(
+            creature->GetEntry()))
+    {
+        run->UnregisterStageCreature(
+            creature->GetGUID());
+
+        if (run->GetGreedyDemonGuid() ==
+            creature->GetGUID())
+        {
+            run->ClearGreedyDemonGuid();
         }
 
         return;
@@ -5738,6 +5845,24 @@ void ManastormMgr::OnUnitDeath(
         run->GetState() !=
         ManastormRunState::Active)
     {
+        return;
+    }
+
+    //
+    // Greedy Demon resolution is also completely separate from ordinary
+    // trash death: no affix death event, Heart roll, Keeper roll, route
+    // progress or objective processing is allowed for this treasure mob.
+    //
+    if (ManastormGreedyDemon::Instance()
+        .IsActiveGreedyDemon(
+            creature,
+            *run))
+    {
+        ManastormGreedyDemon::Instance()
+            .OnKilled(
+                creature,
+                *run);
+
         return;
     }
 
