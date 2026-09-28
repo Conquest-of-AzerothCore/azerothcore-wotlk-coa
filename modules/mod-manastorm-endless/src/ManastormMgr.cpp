@@ -711,15 +711,44 @@ namespace
         }
 
         // The selected objective belongs only to this disposable stage.
-        // OnCreatureAddWorld() handles normal objective registration,
-        // scaling, Skull marking, affixes, and Chaotic Link synchronization.
         brightwing->SetTempSummonType(
             TEMPSUMMON_MANUAL_DESPAWN);
+
+        //
+        // Map::SummonCreature() adds the TempSummon to the map, but the
+        // AllCreatureScript add-world callback is not guaranteed to register
+        // this module-owned runtime summon on every core path/build.
+        //
+        // Register it explicitly through the same duplicate-safe Manastorm
+        // path used for DB creatures. If the global hook already fired, this
+        // simply re-synchronizes the same objective GUID and does not create a
+        // second stage creature.
+        //
+        ManastormMgr::Instance()
+            .OnCreatureAddWorld(
+                brightwing);
+
+        if (run.GetObjectiveCreatureGuid() !=
+            brightwing->GetGUID())
+        {
+            std::ostringstream message;
+
+            message
+                << "Brightwing (5912) was summoned for segment "
+                << segment.SegmentId
+                << " but did not register as the runtime objective.";
+
+            error = message.str();
+
+            brightwing->DespawnOrUnsummon();
+
+            return false;
+        }
 
         LOG_INFO(
             LOG_FILTER,
             "Bootstrapped Manastorm Wailing Caverns Brightwing: run={} "
-            "segment={} map={} instance={} objective={} guid={}.",
+            "segment={} map={} instance={} objective={} guid={} registered=1.",
             run.GetRunId(),
             segment.SegmentId,
             segment.MapId,
