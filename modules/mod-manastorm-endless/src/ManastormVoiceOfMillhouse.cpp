@@ -241,6 +241,12 @@ namespace
         DungeonVoiceGroup DungeonGroup =
             DungeonVoiceGroup::None;
 
+        // Death/completion narration is run-level commentary. If it waits in
+        // the scheduler while the party crosses a portal, follow the members
+        // into their current stage rather than dropping an otherwise-valid
+        // line because its original map/instance no longer matches.
+        bool FollowMemberPosition = false;
+
         // Empty for normal ACTIVE/death/completion playback. PREPARING intro
         // uses an already-spawned private emitter so its GUID is known to the
         // client before the sound packet is sent.
@@ -746,6 +752,10 @@ namespace
         voice.DungeonGroup =
             dungeonGroup;
 
+        voice.FollowMemberPosition =
+            kind == VoiceKind::PlayerDeath ||
+            kind == VoiceKind::ObjectiveComplete;
+
         voice.Members =
             run.GetMembers();
 
@@ -756,11 +766,18 @@ namespace
         Player* member,
         PendingVoice const& voice)
     {
+        if (!member ||
+            !member->GetSession() ||
+            !member->IsInWorld() ||
+            member->IsBeingTeleported())
+        {
+            return false;
+        }
+
+        if (voice.FollowMemberPosition)
+            return true;
+
         return
-            member &&
-            member->GetSession() &&
-            member->IsInWorld() &&
-            !member->IsBeingTeleported() &&
             member->GetMapId() == voice.MapId &&
             member->GetInstanceId() == voice.InstanceId;
     }
