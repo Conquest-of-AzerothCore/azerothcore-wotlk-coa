@@ -150,3 +150,26 @@ assert "INTRO_EMITTER_SETTLE_MS" in intro_block
 assert "CreateEmitterForMember(" in intro_block
 assert "voice.PreparedEmitterGuid" in intro_block
 assert "PendingVoices.push_back(" in intro_block
+
+
+# Narrator scheduler: one run-level channel, real measured clip durations,
+# priority selection, same-dungeon suppression, and run-level follow-through
+# across portal transitions.
+assert "uint32 BusyMs = 0;" in voice_cpp
+assert "VOICE_GAP_MS = 250" in voice_cpp
+assert "GetSoundDurationMs(" in voice_cpp
+assert "GetVoicePriority(" in voice_cpp
+assert "LastDungeonGroupPlayed" in voice_cpp
+assert "HasPendingDungeonGroup(" in voice_cpp
+assert "FollowMemberPosition" in voice_cpp
+assert "VoiceKind::ObjectiveComplete" in voice_cpp
+assert "VoiceKind::PlayerDeath" in voice_cpp
+
+# Spot-check measured durations from the supplied 115-file voice archive.
+for snippet in (
+    "case 113142: return 15168;",  # Intro_FirstTime
+    "case 113143: return 2880;",   # Intro_GenericWelcome
+    "case 133006: return 7800;",   # Stockades_NeverBeenHere
+    "case 133015: return 10680;",  # Uldaman_Troggs
+):
+    assert snippet in voice_cpp
