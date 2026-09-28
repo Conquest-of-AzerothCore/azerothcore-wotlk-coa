@@ -173,3 +173,15 @@ for snippet in (
     "case 133015: return 10680;",  # Uldaman_Troggs
 ):
     assert snippet in voice_cpp
+
+
+# Dungeon commentary rotates through the authored pool before recycling. A
+# line counts as used only after successful playback; immediate repeats are
+# avoided, and encounter-specific overrides remain evidence-gated.
+assert "UsedDungeonSounds" in voice_cpp
+assert "PickDungeonSound(" in voice_cpp
+assert "HasPendingDungeonSound(" in voice_cpp
+assert "GetEncounterSpecificPool(" in voice_cpp
+assert "LastDungeonGroupPlayed" not in voice_cpp
+assert "used.erase(" in voice_cpp
+assert "voice.SoundId" in voice_cpp
