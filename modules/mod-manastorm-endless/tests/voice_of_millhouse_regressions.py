@@ -119,3 +119,18 @@ intro_hook = mgr_cpp.index(
     mgr_prepare,
 )
 assert mgr_prepare < intro_hook < mgr_active
+
+
+# PREPARING intro retry must exist outside the one-shot map-entry callback so
+# teleport-state rejection cannot permanently lose narration.
+update_start = mgr_cpp.index("void ManastormMgr::Update(uint32 diff)")
+retry_hook = mgr_cpp.index(
+    "ManastormVoiceOfMillhouse::OnPlayerEnteredProtection(",
+    update_start,
+)
+assert retry_hook > update_start
+
+# Dungeon VO should follow ACTIVE promptly again, not wait for the old
+# first-stage 8-second overlap workaround.
+assert "FIRST_STAGE_DUNGEON_DELAY_MS" not in voice_cpp
+assert "constexpr uint32 STAGE_DUNGEON_DELAY_MS = 500;" in voice_cpp
