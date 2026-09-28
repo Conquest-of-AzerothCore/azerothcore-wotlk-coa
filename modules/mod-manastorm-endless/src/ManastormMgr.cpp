@@ -348,6 +348,7 @@ namespace
     // owns a direct objective bootstrap without changing normal WC behavior.
     constexpr uint32 MANASTORM_MAP_WAILING_CAVERNS = 43;
     constexpr uint32 NPC_BRIGHTWING = 5912;
+    constexpr ObjectGuid::LowType SPAWN_BRIGHTWING = 517;
     constexpr uint32 SEGMENT_BRIGHTWING_ENDGAME = 703;
 
     bool BootstrapSunkenTempleHakkarEncounter(
@@ -671,58 +672,120 @@ namespace
             return false;
         }
 
-        // If the rare native DB spawn happened to load, keep it. Segment 703
-        // only creates a replacement when the disposable instance otherwise
-        // has no living Brightwing objective.
-        for (auto const& spawn :
-            map->GetCreatureBySpawnIdStore())
-        {
-            Creature* creature =
-                spawn.second;
+        CreatureData const* spawnData =
+            sObjectMgr->GetCreatureData(
+                SPAWN_BRIGHTWING);
 
-            if (creature &&
-                creature->IsInWorld() &&
-                creature->IsAlive() &&
-                creature->GetEntry() ==
-                    NPC_BRIGHTWING)
-            {
-                return true;
-            }
-        }
-
-        Position const brightwingPosition =
-        {
-              0.00823113f,
-            -55.9339f,
-            -67.0312f,
-              4.01711f
-        };
-
-        TempSummon* brightwing =
-            map->SummonCreature(
-                NPC_BRIGHTWING,
-                brightwingPosition);
-
-        if (!brightwing)
+        if (!spawnData ||
+            spawnData->mapid !=
+                MANASTORM_MAP_WAILING_CAVERNS ||
+            spawnData->id !=
+                NPC_BRIGHTWING)
         {
             error =
-                "Manastorm could not summon Brightwing (5912).";
+                "Wailing Caverns Brightwing DB spawn 517 does not resolve to entry 5912 on map 43.";
             return false;
         }
 
-        // The selected objective belongs only to this disposable stage.
-        brightwing->SetTempSummonType(
-            TEMPSUMMON_MANUAL_DESPAWN);
+        //
+        // Prefer the actual persistent WC spawn if this fresh private copy
+        // already has it alive. This preserves its native DB identity, AI,
+        // addon data and spawn GUID instead of manufacturing a TempSummon.
+        //
+        auto const existingBounds =
+            map->GetCreatureBySpawnIdStore()
+                .equal_range(
+                    SPAWN_BRIGHTWING);
+
+        for (auto itr =
+                existingBounds.first;
+            itr !=
+                existingBounds.second;
+            ++itr)
+        {
+            Creature* creature =
+                itr->second;
+
+            if (!creature ||
+                !creature->IsInWorld() ||
+                !creature->IsAlive() ||
+                creature->GetEntry() !=
+                    NPC_BRIGHTWING)
+            {
+                continue;
+            }
+
+            ManastormMgr::Instance()
+                .OnCreatureAddWorld(
+                    creature);
+
+            if (run.GetObjectiveCreatureGuid() !=
+                creature->GetGUID())
+            {
+                error =
+                    "Living Brightwing DB spawn 517 did not register as the Manastorm objective.";
+                return false;
+            }
+
+            LOG_INFO(
+                LOG_FILTER,
+                "Reused living Manastorm Wailing Caverns Brightwing DB spawn: "
+                "run={} segment={} map={} instance={} spawn={} guid={}.",
+                run.GetRunId(),
+                segment.SegmentId,
+                segment.MapId,
+                run.GetInstanceId(),
+                SPAWN_BRIGHTWING,
+                creature->GetGUID().GetRawValue());
+
+            return true;
+        }
 
         //
-        // Map::SummonCreature() adds the TempSummon to the map, but the
-        // AllCreatureScript add-world callback is not guaranteed to register
-        // this module-owned runtime summon on every core path/build.
+        // Brightwing is a rare 24-hour DB spawn. AzerothCore's normal
+        // Creature::LoadCreatureFromDB() honors a map respawn timestamp and
+        // therefore may materialize this spawn dead with zero HP.
         //
-        // Register it explicitly through the same duplicate-safe Manastorm
-        // path used for DB creatures. If the global hook already fired, this
-        // simply re-synchronizes the same objective GUID and does not create a
-        // second stage creature.
+        // A scripted-private Manastorm stage is disposable, and its respawn
+        // state is memory-only. Clear only THIS private instance's timestamp,
+        // then instantiate the real spawn GUID 517 directly from the DB cache.
+        // Normal Wailing Caverns remains completely untouched.
+        //
+        map->RemoveCreatureRespawnTime(
+            SPAWN_BRIGHTWING);
+
+        Creature* brightwing =
+            new Creature();
+
+        if (!brightwing->LoadCreatureFromDB(
+                SPAWN_BRIGHTWING,
+                map,
+                true,
+                true))
+        {
+            delete brightwing;
+
+            error =
+                "Manastorm could not load Brightwing DB spawn 517 into the private Wailing Caverns instance.";
+            return false;
+        }
+
+        if (!brightwing->IsInWorld() ||
+            !brightwing->IsAlive() ||
+            brightwing->GetEntry() !=
+                NPC_BRIGHTWING)
+        {
+            brightwing->AddObjectToRemoveList();
+
+            error =
+                "Brightwing DB spawn 517 loaded but was not a living entry 5912.";
+            return false;
+        }
+
+        //
+        // Register explicitly. The global AllCreatureScript hook may also
+        // have fired during AddToMap(); OnCreatureAddWorld() is duplicate-safe
+        // for the same exact runtime GUID.
         //
         ManastormMgr::Instance()
             .OnCreatureAddWorld(
@@ -731,28 +794,22 @@ namespace
         if (run.GetObjectiveCreatureGuid() !=
             brightwing->GetGUID())
         {
-            std::ostringstream message;
+            brightwing->AddObjectToRemoveList();
 
-            message
-                << "Brightwing (5912) was summoned for segment "
-                << segment.SegmentId
-                << " but did not register as the runtime objective.";
-
-            error = message.str();
-
-            brightwing->DespawnOrUnsummon();
-
+            error =
+                "Brightwing DB spawn 517 loaded alive but did not register as the runtime objective.";
             return false;
         }
 
         LOG_INFO(
             LOG_FILTER,
-            "Bootstrapped Manastorm Wailing Caverns Brightwing: run={} "
-            "segment={} map={} instance={} objective={} guid={} registered=1.",
+            "Bootstrapped Manastorm Wailing Caverns Brightwing from DB spawn: "
+            "run={} segment={} map={} instance={} spawn={} objective={} guid={} registered=1.",
             run.GetRunId(),
             segment.SegmentId,
             segment.MapId,
             run.GetInstanceId(),
+            SPAWN_BRIGHTWING,
             segment.ObjectiveCreatureEntry,
             brightwing->GetGUID().GetRawValue());
 
