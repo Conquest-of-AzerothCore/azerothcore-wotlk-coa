@@ -4121,6 +4121,8 @@ void ManastormMgr::OnBeforeCreatureSelectLevel(
         creature->GetEntry() == NPC_MANASTORM_HEART ||
         creature->GetEntry() == NPC_COGSLEY ||
         creature->GetEntry() == NPC_STAGE_PORTAL ||
+        creature->GetEntry() ==
+            ManastormVoiceOfMillhouse::EmitterCreatureEntry ||
         creature->IsTrigger() ||
         creature->IsPet() ||
         IsPlayerControlledCreature(creature))
