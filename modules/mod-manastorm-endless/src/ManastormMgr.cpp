@@ -24,6 +24,7 @@
 #include "ManastormRewards.h"
 #include "ManastormAffixEngine.h"
 #include "ManastormGreedyDemon.h"
+#include "ManastormVoiceOfMillhouse.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -2153,6 +2154,9 @@ void ManastormMgr::FailRun(
         }
     }
 
+    ManastormVoiceOfMillhouse::ClearRun(
+        runId);
+
     _runs.erase(
         runId);
 
@@ -2194,6 +2198,9 @@ void ManastormMgr::HandlePlayerDeath(
     {
         return;
     }
+
+    ManastormVoiceOfMillhouse::OnPlayerDeath(
+        *run);
 
     bool hasLivingMember = false;
 
@@ -3296,6 +3303,15 @@ ManastormRun* ManastormMgr::StartRun(
         *selected,
         scaling);
 
+    //
+    // First-time VO uses the existing authoritative progression snapshot.
+    // A character with no completed depth in the selected mode/track has not
+    // yet completed a Manastorm run in that progression lane.
+    //
+    ManastormVoiceOfMillhouse::RegisterRun(
+        runId,
+        progression.BestCompletedDepth == 0);
+
     for (auto guid : members)
     {
         Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
@@ -3643,6 +3659,14 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
                 ClearSafetyBubble(member);
         run->SetState(ManastormRunState::Active);
+
+        //
+        // Voice presentation starts only once the safety bubble collapses and
+        // the stage is truly ACTIVE. This prevents intro/dungeon VO from
+        // firing during private-instance construction or partial transfers.
+        //
+        ManastormVoiceOfMillhouse::OnStageActivated(
+            *run);
 
         for (auto guid : run->GetMembers())
         {
@@ -5027,7 +5051,9 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
 {
     if (!creature ||
         creature->GetEntry() == NPC_COGSLEY ||
-        creature->GetEntry() == NPC_STAGE_PORTAL)
+        creature->GetEntry() == NPC_STAGE_PORTAL ||
+        creature->GetEntry() ==
+            ManastormVoiceOfMillhouse::EmitterCreatureEntry)
     {
         return;
     }
@@ -5455,6 +5481,12 @@ void ManastormMgr::OnCreatureRemoveWorld(Creature* creature)
         run->UnregisterActiveHeart(
             creature->GetGUID());
 
+        return;
+    }
+
+    if (creature->GetEntry() ==
+        ManastormVoiceOfMillhouse::EmitterCreatureEntry)
+    {
         return;
     }
 
@@ -6165,6 +6197,14 @@ void ManastormMgr::OnUnitDeath(
         map,
         *run,
         creature->GetPosition());
+
+    //
+    // One recovered BossKill/portal line is chosen for this completion.
+    // The VO component delays only the explicit PortalsReady alternatives so
+    // they cannot precede the actual portal summon above.
+    //
+    ManastormVoiceOfMillhouse::OnObjectiveComplete(
+        *run);
 
     ManastormClientBridge::Instance()
         .BroadcastStageCompleted(*run);
@@ -6986,6 +7026,9 @@ void ManastormMgr::Update(uint32 diff)
 
     UpdateManastormPotionCharges(diff);
 
+    ManastormVoiceOfMillhouse::Update(
+        diff);
+
     if (_heartPickupCheckTimer <= diff)
     {
         _heartPickupCheckTimer =
@@ -7275,6 +7318,10 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
     }
 
     _transitionTimers.erase(runId);
+
+    ManastormVoiceOfMillhouse::ClearRun(
+        runId);
+
     _runs.erase(runId);
 
     LOG_INFO(LOG_FILTER,
