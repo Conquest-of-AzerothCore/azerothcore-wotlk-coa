@@ -88,7 +88,7 @@ for hook in (
 # The temporary narrator must never join normal Manastorm creature systems.
 assert mgr_cpp.count(
     "ManastormVoiceOfMillhouse::EmitterCreatureEntry"
-) >= 2
+) >= 3
 
 print(
     "Voice of Millhouse recovered IDs, dungeon routing, emitter playback, "
