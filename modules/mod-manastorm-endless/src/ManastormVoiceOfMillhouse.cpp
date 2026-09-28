@@ -135,11 +135,9 @@ namespace
     // dialogue file after SMSG_PLAY_OBJECT_SOUND is sent.
     constexpr uint32 EMITTER_LIFETIME_MS = 12000;
 
-    // First stage already has a run-introduction line. Give that line room
-    // before adding the location-specific commentary.
-    constexpr uint32 FIRST_STAGE_DUNGEON_DELAY_MS = 8000;
-
-    // Later stages can present their location line just after activation.
+    // Dungeon/location commentary belongs to ACTIVE, after protection falls.
+    // The global Intro_* line has already been delivered in PREPARING, so no
+    // long first-stage suppression is required here.
     constexpr uint32 STAGE_DUNGEON_DELAY_MS = 500;
 
     // Avoid a wipe generating several overlapping death jokes in one instant.
@@ -798,9 +796,6 @@ namespace ManastormVoiceOfMillhouse
             RunStates[
                 run.GetRunId()];
 
-        bool const firstStage =
-            !state.FirstStageActivated;
-
         state.FirstStageActivated =
             true;
 
@@ -827,9 +822,7 @@ namespace ManastormVoiceOfMillhouse
         QueueVoice(
             run,
             dungeonSound,
-            firstStage
-                ? FIRST_STAGE_DUNGEON_DELAY_MS
-                : STAGE_DUNGEON_DELAY_MS);
+            STAGE_DUNGEON_DELAY_MS);
     }
 
     void OnPlayerDeath(
