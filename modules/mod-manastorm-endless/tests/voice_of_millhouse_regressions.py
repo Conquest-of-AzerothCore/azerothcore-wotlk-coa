@@ -134,3 +134,19 @@ assert retry_hook > update_start
 # first-stage 8-second overlap workaround.
 assert "FIRST_STAGE_DUNGEON_DELAY_MS" not in voice_cpp
 assert "constexpr uint32 STAGE_DUNGEON_DELAY_MS = 500;" in voice_cpp
+
+
+# PREPARING intro must pre-spawn its emitter and delay the object-bound sound
+# long enough for the client to learn that creature GUID. ACTIVE/death/boss
+# playback continues using the established immediate path.
+assert "constexpr uint32 INTRO_EMITTER_SETTLE_MS = 500;" in voice_cpp
+assert "PreparedEmitterGuid" in voice_cpp
+assert "CreateEmitterForMember(" in voice_cpp
+
+intro_start = voice_cpp.index("void OnPlayerEnteredProtection(")
+intro_end = voice_cpp.index("void OnStageActivated(", intro_start)
+intro_block = voice_cpp[intro_start:intro_end]
+assert "INTRO_EMITTER_SETTLE_MS" in intro_block
+assert "CreateEmitterForMember(" in intro_block
+assert "voice.PreparedEmitterGuid" in intro_block
+assert "PendingVoices.push_back(" in intro_block
