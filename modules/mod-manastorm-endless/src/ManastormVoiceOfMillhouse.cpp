@@ -145,9 +145,6 @@ namespace
     // This is reconstruction safety, not a claimed original Ascension value.
     constexpr uint32 PLAYER_DEATH_COOLDOWN_MS = 5000;
 
-    // GenericPortalsReady lines should not precede the actual portal summon.
-    constexpr uint32 PORTAL_READY_DELAY_MS = 1000;
-
     enum class DungeonVoiceGroup : uint8
     {
         None = 0,
@@ -480,14 +477,6 @@ namespace
         return PickSound(
             MakePool(pool),
             previousSound);
-    }
-
-    bool IsPortalReadySound(
-        uint32 soundId)
-    {
-        return
-            soundId == 113135 ||
-            soundId == 113136;
     }
 
     PendingVoice BuildVoice(
@@ -838,11 +827,14 @@ namespace ManastormVoiceOfMillhouse
         state.LastCompletionSound =
             soundId;
 
+        //
+        // ManastormMgr calls this only after SpawnStagePortal(), so even the
+        // recovered GenericPortalsReady alternatives are truthful immediately
+        // and cannot be lost to an instant portal click.
+        //
         QueueVoice(
             run,
             soundId,
-            IsPortalReadySound(soundId)
-                ? PORTAL_READY_DELAY_MS
-                : 0);
+            0);
     }
 }
