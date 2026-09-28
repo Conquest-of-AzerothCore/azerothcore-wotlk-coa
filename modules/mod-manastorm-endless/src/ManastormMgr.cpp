@@ -333,8 +333,13 @@ namespace
     constexpr uint32 NPC_SHADE_OF_ERANIKUS = 5709;
     constexpr uint32 NPC_JAMMALAN_THE_PROPHET = 5710;
     constexpr uint32 NPC_AVATAR_OF_HAKKAR = 8443;
+    constexpr uint32 NPC_ATAL_ALARION = 8580;
+    constexpr uint32 DATA_SUNKEN_TEMPLE_STATUES = 10;
     constexpr uint32 DATA_SUNKEN_TEMPLE_DEFENDER_KILLED = 11;
+    constexpr uint32 SUNKEN_TEMPLE_STATUE_PHASES = 6;
     constexpr uint32 SUNKEN_TEMPLE_DEFENDERS_COUNT = 6;
+    constexpr uint32 SEGMENT_ATAL_ALARION_NORMAL = 673;
+    constexpr uint32 SEGMENT_ATAL_ALARION_ENDGAME = 674;
     constexpr uint32 SEGMENT_HAKKAR_NORMAL = 675;
     constexpr uint32 SEGMENT_JAMMALAN_NORMAL = 676;
     constexpr uint32 SEGMENT_ERANIKUS_NORMAL = 677;
@@ -350,6 +355,118 @@ namespace
     constexpr uint32 NPC_BRIGHTWING = 5912;
     constexpr ObjectGuid::LowType SPAWN_BRIGHTWING = 517;
     constexpr uint32 SEGMENT_BRIGHTWING_ENDGAME = 703;
+
+    bool BootstrapSunkenTempleAtalAlarionEncounter(
+        Map* map,
+        ManastormRun const& run,
+        std::string& error)
+    {
+        error.clear();
+
+        if (!map)
+        {
+            error =
+                "Sunken Temple Atal'alarion bootstrap has no destination map.";
+            return false;
+        }
+
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (segment.MapId != MANASTORM_MAP_SUNKEN_TEMPLE ||
+            segment.ObjectiveCreatureEntry != NPC_ATAL_ALARION)
+        {
+            std::ostringstream message;
+
+            message
+                << "Sunken Temple Atal'alarion bootstrap was requested for "
+                << "segment "
+                << segment.SegmentId
+                << " but runtime map/objective is "
+                << segment.MapId
+                << "/"
+                << segment.ObjectiveCreatureEntry
+                << ".";
+
+            error = message.str();
+            return false;
+        }
+
+        InstanceMap* instanceMap =
+            map->ToInstanceMap();
+
+        if (!instanceMap)
+        {
+            error =
+                "Sunken Temple Atal'alarion bootstrap is not running on an InstanceMap.";
+            return false;
+        }
+
+        InstanceScript* instance =
+            instanceMap->GetInstanceScript();
+
+        if (!instance)
+        {
+            error =
+                "Sunken Temple Atal'alarion bootstrap has no instance script.";
+            return false;
+        }
+
+        uint32 const statuePhase =
+            instance->GetData(
+                DATA_SUNKEN_TEMPLE_STATUES);
+
+        if (statuePhase >=
+            SUNKEN_TEMPLE_STATUE_PHASES)
+        {
+            return true;
+        }
+
+        //
+        // Native Sunken Temple progression:
+        //
+        //   DATA_STATUES (10) reaches 6
+        //       -> Atal'alarion SmartAI condition becomes true
+        //       -> native SMART_EVENT_UPDATE action sets phase mask 1
+        //       -> ordinary players can see/fight the existing DB boss
+        //
+        // Manastorm begins directly at this selected encounter, so enqueue
+        // only the missing native statue-completion events. EventMap permits
+        // duplicate event IDs and the instance script processes one per map
+        // update, exactly as if the six statue triggers had been completed.
+        //
+        // Do not force visibility, do not summon a duplicate 8580, and do not
+        // replace Atal'alarion's SmartAI.
+        //
+        uint32 const missingStatues =
+            SUNKEN_TEMPLE_STATUE_PHASES -
+            statuePhase;
+
+        for (uint32 i = 0;
+            i < missingStatues;
+            ++i)
+        {
+            instance->SetData(
+                DATA_SUNKEN_TEMPLE_STATUES,
+                1);
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped native Manastorm Sunken Temple statue progression: "
+            "run={} segment={} map={} instance={} statues={}/{} queued={} "
+            "objective={}.",
+            run.GetRunId(),
+            segment.SegmentId,
+            segment.MapId,
+            run.GetInstanceId(),
+            statuePhase,
+            SUNKEN_TEMPLE_STATUE_PHASES,
+            missingStatues,
+            segment.ObjectiveCreatureEntry);
+
+        return true;
+    }
 
     bool BootstrapSunkenTempleHakkarEncounter(
         Map* map,
@@ -866,6 +983,13 @@ namespace
     {
         switch (run.GetSegment().SegmentId)
         {
+        case SEGMENT_ATAL_ALARION_NORMAL:
+        case SEGMENT_ATAL_ALARION_ENDGAME:
+            return BootstrapSunkenTempleAtalAlarionEncounter(
+                map,
+                run,
+                error);
+
         case SEGMENT_HAKKAR_NORMAL:
         case SEGMENT_HAKKAR_ENDGAME:
             return BootstrapSunkenTempleHakkarEncounter(
