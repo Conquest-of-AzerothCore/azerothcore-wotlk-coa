@@ -13,7 +13,9 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <initializer_list>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace
