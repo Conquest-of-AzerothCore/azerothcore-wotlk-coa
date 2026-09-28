@@ -135,6 +135,11 @@ namespace
     // dialogue file after SMSG_PLAY_OBJECT_SOUND is sent.
     constexpr uint32 EMITTER_LIFETIME_MS = 12000;
 
+    // PREPARING happens immediately after a private-instance teleport. Give
+    // the client a short window to receive the private 80911 create/update
+    // before SMSG_PLAY_OBJECT_SOUND references that emitter GUID.
+    constexpr uint32 INTRO_EMITTER_SETTLE_MS = 500;
+
     // Dungeon/location commentary belongs to ACTIVE, after protection falls.
     // The global Intro_* line has already been delivered in PREPARING, so no
     // long first-stage suppression is required here.
@@ -205,6 +210,11 @@ namespace
         uint32 MapId = 0;
         uint32 InstanceId = 0;
         uint32 SoundId = 0;
+
+        // Empty for normal ACTIVE/death/completion playback. PREPARING intro
+        // uses an already-spawned private emitter so its GUID is known to the
+        // client before the sound packet is sent.
+        ObjectGuid PreparedEmitterGuid;
 
         std::vector<ObjectGuid::LowType>
             Members;
@@ -512,29 +522,30 @@ namespace
         return voice;
     }
 
-    bool PlayForMember(
+    bool IsMemberReadyForVoice(
         Player* member,
         PendingVoice const& voice)
     {
-        if (!member ||
-            !member->GetSession() ||
-            !member->IsInWorld() ||
-            member->IsBeingTeleported() ||
-            member->GetMapId() != voice.MapId ||
-            member->GetInstanceId() != voice.InstanceId)
+        return
+            member &&
+            member->GetSession() &&
+            member->IsInWorld() &&
+            !member->IsBeingTeleported() &&
+            member->GetMapId() == voice.MapId &&
+            member->GetInstanceId() == voice.InstanceId;
+    }
+
+    TempSummon* CreateEmitterForMember(
+        Player* member,
+        PendingVoice const& voice)
+    {
+        if (!IsMemberReadyForVoice(
+                member,
+                voice))
         {
-            return false;
+            return nullptr;
         }
 
-        //
-        // User/cache observation plus the recovered creature identity show a
-        // Voice of Millhouse helper appearing when narration is played.
-        //
-        // Listener scope is not recovered. For multiplayer safety we create a
-        // private emitter at each run member and send the object-bound sound
-        // only to that member. This preserves positional SMSG_PLAY_OBJECT_SOUND
-        // behavior without leaking Manastorm narration to unrelated players.
-        //
         TempSummon* emitter =
             member->SummonCreature(
                 ManastormVoiceOfMillhouse::
@@ -559,7 +570,7 @@ namespace
                 voice.MapId,
                 voice.InstanceId);
 
-            return false;
+            return nullptr;
         }
 
         emitter->SetFaction(35);
@@ -579,6 +590,55 @@ namespace
         //
         emitter->SetObjectScale(
             0.01f);
+
+        return emitter;
+    }
+
+    bool PlayForMember(
+        Player* member,
+        PendingVoice const& voice)
+    {
+        if (!IsMemberReadyForVoice(
+                member,
+                voice))
+        {
+            return false;
+        }
+
+        Creature* emitter = nullptr;
+
+        if (!voice.PreparedEmitterGuid.IsEmpty())
+        {
+            emitter =
+                ObjectAccessor::GetCreature(
+                    *member,
+                    voice.PreparedEmitterGuid);
+
+            if (!emitter ||
+                !emitter->IsInWorld())
+            {
+                LOG_DEBUG(
+                    LOG_FILTER,
+                    "Voice of Millhouse prepared emitter {} was not "
+                    "available for run={} player={} sound={}.",
+                    voice.PreparedEmitterGuid.GetRawValue(),
+                    voice.RunId,
+                    member->GetGUID().GetCounter(),
+                    voice.SoundId);
+
+                return false;
+            }
+        }
+        else
+        {
+            emitter =
+                CreateEmitterForMember(
+                    member,
+                    voice);
+
+            if (!emitter)
+                return false;
+        }
 
         emitter->PlayDistanceSound(
             voice.SoundId,
@@ -778,15 +838,45 @@ namespace ManastormVoiceOfMillhouse
             BuildVoice(
                 run,
                 state.IntroSound,
-                0);
+                INTRO_EMITTER_SETTLE_MS);
 
-        if (PlayForMember(
+        //
+        // This event belongs only to the arriving member. Spawn 80911 now,
+        // while the player is safely inside PREPARING, then wait briefly
+        // before sending the object-bound sound from that exact creature GUID.
+        //
+        voice.Members.clear();
+        voice.Members.push_back(
+            playerGuid);
+
+        TempSummon* emitter =
+            CreateEmitterForMember(
                 player,
-                voice))
-        {
-            state.IntroDeliveredMembers.insert(
-                playerGuid);
-        }
+                voice);
+
+        if (!emitter)
+            return;
+
+        voice.PreparedEmitterGuid =
+            emitter->GetGUID();
+
+        PendingVoices.push_back(
+            std::move(voice));
+
+        // Mark once the emitter was successfully created/queued. The manager
+        // retries this hook while PREPARING, so marking here prevents duplicate
+        // private emitters during the 500ms client-settle window.
+        state.IntroDeliveredMembers.insert(
+            playerGuid);
+
+        LOG_DEBUG(
+            LOG_FILTER,
+            "Voice of Millhouse queued PREPARING intro sound {} "
+            "through pre-spawned emitter guid={} for run={} player={}.",
+            state.IntroSound,
+            emitter->GetGUID().GetRawValue(),
+            run.GetRunId(),
+            playerGuid);
     }
 
     void OnStageActivated(
