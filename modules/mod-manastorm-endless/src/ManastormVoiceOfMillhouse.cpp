@@ -15,6 +15,7 @@
 #include <cstddef>
 #include <initializer_list>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -183,7 +184,13 @@ namespace
     struct RunVoiceState
     {
         bool FirstManastorm = false;
-        bool IntroPlayed = false;
+        bool FirstStageActivated = false;
+
+        // One run-level intro is selected, then delivered independently when
+        // each member actually arrives inside the protected start area.
+        uint32 IntroSound = 0;
+        std::unordered_set<ObjectGuid::LowType>
+            IntroDeliveredMembers;
 
         uint32 LastIntroSound = 0;
         uint32 LastDeathSound = 0;
@@ -507,7 +514,7 @@ namespace
         return voice;
     }
 
-    void PlayForMember(
+    bool PlayForMember(
         Player* member,
         PendingVoice const& voice)
     {
@@ -518,7 +525,7 @@ namespace
             member->GetMapId() != voice.MapId ||
             member->GetInstanceId() != voice.InstanceId)
         {
-            return;
+            return false;
         }
 
         //
@@ -554,7 +561,7 @@ namespace
                 voice.MapId,
                 voice.InstanceId);
 
-            return;
+            return false;
         }
 
         emitter->SetFaction(35);
@@ -589,6 +596,8 @@ namespace
             member->GetGUID().GetCounter(),
             voice.MapId,
             voice.InstanceId);
+
+        return true;
     }
 
     void PlayVoice(
@@ -723,6 +732,65 @@ namespace ManastormVoiceOfMillhouse
         }
     }
 
+    void OnPlayerEnteredProtection(
+        ManastormRun const& run,
+        Player* player)
+    {
+        if (!player ||
+            run.GetState() !=
+                ManastormRunState::Preparing)
+        {
+            return;
+        }
+
+        RunVoiceState& state =
+            RunStates[
+                run.GetRunId()];
+
+        ObjectGuid::LowType const playerGuid =
+            player->GetGUID().GetCounter();
+
+        if (state.IntroDeliveredMembers.find(
+                playerGuid) !=
+            state.IntroDeliveredMembers.end())
+        {
+            return;
+        }
+
+        //
+        // Select the run-level introduction once. Every party member hears the
+        // same recovered line when that member actually arrives in the safety
+        // bubble, rather than the first arrival causing absent/transferring
+        // members to miss it.
+        //
+        if (!state.IntroSound)
+        {
+            state.IntroSound =
+                state.FirstManastorm
+                ? INTRO_FIRST_TIME
+                : PickSound(
+                    INTRO_RECURRING,
+                    state.LastIntroSound);
+
+            state.LastIntroSound =
+                state.IntroSound;
+        }
+
+        PendingVoice voice =
+            BuildVoice(
+                run,
+                state.IntroSound,
+                0);
+
+        if (PlayForMember(
+                player,
+                voice))
+        {
+            state.IntroDeliveredMembers.insert(
+                playerGuid);
+        }
+    }
+
     void OnStageActivated(
         ManastormRun const& run)
     {
@@ -731,37 +799,16 @@ namespace ManastormVoiceOfMillhouse
                 run.GetRunId()];
 
         bool const firstStage =
-            !state.IntroPlayed;
+            !state.FirstStageActivated;
 
-        if (firstStage)
-        {
-            uint32 introSound = 0;
+        state.FirstStageActivated =
+            true;
 
-            if (state.FirstManastorm)
-            {
-                introSound =
-                    INTRO_FIRST_TIME;
-            }
-            else
-            {
-                introSound =
-                    PickSound(
-                        INTRO_RECURRING,
-                        state.LastIntroSound);
-            }
-
-            state.LastIntroSound =
-                introSound;
-
-            state.IntroPlayed =
-                true;
-
-            QueueVoice(
-                run,
-                introSound,
-                0);
-        }
-
+        //
+        // The global Intro_* family is intentionally NOT played here anymore.
+        // It belongs to PREPARING / safety-bubble arrival. ACTIVE owns only
+        // dungeon/location commentary plus later combat/completion events.
+        //
         SoundPool const dungeonPool =
             GetDungeonPool(
                 run.GetSegment());
