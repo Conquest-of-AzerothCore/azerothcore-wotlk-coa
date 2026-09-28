@@ -133,7 +133,7 @@ namespace
 
     // Keep an emitter alive long enough for the client to finish any recovered
     // dialogue file after SMSG_PLAY_OBJECT_SOUND is sent.
-    constexpr uint32 EMITTER_LIFETIME_MS = 12000;
+    constexpr uint32 EMITTER_LIFETIME_MS = 30000;
 
     // PREPARING happens immediately after a private-instance teleport. Give
     // the client a short window to receive the private 80911 create/update
@@ -148,6 +148,9 @@ namespace
     // Avoid a wipe generating several overlapping death jokes in one instant.
     // This is reconstruction safety, not a claimed original Ascension value.
     constexpr uint32 PLAYER_DEATH_COOLDOWN_MS = 5000;
+
+    // Small silence between clips keeps back-to-back narration intelligible.
+    constexpr uint32 VOICE_GAP_MS = 250;
 
     enum class DungeonVoiceGroup : uint8
     {
@@ -178,6 +181,15 @@ namespace
         ZulFarrak
     };
 
+    enum class VoiceKind : uint8
+    {
+        None = 0,
+        Dungeon,
+        Intro,
+        PlayerDeath,
+        ObjectiveComplete
+    };
+
     struct SoundPool
     {
         uint32 const* Data = nullptr;
@@ -201,6 +213,17 @@ namespace
         uint32 LastDungeonSound = 0;
 
         uint32 DeathCooldownMs = 0;
+
+        // Lightweight narrator scheduler. BusyMs uses the real duration of
+        // the currently playing recovered clip plus a small inter-line gap.
+        uint32 BusyMs = 0;
+        VoiceKind CurrentKind = VoiceKind::None;
+        uint32 CurrentSoundId = 0;
+
+        // Dungeon commentary is location flavour, not a line that should fire
+        // on every boss in the same dungeon chain.
+        DungeonVoiceGroup LastDungeonGroupPlayed =
+            DungeonVoiceGroup::None;
     };
 
     struct PendingVoice
@@ -210,6 +233,13 @@ namespace
         uint32 MapId = 0;
         uint32 InstanceId = 0;
         uint32 SoundId = 0;
+
+        VoiceKind Kind = VoiceKind::None;
+        uint8 Priority = 0;
+        uint64 Sequence = 0;
+
+        DungeonVoiceGroup DungeonGroup =
+            DungeonVoiceGroup::None;
 
         // Empty for normal ACTIVE/death/completion playback. PREPARING intro
         // uses an already-spawned private emitter so its GUID is known to the
@@ -225,6 +255,8 @@ namespace
 
     std::vector<PendingVoice>
         PendingVoices;
+
+    uint64 NextVoiceSequence = 1;
 
     template <std::size_t N>
     SoundPool MakePool(
@@ -461,6 +493,188 @@ namespace
         return {};
     }
 
+    uint32 GetSoundDurationMs(
+        uint32 soundId)
+    {
+        //
+        // Measured from the 115-file Manastorm voice archive supplied by the
+        // project owner. The MP3s preserve the original WAV filenames. These
+        // values let the scheduler avoid guessing how long Millhouse speaks.
+        //
+        switch (soundId)
+        {
+        case 113130: return 2904;
+        case 113131: return 4176;
+        case 113132: return 1632;
+        case 113133: return 2496;
+        case 113134: return 1128;
+        case 113135: return 1152;
+        case 113136: return 1944;
+        case 113137: return 3816;
+        case 113138: return 1968;
+        case 113139: return 2976;
+        case 113140: return 3960;
+        case 113141: return 7872;
+        case 113142: return 15168;
+        case 113143: return 2880;
+        case 113144: return 5184;
+        case 113145: return 7728;
+        case 113146: return 4920;
+        case 113147: return 6600;
+        case 113148: return 2784;
+        case 113149: return 2616;
+        case 113150: return 2136;
+        case 113151: return 3408;
+        case 113152: return 2400;
+        case 113153: return 2664;
+        case 113154: return 2520;
+        case 113155: return 3120;
+        case 113156: return 1608;
+        case 113157: return 3648;
+        case 132955: return 9288;
+        case 132956: return 6480;
+        case 132957: return 6024;
+        case 132958: return 9720;
+        case 132959: return 7464;
+        case 132960: return 8208;
+        case 132961: return 5232;
+        case 132962: return 8256;
+        case 132963: return 5208;
+        case 132964: return 6192;
+        case 132965: return 6528;
+        case 132966: return 6192;
+        case 132967: return 4128;
+        case 132968: return 5592;
+        case 132969: return 5352;
+        case 132970: return 6024;
+        case 132971: return 5328;
+        case 132972: return 6264;
+        case 132973: return 5616;
+        case 132974: return 4608;
+        case 132975: return 7800;
+        case 132976: return 11688;
+        case 132977: return 5040;
+        case 132978: return 6384;
+        case 132979: return 6672;
+        case 132980: return 6144;
+        case 132981: return 7656;
+        case 132982: return 5448;
+        case 132983: return 6648;
+        case 132984: return 7560;
+        case 132985: return 6624;
+        case 132986: return 5040;
+        case 132987: return 6744;
+        case 132988: return 7392;
+        case 132989: return 4440;
+        case 132990: return 4464;
+        case 132991: return 6360;
+        case 132992: return 3624;
+        case 132993: return 4680;
+        case 132994: return 6648;
+        case 132995: return 8592;
+        case 132996: return 5736;
+        case 132997: return 5568;
+        case 132998: return 6120;
+        case 132999: return 6576;
+        case 133000: return 5544;
+        case 133001: return 7032;
+        case 133002: return 5760;
+        case 133003: return 6192;
+        case 133004: return 8448;
+        case 133005: return 4392;
+        case 133006: return 7800;
+        case 133007: return 3936;
+        case 133008: return 6504;
+        case 133009: return 5784;
+        case 133010: return 6048;
+        case 133011: return 4752;
+        case 133012: return 10944;
+        case 133013: return 5376;
+        case 133014: return 7752;
+        case 133015: return 10680;
+        case 133016: return 2952;
+        case 133017: return 4152;
+        case 133018: return 4776;
+        case 133019: return 5592;
+        case 133020: return 7512;
+        case 133021: return 10728;
+        case 133022: return 7992;
+        case 133023: return 6120;
+        case 133024: return 6288;
+        default:
+            return 4000;
+        }
+    }
+
+    uint8 GetVoicePriority(
+        VoiceKind kind)
+    {
+        switch (kind)
+        {
+        case VoiceKind::ObjectiveComplete:
+            return 40;
+        case VoiceKind::PlayerDeath:
+            return 30;
+        case VoiceKind::Intro:
+            return 20;
+        case VoiceKind::Dungeon:
+            return 10;
+        case VoiceKind::None:
+            break;
+        }
+
+        return 0;
+    }
+
+    bool HasPendingDungeonGroup(
+        uint64 runId,
+        DungeonVoiceGroup group)
+    {
+        for (PendingVoice const& voice :
+            PendingVoices)
+        {
+            if (voice.RunId == runId &&
+                voice.Kind == VoiceKind::Dungeon &&
+                voice.DungeonGroup == group)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void DropStaleLowerPriorityVoices(
+        uint64 runId,
+        VoiceKind incomingKind)
+    {
+        PendingVoices.erase(
+            std::remove_if(
+                PendingVoices.begin(),
+                PendingVoices.end(),
+                [runId, incomingKind](PendingVoice const& voice)
+                {
+                    if (voice.RunId != runId)
+                        return false;
+
+                    if (incomingKind == VoiceKind::PlayerDeath)
+                    {
+                        return voice.Kind == VoiceKind::Dungeon;
+                    }
+
+                    if (incomingKind ==
+                        VoiceKind::ObjectiveComplete)
+                    {
+                        return
+                            voice.Kind == VoiceKind::Dungeon ||
+                            voice.Kind == VoiceKind::PlayerDeath;
+                    }
+
+                    return false;
+                }),
+            PendingVoices.end());
+    }
+
     uint32 PickSound(
         SoundPool pool,
         uint32 previousSound)
@@ -497,7 +711,10 @@ namespace
     PendingVoice BuildVoice(
         ManastormRun const& run,
         uint32 soundId,
-        uint32 delayMs)
+        uint32 delayMs,
+        VoiceKind kind,
+        DungeonVoiceGroup dungeonGroup =
+            DungeonVoiceGroup::None)
     {
         PendingVoice voice;
 
@@ -515,6 +732,19 @@ namespace
 
         voice.SoundId =
             soundId;
+
+        voice.Kind =
+            kind;
+
+        voice.Priority =
+            GetVoicePriority(
+                kind);
+
+        voice.Sequence =
+            NextVoiceSequence++;
+
+        voice.DungeonGroup =
+            dungeonGroup;
 
         voice.Members =
             run.GetMembers();
@@ -658,11 +888,13 @@ namespace
         return true;
     }
 
-    void PlayVoice(
+    bool PlayVoice(
         PendingVoice const& voice)
     {
         if (!voice.SoundId)
-            return;
+            return false;
+
+        bool played = false;
 
         for (ObjectGuid::LowType memberGuid :
             voice.Members)
@@ -673,36 +905,38 @@ namespace
                         HighGuid::Player>(
                             memberGuid));
 
-            PlayForMember(
-                member,
-                voice);
+            played =
+                PlayForMember(
+                    member,
+                    voice) ||
+                played;
         }
+
+        return played;
     }
 
     void QueueVoice(
         ManastormRun const& run,
         uint32 soundId,
-        uint32 delayMs)
+        uint32 delayMs,
+        VoiceKind kind,
+        DungeonVoiceGroup dungeonGroup =
+            DungeonVoiceGroup::None)
     {
         if (!soundId)
             return;
 
-        PendingVoice voice =
+        DropStaleLowerPriorityVoices(
+            run.GetRunId(),
+            kind);
+
+        PendingVoices.push_back(
             BuildVoice(
                 run,
                 soundId,
-                delayMs);
-
-        if (!delayMs)
-        {
-            PlayVoice(
-                voice);
-
-            return;
-        }
-
-        PendingVoices.push_back(
-            std::move(voice));
+                delayMs,
+                kind,
+                dungeonGroup));
     }
 }
 
@@ -745,6 +979,20 @@ namespace ManastormVoiceOfMillhouse
     void Update(
         uint32 diff)
     {
+        //
+        // First age all timers. Pending event delays are independent from the
+        // narrator busy timer so a location line can become ready while an
+        // intro is still speaking, then wait without overlapping it.
+        //
+        for (PendingVoice& voice :
+            PendingVoices)
+        {
+            if (voice.DelayMs <= diff)
+                voice.DelayMs = 0;
+            else
+                voice.DelayMs -= diff;
+        }
+
         for (auto& pair :
             RunStates)
         {
@@ -755,15 +1003,56 @@ namespace ManastormVoiceOfMillhouse
                 state.DeathCooldownMs = 0;
             else
                 state.DeathCooldownMs -= diff;
+
+            if (state.BusyMs <= diff)
+            {
+                state.BusyMs = 0;
+                state.CurrentKind =
+                    VoiceKind::None;
+                state.CurrentSoundId = 0;
+            }
+            else
+            {
+                state.BusyMs -= diff;
+            }
         }
 
+        //
+        // A party member can finish loading slightly later than another. If
+        // Millhouse is already playing this run's exact same Intro_* line,
+        // allow that same line to begin for the late listener as well. This is
+        // not audible overlap for either player, and BusyMs is extended so no
+        // other narration starts until the last listener's intro finishes.
+        //
         for (auto itr =
             PendingVoices.begin();
             itr != PendingVoices.end();)
         {
-            if (itr->DelayMs > diff)
+            auto stateItr =
+                RunStates.find(
+                    itr->RunId);
+
+            if (stateItr ==
+                    RunStates.end())
             {
-                itr->DelayMs -= diff;
+                itr =
+                    PendingVoices.erase(
+                        itr);
+
+                continue;
+            }
+
+            RunVoiceState& state =
+                stateItr->second;
+
+            if (itr->DelayMs ||
+                itr->Kind != VoiceKind::Intro ||
+                !state.BusyMs ||
+                state.CurrentKind !=
+                    VoiceKind::Intro ||
+                state.CurrentSoundId !=
+                    itr->SoundId)
+            {
                 ++itr;
                 continue;
             }
@@ -775,18 +1064,108 @@ namespace ManastormVoiceOfMillhouse
                 PendingVoices.erase(
                     itr);
 
-            // A terminal run cleanup removes both the run state and all of
-            // its pending events. This extra check also protects against a
-            // stale delayed event if ordering ever changes later.
-            if (RunStates.find(
-                    voice.RunId) ==
-                RunStates.end())
+            if (!PlayVoice(
+                    voice))
             {
                 continue;
             }
 
-            PlayVoice(
-                voice);
+            state.BusyMs =
+                std::max(
+                    state.BusyMs,
+                    GetSoundDurationMs(
+                        voice.SoundId) +
+                    VOICE_GAP_MS);
+        }
+
+        //
+        // Each run owns one narrator channel. When that channel is free, pick
+        // the highest-priority ready event; ties preserve enqueue order.
+        //
+        for (auto& pair :
+            RunStates)
+        {
+            uint64 const runId =
+                pair.first;
+
+            RunVoiceState& state =
+                pair.second;
+
+            if (state.BusyMs)
+                continue;
+
+            auto best =
+                PendingVoices.end();
+
+            for (auto itr =
+                PendingVoices.begin();
+                itr != PendingVoices.end();
+                ++itr)
+            {
+                if (itr->RunId != runId ||
+                    itr->DelayMs)
+                {
+                    continue;
+                }
+
+                if (best ==
+                        PendingVoices.end() ||
+                    itr->Priority >
+                        best->Priority ||
+                    (itr->Priority ==
+                        best->Priority &&
+                     itr->Sequence <
+                        best->Sequence))
+                {
+                    best = itr;
+                }
+            }
+
+            if (best ==
+                PendingVoices.end())
+            {
+                continue;
+            }
+
+            PendingVoice voice =
+                std::move(*best);
+
+            PendingVoices.erase(
+                best);
+
+            if (!PlayVoice(
+                    voice))
+            {
+                continue;
+            }
+
+            state.BusyMs =
+                GetSoundDurationMs(
+                    voice.SoundId) +
+                VOICE_GAP_MS;
+
+            state.CurrentKind =
+                voice.Kind;
+
+            state.CurrentSoundId =
+                voice.SoundId;
+
+            if (voice.Kind ==
+                    VoiceKind::Dungeon)
+            {
+                state.LastDungeonGroupPlayed =
+                    voice.DungeonGroup;
+            }
+
+            LOG_DEBUG(
+                LOG_FILTER,
+                "Voice of Millhouse scheduler started sound {} "
+                "kind={} priority={} run={} busyMs={}.",
+                voice.SoundId,
+                uint32(voice.Kind),
+                uint32(voice.Priority),
+                voice.RunId,
+                state.BusyMs);
         }
     }
 
@@ -838,7 +1217,8 @@ namespace ManastormVoiceOfMillhouse
             BuildVoice(
                 run,
                 state.IntroSound,
-                INTRO_EMITTER_SETTLE_MS);
+                INTRO_EMITTER_SETTLE_MS,
+                VoiceKind::Intro);
 
         //
         // This event belongs only to the arriving member. Spawn 80911 now,
@@ -894,6 +1274,21 @@ namespace ManastormVoiceOfMillhouse
         // It belongs to PREPARING / safety-bubble arrival. ACTIVE owns only
         // dungeon/location commentary plus later combat/completion events.
         //
+        DungeonVoiceGroup const dungeonGroup =
+            ResolveDungeonVoiceGroup(
+                run.GetSegment());
+
+        if (dungeonGroup ==
+                DungeonVoiceGroup::None ||
+            state.LastDungeonGroupPlayed ==
+                dungeonGroup ||
+            HasPendingDungeonGroup(
+                run.GetRunId(),
+                dungeonGroup))
+        {
+            return;
+        }
+
         SoundPool const dungeonPool =
             GetDungeonPool(
                 run.GetSegment());
@@ -912,7 +1307,9 @@ namespace ManastormVoiceOfMillhouse
         QueueVoice(
             run,
             dungeonSound,
-            STAGE_DUNGEON_DELAY_MS);
+            STAGE_DUNGEON_DELAY_MS,
+            VoiceKind::Dungeon,
+            dungeonGroup);
     }
 
     void OnPlayerDeath(
@@ -939,7 +1336,8 @@ namespace ManastormVoiceOfMillhouse
         QueueVoice(
             run,
             soundId,
-            0);
+            0,
+            VoiceKind::PlayerDeath);
     }
 
     void OnObjectiveComplete(
@@ -965,6 +1363,7 @@ namespace ManastormVoiceOfMillhouse
         QueueVoice(
             run,
             soundId,
-            0);
+            0,
+            VoiceKind::ObjectiveComplete);
     }
 }
