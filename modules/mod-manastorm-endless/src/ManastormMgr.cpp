@@ -636,6 +636,38 @@ namespace
         return true;
     }
 
+    void StabilizeManastormBrightwing(
+        Creature* brightwing)
+    {
+        if (!brightwing ||
+            brightwing->GetEntry() !=
+                NPC_BRIGHTWING)
+        {
+            return;
+        }
+
+        //
+        // Native WC rarity for entry 5912 is implemented by SmartAI:
+        //
+        //   AI_INIT -> 85% FORCE_DESPAWN after 500 ms
+        //
+        // SMART_EVENT_FLAG_WHILE_CHARMED only means the event is also
+        // permitted while charmed; it does not restrict the roll to charmed
+        // creatures. Therefore a Manastorm-selected Brightwing can correctly
+        // materialize/register, then disappear half a second later.
+        //
+        // At this point AI initialization has already happened and the
+        // delayed FORCE_DESPAWN is queued in the creature's EventProcessor.
+        // Segment 703 explicitly selected this rare as its objective, so
+        // cancel the spawn-time delayed event for THIS runtime creature only.
+        //
+        // SmartAI itself remains installed: combat behavior is preserved.
+        // Normal/public Wailing Caverns is completely untouched.
+        //
+        brightwing->m_Events.KillAllEvents(
+            true);
+    }
+
     bool BootstrapWailingCavernsBrightwingEncounter(
         Map* map,
         ManastormRun const& run,
@@ -715,6 +747,9 @@ namespace
                 continue;
             }
 
+            StabilizeManastormBrightwing(
+                creature);
+
             ManastormMgr::Instance()
                 .OnCreatureAddWorld(
                     creature);
@@ -781,6 +816,14 @@ namespace
                 "Brightwing DB spawn 517 loaded but was not a living entry 5912.";
             return false;
         }
+
+        //
+        // AI initialization occurs inside AddToWorld(), before
+        // LoadCreatureFromDB() returns. Cancel Brightwing's native 85%
+        // AI_INIT rare-despawn timer immediately, while keeping SmartAI itself.
+        //
+        StabilizeManastormBrightwing(
+            brightwing);
 
         //
         // Register explicitly. The global AllCreatureScript hook may also
