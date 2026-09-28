@@ -6977,6 +6977,16 @@ void ManastormMgr::Update(uint32 diff)
                         continue;
                     }
 
+                    //
+                    // The initial map-entry callback can still see the player
+                    // as teleporting. Retry the protected-arrival narrator
+                    // here once the player is fully settled in the instance.
+                    // OnPlayerEnteredProtection() is duplicate-safe per member.
+                    //
+                    ManastormVoiceOfMillhouse::OnPlayerEnteredProtection(
+                        run,
+                        member);
+
                     GameTele const* entrance =
                         sObjectMgr->GetGameTele(
                             run.GetSegment()
