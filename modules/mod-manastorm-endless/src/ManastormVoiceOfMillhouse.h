@@ -4,6 +4,7 @@
 #include "Define.h"
 
 class ManastormRun;
+class Player;
 
 namespace ManastormVoiceOfMillhouse
 {
@@ -28,6 +29,13 @@ namespace ManastormVoiceOfMillhouse
         uint32 diff);
 
     // Presentation hooks owned by the Manastorm manager.
+    //
+    // Recovered behavior: global Manastorm introduction dialogue belongs to
+    // the protected arrival window, before the stage becomes ACTIVE.
+    void OnPlayerEnteredProtection(
+        ManastormRun const& run,
+        Player* player);
+
     void OnStageActivated(
         ManastormRun const& run);
 
