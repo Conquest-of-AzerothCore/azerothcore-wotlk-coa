@@ -3603,6 +3603,17 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                 if (spawn.second && spawn.second->IsInWorld())
                     OnCreatureAddWorld(spawn.second);
         }
+
+        //
+        // Recovered presentation timing: Manastorm_Intro_* belongs to the
+        // protected arrival window. The first caller reaches this point only
+        // after the Safety Bubble has been created; later party members reach
+        // the same hook as they arrive in the already-initialized stage.
+        //
+        ManastormVoiceOfMillhouse::OnPlayerEnteredProtection(
+            *run,
+            player);
+
         bool start = run->StartRequested();
 
         if (run->CanStartWithMissingMembers() &&
