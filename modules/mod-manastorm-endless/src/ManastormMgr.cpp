@@ -342,6 +342,14 @@ namespace
     constexpr uint32 SEGMENT_JAMMALAN_ENDGAME = 679;
     constexpr uint32 SEGMENT_ERANIKUS_ENDGAME = 680;
 
+    // Wailing Caverns segment 703 uses Brightwing as its recovered runtime
+    // objective. Brightwing is a rare native DB spawn and is not guaranteed
+    // to exist in a fresh disposable Manastorm instance, so this one segment
+    // owns a direct objective bootstrap without changing normal WC behavior.
+    constexpr uint32 MANASTORM_MAP_WAILING_CAVERNS = 43;
+    constexpr uint32 NPC_BRIGHTWING = 5912;
+    constexpr uint32 SEGMENT_BRIGHTWING_ENDGAME = 703;
+
     bool BootstrapSunkenTempleHakkarEncounter(
         Map* map,
         ManastormRun const& run,
@@ -627,6 +635,101 @@ namespace
         return true;
     }
 
+    bool BootstrapWailingCavernsBrightwingEncounter(
+        Map* map,
+        ManastormRun const& run,
+        std::string& error)
+    {
+        error.clear();
+
+        if (!map)
+        {
+            error =
+                "Wailing Caverns Brightwing bootstrap has no destination map.";
+            return false;
+        }
+
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (segment.MapId != MANASTORM_MAP_WAILING_CAVERNS ||
+            segment.ObjectiveCreatureEntry != NPC_BRIGHTWING)
+        {
+            std::ostringstream message;
+
+            message
+                << "Wailing Caverns Brightwing bootstrap was requested for "
+                << "segment "
+                << segment.SegmentId
+                << " but runtime map/objective is "
+                << segment.MapId
+                << "/"
+                << segment.ObjectiveCreatureEntry
+                << ".";
+
+            error = message.str();
+            return false;
+        }
+
+        // If the rare native DB spawn happened to load, keep it. Segment 703
+        // only creates a replacement when the disposable instance otherwise
+        // has no living Brightwing objective.
+        for (auto const& spawn :
+            map->GetCreatureBySpawnIdStore())
+        {
+            Creature* creature =
+                spawn.second;
+
+            if (creature &&
+                creature->IsInWorld() &&
+                creature->IsAlive() &&
+                creature->GetEntry() ==
+                    NPC_BRIGHTWING)
+            {
+                return true;
+            }
+        }
+
+        Position const brightwingPosition =
+        {
+              0.00823113f,
+            -55.9339f,
+            -67.0312f,
+              4.01711f
+        };
+
+        TempSummon* brightwing =
+            map->SummonCreature(
+                NPC_BRIGHTWING,
+                brightwingPosition);
+
+        if (!brightwing)
+        {
+            error =
+                "Manastorm could not summon Brightwing (5912).";
+            return false;
+        }
+
+        // The selected objective belongs only to this disposable stage.
+        // OnCreatureAddWorld() handles normal objective registration,
+        // scaling, Skull marking, affixes, and Chaotic Link synchronization.
+        brightwing->SetTempSummonType(
+            TEMPSUMMON_MANUAL_DESPAWN);
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped Manastorm Wailing Caverns Brightwing: run={} "
+            "segment={} map={} instance={} objective={} guid={}.",
+            run.GetRunId(),
+            segment.SegmentId,
+            segment.MapId,
+            run.GetInstanceId(),
+            segment.ObjectiveCreatureEntry,
+            brightwing->GetGUID().GetRawValue());
+
+        return true;
+    }
+
     bool BootstrapSpecialEncounter(
         Map* map,
         ManastormRun const& run,
@@ -651,6 +754,12 @@ namespace
         case SEGMENT_ERANIKUS_NORMAL:
         case SEGMENT_ERANIKUS_ENDGAME:
             return BootstrapSunkenTempleEranikusEncounter(
+                map,
+                run,
+                error);
+
+        case SEGMENT_BRIGHTWING_ENDGAME:
+            return BootstrapWailingCavernsBrightwingEncounter(
                 map,
                 run,
                 error);
