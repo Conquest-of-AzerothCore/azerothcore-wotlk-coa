@@ -77,6 +77,7 @@ assert "PlayDirectSound(" not in voice_cpp
 assert '#include "ManastormVoiceOfMillhouse.h"' in mgr_cpp
 for hook in (
     "ManastormVoiceOfMillhouse::RegisterRun(",
+    "ManastormVoiceOfMillhouse::OnPlayerEnteredProtection(",
     "ManastormVoiceOfMillhouse::OnStageActivated(",
     "ManastormVoiceOfMillhouse::OnPlayerDeath(",
     "ManastormVoiceOfMillhouse::OnObjectiveComplete(",
@@ -94,3 +95,27 @@ print(
     "Voice of Millhouse recovered IDs, dungeon routing, emitter playback, "
     "manager hooks and DB fallback passed."
 )
+
+
+# Intro timing ownership: Intro_* must be delivered during PREPARING arrival,
+# not from the ACTIVE-stage hook.
+assert "void OnPlayerEnteredProtection(" in voice_cpp
+assert "IntroDeliveredMembers" in voice_cpp
+stage_start = voice_cpp.index("void OnStageActivated(")
+stage_end = voice_cpp.index("void OnPlayerDeath(", stage_start)
+stage_block = voice_cpp[stage_start:stage_end]
+assert "INTRO_FIRST_TIME" not in stage_block
+assert "INTRO_RECURRING" not in stage_block
+
+mgr_prepare = mgr_cpp.index(
+    "if (run->GetState() == ManastormRunState::Preparing)"
+)
+mgr_active = mgr_cpp.index(
+    "run->SetState(ManastormRunState::Active);",
+    mgr_prepare,
+)
+intro_hook = mgr_cpp.index(
+    "ManastormVoiceOfMillhouse::OnPlayerEnteredProtection(",
+    mgr_prepare,
+)
+assert mgr_prepare < intro_hook < mgr_active
