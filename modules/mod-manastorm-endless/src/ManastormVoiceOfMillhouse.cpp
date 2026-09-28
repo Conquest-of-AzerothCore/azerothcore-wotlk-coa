@@ -220,10 +220,11 @@ namespace
         VoiceKind CurrentKind = VoiceKind::None;
         uint32 CurrentSoundId = 0;
 
-        // Dungeon commentary is location flavour, not a line that should fire
-        // on every boss in the same dungeon chain.
-        DungeonVoiceGroup LastDungeonGroupPlayed =
-            DungeonVoiceGroup::None;
+        // Per-dungeon shuffle bags. A line is inserted only after successful
+        // playback. This lets consecutive segments in the same dungeon use
+        // the rest of that dungeon's commentary before recycling.
+        std::unordered_map<uint32, std::unordered_set<uint32>>
+            UsedDungeonSounds;
     };
 
     struct PendingVoice
@@ -632,16 +633,16 @@ namespace
         return 0;
     }
 
-    bool HasPendingDungeonGroup(
+    bool HasPendingDungeonSound(
         uint64 runId,
-        DungeonVoiceGroup group)
+        uint32 soundId)
     {
         for (PendingVoice const& voice :
             PendingVoices)
         {
             if (voice.RunId == runId &&
                 voice.Kind == VoiceKind::Dungeon &&
-                voice.DungeonGroup == group)
+                voice.SoundId == soundId)
             {
                 return true;
             }
@@ -679,6 +680,112 @@ namespace
                     return false;
                 }),
             PendingVoices.end());
+    }
+
+    SoundPool GetEncounterSpecificPool(
+        ManastormSegment const& segment)
+    {
+        //
+        // Exact per-encounter trigger assignments are intentionally evidence-
+        // gated. Several recovered filenames strongly suggest boss references,
+        // but filename semantics alone are not enough to claim an original
+        // Ascension trigger. Populate this resolver only when transcript/server
+        // data proves a specific encounter/segment mapping.
+        //
+        // The selection path already prefers this pool over the broader dungeon
+        // pool, so proven overrides can be added without changing scheduler
+        // behavior later.
+        //
+        (void)segment;
+        return {};
+    }
+
+    uint32 PickDungeonSound(
+        SoundPool pool,
+        std::unordered_set<uint32>& used,
+        uint32 previousSound,
+        uint64 runId)
+    {
+        if (!pool.Data || !pool.Size)
+            return 0;
+
+        std::vector<uint32> candidates;
+        candidates.reserve(pool.Size);
+
+        auto collect =
+            [&](bool allowPrevious)
+            {
+                candidates.clear();
+
+                for (std::size_t index = 0;
+                    index < pool.Size;
+                    ++index)
+                {
+                    uint32 const soundId =
+                        pool.Data[index];
+
+                    if (used.find(soundId) !=
+                            used.end() ||
+                        HasPendingDungeonSound(
+                            runId,
+                            soundId))
+                    {
+                        continue;
+                    }
+
+                    if (!allowPrevious &&
+                        pool.Size > 1 &&
+                        soundId == previousSound)
+                    {
+                        continue;
+                    }
+
+                    candidates.push_back(
+                        soundId);
+                }
+            };
+
+        //
+        // First pass: unheard lines only, and avoid the immediately previous
+        // line whenever the pool has alternatives.
+        //
+        collect(false);
+
+        if (candidates.empty())
+        {
+            //
+            // The dungeon's authored pool is exhausted. Reset only entries
+            // belonging to this pool, then begin another cycle. Pending lines
+            // remain excluded so two copies cannot queue at once.
+            //
+            for (std::size_t index = 0;
+                index < pool.Size;
+                ++index)
+            {
+                used.erase(
+                    pool.Data[index]);
+            }
+
+            collect(false);
+        }
+
+        if (candidates.empty())
+        {
+            //
+            // A one-line pool may legitimately need to repeat after it has
+            // finished, but never enqueue another copy while one is pending.
+            //
+            collect(true);
+        }
+
+        if (candidates.empty())
+            return 0;
+
+        return candidates[
+            urand(
+                0,
+                uint32(
+                    candidates.size() - 1))];
     }
 
     uint32 PickSound(
@@ -1170,8 +1277,11 @@ namespace ManastormVoiceOfMillhouse
             if (voice.Kind ==
                     VoiceKind::Dungeon)
             {
-                state.LastDungeonGroupPlayed =
-                    voice.DungeonGroup;
+                state.UsedDungeonSounds[
+                    uint32(
+                        voice.DungeonGroup)]
+                    .insert(
+                        voice.SoundId);
             }
 
             LOG_DEBUG(
@@ -1296,24 +1406,34 @@ namespace ManastormVoiceOfMillhouse
                 run.GetSegment());
 
         if (dungeonGroup ==
-                DungeonVoiceGroup::None ||
-            state.LastDungeonGroupPlayed ==
-                dungeonGroup ||
-            HasPendingDungeonGroup(
-                run.GetRunId(),
-                dungeonGroup))
+            DungeonVoiceGroup::None)
         {
             return;
         }
 
-        SoundPool const dungeonPool =
-            GetDungeonPool(
+        SoundPool commentaryPool =
+            GetEncounterSpecificPool(
                 run.GetSegment());
 
+        if (!commentaryPool.Data ||
+            !commentaryPool.Size)
+        {
+            commentaryPool =
+                GetDungeonPool(
+                    run.GetSegment());
+        }
+
+        std::unordered_set<uint32>& used =
+            state.UsedDungeonSounds[
+                uint32(
+                    dungeonGroup)];
+
         uint32 const dungeonSound =
-            PickSound(
-                dungeonPool,
-                state.LastDungeonSound);
+            PickDungeonSound(
+                commentaryPool,
+                used,
+                state.LastDungeonSound,
+                run.GetRunId());
 
         if (!dungeonSound)
             return;
