@@ -69,7 +69,6 @@ public:
     void AllowStartWithMissingMembers()
     {
         _canStartWithMissingMembers = true;
-        _startRequested = true;
     }
 
     static constexpr uint32
@@ -90,6 +89,7 @@ public:
         {
             _preparationProtectionRemainingMs = 0;
             _canStartWithMissingMembers = true;
+            _startRequested = true;
             return true;
         }
 
