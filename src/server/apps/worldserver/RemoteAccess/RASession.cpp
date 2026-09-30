@@ -69,7 +69,10 @@ void RASession::Start()
     if (!CheckAccessLevel(username) || !CheckPassword(username, password))
     {
         Send("Authentication failed\r\n");
-        _socket.close();
+        {
+            boost::system::error_code ec;
+            _socket.close(ec);
+        }
         return;
     }
 
@@ -88,15 +91,31 @@ void RASession::Start()
             break;
     }
 
-    _socket.close();
+    {
+        boost::system::error_code ec;
+        _socket.close(ec);
+    }
 }
 
 int RASession::Send(std::string_view data)
 {
     std::ostream os(&_writeBuffer);
     os << data;
-    std::size_t written = _socket.send(_writeBuffer.data());
+    // error_code overload, not the exception-throwing one: a client that disconnects mid-response
+    // (dropped connection, reset, a wrapper killing the RA client abruptly) used to throw
+    // boost::system::system_error all the way up through World::ProcessCliCommands with nothing
+    // to catch it, crashing the entire worldserver over a single broken RA socket -- confirmed
+    // live. A failed send here just means this RA session is done; every other system (bots,
+    // real players) is unaffected and shouldn't go down with it.
+    boost::system::error_code error;
+    std::size_t written = _socket.send(_writeBuffer.data(), 0, error);
     _writeBuffer.consume(written);
+    if (error)
+    {
+        boost::system::error_code ec;
+        _socket.close(ec);
+        return 0;
+    }
     return written;
 }
 
@@ -106,7 +125,8 @@ std::string RASession::ReadString()
     std::size_t read = boost::asio::read_until(_socket, _readBuffer, "\r\n", error);
     if (!read)
     {
-        _socket.close();
+        boost::system::error_code ec;
+        _socket.close(ec);
         return "";
     }
 
