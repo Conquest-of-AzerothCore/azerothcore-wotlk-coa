@@ -5,11 +5,11 @@
 #include "AllMapScript.h"
 #include "Creature.h"
 #include "CreatureAI.h"
-#include "InstanceMap.h"
 #include "InstanceScript.h"
 #include "Log.h"
 #include "Map.h"
 #include "Player.h"
+#include "TemporarySummon.h"
 
 namespace
 {
