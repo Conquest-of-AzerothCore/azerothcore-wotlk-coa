@@ -18,6 +18,7 @@ namespace
     constexpr uint32 SEGMENT_MAGMADAR = 609;
     constexpr uint32 SEGMENT_SHAZZRAH = 612;
     constexpr uint32 SEGMENT_BARON_GEDDON = 613;
+    constexpr uint32 SEGMENT_SULFURON = 614;
     constexpr uint32 DATA_LUCIFRON = 0;
     constexpr uint32 DATA_MAGMADAR = 1;
     constexpr uint32 DATA_SHAZZRAH = 4;
@@ -46,6 +47,10 @@ namespace
             case SEGMENT_BARON_GEDDON:
                 bossData = DATA_SHAZZRAH;
                 bossEntry = NPC_SHAZZRAH;
+                return true;
+            case SEGMENT_SULFURON:
+                bossData = DATA_GEDDON;
+                bossEntry = NPC_BARON_GEDDON;
                 return true;
             default:
                 return false;
