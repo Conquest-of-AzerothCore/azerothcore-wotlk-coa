@@ -4,6 +4,7 @@
 #include "AllCreatureScript.h"
 #include "AllMapScript.h"
 #include "Creature.h"
+#include "CreatureAI.h"
 #include "InstanceMap.h"
 #include "InstanceScript.h"
 #include "Log.h"
@@ -19,14 +20,31 @@ namespace
     constexpr uint32 SEGMENT_SHAZZRAH = 612;
     constexpr uint32 SEGMENT_BARON_GEDDON = 613;
     constexpr uint32 SEGMENT_SULFURON = 614;
+    constexpr uint32 SEGMENT_RAGNAROS = 670;
     constexpr uint32 DATA_LUCIFRON = 0;
     constexpr uint32 DATA_MAGMADAR = 1;
+    constexpr uint32 DATA_GEHENNAS = 2;
+    constexpr uint32 DATA_GARR = 3;
     constexpr uint32 DATA_SHAZZRAH = 4;
     constexpr uint32 DATA_GEDDON = 5;
+    constexpr uint32 DATA_SULFURON = 6;
+    constexpr uint32 DATA_GOLEMAGG = 7;
+    constexpr uint32 DATA_MAJORDOMO_EXECUTUS = 8;
+    constexpr uint32 DATA_RAGNAROS = 9;
     constexpr uint32 NPC_LUCIFRON = 12118;
     constexpr uint32 NPC_MAGMADAR = 11982;
     constexpr uint32 NPC_SHAZZRAH = 12264;
     constexpr uint32 NPC_BARON_GEDDON = 12056;
+    constexpr uint32 NPC_MAJORDOMO_EXECUTUS = 12018;
+    constexpr int32 ACTION_START_RAGNAROS_INTRO = -1;
+
+    Position const MAJORDOMO_RAGNAROS_POSITION =
+    {
+        848.933f,
+        -812.875f,
+        -229.601f,
+        4.046f
+    };
 
     bool GetSuppressedBoss(ManastormRun const& run, uint32& bossData, uint32& bossEntry)
     {
@@ -117,6 +135,73 @@ namespace
             run.GetRunId(), run.GetSegment().SegmentId, bossEntry, bossData, despawned, run.GetInstanceId());
     }
 
+    void BootstrapMoltenCoreRagnaros(Map* map, ManastormRun& run)
+    {
+        if (!map || map->GetId() != MAP_MOLTEN_CORE || run.GetSegment().SegmentId != SEGMENT_RAGNAROS ||
+            run.GetSegment().MapId != MAP_MOLTEN_CORE || run.GetInstanceId() != map->GetInstanceId())
+            return;
+
+        InstanceMap* instanceMap = map->ToInstanceMap();
+        if (!instanceMap)
+            return;
+
+        InstanceScript* instance = instanceMap->GetInstanceScript();
+        if (!instance)
+            return;
+
+        ObjectGuid const ragnarosGuid = instance->GetGuidData(DATA_RAGNAROS);
+        if (!ragnarosGuid.IsEmpty())
+        {
+            if (Creature* ragnaros = instanceMap->GetCreature(ragnarosGuid))
+            {
+                if (ragnaros->IsInWorld())
+                    return;
+            }
+        }
+
+        if (instance->GetBossState(DATA_MAJORDOMO_EXECUTUS) != DONE)
+            instance->SetBossState(DATA_MAJORDOMO_EXECUTUS, DONE);
+
+        uint32 const prerequisiteBosses[] =
+        {
+            DATA_MAGMADAR,
+            DATA_GEHENNAS,
+            DATA_GARR,
+            DATA_SHAZZRAH,
+            DATA_GEDDON,
+            DATA_SULFURON,
+            DATA_GOLEMAGG
+        };
+
+        for (uint32 bossData : prerequisiteBosses)
+        {
+            if (instance->GetBossState(bossData) != DONE)
+                instance->SetBossState(bossData, DONE);
+        }
+
+        Creature* majordomo = nullptr;
+        ObjectGuid const majordomoGuid = instance->GetGuidData(DATA_MAJORDOMO_EXECUTUS);
+        if (!majordomoGuid.IsEmpty())
+            majordomo = instanceMap->GetCreature(majordomoGuid);
+
+        if (!majordomo || !majordomo->IsInWorld())
+            majordomo = map->SummonCreature(NPC_MAJORDOMO_EXECUTUS, MAJORDOMO_RAGNAROS_POSITION);
+
+        if (!majordomo || !majordomo->AI())
+        {
+            LOG_ERROR(LOG_FILTER,
+                "Manastorm MC Ragnaros bootstrap failed: run={} segment={} instance={} could not prepare Majordomo Executus.",
+                run.GetRunId(), run.GetSegment().SegmentId, run.GetInstanceId());
+            return;
+        }
+
+        majordomo->AI()->DoAction(ACTION_START_RAGNAROS_INTRO);
+
+        LOG_INFO(LOG_FILTER,
+            "Manastorm MC Ragnaros bootstrap started native Majordomo sequence: run={} segment={} instance={} majordomoGuid={}.",
+            run.GetRunId(), run.GetSegment().SegmentId, run.GetInstanceId(), majordomo->GetGUID().GetRawValue());
+    }
+
     class manastorm_molten_core_map_isolation : public AllMapScript
     {
     public:
@@ -132,6 +217,7 @@ namespace
                 return;
 
             ApplyMoltenCoreBossIsolation(map, *run);
+            BootstrapMoltenCoreRagnaros(map, *run);
         }
     };
 
