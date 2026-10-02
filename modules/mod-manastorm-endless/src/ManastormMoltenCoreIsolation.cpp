@@ -16,10 +16,16 @@ namespace
     constexpr uint32 MAP_MOLTEN_CORE = 409;
     constexpr uint32 SEGMENT_LUCIFRON = 608;
     constexpr uint32 SEGMENT_MAGMADAR = 609;
+    constexpr uint32 SEGMENT_SHAZZRAH = 612;
+    constexpr uint32 SEGMENT_BARON_GEDDON = 613;
     constexpr uint32 DATA_LUCIFRON = 0;
     constexpr uint32 DATA_MAGMADAR = 1;
+    constexpr uint32 DATA_SHAZZRAH = 4;
+    constexpr uint32 DATA_GEDDON = 5;
     constexpr uint32 NPC_LUCIFRON = 12118;
     constexpr uint32 NPC_MAGMADAR = 11982;
+    constexpr uint32 NPC_SHAZZRAH = 12264;
+    constexpr uint32 NPC_BARON_GEDDON = 12056;
 
     bool GetSuppressedBoss(ManastormRun const& run, uint32& bossData, uint32& bossEntry)
     {
@@ -32,6 +38,14 @@ namespace
             case SEGMENT_MAGMADAR:
                 bossData = DATA_LUCIFRON;
                 bossEntry = NPC_LUCIFRON;
+                return true;
+            case SEGMENT_SHAZZRAH:
+                bossData = DATA_GEDDON;
+                bossEntry = NPC_BARON_GEDDON;
+                return true;
+            case SEGMENT_BARON_GEDDON:
+                bossData = DATA_SHAZZRAH;
+                bossEntry = NPC_SHAZZRAH;
                 return true;
             default:
                 return false;
