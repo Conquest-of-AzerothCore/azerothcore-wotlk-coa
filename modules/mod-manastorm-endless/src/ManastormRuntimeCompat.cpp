@@ -1,11 +1,13 @@
 #include "ManastormModuleConfig.h"
 #include "ManastormMgr.h"
 
+#include "AllMapScript.h"
 #include "AllSpellScript.h"
 #include "Creature.h"
 #include "Log.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "Spell.h"
 #include "SpellAuras.h"
@@ -26,6 +28,29 @@ namespace
     constexpr uint32 SPELL_CHAOTIC_LINK = 93459;
     constexpr double CHAOTIC_LINK_HEALTH_PER_STACK = 0.25;
     constexpr uint8 ENDGAME_LEVEL = 60;
+
+    constexpr uint32 MAP_BLACKROCK_SPIRE = 229;
+    constexpr uint32 NPC_SPIRESTONE_BATTLE_LORD = 9218;
+    constexpr uint32 NPC_SPIRESTONE_BUTCHER = 9219;
+    constexpr uint32 NPC_CRYSTAL_FANG = 10376;
+
+    struct BlackrockSpireRareObjective
+    {
+        uint32 SegmentId;
+        uint32 Entry;
+        ObjectGuid::LowType SpawnId;
+    };
+
+    constexpr BlackrockSpireRareObjective
+        BLACKROCK_SPIRE_RARE_OBJECTIVES[] =
+    {
+        {497, NPC_SPIRESTONE_BUTCHER, 43523},
+        {511, NPC_SPIRESTONE_BUTCHER, 43523},
+        {503, NPC_CRYSTAL_FANG, 44422},
+        {515, NPC_CRYSTAL_FANG, 44422},
+        {508, NPC_SPIRESTONE_BATTLE_LORD, 43519},
+        {520, NPC_SPIRESTONE_BATTLE_LORD, 43519},
+    };
 
     ManastormRun* GetRunForStageCreature(
         Creature* creature)
@@ -70,6 +95,304 @@ namespace
         }
 
         return nullptr;
+    }
+
+    BlackrockSpireRareObjective const*
+    GetBlackrockSpireRareObjective(
+        ManastormRun const& run)
+    {
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (segment.MapId !=
+            MAP_BLACKROCK_SPIRE)
+        {
+            return nullptr;
+        }
+
+        for (BlackrockSpireRareObjective const& rare :
+            BLACKROCK_SPIRE_RARE_OBJECTIVES)
+        {
+            if (rare.SegmentId ==
+                    segment.SegmentId &&
+                rare.Entry ==
+                    segment.ObjectiveCreatureEntry)
+            {
+                return &rare;
+            }
+        }
+
+        return nullptr;
+    }
+
+    void StabilizeBlackrockSpireRareObjective(
+        Creature* creature,
+        BlackrockSpireRareObjective const& rare)
+    {
+        if (!creature ||
+            creature->GetEntry() != rare.Entry ||
+            creature->GetSpawnId() != rare.SpawnId)
+        {
+            return;
+        }
+
+        //
+        // These native Blackrock Spire rares use the same rarity pattern
+        // recovered for Brightwing:
+        //
+        //   AI_INIT -> 85% FORCE_DESPAWN after 500 ms
+        //
+        // AI initialization has already run by the time this helper is called,
+        // so the delayed rarity despawn is sitting in the creature's
+        // EventProcessor. The selected Manastorm segment explicitly requires
+        // this rare as its objective; cancel only that runtime creature's
+        // queued spawn-time events while leaving its SmartAI attached.
+        //
+        // This is scoped to the disposable Manastorm instance. Normal/public
+        // Blackrock Spire keeps its native rare-spawn behavior unchanged.
+        //
+        creature->m_Events.KillAllEvents(
+            true);
+    }
+
+    bool EnsureBlackrockSpireRareObjective(
+        Map* map,
+        Player* player,
+        ManastormRun& run)
+    {
+        if (!map ||
+            !player ||
+            map->GetId() != MAP_BLACKROCK_SPIRE ||
+            map->GetInstanceId() != run.GetInstanceId())
+        {
+            return true;
+        }
+
+        BlackrockSpireRareObjective const* rare =
+            GetBlackrockSpireRareObjective(
+                run);
+
+        if (!rare)
+            return true;
+
+        ObjectGuid const objectiveGuid =
+            run.GetObjectiveCreatureGuid();
+
+        if (!objectiveGuid.IsEmpty())
+        {
+            Creature* objective =
+                ObjectAccessor::GetCreature(
+                    *player,
+                    objectiveGuid);
+
+            if (objective &&
+                objective->IsInWorld() &&
+                objective->IsAlive() &&
+                objective->GetEntry() == rare->Entry &&
+                objective->GetSpawnId() == rare->SpawnId)
+            {
+                // The main Manastorm creature hook is registered before this
+                // runtime-compat map hook. On the first member entering the
+                // stage, the rare may therefore already be registered as the
+                // objective but still have its 500 ms rarity despawn queued.
+                if (run.GetState() !=
+                    ManastormRunState::Active)
+                {
+                    StabilizeBlackrockSpireRareObjective(
+                        objective,
+                        *rare);
+                }
+
+                return true;
+            }
+        }
+
+        CreatureData const* spawnData =
+            sObjectMgr->GetCreatureData(
+                rare->SpawnId);
+
+        if (!spawnData ||
+            spawnData->mapid !=
+                MAP_BLACKROCK_SPIRE ||
+            spawnData->id !=
+                rare->Entry)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm Blackrock Spire rare bootstrap rejected DB spawn: "
+                "run={} segment={} map={} instance={} spawn={} expectedEntry={}.",
+                run.GetRunId(),
+                run.GetSegment().SegmentId,
+                run.GetSegment().MapId,
+                run.GetInstanceId(),
+                rare->SpawnId,
+                rare->Entry);
+
+            return false;
+        }
+
+        // Prefer the real native DB creature if the fresh private instance
+        // still has it alive. Stabilize that exact runtime object and register
+        // it through the normal Manastorm objective path.
+        auto const existingBounds =
+            map->GetCreatureBySpawnIdStore()
+                .equal_range(
+                    rare->SpawnId);
+
+        for (auto itr =
+                existingBounds.first;
+            itr !=
+                existingBounds.second;
+            ++itr)
+        {
+            Creature* creature =
+                itr->second;
+
+            if (!creature ||
+                !creature->IsInWorld() ||
+                !creature->IsAlive() ||
+                creature->GetEntry() != rare->Entry)
+            {
+                continue;
+            }
+
+            StabilizeBlackrockSpireRareObjective(
+                creature,
+                *rare);
+
+            ManastormMgr::Instance()
+                .OnCreatureAddWorld(
+                    creature);
+
+            if (run.GetObjectiveCreatureGuid() !=
+                creature->GetGUID())
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Living Manastorm Blackrock Spire rare failed objective registration: "
+                    "run={} segment={} map={} instance={} spawn={} entry={} guid={}.",
+                    run.GetRunId(),
+                    run.GetSegment().SegmentId,
+                    run.GetSegment().MapId,
+                    run.GetInstanceId(),
+                    rare->SpawnId,
+                    rare->Entry,
+                    creature->GetGUID().GetRawValue());
+
+                return false;
+            }
+
+            LOG_INFO(
+                LOG_FILTER,
+                "Reused living Manastorm Blackrock Spire rare DB spawn: "
+                "run={} segment={} map={} instance={} spawn={} entry={} guid={}.",
+                run.GetRunId(),
+                run.GetSegment().SegmentId,
+                run.GetSegment().MapId,
+                run.GetInstanceId(),
+                rare->SpawnId,
+                rare->Entry,
+                creature->GetGUID().GetRawValue());
+
+            return true;
+        }
+
+        // These are long-respawn native DB rares. A scripted-private
+        // Manastorm stage is disposable, so clear only this map instance's
+        // in-memory respawn timestamp and instantiate the original DB spawn.
+        // No world DB row or normal Blackrock Spire rarity is changed.
+        map->RemoveCreatureRespawnTime(
+            rare->SpawnId);
+
+        Creature* creature =
+            new Creature();
+
+        if (!creature->LoadCreatureFromDB(
+                rare->SpawnId,
+                map,
+                true,
+                true))
+        {
+            delete creature;
+
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm could not load Blackrock Spire rare DB spawn: "
+                "run={} segment={} map={} instance={} spawn={} entry={}.",
+                run.GetRunId(),
+                run.GetSegment().SegmentId,
+                run.GetSegment().MapId,
+                run.GetInstanceId(),
+                rare->SpawnId,
+                rare->Entry);
+
+            return false;
+        }
+
+        if (!creature->IsInWorld() ||
+            !creature->IsAlive() ||
+            creature->GetEntry() != rare->Entry)
+        {
+            creature->AddObjectToRemoveList();
+
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm Blackrock Spire rare DB spawn loaded in an invalid state: "
+                "run={} segment={} map={} instance={} spawn={} entry={}.",
+                run.GetRunId(),
+                run.GetSegment().SegmentId,
+                run.GetSegment().MapId,
+                run.GetInstanceId(),
+                rare->SpawnId,
+                rare->Entry);
+
+            return false;
+        }
+
+        // LoadCreatureFromDB() has already completed AddToWorld()/SmartAI
+        // initialization. Remove the queued native rarity despawn immediately,
+        // then explicitly register this exact native spawn as the objective.
+        StabilizeBlackrockSpireRareObjective(
+            creature,
+            *rare);
+
+        ManastormMgr::Instance()
+            .OnCreatureAddWorld(
+                creature);
+
+        if (run.GetObjectiveCreatureGuid() !=
+            creature->GetGUID())
+        {
+            creature->AddObjectToRemoveList();
+
+            LOG_ERROR(
+                LOG_FILTER,
+                "Loaded Manastorm Blackrock Spire rare failed objective registration: "
+                "run={} segment={} map={} instance={} spawn={} entry={} guid={}.",
+                run.GetRunId(),
+                run.GetSegment().SegmentId,
+                run.GetSegment().MapId,
+                run.GetInstanceId(),
+                rare->SpawnId,
+                rare->Entry,
+                creature->GetGUID().GetRawValue());
+
+            return false;
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped Manastorm Blackrock Spire rare from native DB spawn: "
+            "run={} segment={} map={} instance={} spawn={} entry={} guid={} registered=1.",
+            run.GetRunId(),
+            run.GetSegment().SegmentId,
+            run.GetSegment().MapId,
+            run.GetInstanceId(),
+            rare->SpawnId,
+            rare->Entry,
+            creature->GetGUID().GetRawValue());
+
+        return true;
     }
 
     void BroadcastRunState(
@@ -216,6 +539,63 @@ namespace
         boss->SetHealth(
             finalHealth);
     }
+
+    class manastorm_blackrock_spire_rare_objective :
+        public AllMapScript
+    {
+    public:
+        manastorm_blackrock_spire_rare_objective()
+            : AllMapScript(
+                "manastorm_blackrock_spire_rare_objective")
+        {
+        }
+
+        void OnPlayerEnterAll(
+            Map* map,
+            Player* player) override
+        {
+            if (!ManastormModuleConfig::Enabled() ||
+                !map ||
+                !player ||
+                map->GetId() !=
+                    MAP_BLACKROCK_SPIRE)
+            {
+                return;
+            }
+
+            ManastormRun* run =
+                ManastormMgr::Instance()
+                    .GetRunFor(
+                        player);
+
+            if (!run ||
+                run->GetSegment().MapId !=
+                    MAP_BLACKROCK_SPIRE ||
+                run->GetInstanceId() !=
+                    map->GetInstanceId() ||
+                !GetBlackrockSpireRareObjective(
+                    *run))
+            {
+                return;
+            }
+
+            if (!EnsureBlackrockSpireRareObjective(
+                    map,
+                    player,
+                    *run))
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Manastorm Blackrock Spire rare objective bootstrap failed: "
+                    "run={} segment={} map={} instance={} objective={}.",
+                    run->GetRunId(),
+                    run->GetSegment().SegmentId,
+                    run->GetSegment().MapId,
+                    run->GetInstanceId(),
+                    run->GetSegment().ObjectiveCreatureEntry);
+            }
+        }
+    };
 
     class manastorm_molten_core_play_dead :
         public AllSpellScript
@@ -398,6 +778,7 @@ namespace
 
 void AddSC_manastorm_runtime_compat()
 {
+    new manastorm_blackrock_spire_rare_objective();
     new manastorm_molten_core_play_dead();
     new manastorm_forced_track_restore();
 }
