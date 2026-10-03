@@ -28,116 +28,114 @@
 #include "World.h"
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/read_until.hpp>
-#include <thread>
+#include <boost/asio/post.hpp>
+#include <boost/asio/write.hpp>
 
 using boost::asio::ip::tcp;
 
 void RASession::Start()
 {
-    // wait 1 second for active connections to send negotiation request
-    for (int counter = 0; counter < 10 && _socket.available() == 0; counter++)
-        std::this_thread::sleep_for(100ms);
-
-    // Check if there are bytes available, if they are, then the client is requesting the negotiation
-    if (_socket.available() > 0)
+    _negotiationTimer.expires_after(1s);
+    _negotiationTimer.async_wait([self = shared_from_this()](boost::system::error_code error)
     {
-        // Handle subnegotiation
-        char buf[1024] = { };
-        _socket.read_some(boost::asio::buffer(buf));
+        if (error)
+            return;
 
-        // Send the end-of-negotiation packet
-        uint8 const reply[2] = { 0xFF, 0xF0 };
-        _socket.write_some(boost::asio::buffer(reply));
-    }
-
-    Send("Authentication Required\r\n");
-    Send("Username: ");
-
-    std::string username = ReadString();
-
-    if (username.empty())
-        return;
-
-    LOG_INFO("commands.ra", "Accepting RA connection from user {} (IP: {})", username, GetRemoteIpAddress());
-
-    Send("Password: ");
-
-    std::string password = ReadString();
-    if (password.empty())
-        return;
-
-    if (!CheckAccessLevel(username) || !CheckPassword(username, password))
-    {
-        Send("Authentication failed\r\n");
+        auto const available = self->_socket.available(error);
+        if (error)
         {
-            boost::system::error_code ec;
-            _socket.close(ec);
+            self->Close();
+            return;
         }
-        return;
-    }
 
-    LOG_INFO("commands.ra", "User {} (IP: {}) authenticated correctly to RA", username, GetRemoteIpAddress());
-
-    // Authentication successful, send the motd
-    Send(std::string(std::string(sMotdMgr->GetMotd(DEFAULT_LOCALE)) + "\r\n").c_str());
-
-    // Read commands
-    for (;;)
-    {
-        Send("AC>");
-        std::string command = ReadString();
-
-        if (ProcessCommand(command))
-            break;
-    }
-
-    {
-        boost::system::error_code ec;
-        _socket.close(ec);
-    }
+        if (available > 0)
+        {
+            char buffer[1024];
+            self->_socket.read_some(boost::asio::buffer(buffer, std::min<std::size_t>(available, sizeof(buffer))), error);
+            if (error)
+            {
+                self->Close();
+                return;
+            }
+            self->Send(std::string("\xff\xf0", 2), [self]() { self->ReadUsername(); });
+        }
+        else
+            self->ReadUsername();
+    });
 }
 
-int RASession::Send(std::string_view data)
+void RASession::ReadUsername()
 {
-    std::ostream os(&_writeBuffer);
-    os << data;
-    // error_code overload, not the exception-throwing one: a client that disconnects mid-response
-    // (dropped connection, reset, a wrapper killing the RA client abruptly) used to throw
-    // boost::system::system_error all the way up through World::ProcessCliCommands with nothing
-    // to catch it, crashing the entire worldserver over a single broken RA socket -- confirmed
-    // live. A failed send here just means this RA session is done; every other system (bots,
-    // real players) is unaffected and shouldn't go down with it.
-    boost::system::error_code error;
-    std::size_t written = _socket.send(_writeBuffer.data(), 0, error);
-    _writeBuffer.consume(written);
-    if (error)
+    Send("Authentication Required\r\nUsername: ", [self = shared_from_this()]()
     {
-        boost::system::error_code ec;
-        _socket.close(ec);
-        return 0;
-    }
-    return written;
+        self->ReadString([self](std::string username)
+        {
+            self->_username = std::move(username);
+            LOG_INFO("commands.ra", "Accepting RA connection from user {} (IP: {})", self->_username, self->GetRemoteIpAddress());
+            self->Send("Password: ", [self]()
+            {
+                self->ReadString([self](std::string password)
+                {
+                    if (!self->CheckAccessLevel(self->_username) || !self->CheckPassword(self->_username, password))
+                    {
+                        self->Send("Authentication failed\r\n", [self]() { self->Close(); });
+                        return;
+                    }
+                    LOG_INFO("commands.ra", "User {} (IP: {}) authenticated correctly to RA", self->_username, self->GetRemoteIpAddress());
+                    self->Send(std::string(sMotdMgr->GetMotd(DEFAULT_LOCALE)) + "\r\n", [self]() { self->ReadCommand(); });
+                });
+            });
+        });
+    });
 }
 
-std::string RASession::ReadString()
+void RASession::ReadCommand()
+{
+    Send("AC>", [self = shared_from_this()]()
+    {
+        self->ReadString([self](std::string command) { self->ProcessCommand(std::move(command)); });
+    });
+}
+
+void RASession::Close()
 {
     boost::system::error_code error;
-    std::size_t read = boost::asio::read_until(_socket, _readBuffer, "\r\n", error);
-    if (!read)
+    _socket.close(error);
+}
+
+void RASession::Send(std::string data, std::function<void()> next)
+{
+    auto bytes = std::make_shared<std::string>(std::move(data));
+    boost::asio::async_write(_socket, boost::asio::buffer(*bytes),
+        [self = shared_from_this(), bytes, next = std::move(next)](boost::system::error_code error, std::size_t)
     {
-        boost::system::error_code ec;
-        _socket.close(ec);
-        return "";
-    }
+        if (error)
+            self->Close();
+        else if (next)
+            next();
+    });
+}
 
-    std::string line;
-    std::istream is(&_readBuffer);
-    std::getline(is, line);
-
-    if (*line.rbegin() == '\r')
-        line.erase(line.length() - 1);
-
-    return line;
+void RASession::ReadString(std::function<void(std::string)> next)
+{
+    boost::asio::async_read_until(_socket, _readBuffer, "\r\n",
+        [self = shared_from_this(), next = std::move(next)](boost::system::error_code error, std::size_t)
+    {
+        if (error)
+        {
+            self->Close();
+            return;
+        }
+        std::string line;
+        std::istream input(&self->_readBuffer);
+        std::getline(input, line);
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+        if (line.empty())
+            self->Close();
+        else
+            next(std::move(line));
+    });
 }
 
 bool RASession::CheckAccessLevel(std::string const& user)
@@ -199,46 +197,42 @@ bool RASession::CheckPassword(std::string const& user, std::string const& pass)
     return false;
 }
 
-bool RASession::ProcessCommand(std::string& command)
+void RASession::ProcessCommand(std::string command)
 {
-    if (command.length() == 0)
-        return true;
-
     LOG_INFO("commands.ra", "Received command: {}", command);
-
-    // handle quit, exit and logout commands to terminate connection
     if (command == "quit" || command == "exit" || command == "logout")
     {
-        Send("Bye\r\n");
-        return true;
+        Send("Bye\r\n", [self = shared_from_this()]() { self->Close(); });
+        return;
     }
 
-    // Obtain a new promise per command
-    delete _commandExecuting;
-    _commandExecuting = new std::promise<void>();
-
-    CliCommandHolder* cmd = new CliCommandHolder(this, command.c_str(), &RASession::CommandPrint, &RASession::CommandFinished);
-    sWorld->QueueCliCommand(cmd);
-
-    // Wait for the command to finish
-    _commandExecuting->get_future().wait();
-
-    return false;
+    auto state = std::make_shared<CommandState>();
+    state->session = shared_from_this();
+    _negotiationTimer.expires_at(std::chrono::steady_clock::time_point::max());
+    _negotiationTimer.async_wait([self = shared_from_this()](boost::system::error_code) { });
+    auto* holder = new CliCommandHolder(state.get(), command.c_str(), &RASession::CommandPrint, &RASession::CommandFinished);
+    holder->m_callbackLifetime = std::move(state);
+    sWorld->QueueCliCommand(holder);
 }
 
 void RASession::CommandPrint(void* callbackArg, std::string_view text)
 {
-    if (text.empty())
-    {
-        return;
-    }
-
-    RASession* session = static_cast<RASession*>(callbackArg);
-    session->Send(text);
+    auto* state = static_cast<CommandState*>(callbackArg);
+    constexpr std::size_t maxOutput = 1024 * 1024;
+    if (state->output.size() < maxOutput)
+        state->output.append(text.substr(0, maxOutput - state->output.size()));
 }
 
 void RASession::CommandFinished(void* callbackArg, bool /*success*/)
 {
-    RASession* session = static_cast<RASession*>(callbackArg);
-    session->_commandExecuting->set_value();
+    auto* state = static_cast<CommandState*>(callbackArg);
+    auto self = state->session.lock();
+    if (!self)
+        return;
+    auto output = std::move(state->output);
+    boost::asio::post(self->_socket.get_executor(), [self, output = std::move(output)]() mutable
+    {
+        self->_negotiationTimer.cancel();
+        self->Send(std::move(output), [self]() { self->ReadCommand(); });
+    });
 }
