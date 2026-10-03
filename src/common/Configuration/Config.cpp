@@ -48,6 +48,24 @@ namespace
         "CharacterDatabaseInfo",
     };
 
+    // Modules read their settings in hot paths (once per world tick, per player update). A key missing from the config
+    // files was reported on every one of those reads: two log lines per tick, tens of thousands an hour. Report it once
+    // per configuration load instead.
+    std::mutex _missingReportLock;
+    std::unordered_set<std::string> _missingReported;
+
+    bool FirstMissingReport(std::string const& name)
+    {
+        std::lock_guard<std::mutex> guard(_missingReportLock);
+        return _missingReported.insert(name).second;
+    }
+
+    void ForgetMissingReports()
+    {
+        std::lock_guard<std::mutex> guard(_missingReportLock);
+        _missingReported.clear();
+    }
+
     // Check system configs like *server.conf*
     bool IsAppConfig(std::string_view fileName)
     {
@@ -469,6 +487,8 @@ ConfigMgr* ConfigMgr::instance()
 
 bool ConfigMgr::Reload()
 {
+    ForgetMissingReports();
+
     if (!LoadAppConfigs(true))
     {
         return false;
@@ -552,7 +572,7 @@ T ConfigMgr::GetValueDefault(std::string const& name, T const& def, bool showLog
     }
     else if (notFound)
     {
-        if (showLogs)
+        if (showLogs && FirstMissingReport(name))
         {
             bool isCritical = _criticalConfigOptions.find(name) != _criticalConfigOptions.end();
             ConfigSeverity severity = isCritical ? _policy.criticalOptionSeverity : _policy.missingOptionSeverity;
@@ -617,7 +637,7 @@ std::string ConfigMgr::GetValueDefault<std::string>(std::string const& name, std
     }
     else if (notFound)
     {
-        if (showLogs)
+        if (showLogs && FirstMissingReport(name))
         {
             bool isCritical = _criticalConfigOptions.find(name) != _criticalConfigOptions.end();
             ConfigSeverity severity = isCritical ? _policy.criticalOptionSeverity : _policy.missingOptionSeverity;
