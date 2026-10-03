@@ -6982,7 +6982,7 @@ bool ManastormMgr::TransitionToNextStage(
     uint32 const previousInstanceId =
         run.GetInstanceId();
 
-    uint32 const nextDepth =
+    uint32 nextDepth =
         previousDepth + 1;
 
     ManastormProgressionSnapshot
@@ -6996,6 +6996,22 @@ bool ManastormMgr::TransitionToNextStage(
             error))
     {
         return false;
+    }
+
+    // Resume the destination track after a level-cap transition. Pending
+    // unlock introductions take priority over ordinary five-floor checkpoints.
+    if (run.IsEndgame() != (run.GetSegment().Difficulty == 2))
+    {
+        if (progression.PendingIntroDepth)
+        {
+            nextDepth = progression.PendingIntroDepth;
+        }
+        else
+        {
+            std::vector<uint32> enterableDepths;
+            ManastormProgression::BuildEnterableDepths(progression, enterableDepths);
+            nextDepth = enterableDepths.front();
+        }
     }
 
     ManastormGenerator generator;
