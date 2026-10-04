@@ -13,6 +13,7 @@
 #include "QuestDef.h"
 #include "ScriptMgr.h"
 #include "PlayerScript.h"
+#include <algorithm>
 #include <limits>
 #include "Language.h"
 #include <string>
@@ -439,6 +440,7 @@ public:
             true,
             {
                 UNITHOOK_ON_DAMAGE,
+                UNITHOOK_MODIFY_HEAL_RECEIVED,
                 UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
                 UNITHOOK_MODIFY_MELEE_DAMAGE,
                 UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
@@ -460,6 +462,64 @@ public:
             attacker,
             victim,
             damage);
+    }
+
+    void ModifyHealReceived(
+        Unit* target,
+        Unit* healer,
+        uint32& heal,
+        SpellInfo const* spellInfo) override
+    {
+        if (!ManastormModuleConfig::Enabled() ||
+            !spellInfo ||
+            spellInfo->Id != 991510 ||
+            !target ||
+            target != healer ||
+            !heal)
+        {
+            return;
+        }
+
+        Player* player = target->ToPlayer();
+        if (!player ||
+            !player->IsInWorld() ||
+            !player->IsAlive() ||
+            player->IsBeingTeleported())
+        {
+            return;
+        }
+
+        ManastormRun const* run =
+            ManastormMgr::Instance().GetRunFor(player);
+
+        Map const* map = player->FindMap();
+        if (!run ||
+            !map ||
+            (run->GetState() != ManastormRunState::Active &&
+             run->GetState() != ManastormRunState::StageComplete) ||
+            map->GetId() != run->GetSegment().MapId ||
+            map->GetInstanceId() != run->GetInstanceId())
+        {
+            return;
+        }
+
+        // Apply only the highest learned Hearty Heal rank (93467-93476).
+        // The donor bonus is 25% per rank; preserve the native heart spell's
+        // level/stat healing, absorb handling, combat log and mana effect.
+        uint32 rank = 0;
+        for (uint32 spellId = 93476; spellId >= 93467; --spellId)
+        {
+            if (player->HasSpell(spellId))
+            {
+                rank = spellId - 93467 + 1;
+                break;
+            }
+        }
+
+        uint64 const upgradedHeal = uint64(heal) * (4 + rank) / 4;
+        heal = uint32(std::min<uint64>(
+            upgradedHeal,
+            std::numeric_limits<uint32>::max()));
     }
 
     void ModifyMeleeDamage(
