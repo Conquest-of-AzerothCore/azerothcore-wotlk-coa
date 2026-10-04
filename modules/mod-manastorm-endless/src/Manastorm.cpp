@@ -199,6 +199,18 @@ namespace
             return SPELL_CAST_OK;
         }
 
+        void SuppressLegacyPotionReserve(SpellEffIndex effIndex)
+        {
+            // Effect 183 runs at launch in this core. The shared backend owns
+            // the reserve; do not also start 762608's cooldown/stack chain.
+            if (GetSpellInfo()->Id == ManastormBaseline::SpellPotion &&
+                effIndex == EFFECT_2 &&
+                GetSpellInfo()->Effects[effIndex].Effect == 183)
+            {
+                PreventHitDefaultEffect(effIndex);
+            }
+        }
+
         void HandleAfterCast()
         {
             Player* player =
@@ -316,6 +328,16 @@ namespace
 
         void Register() override
         {
+            // This script also handles Matrix, Escape and Cogsley. ANY keeps
+            // their registrations valid; the handler only suppresses Potion.
+            OnEffectLaunch += SpellEffectFn(
+                spell_manastorm_baseline_tool::SuppressLegacyPotionReserve,
+                EFFECT_ALL, SPELL_EFFECT_ANY);
+
+            OnEffectLaunchTarget += SpellEffectFn(
+                spell_manastorm_baseline_tool::SuppressLegacyPotionReserve,
+                EFFECT_ALL, SPELL_EFFECT_ANY);
+
             OnCheckCast +=
                 SpellCheckCastFn(
                     spell_manastorm_baseline_tool::
