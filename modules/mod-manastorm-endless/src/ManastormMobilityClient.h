@@ -1,13 +1,17 @@
 #ifndef MANASTORM_MOBILITY_CLIENT_H
 #define MANASTORM_MOBILITY_CLIENT_H
 
+#include "Define.h"
+
 class Player;
 
 namespace ManastormMobilityClient
 {
-    // Opt-in native family-38 proof; the shared server backend remains authoritative.
+    bool IsMixture(uint32 spellId);
     void Load();
     void Sync(Player* player);
+    void SyncAuras(Player* player);
+    void OnMixtureRemoved(Player* player);
 }
 
 #endif

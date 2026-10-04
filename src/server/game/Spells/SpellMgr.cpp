@@ -34,6 +34,7 @@
 #include "World.h"
 
 #include <algorithm>
+#include <memory>
 
 namespace
 {
@@ -3121,6 +3122,27 @@ SpellCooldownOverride SpellMgr::GetSpellCooldownOverride(uint32 spellId) const
 {
     auto range = mSpellCooldownOverrideMap.find(spellId);
     return range->second;
+}
+
+SpellInfo* SpellMgr::RegisterRuntimeSpell(SpellEntry const& entry)
+{
+    if (!entry.Id || GetSpellInfo(entry.Id))
+    {
+        LOG_ERROR("spells", "Cannot register runtime spell {}: ID is zero or already exists.", entry.Id);
+        return nullptr;
+    }
+
+    auto spellInfo = std::make_unique<SpellInfo>(&entry);
+    spellInfo->_spellSpecific = spellInfo->LoadSpellSpecific();
+    spellInfo->_auraState = spellInfo->LoadAuraState();
+    spellInfo->_InitializeExplicitTargetMask();
+    spellInfo->_LoadImmunityInfo();
+
+    if (entry.Id >= mSpellInfoMap.size())
+        mSpellInfoMap.resize(std::size_t(entry.Id) + 1, nullptr);
+    SpellInfo* result = spellInfo.release();
+    mSpellInfoMap[entry.Id] = result;
+    return result;
 }
 
 void SpellMgr::UnloadSpellInfoStore()

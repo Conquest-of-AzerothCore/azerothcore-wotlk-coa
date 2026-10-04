@@ -15,9 +15,6 @@ Manastorm.ClientMode = 2
 # The compatibility donor run service is never registered.
 # AscensionCompat.Enable / remote-client admission remain core connection settings.
 
-# Native client proof for Mobility + Elemental Burst (502828).
-# 0: disabled (default). 1: patch Mobility 1300179-1300185 to family 38 in your private Manastorm stage.
-# Other spell families are not covered by this test. Original client rows are restored outside that stage.
-# Uses server DataDir/dbc/Spell.dbc and native opcode 0x092A; no client files are modified.
-# Requires Manastorm.Enable=1, Manastorm.ClientMode=2 and a worldserver restart. Relog after enabling.
-Manastorm.MobilityClientFamily38Test = 0
+# Native Mobility covers all 36 listed class spell families automatically in Mode 2.
+# Runtime supporting auras follow the active mixture and are removed outside your Manastorm stage.
+# Requires the matching <DataDir>/dbc/Spell.dbc. No client files or SQL edits are needed.

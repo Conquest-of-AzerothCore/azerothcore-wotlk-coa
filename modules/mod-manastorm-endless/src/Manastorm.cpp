@@ -19,6 +19,7 @@
 #include "Language.h"
 #include <string>
 #include "Spell.h"
+#include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "Chat.h"
@@ -466,6 +467,8 @@ public:
             true,
             {
                 UNITHOOK_ON_DAMAGE,
+                UNITHOOK_ON_AURA_APPLY,
+                UNITHOOK_ON_AURA_REMOVE,
                 UNITHOOK_RESOLVE_SPELL_CAST,
                 UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE,
                 UNITHOOK_MODIFY_HEAL_RECEIVED,
@@ -490,6 +493,20 @@ public:
             attacker,
             victim,
             damage);
+    }
+
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (unit && aura && ManastormMobilityClient::IsMixture(aura->GetId()))
+            if (Player* player = unit->ToPlayer())
+                ManastormMobilityClient::SyncAuras(player);
+    }
+
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode /*mode*/) override
+    {
+        if (unit && application && ManastormMobilityClient::IsMixture(application->GetBase()->GetId()))
+            if (Player* player = unit->ToPlayer())
+                ManastormMobilityClient::OnMixtureRemoved(player);
     }
 
     void ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo) override
@@ -712,7 +729,7 @@ public:
 
     void OnPlayerMapChanged(Player* player) override
     {
-        ManastormMobilityClient::Sync(player);
+        ManastormMobilityClient::SyncAuras(player);
     }
 
     void OnPlayerLevelChanged(
