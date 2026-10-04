@@ -18,6 +18,7 @@
 #include "DBCStores.h"
 #include "GameObjectAI.h"
 #include "Log.h"
+#include "Map.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
@@ -567,6 +568,19 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 
     recvPacket.read_skip<uint8>();                          // counter, increments with every CANCEL packet, don't use for now
     recvPacket >> spellId;
+
+    // Preserve explicit cancellation. This opcode has no reason field, so a
+    // moving client cancellation cannot safely be treated as an automatic one.
+    if (_player->HasAura(1300179) || _player->HasManastormMovementGrace())
+    {
+        Spell const* current = _player->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+        Map const* map = _player->FindMap();
+        LOG_DEBUG("spells.scripts",
+            "Mobility client cancellation: requested={} current={} moving={} grace={} privateMap={}.",
+            spellId, current ? current->GetSpellInfo()->Id : 0,
+            _player->isMoving(), _player->HasManastormMovementGrace(),
+            map && map->IsScriptedPrivateInstance());
+    }
 
     _player->SpellQueue.clear();
 

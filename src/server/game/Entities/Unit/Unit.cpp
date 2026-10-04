@@ -4573,6 +4573,10 @@ bool Unit::CanCastSpellWhileMoving(SpellInfo const* info) const
 {
     if (!info)
         return false;
+    // All movement gates must agree on the active Manastorm mixture.
+    // Its aura 313 family differs from CoA class spells such as Elemental Burst.
+    if (HasManastormMovementGrace())
+        return true;
     if (IsPlayer() && getClass() == CLASS_STARCALLER &&
         (info->Id == 801990 || info->Id == 802682 || (HasAura(704772) && !info->IsPositive())))
         return true;
