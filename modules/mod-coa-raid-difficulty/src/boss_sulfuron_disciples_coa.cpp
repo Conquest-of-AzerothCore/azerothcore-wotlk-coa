@@ -24,19 +24,16 @@
  *
  *   Cull the Destroyer (Gehennas):
  *     Shadow Bolt - Cull     2105960 dummy -> 2105961 SCHOOL_DAMAGE (placeholder
- *                            base points 1: no "- Damage Info" aura family exists
- *                            for this pair anywhere in Spell.dbc, so - like the
- *                            still-unmapped Harbinger Priest ids 2105950-53
- *                            flagged in docs/coa/molten-core.md SS8 - this hit
- *                            deals its DBC placeholder amount until one is found;
- *                            not invented here).
+ *                            base points 1; the real damage comes from the
+ *                            "Harbinger Priests - Damage Info" family 2105950-53
+ *                            through coa_spell_damage_info, rev_20261004_92).
  *     Cauterize - Cull       2105966, direct SPELL_EFFECT_HEAL (self, real value
  *                            in the DBC, no dummy needed) - the "self-heal" half.
  *     Curse of Gehennas      2105973 dummy -> 2105974 SPELL_AURA_MOD_HEALING_PCT
  *                            -51% (real value) - the "curse" half.
  *
  *   Proxima the Opressor (Shazzrah):
- *     Shadow Bolt - Proxima  2105956 dummy -> 2105957 (same placeholder caveat).
+ *     Shadow Bolt - Proxima  2105956 dummy -> 2105957 (same Damage Info family).
  *     Dampen Magic - Proxima 2105963 dummy -> 2105964 SPELL_AURA_MOD_DAMAGE_
  *                            PERCENT_TAKEN -51%, self - mitigation, not a curse
  *                            on the raid; cadence copied from Shazzrah's own
@@ -49,7 +46,7 @@
  *                            (2105605/606) for the same reason.
  *
  *   Ebon the Cruel (Lucifron):
- *     Shadow Bolt - Ebon     2105958 dummy -> 2105959 (same placeholder caveat).
+ *     Shadow Bolt - Ebon     2105958 dummy -> 2105959 (same Damage Info family).
  *     Dark Mending - Ebon    2105965, direct SPELL_EFFECT_HEAL (self, real value,
  *                            no dummy) - the "self-heal" half.
  *     Curse of Lucifron      2105971 dummy -> 2105972 SPELL_AURA_MOD_POWER_COST_

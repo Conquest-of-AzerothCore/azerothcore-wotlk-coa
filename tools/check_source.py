@@ -33,7 +33,8 @@ SUITES = {
     },
     'molten-core-sql': {
         'paths': ['data/sql/updates/pending_db_world/*molten_core*.sql'],
-        'commands': [['tools/test_molten_core_smart_scripts_base_entry.py']],
+        'commands': [['tools/test_molten_core_smart_scripts_base_entry.py'],
+                     ['tools/test_molten_core_damage_info.py']],
     },
     'codestyle': {
         'paths': ['apps/codestyle/*', '.editorconfig'],

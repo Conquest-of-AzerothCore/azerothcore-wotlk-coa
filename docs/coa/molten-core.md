@@ -278,8 +278,8 @@ plain summon-and-buff) no longer carries a difficulty gate at all — the `min_d
 `CoaBossAI.cpp` check were dropped once removing Sulfuron's gate left every row wanting every difficulty.
 Each disciple runs a dummy→real-effect curse/self-heal pair read from `Spell.dbc`: Cull = Curse of Gehennas +
 Cauterize (real heal), Proxima = Dampen Magic + Arcane Instability (Shazzrah's own measured cadences), Ebon =
-Curse of Lucifron + Dark Mending (real heal); all three also carry a Shadow Bolt with no matching "- Damage
-Info" family, so it still deals DBC placeholder damage. Confirmed in-game (`verify-ABC.md`,
+Curse of Lucifron + Dark Mending (real heal); all three also carry a Shadow Bolt whose damage comes from the
+"Harbinger Priests - Damage Info" family (2105950-53, see §8 item 16). Confirmed in-game (`verify-ABC.md`,
 `impl-D-fixes.md`): d0 and d2 both now spawn 1 Corvus + the three disciples, all casting over a 90s window.
 Cadences are designed (every log entry reads `casts: 0`); Rapid Regeneration (804315) is left unwired, never
 observed.
@@ -874,8 +874,11 @@ wowhead.com/classic/guide/majordomo-executus-molten-core-strategy-wow-classic, W
 15. **Heating Up (Baron Geddon, 2105746) is not wired.** A `MOD_DAMAGE_PERCENT_DONE` self-stack aura with no
     `EffectTriggerSpell` anywhere pointing at it and no roll on its own base points — the DBC gives no
     evidence of what triggers it or by how much. Left unimplemented rather than inventing a stack/percentage.
-16. **Harbinger Priests' Damage Info is unmapped.** No "Harbinger Priest" info-aura family (2105950-53, seen
-    in inventory) was matched to a live cast; not one of the 12 pairs wired in §6, left unmapped.
+16. **Harbinger Priests' Damage Info maps the three disciples' Shadow Bolts.** The info-aura family 2105950-53
+    (base points 1600/2128/2656/3200, "Sulfuron Harbinger's Priests pull their base spells BASE DAMAGE from this
+    Aura") now drives Cull 2105961, Proxima 2105957 and Ebon 2105959 (rev_20261004_92). Corvus's own Shadow Bolt
+    (2105954/2105955) is not cast by the stock Flamewaker Priest script and stays unmapped. The log corpus does
+    not record the pulls' difficulty, so the d0..d3 assignment rests on the aura family, not on a per-tier reading.
 17. **Sulfuron's own Dark Strike (19777) is dead code** — never `cast_start`s from Sulfuron himself; the
     Flamewaker Priest add casts the identical id instead. Not changed, flagged in case that was unintended.
 18. **Magmadar's CoA/BB health-coefficient outlier: accepted.** Every other boss with both readings lands the
