@@ -4,6 +4,7 @@
 #include "DBCStores.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
+#include "Opcodes.h"
 #include "ManastormMgr.h"
 #include "ManastormModuleConfig.h"
 #include "ManastormRun.h"
@@ -17,6 +18,7 @@
 #include "WorldSession.h"
 
 #include <array>
+#include <chrono>
 #include <filesystem>
 #include <string>
 
@@ -204,6 +206,47 @@ void ManastormMobilityClient::Sync(Player* player)
     SyncAuras(player);
 }
 
+void ManastormMobilityClient::PrepareEntry(Player* player)
+{
+    if (!IsNativePlayer(player) || player->GetSession()->PlayerLoading() ||
+        !player->IsInWorld() || !IsOwnedStage(player) || player->HasManastormMovementGrace())
+        return;
+
+    // Prime only unused client slots. Do not create server auras, replace buffs or grant server grace.
+    std::array<uint8, FAMILIES.size()> slots{};
+    std::size_t count = 0;
+    Unit::VisibleAuraMap const* visible = player->GetVisibleAuras();
+    for (uint16 slot = 0; slot < MAX_AURAS && count < slots.size(); ++slot)
+        if (visible->find(uint8(slot)) == visible->end())
+            slots[count++] = uint8(slot);
+
+    if (count != slots.size())
+        return;
+
+    // OnPlayerEnterAll follows SendInitSelf, while world-transfer initialization is still in progress.
+    // Stock SMSG_AURA_UPDATE is one entry per packet; use the core's normal flag and duration layout.
+    for (std::size_t index = 0; index < slots.size(); ++index)
+    {
+        WorldPacket packet(SMSG_AURA_UPDATE, 32);
+        packet << player->GetPackGUID();
+        packet << slots[index] << uint32(FIRST_SUPPORT_SPELL + uint32(index));
+        packet << uint8(AFLAG_EFF_INDEX_0 | AFLAG_CASTER | AFLAG_POSITIVE | AFLAG_DURATION);
+        packet << uint8(player->GetLevel()) << uint8(1);
+        // Short finite lifetime is also a fallback if the client misses a removal.
+        packet << uint32(1) << uint32(1);
+        player->SendDirectMessage(&packet);
+    }
+    for (uint8 slot : slots)
+    {
+        WorldPacket packet(SMSG_AURA_UPDATE, 16);
+        packet << player->GetPackGUID() << slot << uint32(0);
+        player->SendDirectMessage(&packet);
+    }
+
+    LOG_DEBUG("spells.scripts", "Mobility entry preparation: primed {} client aura records for {}.",
+        slots.size(), player->GetGUID().ToString());
+}
+
 void ManastormMobilityClient::OnMixtureRemoved(Player* player)
 {
     if (!IsNativePlayer(player))
@@ -242,6 +285,7 @@ void ManastormMobilityClient::SyncAuras(Player* player)
         return;
     }
 
+    auto const start = std::chrono::steady_clock::now();
     for (std::size_t index = 0; index < FAMILIES.size(); ++index)
     {
         uint32 const id = FIRST_SUPPORT_SPELL + uint32(index);
@@ -255,4 +299,9 @@ void ManastormMobilityClient::SyncAuras(Player* player)
         support->SetDuration(source->GetDuration());
         support->SetNeedClientUpdateForTargets();
     }
+
+    auto const elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - start).count();
+    LOG_DEBUG("spells.scripts", "Mobility server aura synchronization: {} families for {} in {} ms.",
+        FAMILIES.size(), player->GetGUID().ToString(), elapsed);
 }

@@ -1148,6 +1148,7 @@ public:
             return;
 
         ManastormMgr::Instance().OnPlayerEnterMap(map, player);
+        ManastormMobilityClient::PrepareEntry(player);
     }
 };
 }
