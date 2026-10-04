@@ -122,7 +122,9 @@ namespace
         if (!player->HasSpell(spell))
             return "SET_MANASTORM_LOADOUT_NOT_KNOWN";
         for (auto const& other : Ascension::Manastorm::Gadgets)
-            if (other.family == gadget->family && other.rank > gadget->rank && player->HasSpell(other.spell))
+            // Passive upgrades modify the active gadget; they do not replace its loadout slot.
+            if (!other.passive && other.family == gadget->family &&
+                other.rank > gadget->rank && player->HasSpell(other.spell))
                 return "SET_MANASTORM_LOADOUT_BAD_RANK";
         if (slots[slot] == spell)
             return "SET_MANASTORM_LOADOUT_ALREADY_SET";

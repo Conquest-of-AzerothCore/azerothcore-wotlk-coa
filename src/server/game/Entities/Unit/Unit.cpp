@@ -5747,12 +5747,12 @@ void Unit::RemoveNotOwnSingleTargetAuras()
 
 bool Unit::HasManastormMovementGrace() const
 {
-    // Aura 313 is a private client extension. Only the eight authored Mobility Mixtures
-    // in an authorized scripted instance enable it; unrelated aura-313 class spells do not.
+    // Only the temporary Mobility Mixture auras grant movement grace.
+    // Learned duration upgrades (1300186-1300192) never grant it by themselves.
     Map const* map = FindMap();
     if (!IsPlayer() || !map || !map->IsScriptedPrivateInstance())
         return false;
-    for (uint32 spell : {1300179u, 1300186u, 1300187u, 1300188u, 1300189u, 1300190u, 1300191u, 1300192u})
+    for (uint32 spell = 1300179; spell <= 1300185; ++spell)
         if (HasAura(spell))
             return true;
     return false;
