@@ -237,19 +237,19 @@ pulses 10× at 1s intervals for 875-1999 damage, Armageddon's 2105748 hits all 1
 Health: `hp_d0..d3` 884,285/1,179,047/1,774,570/2,586,957 (rebuilt from a direct CoA video reading at
 Ascended — see §5).
 
-**Living Bomb explosion (designed, not corpus-evidenced — see §8).** The carrier aura (2105702-05) applies
-`SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` (227) on effect 0, not `SPELL_AURA_PERIODIC_TRIGGER_SPELL` (23)
-as its own self-damage trigger id might suggest; `spell_geddon_living_bomb_explosion_coa`
-(`boss_geddon_coa.cpp`) originally registered its `AfterEffectRemove` hook against the wrong aura name (23),
-so `AuraScript::CheckEffect` filtered it on every expiry and the handler never ran on any difficulty — the
-carrier only ever saw its own periodic 2105706 ticks, confirmed in three live trials before the fix. Fixed by
-binding the hook to 227, confirmed against `Spell.dbc` directly. Live re-verification (grouped 5-bot raid,
-Ascended) after the fix: 3/3 natural expiries produced the explosion, each bystander within 5 yd took exactly
-one 3200-damage hit (Normal-ladder figure; the far bot stayed outside 5 yd and never did), the carrier alone
-took its own periodic ticks, and all 3 expiries knocked the actual carrier back (`SMSG_MOVE_KNOCK_BACK`, 3/3).
-An earlier verification attempt with ungrouped bots wrongly reported zero bystander hits post-fix: each
-ungrouped bot gets its own personal raid instance, so no bystander was ever on the same map — a harness
-defect, not a mechanic defect, fixed by grouping the bots into one raid before entering the instance.
+**Living Bomb explosion (corpus-evidenced, DBC-driven).** Ascension's combat logs (2026-05-28 Ascended, 08-09
+Normal, 08-16 and 08-23 Mythic) show one `Living Bomb Explosion` per carrier at the aura-removal millisecond,
+dealt to the carrier itself and to a pet inside 5 yd; no player bystander was ever caught in one. The carrier
+aura (2105702 N / 03 H / 04 M / 05 A) applies `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` (227) on effect 0.
+`Spell.dbc` already holds the rest of the kit: the explosion 2105708/09/10/11 (its own damage: 1400-1600,
+1867-2133, 2334-2666, 2800-3200) and 2105712 `Living Bomb - Knock Up` (vertical `KNOCK_BACK`, Feather Fall 3s),
+radius from the hidden hit trigger 2105707 (SpellRadius 8, 5 yd). `spell_geddon_living_bomb_explosion_coa`
+(`boss_geddon_coa.cpp`) only adds the missing trigger: on `AURA_REMOVE_BY_EXPIRE` (not dispel, not death) Geddon
+casts explosion `2105708 + (carrierAura - 2105702)` on every hostile unit within 5 yd of the carrier, the carrier
+included, then Knock Up on the carrier. It had registered its `AfterEffectRemove` hook against aura name 23
+instead of 227, so it never ran before `d8c078a7b`; an earlier version also invented a 3200 x difficulty
+ladder, logged under the tick id 2105706, spared the carrier and launched at speed 10 without Feather Fall.
+Burning Ground (2105713-16), which the logs show landing on carriers after the explosion, is not implemented.
 
 ### Sulfuron Harbinger (12098)
 
@@ -1089,12 +1089,8 @@ evidence + source reads), fixed individually below. See `impl-G-mechanics.md` fo
    once the sons die) is unchanged, only the trigger condition and the 90s->60s safety-ceiling
    duration. Both thresholds rest on only 2 independent kills -- a strong first estimate, not a final
    number.
-10. **Baron Geddon's Living Bomb explodes on natural expiry.** 2105702-05 (the carrier aura) had no
-    explosion anywhere in the DBC kit. Per the user's own memory, on `AURA_REMOVE_BY_EXPIRE` only
-    (not dispel, not the carrier's death) the carrier now gets a light vertical launch and everyone
-    else within 5 yd takes fire damage, based on vanilla Living Bomb's own explosion (20476, 3200)
-    scaled by the same 1/1.44/1.88/2.32 ladder used everywhere else in this instance -- the user's
-    coefficient choice, not a measured value for this spell.
+10. **Baron Geddon's Living Bomb explodes on natural expiry.** Superseded by the corpus-evidenced
+    reading above: the explosion and Knock Up spells are DBC spells, not a designed ladder.
 11. **A portal to Ragnaros' lair appears once Majordomo is defeated.** `go_ragnaros_portal_coa`
     reuses the existing "Molten Core Instance Portal" template (181623, display 6450) rather than a
     new one; a static spawn at the room-center point (same point as the Sacrificial Chains,
