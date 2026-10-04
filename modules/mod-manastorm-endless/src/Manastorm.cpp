@@ -1,5 +1,6 @@
 #include "ManastormModuleConfig.h"
 #include "ManastormClientBridge.h"
+#include "ManastormMobilityClient.h"
 #include "ManastormMgr.h"
 
 #include "AllCreatureScript.h"
@@ -378,6 +379,8 @@ public:
             return;
         }
 
+        ManastormMobilityClient::Load();
+
         if (ManastormMgr::Instance().ReloadData())
         {
             LOG_INFO(LOG_FILTER,
@@ -688,6 +691,7 @@ public:
             "manastorm_playerscript",
             {
                 PLAYERHOOK_ON_LOGIN,
+                PLAYERHOOK_ON_MAP_CHANGED,
                 PLAYERHOOK_ON_LEVEL_CHANGED,
                 PLAYERHOOK_ON_GIVE_EXP,
                 PLAYERHOOK_ON_BEFORE_SEND_CHAT_MESSAGE,
@@ -703,6 +707,12 @@ public:
             ManastormMgr::Instance().OnPlayerLogin(player);
         // Native mode publishes false flags when disabled; Mode 1 sends no native configs.
         ManastormClientBridge::Instance().Login(player);
+        ManastormMobilityClient::Sync(player);
+    }
+
+    void OnPlayerMapChanged(Player* player) override
+    {
+        ManastormMobilityClient::Sync(player);
     }
 
     void OnPlayerLevelChanged(
