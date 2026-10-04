@@ -18,6 +18,7 @@
 #include "Language.h"
 #include <string>
 #include "Spell.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 #include "Chat.h"
 #include "../../mod-ascension-compat/src/AscensionManastormGadgets.h"
@@ -440,6 +441,8 @@ public:
             true,
             {
                 UNITHOOK_ON_DAMAGE,
+                UNITHOOK_RESOLVE_SPELL_CAST,
+                UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE,
                 UNITHOOK_MODIFY_HEAL_RECEIVED,
                 UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
                 UNITHOOK_MODIFY_MELEE_DAMAGE,
@@ -462,6 +465,49 @@ public:
             attacker,
             victim,
             damage);
+    }
+
+    void ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo) override
+    {
+        if (!ManastormModuleConfig::Enabled() || !spellInfo ||
+            spellInfo->Id == 93378 || spellInfo->Id == 93380 || spellInfo->Id == 93412)
+        {
+            return;
+        }
+
+        uint32 const rankedSpell = ManastormMgr::Instance().ResolveAffixRankSpell(caster, spellInfo->Id);
+        if (rankedSpell != spellInfo->Id)
+            if (SpellInfo const* rankedInfo = sSpellMgr->GetSpellInfo(rankedSpell))
+                spellInfo = rankedInfo;
+    }
+
+    void ModifySpellEffectBaseValue(
+        Unit const* caster,
+        SpellInfo const* spellInfo,
+        uint8 effectIndex,
+        float& value) override
+    {
+        if (!ManastormModuleConfig::Enabled() ||
+            !caster ||
+            !spellInfo ||
+            effectIndex != EFFECT_0 ||
+            (spellInfo->Id != 93378 && spellInfo->Id != 93380 && spellInfo->Id != 93412))
+        {
+            return;
+        }
+
+        // Preserve Fungal's summon gate, Toxic Spores' bounded lifetime and
+        // the cosmetic Energy helper's target shape; only their amount is ranked.
+        uint32 const rankedSpell = ManastormMgr::Instance().ResolveAffixRankSpell(caster, spellInfo->Id);
+        if (rankedSpell == spellInfo->Id)
+            return;
+
+        SpellInfo const* rankedInfo = sSpellMgr->GetSpellInfo(rankedSpell);
+        if (!rankedInfo || rankedInfo->Effects[EFFECT_0].RealPointsPerLevel != 0.0f)
+            return;
+
+        // Sample raw rank data; the original CalcValue applies caster modifiers once.
+        value = float(rankedInfo->Effects[EFFECT_0].CalcValue(nullptr));
     }
 
     void ModifyHealReceived(

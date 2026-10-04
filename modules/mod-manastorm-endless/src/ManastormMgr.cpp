@@ -7794,3 +7794,77 @@ ManastormRun* ManastormMgr::GetRunForStage(
 
     return run;
 }
+
+uint32 ManastormMgr::ResolveAffixRankSpell(Unit const* caster, uint32 spellId)
+{
+    // These are payload/controller roles, not necessarily the catalog's marker.
+    // Keep identical rank families and the existing Leeching/Reflecting callbacks.
+    uint32 affixId = 0;
+    uint8 role = 1;
+    switch (spellId)
+    {
+        case 93489: affixId = 11; break;
+        case 93365: affixId = 11; role = 2; break;
+        case 93355: affixId = 13; break;
+        case 93358: affixId = 13; role = 2; break;
+        case 93423: affixId = 23; break;
+        case 93420: affixId = 26; break;
+        case 94761: affixId = 28; break;
+        case 93378: affixId = 31; break;
+        case 93380: affixId = 31; role = 2; break;
+        case 93437: affixId = 33; break;
+        case 93370: affixId = 61; break;
+        case 93386: affixId = 101; break;
+        case 93319: affixId = 93316; break;
+        case 93342: affixId = 93341; break;
+        case 93406: affixId = 93403; role = 2; break;
+        case 93407: affixId = 93403; role = 3; break;
+        case 94754: affixId = 93510; break;
+        case 93412: affixId = 101; break;
+        default: return spellId;
+    }
+
+    if (!caster || !caster->IsInWorld())
+        return spellId;
+
+    Map const* map = caster->FindMap();
+    if (!map || !map->IsScriptedPrivateInstance())
+        return spellId;
+
+    ManastormRun* run = GetRunForStage(map->GetId(), map->GetInstanceId());
+    if (!run ||
+        (run->GetState() != ManastormRunState::Active &&
+         run->GetState() != ManastormRunState::StageComplete) ||
+        !run->HasStageAffix(affixId))
+    {
+        return spellId;
+    }
+
+    if (Player const* player = caster->ToPlayer())
+    {
+        if (GetRunFor(player) != run)
+            return spellId;
+    }
+    else if (Creature const* creature = caster->ToCreature())
+    {
+        if (creature->IsControlledByPlayer() ||
+            creature->IsCreatedByPlayer() ||
+            creature->IsCharmedOwnedByPlayerOrPlayer() ||
+            (!run->HasCreatureAffix(creature->GetGUID(), affixId) &&
+             !ManastormAffixEngine::Instance().IsAffixHelperCreature(creature->GetEntry())))
+        {
+            return spellId;
+        }
+    }
+    else
+        return spellId;
+
+    ManastormAffixDefinition const* definition =
+        ManastormDataStore::Instance().GetAffixById(affixId);
+    if (!definition)
+        return spellId;
+
+    uint32 const rankedSpell =
+        definition->GetRankSpell(role, run->GetStageAffixRank(affixId));
+    return rankedSpell && sSpellMgr->GetSpellInfo(rankedSpell) ? rankedSpell : spellId;
+}

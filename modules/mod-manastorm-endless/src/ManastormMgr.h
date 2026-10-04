@@ -103,6 +103,8 @@ public:
         Unit* victim,
         uint32 damage);
 
+    uint32 ResolveAffixRankSpell(Unit const* caster, uint32 spellId);
+
     uint32 ScaleCreatureDamage(
         Unit* attacker,
         Unit* victim,
