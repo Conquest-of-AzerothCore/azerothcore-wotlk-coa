@@ -1804,6 +1804,14 @@ struct SpellCategoryEntry
     uint32 Flags;
 };
 
+// Ascension: named targets for spell modifiers with an empty class mask.
+struct SpellAffectEntry
+{
+    uint32 ID;                                              // 0
+    uint32 ModifierSpellID;                                 // 1
+    int32 AffectedSpellID;                                  // 2: negative means all ranks of the root
+};
+
 struct SpellDifficultyEntry
 {
     uint32     ID;                                          // 0

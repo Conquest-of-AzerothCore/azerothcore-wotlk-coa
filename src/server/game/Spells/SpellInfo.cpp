@@ -28,6 +28,8 @@
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include <algorithm>
+#include <unordered_map>
+#include <vector>
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType)
 {
@@ -1449,6 +1451,22 @@ uint8 SpellInfo::CalcMaxAuraStacks(Unit* caster) const
     return uint8(std::clamp(maximum, 1.0f, 255.0f));
 }
 
+namespace
+{
+    // Build once after DBC loading; avoid scanning the table on every modifier check.
+    std::unordered_map<uint32, std::vector<int32>> const& SpellAffectTargets()
+    {
+        static std::unordered_map<uint32, std::vector<int32>> const targets = []
+        {
+            std::unordered_map<uint32, std::vector<int32>> byModifier;
+            for (SpellAffectEntry const* entry : sSpellAffectStore)
+                byModifier[entry->ModifierSpellID].push_back(entry->AffectedSpellID);
+            return byModifier;
+        }();
+        return targets;
+    }
+}
+
 bool SpellInfo::IsAffectedBySpellMods() const
 {
     return !(AttributesEx3 & SPELL_ATTR3_IGNORE_CASTER_MODIFIERS);
@@ -1530,6 +1548,21 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
     if (Id == 504705 && SpellFamilyName == 35 && affectSpell->SpellFamilyName == 35 &&
         (mod->mask & flag96(0, 16384, 0)))
         return true;
+
+    if (!mod->mask)
+    {
+        auto const& targets = SpellAffectTargets();
+        auto const named = targets.find(mod->spellId);
+        if (named != targets.end())
+        {
+            uint32 const firstRank = sSpellMgr->GetFirstSpellInChain(Id);
+            return std::any_of(named->second.begin(), named->second.end(), [&](int32 target)
+            {
+                // Widen before negating so even INT32_MIN cannot overflow.
+                return target < 0 ? uint32(-int64(target)) == firstRank : uint32(target) == Id;
+            });
+        }
+    }
 
     return IsAffected(affectSpell->SpellFamilyName, mod->mask);
 }

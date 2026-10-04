@@ -105,6 +105,7 @@ char constexpr SkillTiersfmt[] = "nxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiii";
 char constexpr SoundEntriesfmt[] = "nxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 char constexpr SpellCastTimefmt[] = "nixx";
 char constexpr SpellCategoryfmt[] = "ni";
+char constexpr SpellAffectfmt[] = "nii";
 char constexpr SpellDifficultyfmt[] = "niiii";
 char constexpr SpellDurationfmt[] = "niii";
 char constexpr SpellEntryfmt[] = "niiiiiiiiiiiixixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifxiiiiiiiiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffiiiiiiiiiiiiiissssssssssssssssxssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiixfffxxxiiiiixxfffxx";

@@ -28,6 +28,7 @@
 #include "TransportMgr.h"
 #include "World.h"
 #include <algorithm>
+#include <filesystem>
 #include <map>
 
 typedef std::map<uint16, uint32> AreaFlagByAreaID;
@@ -169,6 +170,7 @@ PetFamilySpellsStore sPetFamilySpellsStore;
 
 DBCStorage <SpellCastTimesEntry> sSpellCastTimesStore(SpellCastTimefmt);
 DBCStorage <SpellCategoryEntry> sSpellCategoryStore(SpellCategoryfmt);
+DBCStorage <SpellAffectEntry> sSpellAffectStore(SpellAffectfmt);
 DBCStorage <SpellDifficultyEntry> sSpellDifficultyStore(SpellDifficultyfmt);
 DBCStorage <SpellDurationEntry> sSpellDurationStore(SpellDurationfmt);
 DBCStorage <SpellFocusObjectEntry> sSpellFocusObjectStore(SpellFocusObjectfmt);
@@ -378,6 +380,11 @@ void LoadDBCStores(std::string const& dataPath)
     LOAD_DBC(sSpellStore,                           "Spell.dbc",                            "spell_dbc");
     LOAD_DBC(sSpellCastTimesStore,                  "SpellCastTimes.dbc",                   "spellcasttimes_dbc");
     LOAD_DBC(sSpellCategoryStore,                   "SpellCategory.dbc",                    "spellcategory_dbc");
+    // Optional Ascension extension; stock clients do not ship this table.
+    if (std::filesystem::exists(dbcPath + "SpellAffect.dbc"))
+        LOAD_DBC(sSpellAffectStore,                 "SpellAffect.dbc",                      nullptr);
+    else
+        LOG_WARN("server.loading", "SpellAffect.dbc not found in {}: named spell modifiers will not apply", dbcPath);
     LOAD_DBC(sSpellDifficultyStore,                 "SpellDifficulty.dbc",                  "spelldifficulty_dbc");
     LOAD_DBC(sSpellDurationStore,                   "SpellDuration.dbc",                    "spellduration_dbc");
     LOAD_DBC(sSpellFocusObjectStore,                "SpellFocusObject.dbc",                 "spellfocusobject_dbc");
