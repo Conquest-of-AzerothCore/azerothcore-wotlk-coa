@@ -21,6 +21,8 @@
 #include "SpellScriptLoader.h"
 #include "molten_core.h"
 
+#include <algorithm>
+
 enum Texts
 {
     SAY_SUMMON_MAJ                          = 0,
@@ -49,6 +51,8 @@ enum Spells
     SPELL_RAGEMERGE                         = 20568,
     SPELL_RAGNAROS_SUBMERGE_EFFECT          = 21859,    // Applies pacify state and applies all schools immunity (server side)
     SPELL_ELEMENTAL_FIRE_KILL               = 19773,    // Spell is used only on Majordomo
+    SPELL_SUPER_NOVA_A                      = 2108627,  // Ascension: D0..D3 are consecutive ids, area hit on every enemy at any distance
+    SPELL_SUPER_NOVA_B                      = 2108662,  // Ascension: second group, D0..D3 consecutive ids
     SPELL_MIGHT_OF_RAGNAROS                 = 21154,
     SPELL_INTENSE_HEAT                      = 21155,
     SPELL_SUMMON_SONS_FLAME                 = 21108,    // Trigger the eight spells summoning the Son of Flame adds
@@ -84,6 +88,8 @@ enum Events
     EVENT_MELEE_SCAN,
     EVENT_SUBMERGE,
     EVENT_LAVA_BURST_TRIGGER,
+    EVENT_SUPER_NOVA_A,
+    EVENT_SUPER_NOVA_B,
 
     // Submerge
     EVENT_EMERGE,
@@ -118,6 +124,12 @@ enum Misc
 // applied once, right before he can be attacked, so FlexHealth's own "keep the current
 // percentage" recompute (OnUnitEnterCombat) carries the 50% through unchanged.
 constexpr uint32 RAGNAROS_COA_ENGAGE_HEALTH_PCT = 50;
+
+// Archive combat logs (12 Ragnaros pulls): Super Nova group A first lands 10.0s after the pull, group B 15.0s
+// after it, and each repeats every 12.0s (12.0-12.2s between salvos) while Ragnaros is emerged.
+constexpr Milliseconds SUPER_NOVA_A_FIRST = 10000ms;
+constexpr Milliseconds SUPER_NOVA_B_FIRST = 15000ms;
+constexpr Milliseconds SUPER_NOVA_PERIOD = 12000ms;
 
 // Live-Ascension evidence (diag-G3.md "Ascension evidence" #1, 54-log corpus, 2 full kills):
 // Ragnaros submerges at health-percentage thresholds, not the stock 180s elapsed-time timer --
@@ -342,6 +354,18 @@ struct boss_ragnaros : public BossAI
                     DoCastAOE(SPELL_LAVA_BURST);
                     break;
                 }
+                case EVENT_SUPER_NOVA_A:
+                {
+                    DoCastSelf(SuperNovaFor(SPELL_SUPER_NOVA_A));
+                    events.Repeat(SUPER_NOVA_PERIOD);
+                    break;
+                }
+                case EVENT_SUPER_NOVA_B:
+                {
+                    DoCastSelf(SuperNovaFor(SPELL_SUPER_NOVA_B));
+                    events.Repeat(SUPER_NOVA_PERIOD);
+                    break;
+                }
                 case EVENT_MELEE_SCAN:
                 {
                     // ReselectVictim() in the threat system already prefers
@@ -486,10 +510,17 @@ private:
         events.RescheduleEvent(EVENT_WRATH_OF_RAGNAROS, 30s, PHASE_EMERGED, PHASE_EMERGED);
         events.RescheduleEvent(EVENT_HAND_OF_RAGNAROS, 25s, PHASE_EMERGED, PHASE_EMERGED);
         events.RescheduleEvent(EVENT_LAVA_BURST, 10s, PHASE_EMERGED, PHASE_EMERGED);
+        events.RescheduleEvent(EVENT_SUPER_NOVA_A, SUPER_NOVA_A_FIRST, PHASE_EMERGED, PHASE_EMERGED);
+        events.RescheduleEvent(EVENT_SUPER_NOVA_B, SUPER_NOVA_B_FIRST, PHASE_EMERGED, PHASE_EMERGED);
         if (!_hasSubmergedTwice)
             events.RescheduleEvent(EVENT_SUBMERGE, 500ms, PHASE_EMERGED, PHASE_EMERGED);
         events.RescheduleEvent(EVENT_MIGHT_OF_RAGNAROS, 11s, PHASE_EMERGED, PHASE_EMERGED);
         events.RescheduleEvent(EVENT_MELEE_SCAN, 500ms, PHASE_EMERGED, PHASE_EMERGED);
+    }
+
+    uint32 SuperNovaFor(uint32 baseSpell) const
+    {
+        return baseSpell + std::min<uint32>(uint32(me->GetMap()->GetSpawnMode()), 3);
     }
 
     bool IsVictimWithinMeleeRange() const

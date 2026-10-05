@@ -363,7 +363,7 @@ players (not itself) and killing it removes the debuff from them.
 | Hand of Ragnaros | vanilla id 19780 shared with Sulfuron (whose own schedule already resolves it correctly via `SpellDifficulty.dbc`) | `boss_ragnaros.cpp` cast 19780 on self — would have silently broken Sulfuron's correct Heroic+ resolution if patched by id override | repointed to CoA's own 2108612 (own `SpellDifficulty` group 2213), cast changed self→victim to match the new spell's target field | measured (dbc group) + designed (call-site fix) | — |
 | Wrath of Ragnaros | exclusive caster (only `boss_ragnaros.cpp`) | 20566 | repointed to 2108623 (group 2215) | measured (exclusivity) + dbc | — |
 | Magma Blast | exclusive caster, dummy effect with no native trigger | 20565 | repointed to 2108607; new `SpellScript` casts the damage effect 2108608, already bound to Damage Info from rev_83 | measured + dbc | — |
-| Sulfuras Slam, both Super Nova groups, Magma Splash, Unbearable Heat, Magma Strike, Fire Strike/Fierce Fire Strike, Meteor | in the CoA kit, no stock choreography beat matches them | not wired | not wired | exiles-kit only | No safe mapping without a log or a maintainer ruling — listed in §8 |
+| Sulfuras Slam, Magma Splash, Unbearable Heat, Magma Strike, Fire Strike/Fierce Fire Strike, Meteor | in the CoA kit, no stock choreography beat matches them | not wired | not wired | exiles-kit only | No safe mapping without a log or a maintainer ruling — listed in §8 |
 | Submerge / Sons of Flame / knockback timers | stock, all vanilla, unchanged (180s submerge, 90s duration) | unchanged | unchanged | measured (stock file) | Whether the stock script's vanilla-id casts already resolve to the matching CoA ids via the core's own `SpellDifficulty` chain (as they do for Sulfuron) was not confirmed at runtime this session |
 
 Health: `hp_d0..d3` 2,394,118/3,192,157/4,747,960/7,058,824 — d0 and d3 are both direct CoA video readings
@@ -830,11 +830,12 @@ wowhead.com/classic/guide/majordomo-executus-molten-core-strategy-wow-classic, W
 5. **Gehennas procs.** Curse of Gehennas's dispel-punish mana-burn (2105423/24) needs a `SpellScript`
    triggered on dispel, which the timer-based schedule engine has no hook for. Not added; needs either a new
    engine hook or acceptance that this proc is out of scope for the data-driven path.
-6. **Ragnaros abilities not wired**: Sulfuras Slam, both Super Nova groups (2108627-30 and 2108662-65 — which
-   is "base" vs. a variant is itself unresolved), Magma Splash, Unbearable Heat, Magma Strike, Fire
+6. **Ragnaros abilities not wired**: Sulfuras Slam, Magma Splash, Unbearable Heat, Magma Strike, Fire
    Strike/Fierce Fire Strike, and Meteor timing (2108762, already bound to Damage Info via §6 but nothing
    casts it). None have a stock choreography beat to attach to without inventing one; needs a combat log or an
-   explicit maintainer ruling per ability.
+   explicit maintainer ruling per ability. Both Super Nova groups are wired (2108627-30 first at 10s, 2108662-65
+   first at 15s, each every 12s while emerged: the logs show two groups, not a base and a variant). Their last
+   phase differs in the logs (group B every 10.5-10.6s in the Mythic pulls only, group A rare) and is not modelled.
 7. **~~Lucifron's Flamewaker Protectors vs. a player's memory.~~ Resolved: removed, by player decision
    (`rev_20260930_98`).** This item previously read the export's own static placement (2 adds ~4 yd from
    Lucifron) as outweighing a "no adds" report. On a direct, later in-game account of the correct spot and "no

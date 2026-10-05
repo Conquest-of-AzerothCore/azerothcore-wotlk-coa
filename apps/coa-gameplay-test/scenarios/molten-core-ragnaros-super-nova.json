@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "name": "Molten Core: Ragnaros casts both Super Nova groups from 10s and 15s, every 12s",
+  "contract": [
+    "Archive WoWCombatLog evidence (12 Ragnaros pulls): Super Nova group A (2108627-30) first lands 10.0s after the pull and group B (2108662-65) 15.0s after it,",
+    "each repeating every 12.0s (12.0-12.2s between salvos) while Ragnaros is emerged. The Normal ids 2108627 and 2108662 are the ones this fixture",
+    "resolves. The scenario asserts both groups are silent before their first cast, then land, then repeat."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 409,
+    "x": 1144.6,
+    "y": -1020.5,
+    "z": -185.6,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 11502,
+      "health": 4000000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000000,
+      "maximum": 2000000000,
+      "label": "Configure the survival health before aggressive creatures can attack"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Molten Core",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 409
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the settling",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "label": "Engage the boss",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the boss fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11502,
+      "spell": 2108627,
+      "equals": 0,
+      "label": "Super Nova group A has not landed before its 10s first cast"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11502,
+      "spell": 2108662,
+      "equals": 0,
+      "label": "Super Nova group B has not landed before its 15s first cast"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11502,
+      "spell": 2108627,
+      "min": 1,
+      "within_ms": 6000,
+      "label": "Super Nova group A lands about 10s after the pull"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11502,
+      "spell": 2108662,
+      "min": 1,
+      "within_ms": 8000,
+      "label": "Super Nova group B lands about 15s after the pull"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11502,
+      "spell": 2108627,
+      "min": 2,
+      "within_ms": 14000,
+      "label": "Super Nova group A repeats 12s after its first cast"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 11502,
+      "spell": 2108662,
+      "min": 2,
+      "within_ms": 14000,
+      "label": "Super Nova group B repeats 12s after its first cast"
+    }
+  ]
+}
