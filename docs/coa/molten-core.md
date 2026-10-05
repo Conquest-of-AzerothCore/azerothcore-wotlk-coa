@@ -1199,8 +1199,8 @@ evidence + source reads), fixed individually below. See `impl-G-mechanics.md` fo
    script: `SPELL_PANIC_COA` is 2105309 and the body's `EVENT_PANIC_COA` repeats on a flat 40s (first cast
    still at the previous, unmeasured 9500ms offset), on every difficulty (Normal through Ascended, the body
    script is shared). Not the "Bellowing Roar"/"Ancient Dread/
-   Fury/Despair/Hysteria" family (2105308/2105310-13) the task brief initially named, which exist as catalog
-   ids but never fire in any of the 54 logs. The hound's own kit has no fear anywhere: its action-type-88
+   Fury/Despair/Hysteria" family (2105308/2105310-13) the task brief initially named, which the body does cast
+   in the archive logs as a 66.6-70.2s raid cycle (not a fear; see the Ancient cycle in `boss_magmadar_coa.cpp`). The hound's own kit has no fear anywhere: its action-type-88
    random pool (now decoded, see the trash table above) is Ground Stomp/Cauterizing Flames/Withering Heat/
    Ancient Despair/Ancient Hysteria/Ancient Dread — stun, resistance and stat effects, not fear — confirmed
    both by static decoding and by the corpus (no Panic or any `MOD_FEAR` aura ever recorded on the hound, any

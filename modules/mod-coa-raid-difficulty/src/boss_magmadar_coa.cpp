@@ -15,12 +15,17 @@
  *
  * The body itself keeps its stock Frenzy/Lava Bomb timers (vanilla ids)
  * unchanged - no log ever caught them being wrong. Of its own kit (Fierce
- * Blow, Bellowing Roar, Ancient Despair/Hysteria/Dread/Fury) only Fierce Blow
- * has a measured timer: on the tank, first cast median 8.5s after the pull
- * (8 pulls), then a repeat median of 7.7s, 82% of 222 repeats between 6s and
- * 10s. It is drawn from the 6-10s window for the first cast and every repeat,
- * so the cast cannot be predicted. The rest stays unused, as Ragnaros's
- * unmatched kit entries do.
+ * Blow, Bellowing Roar, Ancient Despair/Hysteria/Dread/Fury) Fierce Blow and
+ * the Ancient cycle have measured timers. Fierce Blow: on the tank, first cast
+ * median 8.5s after the pull (8 pulls), then a repeat median of 7.7s, 82% of
+ * 222 repeats between 6s and 10s, drawn from the 6-10s window for the first
+ * cast and every repeat so the cast cannot be predicted. The Ancient cycle
+ * (4 pulls with it, 2026-05-28 to 2026-08-23): one area spell on the raid,
+ * always in the order Hysteria, Dread, Fury, Despair, first cast 31.9-35.9s
+ * after the pull, then 66.6-70.2s between casts (66.7s on 05-28 and 08-23,
+ * 70.0-70.2s on 08-16); the starting spell differs per pull, so it is drawn
+ * at random. Bellowing Roar stays unused, as Ragnaros's unmatched kit entries
+ * do.
  *
  * Panic is the one body cast the corpus does measure (research-H3.md): the
  * body's real fear is Ascension's own Panic (2105309, self+area
@@ -50,6 +55,7 @@
 #include "../../../src/server/scripts/EasternKingdoms/BlackrockMountain/MoltenCore/molten_core.h"
 
 #include <algorithm>
+#include <array>
 
 namespace
 {
@@ -66,6 +72,10 @@ namespace
         SPELL_LAVA_BOMB_MELEE_COA       = 19411,
         SPELL_LAVA_BOMB_RANGED_COA      = 20474,
         SPELL_FIERCE_BLOW_COA           = 975011,
+        SPELL_ANCIENT_HYSTERIA_COA      = 2105311,
+        SPELL_ANCIENT_DREAD_COA         = 2105312,
+        SPELL_ANCIENT_FURY_COA          = 2105313,
+        SPELL_ANCIENT_DESPAIR_COA       = 2105310,
 
         // Heads
         SPELL_HEAD_ENRAGE               = 2105307,
@@ -88,6 +98,7 @@ namespace
         EVENT_LAVA_BOMB_MELEE_COA,
         EVENT_LAVA_BOMB_RANGED_COA,
         EVENT_FIERCE_BLOW_COA,
+        EVENT_ANCIENT_CYCLE_COA,
         EVENT_CORE_HOUND_SPAWN_COA,
     };
 
@@ -101,6 +112,13 @@ namespace
 
     constexpr Milliseconds FIERCE_BLOW_MIN_COA = 6000ms;
     constexpr Milliseconds FIERCE_BLOW_MAX_COA = 10000ms;
+    constexpr std::array<uint32, 4> ANCIENT_CYCLE_COA = {
+        SPELL_ANCIENT_HYSTERIA_COA, SPELL_ANCIENT_DREAD_COA, SPELL_ANCIENT_FURY_COA, SPELL_ANCIENT_DESPAIR_COA
+    };
+    constexpr Milliseconds ANCIENT_FIRST_MIN_COA = 31900ms;
+    constexpr Milliseconds ANCIENT_FIRST_MAX_COA = 35900ms;
+    constexpr Milliseconds ANCIENT_REPEAT_MIN_COA = 66600ms;
+    constexpr Milliseconds ANCIENT_REPEAT_MAX_COA = 70200ms;
     constexpr float MELEE_TARGET_LOOKUP_DIST = 10.0f;
     constexpr float HEAD_OFFSET_DIST = 3.0f;
     constexpr float HEAD_OFFSET_ANGLE = 0.55f;
@@ -144,6 +162,8 @@ namespace
             events.ScheduleEvent(EVENT_LAVA_BOMB_MELEE_COA, 12s);
             events.ScheduleEvent(EVENT_LAVA_BOMB_RANGED_COA, 15s);
             events.ScheduleEvent(EVENT_FIERCE_BLOW_COA, FIERCE_BLOW_MIN_COA, FIERCE_BLOW_MAX_COA);
+            events.ScheduleEvent(EVENT_ANCIENT_CYCLE_COA, ANCIENT_FIRST_MIN_COA, ANCIENT_FIRST_MAX_COA);
+            _ancientIndex = urand(0, uint32(ANCIENT_CYCLE_COA.size()) - 1);
             // Designed: no log measures the heads or the hound adds, only
             // that #5120 says the heads exist and cast, and the player
             // report asks for periodic Core Hound reinforcements.
@@ -199,6 +219,13 @@ namespace
                     events.Repeat(FIERCE_BLOW_MIN_COA, FIERCE_BLOW_MAX_COA);
                     break;
                 }
+                case EVENT_ANCIENT_CYCLE_COA:
+                {
+                    DoCastSelf(ANCIENT_CYCLE_COA[_ancientIndex]);
+                    _ancientIndex = (_ancientIndex + 1) % ANCIENT_CYCLE_COA.size();
+                    events.Repeat(ANCIENT_REPEAT_MIN_COA, ANCIENT_REPEAT_MAX_COA);
+                    break;
+                }
                 case EVENT_CORE_HOUND_SPAWN_COA:
                 {
                     // Designed: 2 hounds, no confirmed count or cadence.
@@ -209,6 +236,9 @@ namespace
                 }
             }
         }
+
+    private:
+        uint32 _ancientIndex = 0;
     };
 
     struct npc_magmadar_head_coa : public ScriptedAI
