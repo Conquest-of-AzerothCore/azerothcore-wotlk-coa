@@ -38,7 +38,15 @@ enum Spells
     // Core Rager
     SPELL_MANGLE                = 19820,
     SPELL_FULL_HEAL             = 17683,
+    SPELL_FIERCE_BLOW_COA       = 975011,   // CoA addition
 };
+
+// CoA addition: Fierce Blow is drawn from a window so it cannot be predicted. First cast: min-max of 6 logged
+// first casts (3.5-5.6s). Repeat: 6-10s holds 84% of 151 logged repeats.
+constexpr uint32 FIERCE_BLOW_FIRST_MIN = 3500;
+constexpr uint32 FIERCE_BLOW_FIRST_MAX = 5600;
+constexpr uint32 FIERCE_BLOW_MIN = 6000;
+constexpr uint32 FIERCE_BLOW_MAX = 10000;
 
 struct boss_golemagg : public BossAI
 {
@@ -117,7 +125,8 @@ struct npc_core_rager : public ScriptedAI
     npc_core_rager(Creature* creature) : ScriptedAI(creature),
         instance(creature->GetInstanceScript()),
         mangleTimer(7000),
-        rangeCheckTimer(1000)
+        rangeCheckTimer(1000),
+        fierceBlowTimer(urand(FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX))
     {
     }
 
@@ -125,6 +134,7 @@ struct npc_core_rager : public ScriptedAI
     {
         mangleTimer = 7000;               // These times are probably wrong
         rangeCheckTimer = 1000;
+        fierceBlowTimer = urand(FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
 
         if (instance->GetBossState(DATA_GOLEMAGG) == DONE)
             DoCastSelf(SPELL_CORE_RAGER_QUIET_SUICIDE, true);
@@ -180,6 +190,16 @@ struct npc_core_rager : public ScriptedAI
             mangleTimer -= diff;
         }
 
+        if (fierceBlowTimer <= diff)
+        {
+            DoCastVictim(SPELL_FIERCE_BLOW_COA);
+            fierceBlowTimer = urand(FIERCE_BLOW_MIN, FIERCE_BLOW_MAX);
+        }
+        else
+        {
+            fierceBlowTimer -= diff;
+        }
+
         DoMeleeAttackIfReady();
     }
 
@@ -187,6 +207,7 @@ private:
     InstanceScript* instance;
     uint32 mangleTimer;
     uint32 rangeCheckTimer;
+    uint32 fierceBlowTimer;
 };
 
 void AddSC_boss_golemagg()

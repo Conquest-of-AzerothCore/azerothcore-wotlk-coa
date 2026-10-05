@@ -67,6 +67,7 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 
+#include <algorithm>
 #include <list>
 #include <unordered_map>
 #include <unordered_set>
@@ -91,7 +92,9 @@ namespace
         // "Hidden Area Damage" ids, not a single id the core resolves by itself).
         uint32 effect[MAX_RAID_DIFFICULTY];
         uint32 firstMs;
+        uint32 firstMaxMs;      // above firstMs: the first cast lands anywhere in the window
         uint32 periodMs;        // 0 casts once
+        uint32 periodMaxMs;     // above periodMs: each repeat is drawn from the window
         uint8 hpPct;            // > 0: once below this health instead of on a clock
         uint8 target;
     };
@@ -163,7 +166,8 @@ namespace
         uint32 rows = 0;
         if (QueryResult result = WorldDatabase.Query(
                 "SELECT entry, spell_d0, spell_d1, spell_d2, spell_d3, effect_d0, effect_d1, effect_d2, effect_d3, "
-                "first_ms, period_ms, hp_pct, target FROM coa_boss_schedule ORDER BY entry, idx"))
+                "first_ms, first_max_ms, period_ms, period_max_ms, hp_pct, target "
+                "FROM coa_boss_schedule ORDER BY entry, idx"))
         {
             do
             {
@@ -176,9 +180,11 @@ namespace
                 for (uint8 i = 0; i < MAX_RAID_DIFFICULTY; ++i)
                     row.effect[i] = f[5 + i].Get<uint32>();
                 row.firstMs = f[9].Get<uint32>();
-                row.periodMs = f[10].Get<uint32>();
-                row.hpPct = f[11].Get<uint8>();
-                row.target = f[12].Get<uint8>();
+                row.firstMaxMs = std::max(row.firstMs, f[10].Get<uint32>());
+                row.periodMs = f[11].Get<uint32>();
+                row.periodMaxMs = std::max(row.periodMs, f[12].Get<uint32>());
+                row.hpPct = f[13].Get<uint8>();
+                row.target = f[14].Get<uint8>();
 
                 g_bosses[entry].rows.push_back(row);
                 ++rows;
@@ -213,7 +219,8 @@ namespace
             // ExecuteEvent returns it to mean that nothing is due.
             for (uint32 i = 0; i < _data->rows.size(); ++i)
                 if (!_data->rows[i].hpPct)
-                    _events.ScheduleEvent(i + 1, Milliseconds(_data->rows[i].firstMs));
+                    _events.ScheduleEvent(i + 1, Milliseconds(_data->rows[i].firstMs),
+                                          Milliseconds(_data->rows[i].firstMaxMs));
 
             if (_data->berserkMs)
                 _events.ScheduleEvent(EVENT_BERSERK, Milliseconds(_data->berserkMs));
@@ -303,7 +310,7 @@ namespace
                     Cast(row, spell);
 
                 if (row.periodMs && !row.hpPct)
-                    _events.ScheduleEvent(eventId, Milliseconds(row.periodMs));
+                    _events.ScheduleEvent(eventId, Milliseconds(row.periodMs), Milliseconds(row.periodMaxMs));
 
                 // One cast per update. A second one would interrupt the first.
                 if (me->HasUnitState(UNIT_STATE_CASTING))

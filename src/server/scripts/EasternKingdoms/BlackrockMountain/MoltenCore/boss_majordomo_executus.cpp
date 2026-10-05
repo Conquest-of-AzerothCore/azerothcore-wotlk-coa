@@ -65,6 +65,7 @@ enum Spells
     SPELL_HATE_TO_ZERO                      = 20538,    // Threat reset after each teleport. Server side
     SPELL_SEPARATION_ANXIETY                = 21094,    // Majordomo's aura on his adds; one over 40 yd casts 21095
     SPELL_SEPARATION_ANXIETY_MINION         = 21095,
+    SPELL_FIERCE_BLOW_COA                   = 975011,   // CoA addition
 
     // Outro & Ragnaros intro
     SPELL_TELEPORT_SELF                     = 19484,
@@ -82,6 +83,7 @@ enum Events
     EVENT_TELEPORT_TARGET,
     EVENT_AEGIS_OF_RAGNAROS,
     EVENT_SACRIFICIAL_CHAINS,               // CoA addition (rev_20260930_97)
+    EVENT_FIERCE_BLOW_COA,                  // CoA addition
 
     EVENT_DEFEAT_OUTRO_1                    = 1,
     EVENT_DEFEAT_OUTRO_2,
@@ -270,6 +272,10 @@ struct boss_majordomo : public BossAI
         // CoA addition (rev_20260930_97): see NPC_SACRIFICIAL_CHAINS_COA above.
         events.ScheduleEvent(EVENT_SACRIFICIAL_CHAINS, 29s, PHASE_COMBAT, PHASE_COMBAT);
 
+        // CoA addition: first cast median 8.2s (8 pulls), repeat median 7.8s with 80% of 223 repeats in 6-10s;
+        // drawn from that window so the cast cannot be predicted.
+        events.ScheduleEvent(EVENT_FIERCE_BLOW_COA, 6s, 10s, PHASE_COMBAT, PHASE_COMBAT);
+
         aliveMinionsGUIDS.clear();
         aliveMinionsGUIDS = static_minionsGUIDS;
     }
@@ -417,6 +423,12 @@ struct boss_majordomo : public BossAI
                             // behaviour.
                             me->SummonCreature(NPC_SACRIFICIAL_CHAINS_COA, MajordomoSummonPos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5 * MINUTE * IN_MILLISECONDS);
                             events.Repeat(47s);
+                            break;
+                        }
+                        case EVENT_FIERCE_BLOW_COA:
+                        {
+                            DoCastVictim(SPELL_FIERCE_BLOW_COA);
+                            events.Repeat(6s, 10s);
                             break;
                         }
                     }

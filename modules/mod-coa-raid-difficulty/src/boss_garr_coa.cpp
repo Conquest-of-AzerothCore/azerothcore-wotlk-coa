@@ -9,7 +9,7 @@
  * Spell.dbc (id, description, effect, aura, target) since no combat log
  * ever caught these:
  *
- *   Fierce Blow         tank, first 12s,  every 8.2s   (measured)
+ *   Fierce Blow         tank, first 8-16.9s, then every 6-10s, drawn at random (measured)
  *   Harden               self, every 20s                (designed)
  *     Stacking self-buff ("Garr continues to harden his body, reducing
  *     damage taken"); stops while cracked.
@@ -48,6 +48,13 @@ namespace
         SPELL_UNSTOPPABLE_FORCE = 2105515,
     };
 
+    // Fierce Blow is drawn from a window so it cannot be predicted. First cast: min-max of 4 logged
+    // first casts (8.0-16.9s). Repeat: 6-10s holds 77% of 61 logged repeats.
+    constexpr Milliseconds FIERCE_BLOW_FIRST_MIN = 8000ms;
+    constexpr Milliseconds FIERCE_BLOW_FIRST_MAX = 16900ms;
+    constexpr Milliseconds FIERCE_BLOW_MIN = 6000ms;
+    constexpr Milliseconds FIERCE_BLOW_MAX = 10000ms;
+
     enum GarrEvents
     {
         EVENT_FIERCE_BLOW = 1,
@@ -71,7 +78,7 @@ namespace
         void JustEngagedWith(Unit* /*who*/) override
         {
             _JustEngagedWith();
-            events.ScheduleEvent(EVENT_FIERCE_BLOW, 12s);
+            events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
             events.ScheduleEvent(EVENT_HARDEN, 5s);
             events.ScheduleEvent(EVENT_LAND_SLIDE, 20s);
             events.ScheduleEvent(EVENT_UNSTOPPABLE_FORCE, 45s);
@@ -96,7 +103,7 @@ namespace
             {
                 case EVENT_FIERCE_BLOW:
                     DoCastVictim(SPELL_FIERCE_BLOW);
-                    events.Repeat(8200ms);
+                    events.Repeat(FIERCE_BLOW_MIN, FIERCE_BLOW_MAX);
                     break;
                 case EVENT_HARDEN:
                     if (!_cracked)

@@ -76,7 +76,7 @@ show 0 counted casts — only aura/health/damage-taken events are reliable for t
 | | Reality (CoA kit + evidence) | Before this branch | After this branch | Evidence | Open question |
 |---|---|---|---|---|---|
 | Shadow Bolt | 2105212→2105213, area, 5.3s/15.1s | ran, placeholder ~2 dmg | Damage Info wired, real per-difficulty damage (800/1600/2400/3200) | measured + exiles-kit | — |
-| Fierce Blow | 975011, tank, 8.4s/7.8s | ran | unchanged | measured | — |
+| Fierce Blow | 975011, tank, random first 6-10s then 6-10s | ran | unchanged | measured | — |
 | Curse of Lucifron | 2105206→2105207, area, 18.8s/79.9s | ran, placeholder dmg | Damage Info wired | measured | — |
 | Suppressing Shadows | 2105218, area, 29.2s/25.1s | ran; landing effect (2105219) missing | landing effect 2105219 added to the row | designed (row shape), measured (timers) | — |
 | Impending Doom | 2105201→2105205, area | absent — no schedule row at all | added, first 7s/period 20s | dbm (DBM-Warmane vanilla Doom, CD20/first7); no log ever recorded this cast | timer is a vanilla-CD borrow, not a measured Ascension interval |
@@ -124,7 +124,7 @@ encounter).
 
 | | Reality | Before | After | Evidence | Open question |
 |---|---|---|---|---|---|
-| Body casts Fierce Blow 975011 on his tank (first 8.4s, then every 7.6s; medians of 7 pulls, 225 casts) beside stock melee/Frenzy/Panic; two head creatures (80642/80643) cast Enrage (2105307), Scorching Breath (2105360 dummy → hidden 2105361 → real hit 2105362-65), Lava Burst (2105357, Damage Info 2105351-54) and Lava Bomb ground fire (2105366 dummy → persistent-area 2105367-70) | stock `boss_magmadar` script only | new `boss_magmadar_coa.cpp`: on engage, `DoSummon`s both heads (`TEMPSUMMON_MANUAL_DESPAWN`, difficulty variant auto-resolved by `creature_template.difficulty_entry_1..3`) plus periodic Core Hound (11671) reinforcements | new head kit wired and cast on schedule; ground-fire puddle fixed (see below); heads share the body's health pool (see below) | exiles-kit (heads' spells) + measured (in-probe cast/damage confirmation, lm-validation.md) + MC_PV video ("PV = Magmadar") for the shared pool | Core Hound entry/count/cadence (2 hounds, first 45s/repeat 50s) is `designed`, not measured — see §8 |
+| Body casts Fierce Blow 975011 on his tank (first cast and every repeat drawn at random from 6-10s; medians 8.5s/7.7s, 8 pulls, 230 casts) beside stock melee/Frenzy/Panic; two head creatures (80642/80643) cast Enrage (2105307), Scorching Breath (2105360 dummy → hidden 2105361 → real hit 2105362-65), Lava Burst (2105357, Damage Info 2105351-54) and Lava Bomb ground fire (2105366 dummy → persistent-area 2105367-70) | stock `boss_magmadar` script only | new `boss_magmadar_coa.cpp`: on engage, `DoSummon`s both heads (`TEMPSUMMON_MANUAL_DESPAWN`, difficulty variant auto-resolved by `creature_template.difficulty_entry_1..3`) plus periodic Core Hound (11671) reinforcements | new head kit wired and cast on schedule; ground-fire puddle fixed (see below); heads share the body's health pool (see below) | exiles-kit (heads' spells) + measured (in-probe cast/damage confirmation, lm-validation.md) + MC_PV video ("PV = Magmadar") for the shared pool | Core Hound entry/count/cadence (2 hounds, first 45s/repeat 50s) is `designed`, not measured — see §8 |
 
 The two heads don't exist as a static spawn or a vehicle passenger anywhere in the export — they are summoned
 by the body's own script on engage, the same idiom already used for Garr's Firesworn. `Lava Burst`'s
@@ -146,7 +146,7 @@ replaced: Magmadar now has his own direct CoA video reading (§5), both heads ca
 
 | | Reality | Before | After | Evidence | Open question |
 |---|---|---|---|---|---|
-| Fierce Blow 975011, tank, 7.0s/8.5s | ran | unchanged | measured | — |
+| Fierce Blow 975011, tank, random first 6-10s then 6.8-10.4s | ran | unchanged | measured | — |
 | Rain of Fire 2105407, area, 8.5s/30s | ran, placeholder dmg | Damage Info wired | measured + exiles-kit | Unquenchable Flames (2105411-14) is the spell's own built-in `EffectTriggerSpell`, not a separate cast — confirmed no gap |
 | Incinerate 2105405→2105406, area, 9.5s/15.1s | ran, placeholder dmg | Damage Info wired | measured + exiles-kit | — |
 | Curse of Gehennas 2105415→2105416, area, 11.1s/39.9s | ran | unchanged | measured | Dispel-punish proc (2105423/24) needs a `SpellScript`, not a schedule row — not added |
@@ -160,7 +160,7 @@ Ascended — see §5).
 
 | | Reality | Before | After | Evidence | Open question |
 |---|---|---|---|---|---|
-| Fierce Blow 975011, tank, 12.0s/8.2s | only scheduled ability | unchanged | measured | Only 1 measured schedule row for Garr — sparsest of the 7 `coa_boss_ai` bosses; log-coverage gap or true current kit is unresolved |
+| Fierce Blow 975011, tank, random first 8-16.9s then 6-10s | only scheduled ability | unchanged | measured | Only 1 measured schedule row for Garr — sparsest of the 7 `coa_boss_ai` bosses; log-coverage gap or true current kit is unresolved |
 | Antimagic Pulse, Magma Shackles, Separation Anxiety/Mass Eruption (dead C++ kit) | unreachable (`coa_boss_ai` wins over `boss_garr.cpp`) | replaced by a new `boss_garr_coa.cpp` (own BossAI) | Harden (self-buff, 20s), Land Slide (self, 20s/30s, knockback AoE), Unstoppable Force (self, 45s/45s: drops Harden, applies Cracked+Earth Fury, summons an extra Firesworn, 20s recovery) | designed (all four timers; no log ever recorded them) | Harden/Cracked/Earth Fury's real stack-counting cycle was simplified to a flat crack-and-recover loop; Land Slide's "charge through" is a self-centered AoE, not pathing |
 | Firesworn respawn on wipe (#5391) | not respawned; instance script only had the Golemagg branch | fixed: `_garrFireswornGUIDs` tracked, respawned on `NOT_STARTED`/`FAIL` mirroring Golemagg | measured (code read) | — |
 | Firesworn Eruption damage (#5388) | 19497 (~3000 dmg) flat on Normal/Heroic, 350126 (~4600) on Mythic/Ascended — a real `SpellDifficulty.dbc` family, not an Ascended value leaking onto Normal | unchanged | unchanged | exiles-kit + dbc | Not flex-scaled by raid size/gear the way boss casts are — needs a decision on whether that's the actual defect (§8) |
@@ -177,7 +177,7 @@ proc buff) — treated as stale/recycled aura data, not a real Garr mechanic, an
 | | Reality | Before | After | Evidence | Open question |
 |---|---|---|---|---|---|
 | Arcane Explosion 2105601, tank, 3.6s/8.4s | ran | unchanged | measured | — |
-| Fierce Blow 975011, tank, 6.6s/9.2s | ran | unchanged | measured | — |
+| Fierce Blow 975011, tank, random first 6-10s then 7.6-12.8s | ran | unchanged | measured | — |
 | Dampen Magic (self) 2105607→608, 14.1s/30.2s | ran | unchanged | measured | — |
 | Blink 2105611, area, 14.6s/16.4s | ran as a plain teleport | Gate of Shazzrah's threat wipe (`ResetAllThreat`+`AddThreat`+`AttackStart`) bound via a new `SpellScript` | measured (timer) + measured (dead-code comparison to `boss_shazzrah.cpp`) | The wipe now always lands on the tank (`TARGET_AREA` resolves to the tank), not a random raid member as vanilla did |
 | Arcane Instability 2105605→606, area, 18.4s/65.2s | ran | unchanged | measured | — |
@@ -1536,3 +1536,21 @@ Verification: `codestyle-cpp.py --files` on every touched file passed; `tools/ve
 --base origin/main` passed except the pre-existing `tools/test_comments.py` self-test failure (documented in
 every prior session on this branch, unrelated to any file this change touched). See `impl-AH-chain-immovable.md`
 for the live evidence.
+
+## 16. Batch E (2026-10-05): Fierce Blow on every Molten Core creature that cast it
+
+Fierce Blow (975011, a next-swing hit) was a generic Ascension mechanic: 78744 lines across the archive logs show it on
+the Molten Core bosses and trash. Each creature now casts it on its tank with the first cast and every repeat drawn at
+random from a window, so neither players nor boss-timer addons can predict it. The windows come from the logged
+intervals per creature guid (de-duplicated, first cast measured from the creature's first damage event with a player).
+
+- Repeat window 6-10s for every creature except Gehennas (6.8-10.4s) and Shazzrah (7.6-12.8s), whose own
+  distributions leave 6-10s (52% and 49% inside). Creatures with fewer than 15 repeats (Flame Imp, Firewalker,
+  Lava Reaver, Flameguard) use the shared window as a default, not a measurement.
+- First-cast window 6-10s except where a creature's own distribution leaves it: Core Hound 6.9-13s, Firesworn 7.6-17s,
+  Firelord 8.1-12.6s, Lava Elemental 7.5-12.4s, Lava Reaver 5.7-8s (interquartile ranges), Golemagg 6.9-14.6s,
+  Garr 8-16.9s, Cindermaw 3.5-5.6s, Flamewaker 6.7-21.1s (min-max of fewer than 15 first casts).
+- Data: SmartAI rows for the 13 SmartAI trash entries (`rev_20261005_11`), `first_max_ms`/`period_max_ms` on
+  `coa_boss_schedule` for the `coa_boss_ai` bosses (`rev_20261005_10`). C++: Magmadar, Garr, Majordomo, Core Hound,
+  Cindermaw and Firesworn draw their own timers.
+- Fierce Blow replaces the next melee swing, so its damage follows each creature's melee scale (section 10.1).
