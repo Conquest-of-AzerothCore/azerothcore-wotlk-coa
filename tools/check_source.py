@@ -36,6 +36,14 @@ SUITES = {
         'commands': [['tools/test_molten_core_smart_scripts_base_entry.py'],
                      ['tools/test_molten_core_damage_info.py']],
     },
+    'molten-core-bosses': {
+        'paths': ['src/server/scripts/EasternKingdoms/BlackrockMountain/MoltenCore/boss_ragnaros.cpp',
+                  'modules/mod-coa-raid-difficulty/src/boss_geddon_coa.cpp',
+                  'modules/mod-coa-raid-difficulty/src/boss_magmadar_coa.cpp',
+                  'modules/mod-coa-raid-difficulty/src/boss_shazzrah_coa.cpp',
+                  'data/sql/updates/pending_db_world/*molten_core_lucifron_impending_doom.sql'],
+        'commands': [['tools/test_molten_core_boss_timings.py']],
+    },
     'codestyle': {
         'paths': ['apps/codestyle/*', '.editorconfig'],
         'commands': [['apps/codestyle/tests/test_scoped_lint.py']],

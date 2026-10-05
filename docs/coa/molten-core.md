@@ -79,7 +79,7 @@ show 0 counted casts — only aura/health/damage-taken events are reliable for t
 | Fierce Blow | 975011, tank, random first 6-10s then 6-10s | ran | unchanged | measured | — |
 | Curse of Lucifron | 2105206→2105207, area, 18.8s/79.9s | ran, placeholder dmg | Damage Info wired | measured | — |
 | Suppressing Shadows | 2105218, area, 29.2s/25.1s | ran; landing effect (2105219) missing | landing effect 2105219 added to the row | designed (row shape), measured (timers) | — |
-| Impending Doom | 2105201→2105205, area | absent — no schedule row at all | added, first 7s/period 20s | dbm (DBM-Warmane vanilla Doom, CD20/first7); no log ever recorded this cast | timer is a vanilla-CD borrow, not a measured Ascension interval |
+| Impending Doom | 2105201→2105205, area | absent — no schedule row at all | first 20.9-27.5s, every 22.2-22.6s (`rev_20261005_20`) | logs: 3 pulls (2026-08-09, 08-16, 08-23), 14 intervals of 22.2-22.6s, first cast derived from the first hits at 43.3/45.1/49.9s | first-cast window is a measured range from three pulls |
 
 Health: `coa_boss_flex` `hp_d0..d3` 588,759/785,012/1,181,513/1,722,727 (rebuilt from a direct CoA video
 reading at Ascended; d0-d2 from Lucifron's own prior shape anchored on it — see §5).
