@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "name": "Molten Core: every Inferno wave gives Baron Geddon one Heating Up charge",
+  "contract": [
+    "Archive WoWCombatLog evidence (4 Geddon pulls): Heating Up 2105746 lands on Geddon 1-3ms after each Inferno damage wave (the aura on the first wave, a dose on each",
+    "next), ten per Inferno cast, with Inferno 60.0s apart and 50 charges after a 285s pull. Inferno first casts about 29s after the pull."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 409,
+    "x": 1144.6,
+    "y": -1020.5,
+    "z": -185.6,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 12056,
+      "health": 4000000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000000,
+      "maximum": 2000000000,
+      "label": "Configure the survival health before aggressive creatures can attack"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Molten Core",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 409
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the settling",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "label": "Engage the boss",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the boss fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Heating Up appears on Geddon with the first Inferno",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2105746,
+      "equals": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "The ten Inferno waves give Geddon at least nine charges",
+      "actor": "boss",
+      "metric": "aura_stacks",
+      "spell": 2105746,
+      "min": 9,
+      "within_ms": 20000
+    }
+  ]
+}

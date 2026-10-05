@@ -15,6 +15,10 @@
  * light on Ascended (near-zero raid frame drops, no deaths to it) and asked for +20% on every
  * difficulty, since nothing in the data distinguishes one tier as already correct. The single
  * tunable is INFERNO_DAMAGE_MULTIPLIER below.
+ *
+ * Each Inferno wave also gives Geddon one charge of Heating Up (2105746, +1% damage per charge):
+ * in the four logged pulls the aura (first) or the dose (after) lands 1-3 ms after every Inferno
+ * damage wave, 10 per Inferno and 60.0s apart, 50 charges at the end of a 285s pull.
  */
 
 #include "Cell.h"
@@ -37,6 +41,7 @@ namespace
         SPELL_LIVING_BOMB_CARRIER_NORMAL   = 2105702,
         SPELL_LIVING_BOMB_EXPLOSION_NORMAL = 2105708,
         SPELL_LIVING_BOMB_KNOCK_UP         = 2105712,
+        SPELL_HEATING_UP                   = 2105746,
     };
 
     constexpr float EXPLOSION_RADIUS = 5.0f;
@@ -86,9 +91,16 @@ namespace
             SetHitDamage(int32(GetHitDamage() * INFERNO_DAMAGE_MULTIPLIER));
         }
 
+        void AddHeatingUp()
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, SPELL_HEATING_UP, true);
+        }
+
         void Register() override
         {
             OnEffectHitTarget += SpellEffectFn(spell_geddon_inferno_damage_coa::ScaleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            AfterCast += SpellCastFn(spell_geddon_inferno_damage_coa::AddHeatingUp);
         }
     };
 }

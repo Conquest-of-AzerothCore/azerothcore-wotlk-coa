@@ -872,9 +872,10 @@ wowhead.com/classic/guide/majordomo-executus-molten-core-strategy-wow-classic, W
     7).** It had confirmed firing on a flat 5s SmartAI cooldown against a random non-top-threat target, with
     two Protectors per pull doing this simultaneously. The open question of whether the ability belonged on
     Lucifron himself instead no longer applies — it left with the add, not moved.
-15. **Heating Up (Baron Geddon, 2105746) is not wired.** A `MOD_DAMAGE_PERCENT_DONE` self-stack aura with no
-    `EffectTriggerSpell` anywhere pointing at it and no roll on its own base points — the DBC gives no
-    evidence of what triggers it or by how much. Left unimplemented rather than inventing a stack/percentage.
+15. **Heating Up (Baron Geddon, 2105746) follows Inferno.** The DBC names no trigger, but the logs do: in all four
+    pulls the aura (first wave) or a dose (later waves) lands 1-3ms after every Inferno damage wave, ten per
+    Inferno cast, 60.0s apart, 50 charges after a 285s pull. `spell_geddon_inferno_damage_coa` (AfterCast on the four
+    wave spells) adds one charge per wave. The per-charge percentage is the DBC's own (not measured).
 16. **Harbinger Priests' Damage Info maps the three disciples' Shadow Bolts.** The info-aura family 2105950-53
     (base points 1600/2128/2656/3200, "Sulfuron Harbinger's Priests pull their base spells BASE DAMAGE from this
     Aura") now drives Cull 2105961, Proxima 2105957 and Ebon 2105959 (rev_20261004_92). Corvus's own Shadow Bolt
