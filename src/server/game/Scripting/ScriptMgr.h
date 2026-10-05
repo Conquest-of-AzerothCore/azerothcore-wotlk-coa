@@ -357,6 +357,7 @@ public: /* PlayerScript */
     void OnPlayerSave(Player* player);
     void OnPlayerNormalizeActionButtonSpell(Player* player, uint32& action, bool loading);
     void OnPlayerSpellChargeConsumed(Player* player, SpellInfo const* spellInfo, Spell* spell, uint32 recoveryMs, uint64 nowEpochMs);
+    void OnPlayerSendSpellChargeStates(Player const* player);
     void OnPlayerSpellCooldownCalculated(Player* player, SpellInfo const* spellInfo, Spell* spell, uint32 recoveryMs);
     void OnPlayerDelete(ObjectGuid guid, uint32 accountId);
     void OnPlayerFailedDelete(ObjectGuid guid, uint32 accountId);

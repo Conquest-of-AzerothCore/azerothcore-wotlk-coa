@@ -1,6 +1,7 @@
 #include "ManastormClientBridge.h"
 #include "ManastormModuleConfig.h"
 #include "ManastormMgr.h"
+#include "ManastormPotionClient.h"
 
 #include "ObjectAccessor.h"
 #include "Creature.h"
@@ -1965,7 +1966,24 @@ bool ManastormMgr::ConsumeManastormPotionCharge(
             ManastormBaseline::PotionRechargeMs;
     }
 
+    SyncManastormPotionCharges(player);
     return true;
+}
+
+void ManastormMgr::SyncManastormPotionCharges(Player const* player) const
+{
+    if (!player)
+        return;
+
+    auto const itr = _manastormPotionCharges.find(player->GetGUID().GetCounter());
+    if (!ManastormModuleConfig::Enabled() || !IsPlayerInActiveEndlessStage(player) ||
+        itr == _manastormPotionCharges.end())
+    {
+        ManastormPotionClient::Reset(player);
+        return;
+    }
+
+    ManastormPotionClient::Send(player, itr->second.Charges, itr->second.RechargeTimerMs);
 }
 
 bool ManastormMgr::IsValidRegenerationMatrixTarget(
@@ -2707,6 +2725,7 @@ void ManastormMgr::RemoveBaselineRunItems(
         return;
 
     ClearSafetyBubble(player);
+    ManastormPotionClient::Reset(player);
 
     uint32 const items[] =
     {
@@ -2791,6 +2810,7 @@ void ManastormMgr::UpdateManastormPotionCharges(
             continue;
         }
 
+        uint8 const previousCharges = state.Charges;
         uint32 remainingDiff = diff;
 
         while (
@@ -2832,6 +2852,10 @@ void ManastormMgr::UpdateManastormPotionCharges(
             state.RechargeTimerMs =
                 ManastormBaseline::PotionRechargeMs;
         }
+
+        if (state.Charges != previousCharges)
+            if (Player* player = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(itr->first)))
+                SyncManastormPotionCharges(player);
 
         ++itr;
     }

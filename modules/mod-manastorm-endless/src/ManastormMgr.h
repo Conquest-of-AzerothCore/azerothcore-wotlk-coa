@@ -56,6 +56,8 @@ public:
     bool ConsumeManastormPotionCharge(
         Player* player);
 
+    void SyncManastormPotionCharges(Player const* player) const;
+
     bool IsValidRegenerationMatrixTarget(
         Player const* caster,
         Player const* target) const;

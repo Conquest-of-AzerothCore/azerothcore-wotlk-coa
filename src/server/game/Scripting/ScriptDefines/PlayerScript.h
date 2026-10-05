@@ -231,6 +231,7 @@ enum PlayerHook
     PLAYERHOOK_ON_PLAYER_BREATH_INVERTED,
     PLAYERHOOK_ON_CAN_REGENERATE,
     PLAYERHOOK_ON_CAN_ENERGIZE,
+    PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES,
     PLAYERHOOK_END
 };
 
@@ -371,6 +372,9 @@ public:
 
     virtual void OnPlayerNormalizeActionButtonSpell(Player* /*player*/, uint32& /*action*/, bool /*loading*/) { }
     virtual void OnPlayerSpellChargeConsumed(Player* /*player*/, SpellInfo const* /*spellInfo*/, Spell* /*spell*/, uint32 /*recoveryMs*/, uint64 /*nowEpochMs*/) { }
+
+    // Append charge displays backed by module-owned state after the core's full client reset.
+    virtual void OnPlayerSendSpellChargeStates(Player const* /*player*/) { }
     virtual void OnPlayerSpellCooldownCalculated(Player* /*player*/, SpellInfo const* /*spellInfo*/, Spell* /*spell*/, uint32 /*recoveryMs*/) { }
 
     // Called when a player is bound to an instance

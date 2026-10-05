@@ -1,6 +1,7 @@
 #include "ManastormModuleConfig.h"
 #include "ManastormClientBridge.h"
 #include "ManastormMobilityClient.h"
+#include "ManastormPotionClient.h"
 #include "ManastormMgr.h"
 
 #include "AllCreatureScript.h"
@@ -381,6 +382,7 @@ public:
         }
 
         ManastormMobilityClient::Load();
+        ManastormPotionClient::Load();
 
         if (ManastormMgr::Instance().ReloadData())
         {
@@ -713,7 +715,8 @@ public:
                 PLAYERHOOK_ON_GIVE_EXP,
                 PLAYERHOOK_ON_BEFORE_SEND_CHAT_MESSAGE,
                 PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT,
-                PLAYERHOOK_ON_BEFORE_CRITERIA_PROGRESS
+                PLAYERHOOK_ON_BEFORE_CRITERIA_PROGRESS,
+                PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES
             })
     {
     }
@@ -725,11 +728,18 @@ public:
         // Native mode publishes false flags when disabled; Mode 1 sends no native configs.
         ManastormClientBridge::Instance().Login(player);
         ManastormMobilityClient::Sync(player);
+        ManastormMgr::Instance().SyncManastormPotionCharges(player);
     }
 
     void OnPlayerMapChanged(Player* player) override
     {
         ManastormMobilityClient::SyncAuras(player);
+        ManastormMgr::Instance().SyncManastormPotionCharges(player);
+    }
+
+    void OnPlayerSendSpellChargeStates(Player const* player) override
+    {
+        ManastormMgr::Instance().SyncManastormPotionCharges(player);
     }
 
     void OnPlayerLevelChanged(
@@ -1149,6 +1159,7 @@ public:
 
         ManastormMgr::Instance().OnPlayerEnterMap(map, player);
         ManastormMobilityClient::PrepareEntry(player);
+        ManastormMgr::Instance().SyncManastormPotionCharges(player);
     }
 };
 }

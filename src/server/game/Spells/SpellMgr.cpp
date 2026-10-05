@@ -338,6 +338,10 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
     if (!IsDiminishingReturnsGroupDurationLimited(group))
         return 0;
 
+    // Polymorph: Frogduck explicitly advertises an eight-second player limit.
+    if (spellproto->Id == 991522)
+        return 8 * IN_MILLISECONDS;
+
     // Explicit diminishing duration
     switch (spellproto->SpellFamilyName)
     {

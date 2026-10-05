@@ -17276,7 +17276,10 @@ void Player::SendAllSpellChargeStates() const
     GetSession()->SendPacket(&clear);
 
     if (partialPools.empty())
+    {
+        sScriptMgr->OnPlayerSendSpellChargeStates(this);
         return;
+    }
 
     WorldPacket packet(SMSG_SEND_SPELL_CHARGES, 4 + partialPools.size() * 9);
     packet << uint32(partialPools.size());
@@ -17287,6 +17290,7 @@ void Player::SendAllSpellChargeStates() const
         packet << uint8(pool.second);
     }
     GetSession()->SendPacket(&packet);
+    sScriptMgr->OnPlayerSendSpellChargeStates(this);
 }
 
 std::string Player::GetDebugInfo() const

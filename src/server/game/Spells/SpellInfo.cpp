@@ -2261,6 +2261,10 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 
 SpellSpecificType SpellInfo::LoadSpellSpecific() const
 {
+    // Frogduck Morph Machine keeps its generic gadget family but uses native Polymorph rules.
+    if (Id == 991576 && HasAura(SPELL_AURA_MOD_CONFUSE) && HasAura(SPELL_AURA_TRANSFORM))
+        return SPELL_SPECIFIC_MAGE_POLYMORPH;
+
     switch (SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
