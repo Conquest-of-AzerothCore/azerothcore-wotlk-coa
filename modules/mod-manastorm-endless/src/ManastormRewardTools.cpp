@@ -1,6 +1,9 @@
 #include "ManastormModuleConfig.h"
 
+#include "Creature.h"
+#include "CreatureScript.h"
 #include "Player.h"
+#include "ScriptedCreature.h"
 #include "Random.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
@@ -82,9 +85,57 @@ namespace
                 SPELL_EFFECT_ASCENSION_TRIGGER_RANDOM_SPELL);
         }
     };
+    class npc_manastorm_empty_heart : public CreatureScript
+    {
+    public:
+        npc_manastorm_empty_heart() : CreatureScript("npc_manastorm_empty_heart") { }
+
+        struct npc_manastorm_empty_heartAI : public ScriptedAI
+        {
+            explicit npc_manastorm_empty_heartAI(Creature* creature) : ScriptedAI(creature)
+            {
+                me->SetReactState(REACT_PASSIVE);
+            }
+
+            bool _collected = false;
+
+            void IsSummonedBy(WorldObject* /*summoner*/) override
+            {
+                if (ManastormModuleConfig::Enabled())
+                    me->CastSpell(me, 991511, true); // Existing cosmetic heart visual.
+            }
+
+            void AttackStart(Unit* /*target*/) override { }
+
+            void MoveInLineOfSight(Unit* who) override
+            {
+                if (_collected || !ManastormModuleConfig::Enabled() || !who)
+                    return;
+
+                Player* player = who->ToPlayer();
+                if (!player || !player->IsAlive() || player->IsBeingTeleported() ||
+                    !me->IsWithinDistInMap(player, 2.0f) || !me->IsWithinLOSInMap(player))
+                {
+                    return;
+                }
+
+                // Cosmetic pickup only. Do not call the healing-heart backend,
+                // cast 991510, or change health, maximum health or run capacity.
+                _collected = true;
+                me->DespawnOrUnsummon();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const override
+        {
+            return new npc_manastorm_empty_heartAI(creature);
+        }
+    };
+
 }
 
 void AddSC_manastorm_reward_tools()
 {
     RegisterSpellScript(spell_manastorm_reward_random);
+    new npc_manastorm_empty_heart();
 }

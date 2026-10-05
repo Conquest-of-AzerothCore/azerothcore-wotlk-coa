@@ -233,6 +233,7 @@ namespace
     constexpr float STAGE_PORTAL_Z_OFFSET = 3.5f;
 
     constexpr uint32 NPC_MANASTORM_HEART = 900025;
+    constexpr uint32 NPC_EMPTY_HEART_CONTAINER = 900027;
 
     constexpr uint32 SPELL_MANASTORM_HEART_PROJECTILE = 991507;
     constexpr uint32 SPELL_MANASTORM_HEART_HEALING = 991510;
@@ -5448,7 +5449,9 @@ bool ManastormMgr::ForceStageAffix(
 
 void ManastormMgr::OnCreatureAddWorld(Creature* creature)
 {
+    // Cosmetic toy pickups never join stage objectives, affixes or healing hearts.
     if (!creature ||
+        creature->GetEntry() == NPC_EMPTY_HEART_CONTAINER ||
         creature->GetEntry() == NPC_COGSLEY ||
         creature->GetEntry() == NPC_STAGE_PORTAL ||
         creature->GetEntry() ==
@@ -5860,7 +5863,7 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
 
 void ManastormMgr::OnCreatureRemoveWorld(Creature* creature)
 {
-    if (!creature)
+    if (!creature || creature->GetEntry() == NPC_EMPTY_HEART_CONTAINER)
         return;
 
     Map* map = creature->GetMap();
