@@ -3,11 +3,13 @@
 
 #include "AllMapScript.h"
 #include "Creature.h"
+#include "CreatureAI.h"
 #include "InstanceScript.h"
 #include "Log.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
+#include "ScriptedCreature.h"
 #include "ScriptMgr.h"
 
 #include <unordered_map>
@@ -19,15 +21,19 @@ namespace
 
     constexpr uint32 MAP_BLACKROCK_SPIRE = 229;
     constexpr uint32 NPC_PYROGUARD_EMBERSEER = 9816;
+    constexpr uint32 NPC_BLACKHAND_INCARCERATOR = 10316;
 
-    // Native Blackrock Spire identifiers recovered from blackrock_spire.h.
+    // Native Blackrock Spire identifier recovered from blackrock_spire.h.
     constexpr uint32 DATA_PYROGUARD_EMBERSEER = 9;
-    constexpr uint32 EVENT_PYROGUARD_EMBERSEER = 4884;
 
-    // Emberseer's native reset applies this after the encounter has finished
-    // its five-second spawn initialization. Waiting for it prevents a very
-    // fast Manastorm bubble exit from racing the boss's pending reset event.
+    // Emberseer's native reset applies the cage after its five-second spawn
+    // initialization. Waiting for it prevents a very fast Manastorm bubble
+    // exit from racing the boss's pending reset event.
     constexpr uint32 SPELL_ENCAGED_EMBERSEER = 15282;
+    constexpr uint32 SPELL_FREEZE_ANIM = 16245;
+    constexpr uint32 SPELL_EMBERSEER_GROWING = 16048;
+    constexpr uint32 SPELL_EMBERSEER_GROWING_TRIGGER = 16049;
+    constexpr uint32 SPELL_EMBERSEER_FULL_STRENGTH = 16047;
 
     constexpr uint32 SEGMENT_PYROGUARD_NORMAL = 661;
     constexpr uint32 SEGMENT_PYROGUARD_ENDGAME = 660;
@@ -119,6 +125,75 @@ namespace
         }
 
         return nullptr;
+    }
+
+    uint32 ActivateEmberseerIncarcerators(
+        Creature* emberseer)
+    {
+        if (!emberseer)
+            return 0;
+
+        std::list<Creature*> incarcerators;
+        GetCreatureListWithEntryInGrid(
+            incarcerators,
+            emberseer,
+            NPC_BLACKHAND_INCARCERATOR,
+            35.0f);
+
+        uint32 activated = 0;
+
+        for (Creature* incarcerator :
+            incarcerators)
+        {
+            if (!incarcerator ||
+                !incarcerator->IsInWorld() ||
+                !incarcerator->IsAlive())
+            {
+                continue;
+            }
+
+            CreatureAI* ai =
+                incarcerator->AI();
+
+            if (!ai)
+                continue;
+
+            // This is the native Blackhand Incarcerator activation path. It
+            // removes immunity, interrupts the Emberseer channel, cancels
+            // re-encage work and places the add in combat with the zone.
+            ai->SetData(1, 1);
+            ++activated;
+        }
+
+        return activated;
+    }
+
+    void ReleaseEmberseerImmediately(
+        Creature* emberseer)
+    {
+        if (!emberseer)
+            return;
+
+        // Manastorm selects Emberseer as the objective directly, so the
+        // dungeon's altar/growth ritual is not a prerequisite for this private
+        // stage. Preserve the native release state without running the delayed
+        // ritual sequence.
+        emberseer->RemoveAura(
+            SPELL_ENCAGED_EMBERSEER);
+        emberseer->RemoveAura(
+            SPELL_FREEZE_ANIM);
+        emberseer->RemoveAura(
+            SPELL_EMBERSEER_GROWING);
+        emberseer->RemoveAura(
+            SPELL_EMBERSEER_GROWING_TRIGGER);
+
+        emberseer->CastSpell(
+            emberseer,
+            SPELL_EMBERSEER_FULL_STRENGTH);
+
+        emberseer->RemoveUnitFlag(
+            UNIT_FLAG_NOT_SELECTABLE);
+        emberseer->SetImmuneToPC(false);
     }
 
     void QueueEmberseerStage(
@@ -253,7 +328,7 @@ namespace
 
                     LOG_WARN(
                         LOG_FILTER,
-                        "Discarded pending Manastorm Emberseer bootstrap after timeout: "
+                        "Discarded pending Manastorm Emberseer activation after timeout: "
                         "run={} instance={} member={}.",
                         runId,
                         pending.InstanceId,
@@ -283,10 +358,9 @@ namespace
                     continue;
                 }
 
-                // Do not begin the native room event while the party is still
-                // protected by the Manastorm Safety Bubble. The main manager
-                // changes Preparing -> Active only after the player leaves
-                // protection or explicitly engages a stage creature.
+                // Keep the native encounter untouched while the party is still
+                // protected. Manastorm changes Preparing -> Active only after
+                // the safety phase ends or a stage creature is engaged.
                 if (run->GetState() ==
                     ManastormRunState::Preparing)
                 {
@@ -333,7 +407,7 @@ namespace
 
                     LOG_ERROR(
                         LOG_FILTER,
-                        "Manastorm Emberseer bootstrap timed out without objective: "
+                        "Manastorm Emberseer activation timed out without objective: "
                         "run={} segment={} map={} instance={} objective={}.",
                         run->GetRunId(),
                         run->GetSegment().SegmentId,
@@ -362,7 +436,7 @@ namespace
 
                     LOG_ERROR(
                         LOG_FILTER,
-                        "Manastorm Emberseer bootstrap timed out without Blackrock Spire instance script: "
+                        "Manastorm Emberseer activation timed out without Blackrock Spire instance script: "
                         "run={} segment={} instance={} guid={}.",
                         run->GetRunId(),
                         run->GetSegment().SegmentId,
@@ -380,11 +454,7 @@ namespace
                     instance->GetBossState(
                         DATA_PYROGUARD_EMBERSEER);
 
-                // A reconnect or another native trigger may already have
-                // started/completed the event. In that case there is nothing
-                // Manastorm-specific left to do.
-                if (state == IN_PROGRESS ||
-                    state == DONE)
+                if (state == DONE)
                 {
                     itr =
                         sPendingEmberseerStages.erase(
@@ -392,11 +462,12 @@ namespace
                     continue;
                 }
 
-                if (state != NOT_STARTED)
+                if (state != NOT_STARTED &&
+                    state != IN_PROGRESS)
                 {
                     LOG_WARN(
                         LOG_FILTER,
-                        "Manastorm Emberseer bootstrap found unexpected native state: "
+                        "Manastorm Emberseer activation found unexpected native state: "
                         "run={} segment={} instance={} state={}.",
                         run->GetRunId(),
                         run->GetSegment().SegmentId,
@@ -409,11 +480,12 @@ namespace
                     continue;
                 }
 
-                // Emberseer's Reset() schedules its native initial cage setup
-                // five seconds after spawn. If a player leaves the safety
-                // bubble extremely quickly, wait for that setup instead of
-                // starting event 4884 and then having the pending reset undo it.
-                if (!emberseer->HasAura(
+                // Emberseer's Reset() schedules the cage initialization five
+                // seconds after spawn. Wait for that event to finish before
+                // overriding the private Manastorm stage, otherwise Reset()
+                // could immediately make the boss untargetable again.
+                if (state == NOT_STARTED &&
+                    !emberseer->HasAura(
                         SPELL_ENCAGED_EMBERSEER))
                 {
                     if (pending.WaitedMs <
@@ -425,7 +497,7 @@ namespace
 
                     LOG_ERROR(
                         LOG_FILTER,
-                        "Manastorm Emberseer bootstrap timed out waiting for native cage initialization: "
+                        "Manastorm Emberseer activation timed out waiting for native cage initialization: "
                         "run={} segment={} instance={} guid={}.",
                         run->GetRunId(),
                         run->GetSegment().SegmentId,
@@ -439,62 +511,37 @@ namespace
                     continue;
                 }
 
-                // Use the exact native Blackrock Spire event normally fired by
-                // the Altar of Emberseer. The instance script forwards event
-                // 4884 to Emberseer AI SetData(1, 1), which:
-                //   - sets the boss encounter IN_PROGRESS;
-                //   - activates nearby Blackhand Incarcerators (10316);
-                //   - removes their immunity and starts combat;
-                //   - runs Emberseer's native growth/release sequence;
-                //   - finally makes Emberseer selectable/attackable.
-                // No flags or immunities are manually overridden here.
-                instance->ProcessEvent(
-                    emberseer,
-                    EVENT_PYROGUARD_EMBERSEER);
+                if (state == NOT_STARTED)
+                {
+                    instance->SetBossState(
+                        DATA_PYROGUARD_EMBERSEER,
+                        IN_PROGRESS);
+                }
+
+                uint32 const activatedIncarcerators =
+                    ActivateEmberseerIncarcerators(
+                        emberseer);
+
+                ReleaseEmberseerImmediately(
+                    emberseer);
 
                 state =
                     instance->GetBossState(
                         DATA_PYROGUARD_EMBERSEER);
 
-                if (state != IN_PROGRESS &&
-                    state != DONE)
-                {
-                    if (pending.WaitedMs <
-                        PENDING_TIMEOUT_MS)
-                    {
-                        ++itr;
-                        continue;
-                    }
-
-                    LOG_ERROR(
-                        LOG_FILTER,
-                        "Native Manastorm Emberseer event did not enter progress: "
-                        "run={} segment={} instance={} state={} guid={}.",
-                        run->GetRunId(),
-                        run->GetSegment().SegmentId,
-                        run->GetInstanceId(),
-                        uint32(state),
-                        emberseer->GetGUID()
-                            .GetRawValue());
-
-                    itr =
-                        sPendingEmberseerStages.erase(
-                            itr);
-                    continue;
-                }
-
                 LOG_INFO(
                     LOG_FILTER,
-                    "Started native Blackrock Spire Emberseer event for Manastorm: "
-                    "run={} segment={} map={} instance={} event={} objective={} guid={} state={}.",
+                    "Activated Blackrock Spire Emberseer immediately for Manastorm: "
+                    "run={} segment={} map={} instance={} objective={} guid={} "
+                    "incarcerators={} state={}.",
                     run->GetRunId(),
                     run->GetSegment().SegmentId,
                     run->GetSegment().MapId,
                     run->GetInstanceId(),
-                    EVENT_PYROGUARD_EMBERSEER,
                     NPC_PYROGUARD_EMBERSEER,
                     emberseer->GetGUID()
                         .GetRawValue(),
+                    activatedIncarcerators,
                     uint32(state));
 
                 itr =
