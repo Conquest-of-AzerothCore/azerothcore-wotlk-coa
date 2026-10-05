@@ -14,11 +14,11 @@
  * own vanilla Lava Bomb only approximates).
  *
  * The body itself keeps its stock Frenzy/Lava Bomb timers (vanilla ids)
- * unchanged - no log ever caught them being wrong, and #5120 only says the
- * body never casts its *own* kit (Fierce Blow, Bellowing Roar, Ancient
- * Despair/Hysteria/Dread/Fury), which stays unused here for the same reason
- * Ragnaros's unmatched kit entries stay unused: no log evidence to place
- * them on a timer.
+ * unchanged - no log ever caught them being wrong. Of its own kit (Fierce
+ * Blow, Bellowing Roar, Ancient Despair/Hysteria/Dread/Fury) only Fierce Blow
+ * has a measured timer: on the tank, first cast 6.0-9.8s after the pull
+ * (median 8.4s), then every 7.4-8.6s (median 7.6s) across 7 pulls, 225 casts.
+ * The rest stays unused, as Ragnaros's unmatched kit entries do.
  *
  * Panic is the one body cast the corpus does measure (research-H3.md): the
  * body's real fear is Ascension's own Panic (2105309, self+area
@@ -63,6 +63,7 @@ namespace
         SPELL_PANIC_COA                 = 2105309, // measured (research-H3.md); vanilla donor was 19408
         SPELL_LAVA_BOMB_MELEE_COA       = 19411,
         SPELL_LAVA_BOMB_RANGED_COA      = 20474,
+        SPELL_FIERCE_BLOW_COA           = 975011,
 
         // Heads
         SPELL_HEAD_ENRAGE               = 2105307,
@@ -84,6 +85,7 @@ namespace
         EVENT_PANIC_COA,
         EVENT_LAVA_BOMB_MELEE_COA,
         EVENT_LAVA_BOMB_RANGED_COA,
+        EVENT_FIERCE_BLOW_COA,
         EVENT_CORE_HOUND_SPAWN_COA,
     };
 
@@ -137,6 +139,7 @@ namespace
             events.ScheduleEvent(EVENT_PANIC_COA, 9500ms);
             events.ScheduleEvent(EVENT_LAVA_BOMB_MELEE_COA, 12s);
             events.ScheduleEvent(EVENT_LAVA_BOMB_RANGED_COA, 15s);
+            events.ScheduleEvent(EVENT_FIERCE_BLOW_COA, 8400ms);
             // Designed: no log measures the heads or the hound adds, only
             // that #5120 says the heads exist and cast, and the player
             // report asks for periodic Core Hound reinforcements.
@@ -184,6 +187,12 @@ namespace
                     if (!targets.empty())
                         DoCast(targets.front(), SPELL_LAVA_BOMB_RANGED_COA);
                     events.Repeat(12s, 15s);
+                    break;
+                }
+                case EVENT_FIERCE_BLOW_COA:
+                {
+                    DoCastVictim(SPELL_FIERCE_BLOW_COA);
+                    events.Repeat(7600ms);
                     break;
                 }
                 case EVENT_CORE_HOUND_SPAWN_COA:
