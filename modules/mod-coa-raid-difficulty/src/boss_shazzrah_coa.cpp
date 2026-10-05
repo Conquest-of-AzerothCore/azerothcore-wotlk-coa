@@ -23,6 +23,11 @@
  * encounter runs, rather than despawning on its own timer. instance_molten_
  * core.cpp despawns every tracked reflection once DATA_SHAZZRAH leaves
  * IN_PROGRESS (wipe, evade, kill or reset), so none linger between pulls.
+ *
+ * Every Blink in the archive logs (6 pulls, 77 Blinks) is paired with a Time
+ * Stop (2105618) on the player he lands on at the same instant, and a Mass Slow
+ * (2105619) on the raid 2s later, so both ride the Blink instead of a timer of
+ * their own.
  */
 
 #include "Creature.h"
@@ -38,7 +43,11 @@ namespace
     enum ShazzrahBlinkSpells
     {
         NPC_REFLECTION_OF_SHAZZRAH = 11504,
+        SPELL_TIME_STOP_COA        = 2105618,
+        SPELL_MASS_SLOW_COA        = 2105619,
     };
+
+    constexpr Milliseconds MASS_SLOW_DELAY_COA = 2000ms;
 
     class spell_shazzrah_blink_coa : public SpellScript
     {
@@ -58,6 +67,13 @@ namespace
                     creatureCaster->GetThreatMgr().ResetAllThreat();
                     creatureCaster->GetThreatMgr().AddThreat(target, 1);
                     creatureCaster->AI()->AttackStart(target);
+
+                    creatureCaster->CastSpell(target, SPELL_TIME_STOP_COA, true);
+                    creatureCaster->m_Events.AddEventAtOffset([creatureCaster]()
+                    {
+                        if (creatureCaster->IsAlive())
+                            creatureCaster->CastSpell(creatureCaster, SPELL_MASS_SLOW_COA, true);
+                    }, MASS_SLOW_DELAY_COA);
 
                     if (Creature* reflection = creatureCaster->SummonCreature(NPC_REFLECTION_OF_SHAZZRAH, prevBlinkPos, TEMPSUMMON_MANUAL_DESPAWN))
                     {

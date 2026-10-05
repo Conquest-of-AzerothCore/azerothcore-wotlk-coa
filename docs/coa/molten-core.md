@@ -218,8 +218,8 @@ multi-target hit list for a single cast). Heroic, Mythic and Ascended were not r
 session (not yet run).
 
 Health: `hp_d0..d3` 775,397/1,033,863/1,556,054/2,267,615 (rebuilt from a Bronzebeard video reading at
-Ascended times the C=3.306 BB->CoA coefficient — see §5). Time Stop (2105618) and Mass Slow (2105619) exist in the kit with no schedule row and no
-corroborating log/addon evidence — left as needs-decision, not added.
+Ascended times the C=3.306 BB->CoA coefficient — see §5). Time Stop (2105618) and Mass Slow (2105619) ride every Blink: the archive logs (6 pulls, 77 Blinks) pair each Blink with a Time
+Stop on the player he lands on at the same instant and a Mass Slow on the raid 2s later; `spell_shazzrah_blink_coa` casts both.
 
 ### Baron Geddon (12056)
 
