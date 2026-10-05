@@ -28,6 +28,7 @@
 
 void AddSC_manastorm_commandscript();
 void AddSC_manastorm_greedy_demon();
+void AddSC_manastorm_reward_tools();
 
 namespace
 {
@@ -1178,5 +1179,6 @@ void AddSC_manastorm()
     RegisterSpellScript(spell_manastorm_baseline_tool);
 
     AddSC_manastorm_greedy_demon();
+    AddSC_manastorm_reward_tools();
     AddSC_manastorm_commandscript();
 }
