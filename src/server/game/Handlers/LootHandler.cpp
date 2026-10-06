@@ -36,6 +36,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
     Player* player = GetPlayer();
     ObjectGuid lguid = player->GetLootGUID();
     Loot* loot = nullptr;
+    bool materialCacheOverflow = false;
     uint8 lootSlot = 0;
 
     recvData >> lootSlot;
@@ -75,6 +76,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         }
 
         loot = &pItem->loot;
+        materialCacheOverflow = pItem->GetEntry() == 1478051;
     }
     else if (lguid.IsCorpse())
     {
@@ -105,7 +107,10 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
 
     InventoryResult msg;
     LootItem* lootItem = player->StoreLootItem(lootSlot, loot, msg);
-    if (msg != EQUIP_ERR_OK && lguid.IsItem() && loot->loot_type != LOOT_CORPSE)
+    bool const fullMaterialCache = materialCacheOverflow &&
+        (msg == EQUIP_ERR_INVENTORY_FULL || msg == EQUIP_ERR_BAG_FULL);
+    if (lootItem && msg != EQUIP_ERR_OK && lguid.IsItem() &&
+        (loot->loot_type != LOOT_CORPSE || fullMaterialCache))
     {
         lootItem->is_looted = true;
         loot->NotifyItemRemoved(lootItem->itemIndex);

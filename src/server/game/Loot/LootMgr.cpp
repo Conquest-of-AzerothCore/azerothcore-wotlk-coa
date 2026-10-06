@@ -558,7 +558,7 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     // Ordinary creature/object/item loot keeps the standard eighteen-slot cap.
     maxItemCount = &store == &LootTemplates_Item &&
         (lootId == 1278048 || lootId == 1278049) ? 20 : MAX_NR_LOOT_ITEMS;
-    fixedMoneyLoot = &store == &LootTemplates_Item && lootId == 1478052;
+    fixedMoneyLoot = &store == &LootTemplates_Item && (lootId == 1478051 || lootId == 1478052);
     items.reserve(maxItemCount);
     quest_items.reserve(MAX_NR_QUEST_ITEMS);
 

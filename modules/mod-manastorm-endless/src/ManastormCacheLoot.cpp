@@ -10,10 +10,22 @@
 #include "Player.h"
 #include "Spell.h"
 #include "Util.h"
+#include "WorldScript.h"
+#include "PlayerScript.h"
+#include "WorldSession.h"
+#include "WorldPacket.h"
+#include "Opcodes.h"
+#include "DatabaseEnv.h"
+#include "Field.h"
+#include "Log.h"
+#include "Random.h"
 
 #include <array>
 #include <cstdint>
 #include <limits>
+#include <memory>
+#include <atomic>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -350,10 +362,217 @@ namespace
             return false;
         }
     };
+    struct MaterialCandidate
+    {
+        uint32 ItemEntry = 0;
+        uint32 Weight = 0;
+        uint8 MinCount = 1;
+        uint8 MaxCount = 5;
+    };
+
+    struct MaterialCategory
+    {
+        std::string Name;
+        uint32 TotalWeight = 0;
+        std::vector<MaterialCandidate> Items;
+    };
+
+    using MaterialPools = std::vector<MaterialCategory>;
+    std::shared_ptr<MaterialPools const> MaterialCachePools;
+
+    void LoadMaterialCachePools()
+    {
+        auto pools = std::make_shared<MaterialPools>();
+        QueryResult result = WorldDatabase.Query(
+            "SELECT category, item_entry, weight, min_count, max_count "
+            "FROM manastorm_material_cache_pool WHERE enabled = 1 ORDER BY category, item_entry");
+        bool valid = bool(result);
+        if (result)
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+                std::string const category = fields[0].Get<std::string>();
+                uint32 const entry = fields[1].Get<uint32>();
+                uint32 const weight = fields[2].Get<uint32>();
+                uint8 const minimum = fields[3].Get<uint8>();
+                uint8 const maximum = fields[4].Get<uint8>();
+                if (category.empty() || !weight || !minimum || minimum > maximum ||
+                    !sObjectMgr->GetItemTemplate(entry))
+                {
+                    valid = false;
+                    break;
+                }
+
+                if (pools->empty() || pools->back().Name != category)
+                    pools->push_back({category, 0, {}});
+
+                MaterialCategory& pool = pools->back();
+                if (uint64(pool.TotalWeight) + weight > std::numeric_limits<uint32>::max())
+                {
+                    valid = false;
+                    break;
+                }
+
+                pool.TotalWeight += weight;
+                pool.Items.push_back({entry, weight, minimum, maximum});
+            }
+            while (result->NextRow());
+        }
+
+        std::shared_ptr<MaterialPools const> loaded;
+        if (valid && pools->size() >= 3)
+            loaded = pools;
+        else
+            LOG_ERROR("module.manastorm.endless.rewards",
+                "Material cache 1478051 disabled: apply SQL 42 and configure at least three valid categories.");
+
+        std::atomic_store(&MaterialCachePools, loaded);
+    }
+
+    class manastorm_material_cache_loader final : public WorldScript
+    {
+    public:
+        manastorm_material_cache_loader() : WorldScript("manastorm_material_cache_loader",
+            {WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_AFTER_CONFIG_LOAD}) { }
+
+        void OnStartup() override { LoadMaterialCachePools(); }
+
+        void OnAfterConfigLoad(bool reload) override
+        {
+            if (reload)
+                LoadMaterialCachePools();
+        }
+    };
+
+    class manastorm_material_cache_selector final : public GlobalScript
+    {
+    public:
+        manastorm_material_cache_selector() : GlobalScript("manastorm_material_cache_selector",
+            {GLOBALHOOK_ON_BEFORE_LOOT_EQUAL_CHANCED}) { }
+
+        bool OnBeforeLootEqualChanced(Player const* player, std::list<LootStoreItem*> /*entries*/,
+            Loot& loot, LootStore const& store) override
+        {
+            if (!player || &store != &LootTemplates_Item)
+                return true;
+
+            Item const* container = player->GetItemByGuid(loot.containerGUID);
+            if (!container || container->GetEntry() != 1478051)
+                return true;
+
+            auto pools = std::atomic_load(&MaterialCachePools);
+            if (!ManastormModuleConfig::Enabled() || !pools || pools->size() < 3)
+                return false;
+
+            // Sample category indices without replacement; all categories are
+            // equally likely. Item weights are relative within each category.
+            std::vector<uint32> available;
+            available.reserve(pools->size());
+            for (uint32 index = 0; index < pools->size(); ++index)
+                available.push_back(index);
+
+            for (uint32 draw = 0; draw < 3; ++draw)
+            {
+                uint32 const index = urand(0, uint32(available.size() - 1));
+                MaterialCategory const& category = (*pools)[available[index]];
+                available[index] = available.back();
+                available.pop_back();
+
+                uint32 roll = urand(1, category.TotalWeight);
+                for (MaterialCandidate const& candidate : category.Items)
+                {
+                    if (roll > candidate.Weight)
+                    {
+                        roll -= candidate.Weight;
+                        continue;
+                    }
+
+                    LootStoreItem selected(candidate.ItemEntry, 0, 100.0f, false,
+                        LOOT_MODE_DEFAULT, 0, candidate.MinCount, candidate.MaxCount);
+                    loot.AddItem(selected);
+                    break;
+                }
+            }
+
+            return false;
+        }
+    };
+
+    class item_manastorm_material_cache final : public ItemScript
+    {
+    public:
+        item_manastorm_material_cache() : ItemScript("item_manastorm_material_cache") { }
+
+        bool OnUse(Player* player, Item* item, SpellCastTargets const&) override
+        {
+            return OpenCache(player, item);
+        }
+
+        static bool OpenCache(Player* player, Item* item)
+        {
+            if (!player || !item || item->GetEntry() != 1478051 ||
+                !player->GetSession() || !player->IsAlive() || player->IsInCombat())
+                return true;
+
+            if (!ManastormModuleConfig::Enabled() || !std::atomic_load(&MaterialCachePools))
+            {
+                player->SendSystemMessage("This cache's material rewards are unavailable. The cache was not consumed.");
+                return true;
+            }
+
+            ObjectGuid const guid = item->GetGUID();
+            WorldSession* session = player->GetSession();
+            player->SendLoot(guid, LOOT_CORPSE);
+            if (player->GetLootGUID() != guid)
+                return true;
+
+            // Use normal loot handlers for persistence, capacity checks and
+            // item-push notifications. The scoped core fallback mails full-bag
+            // material rewards through its existing item-retrieval path.
+            uint8 const slotCount = uint8(item->loot.items.size());
+            for (uint8 slot = 0; slot < slotCount && player->GetLootGUID() == guid; ++slot)
+            {
+                WorldPacket take(CMSG_AUTOSTORE_LOOT_ITEM, 1);
+                take << slot;
+                session->HandleAutostoreLootItemOpcode(take);
+            }
+
+            WorldPacket money(CMSG_LOOT_MONEY, 0);
+            session->HandleLootMoneyOpcode(money);
+            WorldPacket release(CMSG_LOOT_RELEASE, 8);
+            release << guid;
+            session->HandleLootReleaseOpcode(release);
+            return true;
+        }
+    };
+
+    class manastorm_material_cache_open final : public PlayerScript
+    {
+    public:
+        manastorm_material_cache_open() : PlayerScript("manastorm_material_cache_open",
+            {PLAYERHOOK_ON_BEFORE_OPEN_ITEM}) { }
+
+        bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
+        {
+            if (!item || item->GetEntry() != 1478051)
+                return true;
+
+            // Container opens bypass ItemScript::OnUse in the native core.
+            // Reuse the same delivery path and prevent a second SendLoot call.
+            item_manastorm_material_cache::OpenCache(player, item);
+            return false;
+        }
+    };
+
 }
 
 void AddSC_manastorm_cache_loot()
 {
     new item_manastorm_cache();
+    new manastorm_material_cache_loader();
+    new manastorm_material_cache_selector();
+    new item_manastorm_material_cache();
+    new manastorm_material_cache_open();
     new manastorm_cache_loot_selector();
 }
