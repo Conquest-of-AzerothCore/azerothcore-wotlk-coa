@@ -24,9 +24,11 @@ namespace
     constexpr uint32 NPC_PYROGUARD_EMBERSEER = 9816;
     constexpr uint32 NPC_BLACKHAND_INCARCERATOR = 10316;
     constexpr uint32 NPC_BURNING_FELGUARD = 10263;
+    constexpr uint32 NPC_WARCHIEF_REND_BLACKHAND = 10429;
 
-    // Native Blackrock Spire identifier recovered from blackrock_spire.h.
+    // Native Blackrock Spire identifiers recovered from blackrock_spire.h.
     constexpr uint32 DATA_PYROGUARD_EMBERSEER = 9;
+    constexpr uint32 DATA_GYTH = 11;
 
     // Emberseer's native reset applies the cage after its five-second spawn
     // initialization. Waiting for it prevents a very fast Manastorm bubble
@@ -39,6 +41,8 @@ namespace
 
     constexpr uint32 SEGMENT_BURNING_FELGUARD_NORMAL = 501;
     constexpr uint32 SEGMENT_BURNING_FELGUARD_ENDGAME = 513;
+    constexpr uint32 SEGMENT_REND_NORMAL = 663;
+    constexpr uint32 SEGMENT_REND_ENDGAME = 662;
     constexpr uint32 SEGMENT_PYROGUARD_NORMAL = 661;
     constexpr uint32 SEGMENT_PYROGUARD_ENDGAME = 660;
 
@@ -50,6 +54,15 @@ namespace
     constexpr float BURNING_FELGUARD_Y = -372.468f;
     constexpr float BURNING_FELGUARD_Z = 57.2964f;
     constexpr float BURNING_FELGUARD_O = 0.742208f;
+
+    // Native stadium/Gyth arena anchor recovered from boss_rend_blackhand.cpp.
+    Position const REND_ARENA_POSITION =
+    {
+        211.762f,
+        -397.5885f,
+        111.1817f,
+        4.747295f
+    };
 
     constexpr uint32 CHECK_INTERVAL_MS = 250;
     constexpr uint32 PENDING_TIMEOUT_MS = 180000;
@@ -85,6 +98,18 @@ namespace
                 SEGMENT_BURNING_FELGUARD_NORMAL ||
             segment.SegmentId ==
                 SEGMENT_BURNING_FELGUARD_ENDGAME;
+    }
+
+    bool IsRendManastormSegment(
+        ManastormRun const& run)
+    {
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        return segment.MapId == MAP_BLACKROCK_SPIRE &&
+            segment.ObjectiveCreatureEntry == NPC_WARCHIEF_REND_BLACKHAND &&
+            (segment.SegmentId == SEGMENT_REND_NORMAL ||
+                segment.SegmentId == SEGMENT_REND_ENDGAME);
     }
 
     bool IsEmberseerManastormSegment(
@@ -276,6 +301,46 @@ namespace
         return true;
     }
 
+    void EnsureRend(
+        Map* map,
+        ManastormRun& run)
+    {
+        InstanceScript* instance =
+            map->GetInstanceScript();
+
+        if (!instance)
+            return;
+
+        if (instance->GetBossState(DATA_GYTH) != IN_PROGRESS)
+            instance->SetBossState(DATA_GYTH, IN_PROGRESS);
+
+        Creature* rend = nullptr;
+        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        {
+            Creature* creature = spawn.second;
+            if (creature &&
+                creature->IsInWorld() &&
+                creature->IsAlive() &&
+                creature->GetEntry() == NPC_WARCHIEF_REND_BLACKHAND)
+            {
+                rend = creature;
+                break;
+            }
+        }
+
+        if (!rend)
+            return;
+
+        rend->NearTeleportTo(REND_ARENA_POSITION);
+        rend->RemoveUnitFlag(
+            UNIT_FLAG_NON_ATTACKABLE |
+            UNIT_FLAG_PREPARATION);
+        rend->SetImmuneToAll(false);
+
+        if (run.GetObjectiveCreatureGuid() != rend->GetGUID())
+            ManastormMgr::Instance().OnCreatureAddWorld(rend);
+    }
+
     Creature* FindEmberseer(
         Map* map,
         Player* player,
@@ -416,13 +481,13 @@ namespace
             run.GetInstanceId();
     }
 
-    class manastorm_blackrock_spire_burning_felguard_map :
+    class manastorm_blackrock_spire_objective_map :
         public AllMapScript
     {
     public:
-        manastorm_blackrock_spire_burning_felguard_map()
+        manastorm_blackrock_spire_objective_map()
             : AllMapScript(
-                "manastorm_blackrock_spire_burning_felguard_map")
+                "manastorm_blackrock_spire_objective_map")
         {
         }
 
@@ -433,30 +498,24 @@ namespace
             if (!ManastormModuleConfig::Enabled() ||
                 !map ||
                 !player ||
-                map->GetId() !=
-                    MAP_BLACKROCK_SPIRE)
+                map->GetId() != MAP_BLACKROCK_SPIRE)
             {
                 return;
             }
 
             ManastormRun* run =
-                ManastormMgr::Instance()
-                    .GetRunFor(
-                        player);
+                ManastormMgr::Instance().GetRunFor(player);
 
             if (!run ||
-                !IsBurningFelguardManastormSegment(
-                    *run) ||
-                run->GetInstanceId() !=
-                    map->GetInstanceId())
+                run->GetInstanceId() != map->GetInstanceId())
             {
                 return;
             }
 
-            EnsureBurningFelguard(
-                map,
-                player,
-                *run);
+            if (IsBurningFelguardManastormSegment(*run))
+                EnsureBurningFelguard(map, player, *run);
+            else if (IsRendManastormSegment(*run))
+                EnsureRend(map, *run);
         }
     };
 
@@ -800,7 +859,7 @@ namespace
 
 void AddSC_manastorm_blackrock_spire_compat()
 {
-    new manastorm_blackrock_spire_burning_felguard_map();
+    new manastorm_blackrock_spire_objective_map();
     new manastorm_blackrock_spire_emberseer_map();
     new manastorm_blackrock_spire_emberseer_world();
 }
