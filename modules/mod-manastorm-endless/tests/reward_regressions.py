@@ -250,6 +250,23 @@ def main() -> None:
     assert "PRIMARY KEY (`guid`, `item_entry`)" in schema
     assert "`quantity` BIGINT UNSIGNED" in schema
 
+    # Every member is classified independently; hidden UI does not grant items.
+    assert "GAME_MODE_WILDCARD = 0x0040" in rewards_cpp
+    assert "session->GetNativeGameModeGuid() == characterGuid" in rewards_cpp
+    assert "session->GetNativeGameModeMask()" in rewards_cpp
+    assert "SELECT gameMode FROM coa_character_gamemode WHERE guid = {}" in rewards_cpp
+    assert 'rule.WildcardOnly = key == "CASE" || key == "BONUS_CACHE"' in rewards_cpp
+    assert 'rule.NonWildcardOnly = key == "BONUS_CACHE_OTHER"' in rewards_cpp
+    assert "(rule.WildcardOnly && !wildcard)" in stage_block
+    assert "(rule.NonWildcardOnly && wildcard)" in stage_block
+    assert "wildcard ? run.GetBonusAbilityCaseCount() : 0u" in stage_block
+    assert "wildcard ? run.GetBonusTalentCaseCount() : 0u" in stage_block
+    assert ".BuildVisibilityRecords(player->GetGUID().GetCounter())" in bridge_cpp
+    mode_sql = (ROOT / "data/sql/db-world/base/41_manastorm_game_mode_rewards.sql").read_text(encoding="utf-8")
+    assert "('BONUS_CACHE_OTHER', 1478051, 1, 1, 0, 1, 0, 0, 1)" in mode_sql
+    assert "item_loot_template" not in mode_sql
+    assert "UPDATE `item_template`" not in mode_sql
+
     print("Manastorm reward regressions: PASS")
 
 

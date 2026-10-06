@@ -15,6 +15,7 @@
 #include "Player.h"
 #include "QueryResult.h"
 #include "Random.h"
+#include "WorldSession.h"
 
 #include <algorithm>
 #include <cmath>
@@ -29,6 +30,7 @@ namespace
     constexpr char const* LOG_FILTER =
         "module.manastorm.endless.rewards";
 
+    constexpr uint32 GAME_MODE_WILDCARD = 0x0040;
     constexpr uint32 ITEM_BEDLAM_BULLION = 1297307;
     constexpr uint32 ITEM_BONZO_BOLT = 1297308;
     constexpr uint32 REWARD_MAIL_SENDER = 80919;
@@ -420,6 +422,8 @@ bool ManastormRewards::LoadRewardRules()
         rule.Key = key == "RUNES" ? "MARKS"
             : key == "RUNES_FIRST" ? "MARKS_FIRST" : key;
         rule.EndgameOnly = key == "CASE";
+        rule.WildcardOnly = key == "CASE" || key == "BONUS_CACHE";
+        rule.NonWildcardOnly = key == "BONUS_CACHE_OTHER";
         rule.ItemEntry =
             fields[1].Get<uint32>();
         rule.BaseAmount =
@@ -463,7 +467,7 @@ bool ManastormRewards::LoadRewardRules()
             foundBonzo = true;
         }
         else if (key == "MARKS" || key == "MARKS_FIRST" || key == "RUNES" ||
-            key == "RUNES_FIRST" || key == "CASE" || key == "BONUS_CACHE")
+            key == "RUNES_FIRST" || key == "CASE" || key == "BONUS_CACHE" || key == "BONUS_CACHE_OTHER")
         {
             if (std::any_of(_completionRewards.begin(), _completionRewards.end(),
                 [&rule](RewardRule const& existing) { return existing.Key == rule.Key; }))
@@ -1144,6 +1148,7 @@ bool ManastormRewards::PrepareStageCompletion(
 
         bool const firstClear =
             !completed;
+        bool const wildcard = (GetActiveGameModeMask(characterGuid) & GAME_MODE_WILDCARD) != 0;
 
         bool const wonNormalCache =
             state.CacheChancePct >= 100 ||
@@ -1383,11 +1388,11 @@ bool ManastormRewards::PrepareStageCompletion(
             !appendQuantity(
                 _treasureKeeper
                     .AbilityCaseItem,
-                run.GetBonusAbilityCaseCount()) ||
+                wildcard ? run.GetBonusAbilityCaseCount() : 0u) ||
             !appendQuantity(
                 _treasureKeeper
                     .TalentCaseItem,
-                run.GetBonusTalentCaseCount()))
+                wildcard ? run.GetBonusTalentCaseCount() : 0u))
         {
             publications.clear();
             return false;
@@ -1397,7 +1402,9 @@ bool ManastormRewards::PrepareStageCompletion(
         // Preserve fractional multipliers independently for every mode and track.
         for (RewardRule const& rule : _completionRewards)
         {
-            if ((rule.FirstClearOnly && !firstClear) ||
+            if ((rule.WildcardOnly && !wildcard) ||
+                (rule.NonWildcardOnly && wildcard) ||
+                (rule.FirstClearOnly && !firstClear) ||
                 (rule.EndgameOnly && track != TrackBit(true)))
                 continue;
 
@@ -2020,9 +2027,26 @@ void ManastormRewards::PublishCommitted(
     publications.clear();
 }
 
-std::vector<ManastormRewardVisibilityRecord>
-ManastormRewards::BuildVisibilityRecords() const
+uint32 ManastormRewards::GetActiveGameModeMask(ObjectGuid::LowType characterGuid) const
 {
+    Player* player = ObjectAccessor::FindConnectedPlayer(
+        ObjectGuid::Create<HighGuid::Player>(characterGuid));
+    WorldSession* session = player ? player->GetSession() : nullptr;
+    if (session && session->HasNativeGameModeMask() &&
+        session->GetNativeGameModeGuid() == characterGuid)
+        return session->GetNativeGameModeMask();
+
+    // Offline participants and login before the owner publishes 0x90B use
+    // that owner's persistent character state. Do not infer mode from class IDs.
+    QueryResult result = CharacterDatabase.Query(
+        "SELECT gameMode FROM coa_character_gamemode WHERE guid = {} LIMIT 1", characterGuid);
+    return result ? result->Fetch()[0].Get<uint32>() : 0;
+}
+
+std::vector<ManastormRewardVisibilityRecord>
+ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid) const
+{
+    bool const wildcard = (GetActiveGameModeMask(characterGuid) & GAME_MODE_WILDCARD) != 0;
     std::vector<
         ManastormRewardVisibilityRecord>
         records;
@@ -2044,7 +2068,9 @@ ManastormRewards::BuildVisibilityRecords() const
         //
         // No reward rate-limit policy is being fabricated here.
         record.Action =
-            reward.Enabled
+            reward.Enabled &&
+                ((reward.ItemEntry != 1278049 && reward.ItemEntry != 1278048 &&
+                  reward.ItemEntry != 97885 && reward.ItemEntry != 97886) || wildcard)
             ? 0
             : 1;
 

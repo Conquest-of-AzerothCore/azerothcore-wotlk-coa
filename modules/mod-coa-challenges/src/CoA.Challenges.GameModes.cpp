@@ -248,6 +248,7 @@ namespace CoAChallenges
         if (!session)
             return;
 
+        session->SetNativeGameModeMask(mask, player->GetGUID().GetCounter());
         WorldPacket data(SMSG_COA_GAME_MODE_STATE, 4);
         data << uint32(mask);
         session->SendPacket(&data);

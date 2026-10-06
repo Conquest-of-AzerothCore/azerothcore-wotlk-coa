@@ -64,7 +64,7 @@ public:
         std::vector<std::shared_ptr<ManastormRewardPublication>>& publications) const;
 
     std::vector<ManastormRewardVisibilityRecord>
-        BuildVisibilityRecords() const;
+        BuildVisibilityRecords(ObjectGuid::LowType characterGuid) const;
 
     bool ResolveCacheItemEntry(
         bool endgame,
@@ -116,6 +116,8 @@ private:
     {
         std::string Key;
         bool EndgameOnly = false;
+        bool WildcardOnly = false;
+        bool NonWildcardOnly = false;
         uint32 ItemEntry = 0;
         uint32 BaseAmount = 0;
         uint32 DepthStep = 1;
@@ -160,6 +162,8 @@ private:
         std::vector<std::shared_ptr<ManastormRewardPublication>>& publications,
         std::string& error,
         std::string const& subject) const;
+
+    uint32 GetActiveGameModeMask(ObjectGuid::LowType characterGuid) const;
 
     bool LoadCacheBrackets();
     bool LoadRewardRules();

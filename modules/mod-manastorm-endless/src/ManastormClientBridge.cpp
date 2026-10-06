@@ -462,7 +462,7 @@ void ManastormClientBridge::SendState(Player* player, ManastormRun const* run) c
     std::vector<ManastormRewardVisibilityRecord> const
         records =
             ManastormRewards::Instance()
-                .BuildVisibilityRecords();
+                .BuildVisibilityRecords(player->GetGUID().GetCounter());
 
     WorldPacket visibility(
         ManastormNativeOpcode::RewardVisibility,

@@ -463,6 +463,16 @@ public:
 
     void SendPacket(WorldPacket const* packet);
     NativeClientConfig& GetNativeClientConfig() { return _nativeClientConfig; }
+    // Authoritative state mirrored by the existing 0x90B sender.
+    void SetNativeGameModeMask(uint32 mask, ObjectGuid::LowType guid)
+    {
+        _nativeGameModeMask = mask;
+        _nativeGameModeGuid = guid;
+        _nativeGameModeKnown = true;
+    }
+    bool HasNativeGameModeMask() const { return _nativeGameModeKnown; }
+    uint32 GetNativeGameModeMask() const { return _nativeGameModeMask; }
+    ObjectGuid::LowType GetNativeGameModeGuid() const { return _nativeGameModeGuid; }
     void SendNativeClientConfig();
     // Socketless integration tests can observe native responses without opening a client connection.
     void SetSocketlessPacketObserver(std::function<void(WorldPacket const&)> observer)
@@ -1256,6 +1266,9 @@ public:                                                 // opcodes handlers
 
 private:
     NativeClientConfig _nativeClientConfig;
+    uint32 _nativeGameModeMask = 0;
+    bool _nativeGameModeKnown = false;
+    ObjectGuid::LowType _nativeGameModeGuid = 0;
     void ProcessQueryCallbacks();
 
     QueryCallbackProcessor _queryProcessor;
