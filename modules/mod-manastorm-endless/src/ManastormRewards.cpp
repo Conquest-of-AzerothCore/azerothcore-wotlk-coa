@@ -459,7 +459,7 @@ bool ManastormRewards::LoadRewardRules()
             _bonzo = rule;
             foundBonzo = true;
         }
-        else if (key == "MARKS" || key == "CASE")
+        else if (key == "MARKS" || key == "MARKS_FIRST" || key == "CASE")
         {
             _completionRewards.push_back(rule);
         }
@@ -857,8 +857,10 @@ uint32 ManastormRewards::CalculateBaseAmount(
     if (!depth)
         return 0;
 
+    // Case bands advance at 50, 100, ...; existing currency bands start at 1.
+    uint64 const stepDepth = rule.Key == "CASE" ? uint64(depth) : uint64(depth - 1);
     uint64 const steps =
-        uint64(depth - 1) /
+        stepDepth /
         uint64(rule.DepthStep);
 
     uint64 const amount =

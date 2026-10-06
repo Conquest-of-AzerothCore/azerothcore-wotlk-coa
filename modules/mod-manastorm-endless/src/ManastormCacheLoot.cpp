@@ -14,6 +14,7 @@
 #include <array>
 #include <cstdint>
 #include <limits>
+#include <utility>
 #include <vector>
 
 namespace
@@ -27,65 +28,42 @@ namespace
         Spirit
     };
 
-    struct PrimaryStatCandidate
-    {
-        ManastormPreferredPrimaryStat Preference;
-        Stats Stat;
-    };
-
-    constexpr std::array<PrimaryStatCandidate, 4> PrimaryStats =
-    {{
-        { ManastormPreferredPrimaryStat::Strength, STAT_STRENGTH },
-        { ManastormPreferredPrimaryStat::Agility, STAT_AGILITY },
-        { ManastormPreferredPrimaryStat::Intellect, STAT_INTELLECT },
-        { ManastormPreferredPrimaryStat::Spirit, STAT_SPIRIT }
-    }};
-
-    //
-    // Ascension's client exposes a selectable loot specialization / Primary Stat,
-    // but this reconstructed core does not yet expose that native selection as
-    // server state. Until that opcode/state is recovered, use the opener's
-    // dominant live primary stat as the personalization preference. Keeping this
-    // decision isolated here makes the native preference a drop-in replacement
-    // later without changing cache SQL or pool selection.
-    //
+    // SharedConstants.lua and C_PrimaryStat:GetActivePrimaryStat use these
+    // learned allocations on both CoA and Hero realms. Live stat totals are
+    // affected by gear/buffs and are not the player's selection.
     ManastormPreferredPrimaryStat ResolvePreferredPrimaryStat(
         Player const* player)
     {
         if (!player)
             return ManastormPreferredPrimaryStat::None;
 
-        uint32 bestValue = 0;
-        ManastormPreferredPrimaryStat best =
-            ManastormPreferredPrimaryStat::None;
-        bool tied = false;
-
-        for (PrimaryStatCandidate const& candidate :
-            PrimaryStats)
-        {
-            uint32 const value =
-                uint32(player->GetStat(candidate.Stat));
-
-            if (value > bestValue)
-            {
-                bestValue = value;
-                best = candidate.Preference;
-                tied = false;
-            }
-            else if (value == bestValue &&
-                value != 0)
-            {
-                tied = true;
-            }
-        }
-
-        if (!bestValue ||
-            tied)
-        {
+        // Duality's original loot weighting has not been recovered. Use the
+        // neutral pool rather than silently substituting its largest live stat.
+        if (player->HasSpell(129243))
             return ManastormPreferredPrimaryStat::None;
+
+        constexpr std::array<std::pair<uint32, ManastormPreferredPrimaryStat>, 4> Allocations =
+        {{
+            { 84864, ManastormPreferredPrimaryStat::Strength },
+            { 84865, ManastormPreferredPrimaryStat::Agility },
+            { 84866, ManastormPreferredPrimaryStat::Intellect },
+            { 84867, ManastormPreferredPrimaryStat::Spirit }
+        }};
+
+        ManastormPreferredPrimaryStat selected = ManastormPreferredPrimaryStat::None;
+        for (auto const& allocation : Allocations)
+        {
+            if (!player->HasSpell(allocation.first))
+                continue;
+
+            // Conflicting allocations cannot identify a unique preference.
+            if (selected != ManastormPreferredPrimaryStat::None)
+                return ManastormPreferredPrimaryStat::None;
+
+            selected = allocation.second;
         }
 
-        return best;
+        return selected;
     }
 
     uint32 GetItemPrimaryStatAmount(

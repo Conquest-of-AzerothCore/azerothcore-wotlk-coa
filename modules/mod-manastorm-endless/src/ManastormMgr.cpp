@@ -4515,9 +4515,25 @@ void ManastormMgr::OnPlayerGiveXP(
         return;
     }
 
-    double const xpMultiplier =
+    double xpMultiplier =
         GetEndlessExperienceMultiplier(
             run->GetDepth());
+
+    // Match C_Manastorm.GetStageBonusExperience's first return:
+    // ManastormModifiers word 11 * Manastorm word 6.
+    // The addon shows (multiplier - 1) * 100; word 8 is a separate return.
+    if (ManastormModuleConfig::IsNativeClientMode())
+    {
+        double const mapFactor = double(segment.NativeExperienceFactor1);
+        if (!std::isfinite(mapFactor) || mapFactor < 0.0)
+        {
+            LOG_ERROR(LOG_FILTER, "Invalid native Manastorm XP factor for segment {}.",
+                segment.SegmentId);
+            return;
+        }
+
+        xpMultiplier *= mapFactor;
+    }
 
     uint32 const originalAmount =
         amount;

@@ -194,6 +194,26 @@ def main() -> None:
     assert "gadget.spell == 992090" in mgr_cpp
     assert "gadget.spell == 762608" in mgr_cpp
 
+    policy_sql = (ROOT / "data" / "sql" / "db-world" / "base" /
+                  "37_manastorm_reward_progression.sql").read_text(encoding="utf-8")
+    assert "('MARKS', 111381, 200, 1, 0, 0, 0, 0, 1)" in policy_sql
+    assert "('MARKS_FIRST', 111381, 100, 1, 0, 1, 0, 0, 1)" in policy_sql
+    assert "('CASE', 1278049, 1, 50, 1, 0, 0, 0, 1)" in policy_sql
+    assert 'key == "MARKS_FIRST"' in rewards_cpp
+    assert 'rule.Key == "CASE" ? uint64(depth) : uint64(depth - 1)' in rewards_cpp
+    for depth, expected in ((1, 1), (49, 1), (50, 2), (99, 2),
+                            (100, 3), (149, 3), (150, 4)):
+        assert 1 + depth // 50 == expected
+    assert "xpMultiplier *= mapFactor" in mgr_cpp
+    assert "segment.NativeExperienceFactor1" in mgr_cpp
+    cache_cpp = (SRC / "ManastormCacheLoot.cpp").read_text(encoding="utf-8")
+    preference = cache_cpp[cache_cpp.index("ResolvePreferredPrimaryStat("):
+                           cache_cpp.index("uint32 GetItemPrimaryStatAmount")]
+    assert "GetStat(" not in preference
+    assert "HasSpell(" in preference
+    for spell in ("84864", "84865", "84866", "84867", "129243"):
+        assert spell in preference
+
     print("Manastorm reward regressions: PASS")
 
 
