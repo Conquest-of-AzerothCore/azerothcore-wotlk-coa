@@ -301,48 +301,159 @@ namespace
         return true;
     }
 
-    void EnsureRend(
+    bool EnsureRend(
         Map* map,
+        Player* player,
         ManastormRun& run)
     {
-        Creature* rend = nullptr;
-        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        if (!map || !player)
+            return false;
+
+        // A Rend already created by this Manastorm compatibility path is a
+        // temporary creature (spawn id 0). Reuse it when another group member
+        // enters instead of creating a duplicate boss.
+        ObjectGuid const objectiveGuid =
+            run.GetObjectiveCreatureGuid();
+
+        if (!objectiveGuid.IsEmpty())
         {
-            Creature* creature = spawn.second;
-            if (creature &&
-                creature->IsInWorld() &&
-                creature->IsAlive() &&
-                creature->GetEntry() == NPC_WARCHIEF_REND_BLACKHAND)
+            Creature* objective =
+                ObjectAccessor::GetCreature(
+                    *player,
+                    objectiveGuid);
+
+            if (objective &&
+                objective->IsInWorld() &&
+                objective->IsAlive() &&
+                objective->GetEntry() ==
+                    NPC_WARCHIEF_REND_BLACKHAND &&
+                !objective->GetSpawnId())
             {
-                rend = creature;
-                break;
+                return true;
             }
         }
 
-        if (!rend)
-            return;
+        InstanceMap* instanceMap =
+            map->ToInstanceMap();
+
+        if (!instanceMap)
+            return false;
 
         InstanceScript* instance =
-            rend->GetInstanceScript();
+            instanceMap->GetInstanceScript();
 
         if (!instance)
-            return;
+            return false;
 
-        if (instance->GetBossState(DATA_GYTH) != IN_PROGRESS)
-            instance->SetBossState(DATA_GYTH, IN_PROGRESS);
+        // Entry 10429 has a persistent DB creature that is the stadium event
+        // controller. Native Blackrock Spire never uses that object as the
+        // combat Rend: it summons Gyth, despawns itself, and Gyth later casts
+        // spell 16328 to create a separate Rend. Do not turn the controller
+        // into the Manastorm boss; doing so leaves its event-owned controlled
+        // units attached when the dead creature is removed.
+        for (auto const& spawn :
+            map->GetCreatureBySpawnIdStore())
+        {
+            Creature* controller =
+                spawn.second;
 
-        rend->NearTeleportTo(
-            REND_ARENA_POSITION.GetPositionX(),
-            REND_ARENA_POSITION.GetPositionY(),
-            REND_ARENA_POSITION.GetPositionZ(),
-            REND_ARENA_POSITION.GetOrientation());
+            if (!controller ||
+                !controller->IsInWorld() ||
+                controller->GetEntry() !=
+                    NPC_WARCHIEF_REND_BLACKHAND)
+            {
+                continue;
+            }
+
+            if (run.GetObjectiveCreatureGuid() ==
+                controller->GetGUID())
+            {
+                run.ClearObjectiveCreatureGuid();
+            }
+
+            controller->DespawnOrUnsummon();
+        }
+
+        // Any remaining claim here is stale/non-Manastorm Rend state. The
+        // clean temporary combat boss below must be the exact fixed objective.
+        if (!run.GetObjectiveCreatureGuid().IsEmpty())
+            run.ClearObjectiveCreatureGuid();
+
+        // Native Rend Reset() becomes combat-ready when the Gyth encounter is
+        // IN_PROGRESS. Advance only that prerequisite state, then create an
+        // ownerless temporary Rend at the native Gyth arena anchor. This uses
+        // the normal boss_rend_blackhand AI without inheriting the stadium
+        // controller's summon/control lifecycle.
+        if (instance->GetBossState(DATA_GYTH) !=
+            IN_PROGRESS)
+        {
+            instance->SetBossState(
+                DATA_GYTH,
+                IN_PROGRESS);
+        }
+
+        TempSummon* rend =
+            map->SummonCreature(
+                NPC_WARCHIEF_REND_BLACKHAND,
+                REND_ARENA_POSITION);
+
+        if (!rend)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm could not summon clean Rend objective: "
+                "run={} segment={} map={} instance={}.",
+                run.GetRunId(),
+                run.GetSegment().SegmentId,
+                run.GetSegment().MapId,
+                run.GetInstanceId());
+
+            return false;
+        }
+
+        rend->SetTempSummonType(
+            TEMPSUMMON_MANUAL_DESPAWN);
         rend->RemoveUnitFlag(
             UNIT_FLAG_NON_ATTACKABLE |
             UNIT_FLAG_PREPARATION);
         rend->SetImmuneToAll(false);
 
-        if (run.GetObjectiveCreatureGuid() != rend->GetGUID())
-            ManastormMgr::Instance().OnCreatureAddWorld(rend);
+        if (run.GetObjectiveCreatureGuid() !=
+            rend->GetGUID())
+        {
+            ManastormMgr::Instance()
+                .OnCreatureAddWorld(
+                    rend);
+        }
+
+        if (run.GetObjectiveCreatureGuid() !=
+            rend->GetGUID())
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Summoned Rend failed Manastorm objective registration: "
+                "run={} segment={} map={} instance={} guid={}.",
+                run.GetRunId(),
+                run.GetSegment().SegmentId,
+                run.GetSegment().MapId,
+                run.GetInstanceId(),
+                rend->GetGUID().GetRawValue());
+
+            rend->DespawnOrUnsummon();
+            return false;
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped clean Rend combat objective for Manastorm: "
+            "run={} segment={} map={} instance={} guid={}.",
+            run.GetRunId(),
+            run.GetSegment().SegmentId,
+            run.GetSegment().MapId,
+            run.GetInstanceId(),
+            rend->GetGUID().GetRawValue());
+
+        return true;
     }
 
     Creature* FindEmberseer(
@@ -519,7 +630,7 @@ namespace
             if (IsBurningFelguardManastormSegment(*run))
                 EnsureBurningFelguard(map, player, *run);
             else if (IsRendManastormSegment(*run))
-                EnsureRend(map, *run);
+                EnsureRend(map, player, *run);
         }
     };
 
