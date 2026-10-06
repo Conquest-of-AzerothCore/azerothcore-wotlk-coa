@@ -499,10 +499,10 @@ namespace
         }
     };
 
-    class item_manastorm_material_cache final : public ItemScript
+    class item_manastorm_bonus_cache final : public ItemScript
     {
     public:
-        item_manastorm_material_cache() : ItemScript("item_manastorm_material_cache") { }
+        item_manastorm_bonus_cache() : ItemScript("item_manastorm_bonus_cache") { }
 
         bool OnUse(Player* player, Item* item, SpellCastTargets const&) override
         {
@@ -511,13 +511,14 @@ namespace
 
         static bool OpenCache(Player* player, Item* item)
         {
-            if (!player || !item || item->GetEntry() != 1478051 ||
+            if (!player || !item || (item->GetEntry() != 1478051 && item->GetEntry() != 1478052) ||
                 !player->GetSession() || !player->IsAlive() || player->IsInCombat())
                 return true;
 
-            if (!ManastormModuleConfig::Enabled() || !std::atomic_load(&MaterialCachePools))
+            if (!ManastormModuleConfig::Enabled() ||
+                (item->GetEntry() == 1478051 && !std::atomic_load(&MaterialCachePools)))
             {
-                player->SendSystemMessage("This cache's material rewards are unavailable. The cache was not consumed.");
+                player->SendSystemMessage("This cache's rewards are unavailable. The cache was not consumed.");
                 return true;
             }
 
@@ -529,7 +530,7 @@ namespace
 
             // Use normal loot handlers for persistence, capacity checks and
             // item-push notifications. The scoped core fallback mails full-bag
-            // material rewards through its existing item-retrieval path.
+            // Bonus Cache rewards through its existing item-retrieval path.
             uint8 const slotCount = uint8(item->loot.items.size());
             for (uint8 slot = 0; slot < slotCount && player->GetLootGUID() == guid; ++slot)
             {
@@ -547,20 +548,20 @@ namespace
         }
     };
 
-    class manastorm_material_cache_open final : public PlayerScript
+    class manastorm_bonus_cache_open final : public PlayerScript
     {
     public:
-        manastorm_material_cache_open() : PlayerScript("manastorm_material_cache_open",
+        manastorm_bonus_cache_open() : PlayerScript("manastorm_bonus_cache_open",
             {PLAYERHOOK_ON_BEFORE_OPEN_ITEM}) { }
 
         bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
         {
-            if (!item || item->GetEntry() != 1478051)
+            if (!item || (item->GetEntry() != 1478051 && item->GetEntry() != 1478052))
                 return true;
 
             // Container opens bypass ItemScript::OnUse in the native core.
             // Reuse the same delivery path and prevent a second SendLoot call.
-            item_manastorm_material_cache::OpenCache(player, item);
+            item_manastorm_bonus_cache::OpenCache(player, item);
             return false;
         }
     };
@@ -572,7 +573,7 @@ void AddSC_manastorm_cache_loot()
     new item_manastorm_cache();
     new manastorm_material_cache_loader();
     new manastorm_material_cache_selector();
-    new item_manastorm_material_cache();
-    new manastorm_material_cache_open();
+    new item_manastorm_bonus_cache();
+    new manastorm_bonus_cache_open();
     new manastorm_cache_loot_selector();
 }
