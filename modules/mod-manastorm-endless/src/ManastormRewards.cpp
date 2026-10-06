@@ -463,7 +463,7 @@ bool ManastormRewards::LoadRewardRules()
             foundBonzo = true;
         }
         else if (key == "MARKS" || key == "MARKS_FIRST" || key == "RUNES" ||
-            key == "RUNES_FIRST" || key == "CASE")
+            key == "RUNES_FIRST" || key == "CASE" || key == "BONUS_CACHE")
         {
             if (std::any_of(_completionRewards.begin(), _completionRewards.end(),
                 [&rule](RewardRule const& existing) { return existing.Key == rule.Key; }))
@@ -790,6 +790,13 @@ bool ManastormRewards::ValidateCharacterSchema() const
         return false;
     }
 
+    if (!CharacterDatabase.Query(
+        "SELECT COUNT(*) FROM character_manastorm_pending_currency WHERE guid = 0"))
+    {
+        LOG_ERROR(LOG_FILTER, "Apply 04_manastorm_pending_currency.sql to acore_characters.");
+        return false;
+    }
+
     return true;
 }
 
@@ -1106,11 +1113,6 @@ bool ManastormRewards::PrepareStageCompletion(
         // their durable reward mail must still be prepared atomically with
         // progression. Online players merely provide richer item creation
         // context and receive the post-commit inventory fast path.
-        Player const* itemOwner =
-            player && player->GetSession()
-            ? player
-            : nullptr;
-
         ManastormRewardStateSnapshot state;
 
         if (!LoadState(
@@ -1363,13 +1365,19 @@ bool ManastormRewards::PrepareStageCompletion(
                 return true;
             };
 
+        auto deferCurrency = [&transaction, characterGuid](uint32 entry, uint32 quantity)
+        {
+            if (quantity)
+                transaction->Append(
+                    "INSERT INTO character_manastorm_pending_currency (guid, item_entry, quantity) "
+                    "VALUES ({}, {}, {}) ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)",
+                    characterGuid, entry, quantity);
+        };
+
+        deferCurrency(_bonzo.ItemEntry, bonzo);
+        deferCurrency(_bedlam.ItemEntry, bedlam);
+
         if (!appendQuantity(
-                _bonzo.ItemEntry,
-                bonzo) ||
-            !appendQuantity(
-                _bedlam.ItemEntry,
-                bedlam) ||
-            !appendQuantity(
                 cacheItemEntry,
                 cacheCount) ||
             !appendQuantity(
@@ -1415,7 +1423,9 @@ bool ManastormRewards::PrepareStageCompletion(
             uint32 const itemEntry = rule.Key == "CASE"
                 ? (urand(0, 1) == 0 ? rule.ItemEntry : 1278048)
                 : rule.ItemEntry;
-            if (!appendQuantity(itemEntry, quantity))
+            if (rule.Key == "MARKS" || rule.Key == "MARKS_FIRST")
+                deferCurrency(itemEntry, quantity);
+            else if (!appendQuantity(itemEntry, quantity))
             {
                 publications.clear();
                 return false;
@@ -1431,229 +1441,10 @@ bool ManastormRewards::PrepareStageCompletion(
             transaction->Append(saveState);
         }
 
-        if (stacks.empty())
-        {
-            error =
-                "Manastorm stage completion produced no reward.";
 
-            publications.clear();
+        if (!PrepareItemDelivery(characterGuid, stacks, transaction, publications, error,
+            "Manastorm: level " + std::to_string(run.GetDepth())))
             return false;
-        }
-
-        std::size_t stackIndex = 0;
-        uint32 mailPart = 0;
-
-        while (stackIndex <
-            stacks.size())
-        {
-            ++mailPart;
-
-            auto publication =
-                std::make_shared<
-                    ManastormRewardPublication>();
-
-            publication->CharacterGuid =
-                characterGuid;
-
-            Mail& mail =
-                publication->MailData;
-
-            mail.messageID =
-                sObjectMgr->
-                    GenerateMailID();
-
-            mail.messageType =
-                MAIL_CREATURE;
-
-            mail.stationery =
-                MAIL_STATIONERY_DEFAULT;
-
-            mail.mailTemplateId = 0;
-            mail.sender =
-                REWARD_MAIL_SENDER;
-            mail.receiver =
-                characterGuid;
-
-            mail.subject =
-                "Manastorm: level " +
-                std::to_string(
-                    run.GetDepth());
-
-            if (mailPart > 1)
-            {
-                mail.subject +=
-                    " (" +
-                    std::to_string(
-                        mailPart) +
-                    ")";
-            }
-
-            mail.body =
-                firstClear
-                ? "A new Manastorm depth was conquered. "
-                  "First-clear and repeatable rewards are enclosed."
-                : "Another Manastorm storm was conquered. "
-                  "Repeatable rewards are enclosed.";
-
-            if (wonNormalCache)
-            {
-                mail.body +=
-                    " Your Manastorm Cache protection reset to 0%.";
-            }
-            else
-            {
-                mail.body +=
-                    " Your Manastorm Cache chance is now " +
-                    std::to_string(
-                        nextCacheChance) +
-                    "%.";
-            }
-
-            mail.deliver_time =
-                GameTime::GetGameTime()
-                    .count();
-
-            mail.expire_time =
-                mail.deliver_time +
-                30 * DAY;
-
-            mail.money = 0;
-            mail.COD = 0;
-            mail.checked =
-                MAIL_CHECK_MASK_HAS_BODY;
-
-            mail.state =
-                MAIL_STATE_UNCHANGED;
-
-            uint32 attachmentCount = 0;
-
-            while (stackIndex <
-                    stacks.size() &&
-                attachmentCount <
-                    MAX_MAIL_ITEMS)
-            {
-                auto const [entry, count] =
-                    stacks[stackIndex++];
-
-                std::unique_ptr<Item> item(
-                    Item::CreateItem(
-                        entry,
-                        count,
-                        itemOwner));
-
-                if (item)
-                {
-                    item->SetOwnerGUID(
-                        ObjectGuid::Create<
-                            HighGuid::Player>(
-                                characterGuid));
-                }
-
-                if (!item)
-                {
-                    error =
-                        "Unable to create a durable "
-                        "Manastorm reward item.";
-
-                    publications.clear();
-                    return false;
-                }
-
-                item->SaveToDB(
-                    transaction);
-
-                mail.AddItem(
-                    item->GetGUID()
-                        .GetCounter(),
-                    entry);
-
-                auto* attachment =
-                    CharacterDatabase
-                        .GetPreparedStatement(
-                            CHAR_INS_MAIL_ITEM);
-
-                attachment->SetData(
-                    0,
-                    mail.messageID);
-
-                attachment->SetData(
-                    1,
-                    item->GetGUID()
-                        .GetCounter());
-
-                attachment->SetData(
-                    2,
-                    characterGuid);
-
-                transaction->Append(
-                    attachment);
-
-                publication->Items
-                    .push_back(
-                        std::move(
-                            item));
-
-                ++attachmentCount;
-            }
-
-            auto* statement =
-                CharacterDatabase
-                    .GetPreparedStatement(
-                        CHAR_INS_MAIL);
-
-            statement->SetData(
-                0,
-                mail.messageID);
-            statement->SetData(
-                1,
-                mail.messageType);
-            statement->SetData(
-                2,
-                int8(
-                    mail.stationery));
-            statement->SetData(
-                3,
-                mail.mailTemplateId);
-            statement->SetData(
-                4,
-                mail.sender);
-            statement->SetData(
-                5,
-                mail.receiver);
-            statement->SetData(
-                6,
-                mail.subject);
-            statement->SetData(
-                7,
-                mail.body);
-            statement->SetData(
-                8,
-                true);
-            statement->SetData(
-                9,
-                uint32(
-                    mail.expire_time));
-            statement->SetData(
-                10,
-                uint32(
-                    mail.deliver_time));
-            statement->SetData(
-                11,
-                mail.money);
-            statement->SetData(
-                12,
-                mail.COD);
-            statement->SetData(
-                13,
-                uint8(
-                    mail.checked));
-
-            transaction->Append(
-                statement);
-
-            publications.push_back(
-                publication);
-        }
 
         LOG_INFO(
             LOG_FILTER,
@@ -1680,6 +1471,271 @@ bool ManastormRewards::PrepareStageCompletion(
             segmentMultiplier);
     }
 
+    return true;
+}
+
+bool ManastormRewards::PrepareItemDelivery(
+    ObjectGuid::LowType characterGuid,
+    std::vector<std::pair<uint32, uint32>> const& stacks,
+    CharacterDatabaseTransaction const& transaction,
+    std::vector<std::shared_ptr<ManastormRewardPublication>>& publications,
+    std::string& error,
+    std::string const& subject) const
+{
+    Player* itemOwner = ObjectAccessor::FindConnectedPlayer(
+        ObjectGuid::Create<HighGuid::Player>(characterGuid));
+    std::size_t stackIndex = 0;
+    uint32 mailPart = 0;
+
+    while (stackIndex <
+        stacks.size())
+    {
+        ++mailPart;
+
+        auto publication =
+            std::make_shared<
+                ManastormRewardPublication>();
+
+        publication->CharacterGuid =
+            characterGuid;
+
+        Mail& mail =
+            publication->MailData;
+
+        mail.messageID =
+            sObjectMgr->
+                GenerateMailID();
+
+        mail.messageType =
+            MAIL_CREATURE;
+
+        mail.stationery =
+            MAIL_STATIONERY_DEFAULT;
+
+        mail.mailTemplateId = 0;
+        mail.sender =
+            REWARD_MAIL_SENDER;
+        mail.receiver =
+            characterGuid;
+
+        mail.subject = subject;
+
+        if (mailPart > 1)
+        {
+            mail.subject +=
+                " (" +
+                std::to_string(
+                    mailPart) +
+                ")";
+        }
+
+        mail.body = "Rewards earned by completing Manastorm stages.";
+
+        mail.deliver_time =
+            GameTime::GetGameTime()
+                .count();
+
+        mail.expire_time =
+            mail.deliver_time +
+            30 * DAY;
+
+        mail.money = 0;
+        mail.COD = 0;
+        mail.checked =
+            MAIL_CHECK_MASK_HAS_BODY;
+
+        mail.state =
+            MAIL_STATE_UNCHANGED;
+
+        uint32 attachmentCount = 0;
+
+        while (stackIndex <
+                stacks.size() &&
+            attachmentCount <
+                MAX_MAIL_ITEMS)
+        {
+            auto const [entry, count] =
+                stacks[stackIndex++];
+
+            std::unique_ptr<Item> item(
+                Item::CreateItem(
+                    entry,
+                    count,
+                    itemOwner));
+
+            if (item)
+            {
+                item->SetOwnerGUID(
+                    ObjectGuid::Create<
+                        HighGuid::Player>(
+                            characterGuid));
+            }
+
+            if (!item)
+            {
+                error =
+                    "Unable to create a durable "
+                    "Manastorm reward item.";
+
+                publications.clear();
+                return false;
+            }
+
+            item->SaveToDB(
+                transaction);
+
+            mail.AddItem(
+                item->GetGUID()
+                    .GetCounter(),
+                entry);
+
+            auto* attachment =
+                CharacterDatabase
+                    .GetPreparedStatement(
+                        CHAR_INS_MAIL_ITEM);
+
+            attachment->SetData(
+                0,
+                mail.messageID);
+
+            attachment->SetData(
+                1,
+                item->GetGUID()
+                    .GetCounter());
+
+            attachment->SetData(
+                2,
+                characterGuid);
+
+            transaction->Append(
+                attachment);
+
+            publication->Items
+                .push_back(
+                    std::move(
+                        item));
+
+            ++attachmentCount;
+        }
+
+        auto* statement =
+            CharacterDatabase
+                .GetPreparedStatement(
+                    CHAR_INS_MAIL);
+
+        statement->SetData(
+            0,
+            mail.messageID);
+        statement->SetData(
+            1,
+            mail.messageType);
+        statement->SetData(
+            2,
+            int8(
+                mail.stationery));
+        statement->SetData(
+            3,
+            mail.mailTemplateId);
+        statement->SetData(
+            4,
+            mail.sender);
+        statement->SetData(
+            5,
+            mail.receiver);
+        statement->SetData(
+            6,
+            mail.subject);
+        statement->SetData(
+            7,
+            mail.body);
+        statement->SetData(
+            8,
+            true);
+        statement->SetData(
+            9,
+            uint32(
+                mail.expire_time));
+        statement->SetData(
+            10,
+            uint32(
+                mail.deliver_time));
+        statement->SetData(
+            11,
+            mail.money);
+        statement->SetData(
+            12,
+            mail.COD);
+        statement->SetData(
+            13,
+            uint8(
+                mail.checked));
+
+        transaction->Append(
+            statement);
+
+        publications.push_back(
+            publication);
+    }
+
+
+    return true;
+}
+
+bool ManastormRewards::SettlePendingCurrency(ObjectGuid::LowType characterGuid) const
+{
+    if (!_loaded)
+        return false;
+
+    QueryResult result = CharacterDatabase.Query(
+        "SELECT item_entry, quantity FROM character_manastorm_pending_currency "
+        "WHERE guid = {} ORDER BY item_entry", characterGuid);
+    if (!result)
+        return true;
+
+    std::vector<std::pair<uint32, uint32>> stacks;
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 const entry = fields[0].Get<uint32>();
+        uint64 remaining = fields[1].Get<uint64>();
+        ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(entry);
+        if (!itemTemplate)
+        {
+            LOG_ERROR(LOG_FILTER, "Cannot settle Manastorm currency item {} for {}.", entry, characterGuid);
+            return false;
+        }
+
+        uint32 const maxStack = std::max<uint32>(1, itemTemplate->GetMaxStackSize());
+        while (remaining)
+        {
+            uint32 const count = uint32(std::min<uint64>(remaining, maxStack));
+            stacks.emplace_back(entry, count);
+            remaining -= count;
+        }
+    }
+    while (result->NextRow());
+
+    auto transaction = CharacterDatabase.BeginTransaction();
+    std::vector<std::shared_ptr<ManastormRewardPublication>> publications;
+    std::string error;
+    if (!PrepareItemDelivery(characterGuid, stacks, transaction, publications, error,
+        "Manastorm: accumulated currency"))
+    {
+        LOG_ERROR(LOG_FILTER, "Manastorm settlement preparation failed for {}: {}.", characterGuid, error);
+        return false;
+    }
+
+    // Publish only after both the payout and removal of the unpaid balance commit.
+    // Manager calls are serialized on the world thread; retries see no paid rows.
+    transaction->Append(
+        "DELETE FROM character_manastorm_pending_currency WHERE guid = {}", characterGuid);
+    if (!CharacterDatabase.AsyncCommitTransaction(transaction).m_future.get())
+    {
+        LOG_ERROR(LOG_FILTER, "Manastorm settlement commit failed for {}. Balance retained.", characterGuid);
+        return false;
+    }
+
+    PublishCommitted(publications);
     return true;
 }
 

@@ -488,7 +488,7 @@ void Loot::AddItem(LootStoreItem const& item)
     uint32 stacks = count / proto->GetMaxStackSize() + (count % proto->GetMaxStackSize() ? 1 : 0);
 
     std::vector<LootItem>& lootItems = item.needs_quest ? quest_items : items;
-    uint32 limit = item.needs_quest ? MAX_NR_QUEST_ITEMS : MAX_NR_LOOT_ITEMS;
+    uint32 limit = item.needs_quest ? MAX_NR_QUEST_ITEMS : maxItemCount;
 
     for (uint32 i = 0; i < stacks && lootItems.size() < limit; ++i)
     {
@@ -554,7 +554,12 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
         return false;
     }
 
-    items.reserve(MAX_NR_LOOT_ITEMS);
+    // These two personal containers guarantee twenty distinct Fortune Scrolls.
+    // Ordinary creature/object/item loot keeps the standard eighteen-slot cap.
+    maxItemCount = &store == &LootTemplates_Item &&
+        (lootId == 1278048 || lootId == 1278049) ? 20 : MAX_NR_LOOT_ITEMS;
+    fixedMoneyLoot = &store == &LootTemplates_Item && lootId == 1478052;
+    items.reserve(maxItemCount);
     quest_items.reserve(MAX_NR_QUEST_ITEMS);
 
     // Initial group is 0, top level set to True
@@ -655,7 +660,7 @@ QuestItemList* Loot::FillFFALoot(Player* player)
 
 QuestItemList* Loot::FillQuestLoot(Player* player)
 {
-    if (items.size() == MAX_NR_LOOT_ITEMS)
+    if (items.size() >= maxItemCount)
         return nullptr;
 
     QuestItemList* ql = new QuestItemList();
@@ -691,7 +696,7 @@ QuestItemList* Loot::FillQuestLoot(Player* player)
             }
         }
 
-        if (items.size() + ql->size() == MAX_NR_LOOT_ITEMS)
+        if (items.size() + ql->size() >= maxItemCount)
             break;
     }
 
@@ -809,7 +814,9 @@ void Loot::generateMoneyLoot(uint32 minAmount, uint32 maxAmount)
 {
     if (maxAmount > 0)
     {
-        if (maxAmount <= minAmount)
+        if (fixedMoneyLoot)
+            gold = minAmount;
+        else if (maxAmount <= minAmount)
             gold = uint32(maxAmount * sWorld->getRate(RATE_DROP_MONEY));
         else if ((maxAmount - minAmount) < 32700)
             gold = uint32(urand(minAmount, maxAmount) * sWorld->getRate(RATE_DROP_MONEY));

@@ -214,6 +214,42 @@ def main() -> None:
     for spell in ("84864", "84865", "84866", "84867", "129243"):
         assert spell in preference
 
+    # Currency and first-clear loot have separate delivery lifecycles.
+    stage_block = rewards_cpp[rewards_cpp.index("bool ManastormRewards::PrepareStageCompletion("):
+                              rewards_cpp.index("bool ManastormRewards::PrepareItemDelivery(")]
+    assert "deferCurrency(_bonzo.ItemEntry, bonzo)" in stage_block
+    assert "deferCurrency(_bedlam.ItemEntry, bedlam)" in stage_block
+    assert 'rule.Key == "MARKS" || rule.Key == "MARKS_FIRST"' in stage_block
+    assert 'key == "BONUS_CACHE"' in rewards_cpp
+    assert "appendQuantity(itemEntry, quantity)" in stage_block
+    settlement = rewards_cpp[rewards_cpp.index("bool ManastormRewards::SettlePendingCurrency("):
+                             rewards_cpp.index("void ManastormRewards::PublishCommitted(")]
+    assert settlement.index("DELETE FROM character_manastorm_pending_currency") < settlement.index("AsyncCommitTransaction")
+    assert settlement.index("AsyncCommitTransaction") < settlement.index("PublishCommitted(publications)")
+    for start, end in (("void ManastormMgr::FailRun(", "void ManastormMgr::HandlePlayerDeath("),
+                       ("bool ManastormMgr::StopRun(", None)):
+        block = mgr_cpp[mgr_cpp.index(start):mgr_cpp.index(end) if end else len(mgr_cpp)]
+        assert "SettlePendingCurrency(memberGuid)" in block
+    login = mgr_cpp[mgr_cpp.index("void ManastormMgr::OnPlayerLogin("):
+                    mgr_cpp.index("void ManastormMgr::OnPlayerEnterMap(")]
+    assert "SettlePendingCurrency(player->GetGUID().GetCounter())" in login
+
+    fortune_sql = (ROOT / "data/sql/db-world/base/39_manastorm_fortune_case_loot.sql").read_text(encoding="utf-8")
+    rows = re.findall(r"\((127804[89]), (\d+), 0, 100, 0, 1, 0, 1, 1,", fortune_sql)
+    for entry, minimum in (("1278049", 97913), ("1278048", 97933)):
+        actual = [int(item) for case, item in rows if case == entry]
+        assert len(actual) == 20
+        assert set(actual) == set(range(minimum, minimum + 20))
+    bonus_sql = (ROOT / "data/sql/db-world/base/40_manastorm_bonus_cache_rewards.sql").read_text(encoding="utf-8")
+    bonus_items = re.findall(r"\(1478052, (\d+), 0, 100, 0, 1, 0, 1, 1,", bonus_sql)
+    assert set(map(int, bonus_items)) == {97885, 97886, 1278049, 1278048}
+    assert len(bonus_items) == 4
+    assert "('BONUS_CACHE', 1478052, 1, 1, 0, 1, 0, 0, 1)" in bonus_sql
+    assert "`minMoneyLoot` = 10000, `maxMoneyLoot` = 10000" in bonus_sql
+    schema = (ROOT / "data/sql/db-characters/base/04_manastorm_pending_currency.sql").read_text(encoding="utf-8")
+    assert "PRIMARY KEY (`guid`, `item_entry`)" in schema
+    assert "`quantity` BIGINT UNSIGNED" in schema
+
     print("Manastorm reward regressions: PASS")
 
 

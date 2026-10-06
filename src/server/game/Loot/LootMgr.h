@@ -317,6 +317,8 @@ struct Loot
     [[nodiscard]] QuestItemMap const& GetPlayerFFAItems() const { return PlayerFFAItems; }
     [[nodiscard]] QuestItemMap const& GetPlayerNonQuestNonFFAConditionalItems() const { return PlayerNonQuestNonFFAConditionalItems; }
 
+    uint32 maxItemCount = MAX_NR_LOOT_ITEMS;
+    bool fixedMoneyLoot = false;
     std::vector<LootItem> items;
     std::vector<LootItem> quest_items;
     uint32 gold;
@@ -355,6 +357,8 @@ struct Loot
         PlayerNonQuestNonFFAConditionalItems.clear();
 
         PlayersLooting.clear();
+        maxItemCount = MAX_NR_LOOT_ITEMS;
+        fixedMoneyLoot = false;
         items.clear();
         quest_items.clear();
         gold = 0;

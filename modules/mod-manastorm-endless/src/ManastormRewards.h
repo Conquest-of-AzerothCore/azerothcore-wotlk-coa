@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <utility>
 
 class Creature;
 class ManastormRun;
@@ -56,6 +57,8 @@ public:
         CharacterDatabaseTransaction const& transaction,
         std::vector<std::shared_ptr<ManastormRewardPublication>>& publications,
         std::string& error) const;
+
+    bool SettlePendingCurrency(ObjectGuid::LowType characterGuid) const;
 
     void PublishCommitted(
         std::vector<std::shared_ptr<ManastormRewardPublication>>& publications) const;
@@ -149,6 +152,14 @@ private:
         uint32 TalentCaseItem = 0;
         uint32 CaseCount = 0;
     };
+
+    bool PrepareItemDelivery(
+        ObjectGuid::LowType characterGuid,
+        std::vector<std::pair<uint32, uint32>> const& stacks,
+        CharacterDatabaseTransaction const& transaction,
+        std::vector<std::shared_ptr<ManastormRewardPublication>>& publications,
+        std::string& error,
+        std::string const& subject) const;
 
     bool LoadCacheBrackets();
     bool LoadRewardRules();

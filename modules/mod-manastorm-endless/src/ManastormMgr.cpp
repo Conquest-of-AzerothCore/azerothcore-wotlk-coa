@@ -2183,6 +2183,9 @@ void ManastormMgr::FailRun(
     std::vector<ObjectGuid::LowType> const members =
         run.GetMembers();
 
+    for (ObjectGuid::LowType memberGuid : members)
+        ManastormRewards::Instance().SettlePendingCurrency(memberGuid);
+
     run.SetState(
         ManastormRunState::Failed);
 
@@ -3809,6 +3812,7 @@ void ManastormMgr::OnPlayerLogin(Player* player)
     ManastormRun* run = GetRunFor(player);
     if (!run)
     {
+        ManastormRewards::Instance().SettlePendingCurrency(player->GetGUID().GetCounter());
         RemoveBaselineRunItems(player, true);
         SendClientState(player, nullptr);
         return;
@@ -7632,6 +7636,9 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
         hadPreviousStage
         ? run->GetPreviousInstanceId()
         : 0;
+
+    for (ObjectGuid::LowType memberGuid : members)
+        ManastormRewards::Instance().SettlePendingCurrency(memberGuid);
 
     run->SetState(
         ManastormRunState::Finished);
