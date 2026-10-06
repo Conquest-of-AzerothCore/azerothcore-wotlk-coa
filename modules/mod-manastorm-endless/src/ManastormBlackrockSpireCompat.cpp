@@ -11,6 +11,7 @@
 #include "Player.h"
 #include "ScriptedCreature.h"
 #include "ScriptMgr.h"
+#include "TemporarySummon.h"
 
 #include <unordered_map>
 
@@ -22,6 +23,7 @@ namespace
     constexpr uint32 MAP_BLACKROCK_SPIRE = 229;
     constexpr uint32 NPC_PYROGUARD_EMBERSEER = 9816;
     constexpr uint32 NPC_BLACKHAND_INCARCERATOR = 10316;
+    constexpr uint32 NPC_BURNING_FELGUARD = 10263;
 
     // Native Blackrock Spire identifier recovered from blackrock_spire.h.
     constexpr uint32 DATA_PYROGUARD_EMBERSEER = 9;
@@ -35,8 +37,19 @@ namespace
     constexpr uint32 SPELL_EMBERSEER_GROWING_TRIGGER = 16049;
     constexpr uint32 SPELL_EMBERSEER_FULL_STRENGTH = 16047;
 
+    constexpr uint32 SEGMENT_BURNING_FELGUARD_NORMAL = 501;
+    constexpr uint32 SEGMENT_BURNING_FELGUARD_ENDGAME = 513;
     constexpr uint32 SEGMENT_PYROGUARD_NORMAL = 661;
     constexpr uint32 SEGMENT_PYROGUARD_ENDGAME = 660;
+
+    // Segment 501/513 enters at the recovered Burning Felguard area. Unlike
+    // the DB-backed BRS rares, entry 10263 is normally produced by Scarshield
+    // Warlock portal summons, so a disposable Manastorm stage owns a direct
+    // temporary objective spawn here instead of waiting on that random event.
+    constexpr float BURNING_FELGUARD_X = -121.781f;
+    constexpr float BURNING_FELGUARD_Y = -372.468f;
+    constexpr float BURNING_FELGUARD_Z = 57.2964f;
+    constexpr float BURNING_FELGUARD_O = 0.742208f;
 
     constexpr uint32 CHECK_INTERVAL_MS = 250;
     constexpr uint32 PENDING_TIMEOUT_MS = 180000;
@@ -53,6 +66,26 @@ namespace
 
     uint32 sCheckTimerMs =
         CHECK_INTERVAL_MS;
+
+    bool IsBurningFelguardManastormSegment(
+        ManastormRun const& run)
+    {
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (segment.MapId !=
+                MAP_BLACKROCK_SPIRE ||
+            segment.ObjectiveCreatureEntry !=
+                NPC_BURNING_FELGUARD)
+        {
+            return false;
+        }
+
+        return segment.SegmentId ==
+                SEGMENT_BURNING_FELGUARD_NORMAL ||
+            segment.SegmentId ==
+                SEGMENT_BURNING_FELGUARD_ENDGAME;
+    }
 
     bool IsEmberseerManastormSegment(
         ManastormRun const& run)
@@ -72,6 +105,175 @@ namespace
                 SEGMENT_PYROGUARD_NORMAL ||
             segment.SegmentId ==
                 SEGMENT_PYROGUARD_ENDGAME;
+    }
+
+    Creature* FindBurningFelguard(
+        Player* player,
+        ManastormRun const& run)
+    {
+        if (!player)
+            return nullptr;
+
+        ObjectGuid const objectiveGuid =
+            run.GetObjectiveCreatureGuid();
+
+        if (!objectiveGuid.IsEmpty())
+        {
+            Creature* objective =
+                ObjectAccessor::GetCreature(
+                    *player,
+                    objectiveGuid);
+
+            if (objective &&
+                objective->IsInWorld() &&
+                objective->IsAlive() &&
+                objective->GetEntry() ==
+                    NPC_BURNING_FELGUARD)
+            {
+                return objective;
+            }
+        }
+
+        // If the native Scarshield Warlock portal happened to create the rare
+        // before this hook runs, reuse that nearby live creature rather than
+        // manufacturing a duplicate objective.
+        std::list<Creature*> felguards;
+        GetCreatureListWithEntryInGrid(
+            felguards,
+            player,
+            NPC_BURNING_FELGUARD,
+            100.0f);
+
+        for (Creature* felguard :
+            felguards)
+        {
+            if (felguard &&
+                felguard->IsInWorld() &&
+                felguard->IsAlive())
+            {
+                return felguard;
+            }
+        }
+
+        return nullptr;
+    }
+
+    bool EnsureBurningFelguard(
+        Map* map,
+        Player* player,
+        ManastormRun& run)
+    {
+        if (!map ||
+            !player ||
+            !IsBurningFelguardManastormSegment(
+                run) ||
+            map->GetId() !=
+                MAP_BLACKROCK_SPIRE ||
+            map->GetInstanceId() !=
+                run.GetInstanceId())
+        {
+            return false;
+        }
+
+        Creature* felguard =
+            FindBurningFelguard(
+                player,
+                run);
+
+        if (felguard)
+        {
+            if (run.GetObjectiveCreatureGuid() !=
+                felguard->GetGUID())
+            {
+                ManastormMgr::Instance()
+                    .OnCreatureAddWorld(
+                        felguard);
+            }
+
+            if (run.GetObjectiveCreatureGuid() ==
+                felguard->GetGUID())
+            {
+                return true;
+            }
+        }
+
+        Position const felguardPosition =
+        {
+            BURNING_FELGUARD_X,
+            BURNING_FELGUARD_Y,
+            BURNING_FELGUARD_Z,
+            BURNING_FELGUARD_O
+        };
+
+        TempSummon* summon =
+            map->SummonCreature(
+                NPC_BURNING_FELGUARD,
+                felguardPosition);
+
+        if (!summon)
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Manastorm could not summon Burning Felguard objective: "
+                "run={} segment={} map={} instance={} objective={}.",
+                run.GetRunId(),
+                run.GetSegment().SegmentId,
+                run.GetSegment().MapId,
+                run.GetInstanceId(),
+                NPC_BURNING_FELGUARD);
+
+            return false;
+        }
+
+        // Keep the summoned rare for the lifetime of this disposable stage.
+        // Normal/public Blackrock Spire still relies on Scarshield Warlock
+        // portal RNG and is never modified by this compatibility path.
+        summon->SetTempSummonType(
+            TEMPSUMMON_MANUAL_DESPAWN);
+
+        // SummonCreature() normally reaches the global Manastorm creature hook
+        // through AddToWorld(). Register explicitly only if that hook has not
+        // already claimed this exact runtime GUID as the fixed objective.
+        if (run.GetObjectiveCreatureGuid() !=
+            summon->GetGUID())
+        {
+            ManastormMgr::Instance()
+                .OnCreatureAddWorld(
+                    summon);
+        }
+
+        if (run.GetObjectiveCreatureGuid() !=
+            summon->GetGUID())
+        {
+            LOG_ERROR(
+                LOG_FILTER,
+                "Summoned Burning Felguard failed Manastorm objective registration: "
+                "run={} segment={} map={} instance={} objective={} guid={}.",
+                run.GetRunId(),
+                run.GetSegment().SegmentId,
+                run.GetSegment().MapId,
+                run.GetInstanceId(),
+                NPC_BURNING_FELGUARD,
+                summon->GetGUID()
+                    .GetRawValue());
+
+            summon->DespawnOrUnsummon();
+            return false;
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped Burning Felguard objective for Manastorm: "
+            "run={} segment={} map={} instance={} objective={} guid={}.",
+            run.GetRunId(),
+            run.GetSegment().SegmentId,
+            run.GetSegment().MapId,
+            run.GetInstanceId(),
+            NPC_BURNING_FELGUARD,
+            summon->GetGUID()
+                .GetRawValue());
+
+        return true;
     }
 
     Creature* FindEmberseer(
@@ -213,6 +415,50 @@ namespace
         pending.InstanceId =
             run.GetInstanceId();
     }
+
+    class manastorm_blackrock_spire_burning_felguard_map :
+        public AllMapScript
+    {
+    public:
+        manastorm_blackrock_spire_burning_felguard_map()
+            : AllMapScript(
+                "manastorm_blackrock_spire_burning_felguard_map")
+        {
+        }
+
+        void OnPlayerEnterAll(
+            Map* map,
+            Player* player) override
+        {
+            if (!ManastormModuleConfig::Enabled() ||
+                !map ||
+                !player ||
+                map->GetId() !=
+                    MAP_BLACKROCK_SPIRE)
+            {
+                return;
+            }
+
+            ManastormRun* run =
+                ManastormMgr::Instance()
+                    .GetRunFor(
+                        player);
+
+            if (!run ||
+                !IsBurningFelguardManastormSegment(
+                    *run) ||
+                run->GetInstanceId() !=
+                    map->GetInstanceId())
+            {
+                return;
+            }
+
+            EnsureBurningFelguard(
+                map,
+                player,
+                *run);
+        }
+    };
 
     class manastorm_blackrock_spire_emberseer_map :
         public AllMapScript
@@ -554,6 +800,7 @@ namespace
 
 void AddSC_manastorm_blackrock_spire_compat()
 {
+    new manastorm_blackrock_spire_burning_felguard_map();
     new manastorm_blackrock_spire_emberseer_map();
     new manastorm_blackrock_spire_emberseer_world();
 }
