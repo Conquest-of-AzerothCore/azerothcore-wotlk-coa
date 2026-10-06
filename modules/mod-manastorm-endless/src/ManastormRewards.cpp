@@ -85,6 +85,7 @@ bool ManastormRewards::Load()
     _cacheBrackets.clear();
     _bedlam = {};
     _bonzo = {};
+    _completionRewards.clear();
     _groupRewardRanges.clear();
     _potentialRewards.clear();
     _treasureKeeper = {};
@@ -414,6 +415,8 @@ bool ManastormRewards::LoadRewardRules()
             continue;
 
         RewardRule rule;
+        rule.Key = key;
+        rule.EndgameOnly = key == "CASE";
         rule.ItemEntry =
             fields[1].Get<uint32>();
         rule.BaseAmount =
@@ -429,7 +432,8 @@ bool ManastormRewards::LoadRewardRules()
         rule.ApplySegmentMultiplier =
             fields[7].Get<uint8>() != 0;
 
-        if (!rule.ItemEntry ||
+        if ((key == "CASE" && !sObjectMgr->GetItemTemplate(1278048)) ||
+            !rule.ItemEntry ||
             !rule.DepthStep ||
             !sObjectMgr->GetItemTemplate(
                 rule.ItemEntry))
@@ -454,6 +458,10 @@ bool ManastormRewards::LoadRewardRules()
         {
             _bonzo = rule;
             foundBonzo = true;
+        }
+        else if (key == "MARKS" || key == "CASE")
+        {
+            _completionRewards.push_back(rule);
         }
     }
     while (result->NextRow());
@@ -759,6 +767,15 @@ bool ManastormRewards::ValidateCharacterSchema() const
             "Character reward table is missing. "
             "Apply 02_manastorm_rewards.sql to acore_characters.");
 
+        return false;
+    }
+
+    if (!_completionRewards.empty() &&
+        !CharacterDatabase.Query(
+            "SELECT COUNT(*) FROM character_manastorm_completion_reward_state WHERE guid = 0"))
+    {
+        LOG_ERROR(LOG_FILTER,
+            "Optional completion reward state is missing. Apply 03_manastorm_completion_rewards.sql.");
         return false;
     }
 
@@ -1353,6 +1370,52 @@ bool ManastormRewards::PrepareStageCompletion(
         {
             publications.clear();
             return false;
+        }
+
+        // Optional completion rewards share the existing durable mail transaction.
+        // Preserve fractional multipliers independently for every mode and track.
+        for (RewardRule const& rule : _completionRewards)
+        {
+            if ((rule.FirstClearOnly && !firstClear) ||
+                (rule.EndgameOnly && track != TrackBit(true)))
+                continue;
+
+            uint32 previousRemainder = 0;
+            uint64 earned = 0;
+            auto* selectState = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MANASTORM_COMPLETION_REWARD);
+            selectState->SetData(0, characterGuid);
+            selectState->SetData(1, uint8(run.GetMode()));
+            selectState->SetData(2, track);
+            selectState->SetData(3, rule.Key);
+            PreparedQueryResult optionalState = CharacterDatabase.Query(selectState);
+            if (optionalState)
+            {
+                Field* optionalFields = optionalState->Fetch();
+                previousRemainder = optionalFields[0].Get<uint32>() % BASIS_POINTS;
+                earned = optionalFields[1].Get<uint64>();
+            }
+
+            uint32 nextRemainder = previousRemainder;
+            uint32 const quantity = ScaleCurrencyAmount(
+                CalculateBaseAmount(rule, run.GetDepth()), rule,
+                groupMultiplier, segmentMultiplier, previousRemainder, nextRemainder);
+            uint32 const itemEntry = rule.Key == "CASE"
+                ? (urand(0, 1) == 0 ? rule.ItemEntry : 1278048)
+                : rule.ItemEntry;
+            if (!appendQuantity(itemEntry, quantity))
+            {
+                publications.clear();
+                return false;
+            }
+
+            auto* saveState = CharacterDatabase.GetPreparedStatement(CHAR_REP_MANASTORM_COMPLETION_REWARD);
+            saveState->SetData(0, characterGuid);
+            saveState->SetData(1, uint8(run.GetMode()));
+            saveState->SetData(2, track);
+            saveState->SetData(3, rule.Key);
+            saveState->SetData(4, nextRemainder);
+            saveState->SetData(5, SaturatingAdd(earned, quantity));
+            transaction->Append(saveState);
         }
 
         if (stacks.empty())

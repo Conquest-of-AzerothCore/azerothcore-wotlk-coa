@@ -111,6 +111,8 @@ private:
 
     struct RewardRule
     {
+        std::string Key;
+        bool EndgameOnly = false;
         uint32 ItemEntry = 0;
         uint32 BaseAmount = 0;
         uint32 DepthStep = 1;
@@ -170,6 +172,7 @@ private:
     std::vector<CacheBracket> _cacheBrackets;
     RewardRule _bedlam;
     RewardRule _bonzo;
+    std::vector<RewardRule> _completionRewards;
     std::vector<GroupRewardRange> _groupRewardRanges;
     std::vector<PotentialReward> _potentialRewards;
     TreasureKeeperRule _treasureKeeper;

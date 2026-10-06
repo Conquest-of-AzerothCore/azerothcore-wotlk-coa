@@ -2,6 +2,7 @@
 #include "ManastormModuleConfig.h"
 #include "ManastormMgr.h"
 #include "ManastormPotionClient.h"
+#include "../../mod-ascension-compat/src/AscensionManastormGadgets.h"
 
 #include "ObjectAccessor.h"
 #include "Creature.h"
@@ -2642,11 +2643,21 @@ void ManastormMgr::HandlePlayerDeath(
     // Multiplayer reaches it only when every run member
     // in the stage is dead.
     //
-    FailRun(
-        *run,
-        "All run members are dead.",
-        0,
-        ManastormFailureExit::FactionHub);
+    // Keep native membership until Leave/Release, so the death UI remains usable.
+    // This state cannot advance or earn another stage reward.
+    run->SetState(ManastormRunState::AwaitingExit);
+    _transitionTimers.erase(run->GetRunId());
+    SetEndlessObjectiveSkull(*run, ObjectGuid::Empty);
+    BroadcastClientState(*run);
+
+    for (ObjectGuid::LowType guid : run->GetMembers())
+    {
+        Player* member = ObjectAccessor::FindConnectedPlayer(
+            ObjectGuid::Create<HighGuid::Player>(guid));
+        if (member)
+            member->SendSystemMessage(
+                "Manastorm: your run has ended. Leave Manastorm or release spirit to return.");
+    }
 }
 
 void ManastormMgr::GrantBaselineRunItems(
@@ -3951,6 +3962,24 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
     // items remain; they are NOT recreated or duplicated.
     //
     GrantBaselineRunItems(player);
+
+    // Arrival hooks can repeat for reconnects. Reset each member once per floor.
+    // The shared potion backend keeps ownership of its three-charge recharge state.
+    if ((run->GetState() == ManastormRunState::Preparing ||
+        run->GetState() == ManastormRunState::Active) &&
+        run->MarkStageCooldownsReset(player->GetGUID().GetCounter()))
+    {
+        for (auto const& gadget : Ascension::Manastorm::Gadgets)
+        {
+            if (gadget.passive || !player->HasSpell(gadget.spell) ||
+                gadget.spell == 254440 || gadget.spell == 992090 || gadget.spell == 762608)
+                continue;
+
+            player->RemoveSpellCooldown(gadget.spell, true);
+        }
+
+        player->RemoveActivePetSpellCooldowns();
+    }
 
     ManastormSegment const& segment = run->GetSegment();
     if (map->GetId() != segment.MapId ||
@@ -7539,6 +7568,16 @@ void ManastormMgr::Update(uint32 diff)
     }
 }
 
+bool ManastormMgr::HandleReleaseAfterWipe(Player* player)
+{
+    ManastormRun* run = GetRunFor(player);
+    if (!run || run->GetState() != ManastormRunState::AwaitingExit)
+        return false;
+
+    FailRun(*run, "All run members are dead.", 0, ManastormFailureExit::FactionHub);
+    return true;
+}
+
 bool ManastormMgr::StopRun(Player* player, std::string& error)
 {
     error.clear();
@@ -7554,6 +7593,12 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
     {
         error = "You are not part of an active Manastorm run.";
         return false;
+    }
+
+    if (run->GetState() == ManastormRunState::AwaitingExit)
+    {
+        FailRun(*run, "All run members are dead.", 0, ManastormFailureExit::FactionHub);
+        return true;
     }
 
     uint64 const runId = run->GetRunId();

@@ -54,6 +54,15 @@ public:
     }
 
     uint32 GetDepth() const { return _depth; }
+    bool MarkStageCooldownsReset(ObjectGuid::LowType guid)
+    {
+        auto const previous = _cooldownResetDepths.find(guid);
+        if (previous != _cooldownResetDepths.end() && previous->second == _depth)
+            return false;
+
+        _cooldownResetDepths[guid] = _depth;
+        return true;
+    }
     ObjectGuid GetPortalGuid() const { return _portalGuid; }
     void SetPortalGuid(ObjectGuid guid) { _portalGuid = guid; }
     bool EntranceInitialized() const { return _entranceInitialized; }
@@ -746,6 +755,7 @@ private:
     std::unordered_set<ObjectGuid::LowType>
         _chaoticLinkUnusedSpawnIds;
 
+    std::unordered_map<ObjectGuid::LowType, uint32> _cooldownResetDepths;
     uint32 _instanceId = 0;
 
     // During the five-second portal window the run may own the completed

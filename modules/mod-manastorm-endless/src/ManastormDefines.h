@@ -25,6 +25,7 @@ enum class ManastormRunState : uint8
     Transitioning = 4,
     Failed = 5,
     Finished = 6,
+    AwaitingExit = 7,
 };
 
 namespace ManastormBaseline

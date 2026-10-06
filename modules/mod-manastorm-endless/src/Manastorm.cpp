@@ -717,7 +717,8 @@ public:
                 PLAYERHOOK_ON_BEFORE_SEND_CHAT_MESSAGE,
                 PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT,
                 PLAYERHOOK_ON_BEFORE_CRITERIA_PROGRESS,
-                PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES
+                PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES,
+                PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD
             })
     {
     }
@@ -736,6 +737,15 @@ public:
     {
         ManastormMobilityClient::SyncAuras(player);
         ManastormMgr::Instance().SyncManastormPotionCharges(player);
+    }
+
+    bool OnPlayerCanRepopAtGraveyard(Player* player) override
+    {
+        if (ManastormModuleConfig::Enabled() &&
+            ManastormMgr::Instance().HandleReleaseAfterWipe(player))
+            return false;
+
+        return true;
     }
 
     void OnPlayerSendSpellChargeStates(Player const* player) override

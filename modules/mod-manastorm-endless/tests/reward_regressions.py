@@ -100,9 +100,12 @@ def main() -> None:
     assert resolve_cache(rows, endgame=True, depth=705, level=1) == 1288068
     assert resolve_cache(rows, endgame=True, depth=736, level=1) == 1288071
     assert resolve_cache(rows, endgame=True, depth=765, level=1) == 1288071
-    assert resolve_cache(rows, endgame=True, depth=826, level=1) == 1289074
-    assert resolve_cache(rows, endgame=True, depth=855, level=1) == 1289074
-    assert resolve_cache(rows, endgame=True, depth=856, level=1) == 0
+    assert resolve_cache(rows, endgame=True, depth=826, level=1) == 1289070
+    assert resolve_cache(rows, endgame=True, depth=875, level=1) == 1289070
+    assert resolve_cache(rows, endgame=True, depth=876, level=1) == 1289071
+    assert resolve_cache(rows, endgame=True, depth=925, level=1) == 1289071
+    assert resolve_cache(rows, endgame=True, depth=926, level=1) == 1289074
+    assert resolve_cache(rows, endgame=True, depth=4294967295, level=1) == 1289074
 
     for item in ("97884", "1297307", "1297308", "1278049", "1278048", "97886", "97885"):
         assert item in world_sql
@@ -137,12 +140,12 @@ def main() -> None:
     assert "TrySpawnTreasureKeeper" in mgr_cpp
     assert "GetBonusCacheCount" in run_h
 
-    # PREPARING protection cannot coexist with killable stage creatures.
-    # The first real player/player-controlled hit explicitly starts the stage;
-    # if the party cannot activate yet, outgoing damage is suppressed.
+    # The first player/player-controlled hit requests stage activation.
+    # Protection remains owned by the existing Safety Bubble spell.
     assert "GetCharmerOrOwnerPlayerOrPlayerItself" in mgr_cpp
     assert "run->RequestStart();" in mgr_cpp
-    assert "damage = 0;" in mgr_cpp
+    damage_block = mgr_cpp[mgr_cpp.index("void ManastormMgr::OnDamage("):]
+    assert "damage = 0;" not in damage_block
     assert "SAFETY_BUBBLE_CLEANUP_SPELLS" in mgr_cpp
     assert "ManastormRunState::StageComplete" in mgr_cpp
     assert "PreparationProtectionMs = 120000" in run_h
@@ -162,6 +165,34 @@ def main() -> None:
     assert "NativeRewardEndMultiplier" in rewards_cpp
     assert "NativeRewardEncounterMultiplier" in rewards_cpp
     assert "nativeMultiplier" in rewards_cpp
+
+    completion_sql = (ROOT / "data" / "sql" / "db-world" / "base" /
+                      "36_manastorm_completion_rewards.sql").read_text(encoding="utf-8")
+    completion_schema = (ROOT / "data" / "sql" / "db-characters" / "base" /
+                         "03_manastorm_completion_rewards.sql").read_text(encoding="utf-8")
+    assert "('MARKS', 111381, 200, 1, 0, 0, 0, 0, 1)" in completion_sql
+    assert "('CASE', 1278049, 1, 1, 0, 0, 0, 0, 1)" in completion_sql
+    assert "('BEDLAM'" not in completion_sql
+    assert "('BONZO'" not in completion_sql
+    assert "CHAR_SEL_MANASTORM_COMPLETION_REWARD" in rewards_cpp
+    assert "transaction->Append(saveState)" in rewards_cpp
+    assert "rule.EndgameOnly && track != TrackBit(true)" in rewards_cpp
+    assert "urand(0, 1) == 0 ? rule.ItemEntry : 1278048" in rewards_cpp
+    assert "PRIMARY KEY (`guid`, `mode`, `track`, `reward_key`)" in completion_schema
+    assert "ManastormRunState::AwaitingExit" in mgr_cpp
+    assert "HandleReleaseAfterWipe" in mgr_cpp
+    assert "MarkStageCooldownsReset" in mgr_cpp
+    assert "MarkStageCooldownsReset" in run_h
+    assert "RemoveActivePetSpellCooldowns" in mgr_cpp
+    death_block = mgr_cpp[mgr_cpp.index("void ManastormMgr::HandlePlayerDeath("):
+                          mgr_cpp.index("void ManastormMgr::GrantBaselineRunItems(")]
+    assert "ManastormRunState::AwaitingExit" in death_block
+    assert "FailRun(" not in death_block
+    death_dispatch = mgr_cpp[mgr_cpp.index("void ManastormMgr::OnUnitDeath("):]
+    assert "ManastormRunState::Active" in death_dispatch
+    assert "gadget.spell == 254440" in mgr_cpp
+    assert "gadget.spell == 992090" in mgr_cpp
+    assert "gadget.spell == 762608" in mgr_cpp
 
     print("Manastorm reward regressions: PASS")
 

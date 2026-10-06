@@ -34,6 +34,8 @@ public:
         Player* player,
         std::string& error);
 
+    bool HandleReleaseAfterWipe(Player* player);
+
     bool UseStagePortal(
         Player* player,
         Creature* portal,
