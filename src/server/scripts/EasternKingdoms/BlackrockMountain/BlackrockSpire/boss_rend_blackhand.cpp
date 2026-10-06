@@ -196,6 +196,12 @@ struct boss_rend_blackhand : public BossAI
     {
         if (type == AREATRIGGER && data == AREATRIGGER_BLACKROCK_STADIUM)
         {
+            // Once Gyth is already active, this Rend is the combat summon,
+            // not the stadium event controller. Ignore repeated stadium area
+            // triggers so combat ability events stay in the combat scheduler.
+            if (instance->GetBossState(DATA_GYTH) == IN_PROGRESS)
+                return;
+
             if (!_gythEvent)
             {
                 _gythEvent = true;
@@ -413,8 +419,8 @@ struct boss_rend_blackhand : public BossAI
     }
 
 private:
-    bool   _gythEvent;
-    uint8 _currentWave;
+    bool _gythEvent = false;
+    uint8 _currentWave = 0;
     ObjectGuid _victorGUID;
     ObjectGuid _waveDoorGUID;
 };
