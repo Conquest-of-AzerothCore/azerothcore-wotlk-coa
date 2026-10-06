@@ -305,15 +305,6 @@ namespace
         Map* map,
         ManastormRun& run)
     {
-        InstanceScript* instance =
-            map->GetInstanceScript();
-
-        if (!instance)
-            return;
-
-        if (instance->GetBossState(DATA_GYTH) != IN_PROGRESS)
-            instance->SetBossState(DATA_GYTH, IN_PROGRESS);
-
         Creature* rend = nullptr;
         for (auto const& spawn : map->GetCreatureBySpawnIdStore())
         {
@@ -331,7 +322,20 @@ namespace
         if (!rend)
             return;
 
-        rend->NearTeleportTo(REND_ARENA_POSITION);
+        InstanceScript* instance =
+            rend->GetInstanceScript();
+
+        if (!instance)
+            return;
+
+        if (instance->GetBossState(DATA_GYTH) != IN_PROGRESS)
+            instance->SetBossState(DATA_GYTH, IN_PROGRESS);
+
+        rend->NearTeleportTo(
+            REND_ARENA_POSITION.GetPositionX(),
+            REND_ARENA_POSITION.GetPositionY(),
+            REND_ARENA_POSITION.GetPositionZ(),
+            REND_ARENA_POSITION.GetOrientation());
         rend->RemoveUnitFlag(
             UNIT_FLAG_NON_ATTACKABLE |
             UNIT_FLAG_PREPARATION);
