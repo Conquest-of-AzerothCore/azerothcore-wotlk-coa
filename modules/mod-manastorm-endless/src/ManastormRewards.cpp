@@ -415,7 +415,10 @@ bool ManastormRewards::LoadRewardRules()
             continue;
 
         RewardRule rule;
-        rule.Key = key;
+        // Keep legacy ledger keys so the currency rename retains earned totals
+        // and fractional carry. World policy accepts the current Rune names.
+        rule.Key = key == "RUNES" ? "MARKS"
+            : key == "RUNES_FIRST" ? "MARKS_FIRST" : key;
         rule.EndgameOnly = key == "CASE";
         rule.ItemEntry =
             fields[1].Get<uint32>();
@@ -459,8 +462,16 @@ bool ManastormRewards::LoadRewardRules()
             _bonzo = rule;
             foundBonzo = true;
         }
-        else if (key == "MARKS" || key == "MARKS_FIRST" || key == "CASE")
+        else if (key == "MARKS" || key == "MARKS_FIRST" || key == "RUNES" ||
+            key == "RUNES_FIRST" || key == "CASE")
         {
+            if (std::any_of(_completionRewards.begin(), _completionRewards.end(),
+                [&rule](RewardRule const& existing) { return existing.Key == rule.Key; }))
+            {
+                LOG_ERROR(LOG_FILTER, "Duplicate Manastorm reward policy for '{}'.", key);
+                return false;
+            }
+
             _completionRewards.push_back(rule);
         }
     }
