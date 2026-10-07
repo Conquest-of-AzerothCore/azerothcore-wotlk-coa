@@ -4,9 +4,11 @@
 CREATE TABLE IF NOT EXISTS `manastorm_segment` (
   `segment_id` INT UNSIGNED NOT NULL,
   `map_id` INT UNSIGNED NOT NULL,
-  -- Optional physical server-map override. 0 preserves the native
-  -- Manastorm.dbc map identity and executes on map_id as before.
+  -- Optional physical server-map override. The explicit enable flag keeps
+  -- runtime map 0 (Eastern Kingdoms) representable while preserving legacy
+  -- rows where runtime_map_id=0 meant "use native map_id".
   `runtime_map_id` INT UNSIGNED NOT NULL DEFAULT 0,
+  `runtime_map_override_enabled` TINYINT UNSIGNED NOT NULL DEFAULT 0,
   `difficulty` TINYINT UNSIGNED NOT NULL DEFAULT 0,
   `dungeon_encounter_id` INT UNSIGNED NOT NULL DEFAULT 0,
   `objective_creature_entry` INT UNSIGNED NOT NULL,

@@ -336,6 +336,27 @@ physical map = 0
 objective entry = 599
 ```
 
+## Moonbrook restoration authored
+
+The first outdoor restoration is now authored in SQL as:
+
+```text
+segment 526 / 527
+native map_id = 1769
+runtime_map_id = 0
+runtime_map_override_enabled = 1
+native objective = 84270
+runtime objective = 599
+game_tele = 2103
+```
+
+The datastore now uses an explicit runtime-map override enable bit, so physical
+Eastern Kingdoms map `0` no longer collides with the historical
+`runtime_map_id = 0` "no override" sentinel.
+
+Existing non-zero runtime-map overrides are backfilled as enabled by the
+migration, preserving current Manaclaw/Kalimdor behavior.
+
 ## Restoration principle
 
 For these outdoor segments, preserve the same split already established elsewhere:

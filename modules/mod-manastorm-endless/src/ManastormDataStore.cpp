@@ -382,6 +382,7 @@ bool ManastormDataStore::LoadSegments()
     QueryResult result = WorldDatabase.Query(
         "SELECT "
         "`segment_id`, `map_id`, `runtime_map_id`, "
+        "`runtime_map_override_enabled`, "
         "`difficulty`, `dungeon_encounter_id`, "
         "`objective_creature_entry`, `runtime_objective_creature_entry`, "
         "`start_game_tele_id`, `weight`, "
@@ -410,12 +411,15 @@ bool ManastormDataStore::LoadSegments()
         uint32 const runtimeMapId =
             fields[2].Get<uint32>();
 
+        bool const runtimeMapOverrideEnabled =
+            fields[3].Get<uint8>() != 0;
+
         segment.MapId =
-            runtimeMapId
+            runtimeMapOverrideEnabled
             ? runtimeMapId
             : segment.NativeMapId;
 
-        segment.Difficulty = fields[3].Get<uint8>();
+        segment.Difficulty = fields[4].Get<uint8>();
 
         // Patch-M difficulty 2 is the native Manastorm Endgame track, not a
         // physical WotLK dungeon spawn mode. Keep the native identity intact
@@ -425,24 +429,24 @@ bool ManastormDataStore::LoadSegments()
             ? 0
             : segment.Difficulty;
 
-        segment.DungeonEncounterId = fields[4].Get<uint32>();
-        segment.NativeObjectiveCreatureEntry = fields[5].Get<uint32>();
+        segment.DungeonEncounterId = fields[5].Get<uint32>();
+        segment.NativeObjectiveCreatureEntry = fields[6].Get<uint32>();
 
         uint32 const runtimeObjectiveCreatureEntry =
-            fields[6].Get<uint32>();
+            fields[7].Get<uint32>();
 
         segment.ObjectiveCreatureEntry =
             runtimeObjectiveCreatureEntry
             ? runtimeObjectiveCreatureEntry
             : segment.NativeObjectiveCreatureEntry;
 
-        segment.StartGameTeleId = fields[7].Get<uint32>();
-        segment.Weight = fields[8].Get<uint32>();
-        segment.MinDepth = fields[9].Get<uint32>();
-        segment.MaxDepth = fields[10].Get<uint32>();
-        segment.RewardMultiplier = fields[11].Get<float>();
-        segment.ChaoticLinkStacks = fields[12].Get<uint8>();
-        segment.Flags = fields[13].Get<uint32>();
+        segment.StartGameTeleId = fields[8].Get<uint32>();
+        segment.Weight = fields[9].Get<uint32>();
+        segment.MinDepth = fields[10].Get<uint32>();
+        segment.MaxDepth = fields[11].Get<uint32>();
+        segment.RewardMultiplier = fields[12].Get<float>();
+        segment.ChaoticLinkStacks = fields[13].Get<uint8>();
+        segment.Flags = fields[14].Get<uint32>();
 
         if (!segment.SegmentId)
         {
