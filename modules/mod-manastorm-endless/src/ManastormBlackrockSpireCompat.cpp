@@ -25,6 +25,7 @@ namespace
     constexpr uint32 NPC_BLACKHAND_INCARCERATOR = 10316;
     constexpr uint32 NPC_BURNING_FELGUARD = 10263;
     constexpr uint32 NPC_WARCHIEF_REND_BLACKHAND = 10429;
+    constexpr uint32 NPC_SOLAKAR_FLAMEWREATH = 10264;
 
     // Native Blackrock Spire identifiers recovered from blackrock_spire.h.
     constexpr uint32 DATA_PYROGUARD_EMBERSEER = 9;
@@ -43,6 +44,8 @@ namespace
     constexpr uint32 SEGMENT_BURNING_FELGUARD_ENDGAME = 513;
     constexpr uint32 SEGMENT_REND_NORMAL = 663;
     constexpr uint32 SEGMENT_REND_ENDGAME = 662;
+    constexpr uint32 SEGMENT_SOLAKAR_NORMAL = 669;
+    constexpr uint32 SEGMENT_SOLAKAR_ENDGAME = 668;
     constexpr uint32 SEGMENT_PYROGUARD_NORMAL = 661;
     constexpr uint32 SEGMENT_PYROGUARD_ENDGAME = 660;
 
@@ -64,18 +67,30 @@ namespace
         4.747295f
     };
 
+    // Native final Father Flame wave position.
+    Position const SOLAKAR_POSITION =
+    {
+        80.0f,
+        -280.0f,
+        93.0f,
+        4.712389f
+    };
+
     constexpr uint32 CHECK_INTERVAL_MS = 250;
     constexpr uint32 PENDING_TIMEOUT_MS = 180000;
 
-    struct PendingEmberseerStage
+    struct PendingBlackrockSpireStage
     {
         ObjectGuid::LowType MemberGuid = 0;
         uint32 InstanceId = 0;
         uint32 WaitedMs = 0;
     };
 
-    std::unordered_map<uint64, PendingEmberseerStage>
+    std::unordered_map<uint64, PendingBlackrockSpireStage>
         sPendingEmberseerStages;
+
+    std::unordered_map<uint64, PendingBlackrockSpireStage>
+        sPendingSolakarStages;
 
     uint32 sCheckTimerMs =
         CHECK_INTERVAL_MS;
@@ -110,6 +125,18 @@ namespace
             segment.ObjectiveCreatureEntry == NPC_WARCHIEF_REND_BLACKHAND &&
             (segment.SegmentId == SEGMENT_REND_NORMAL ||
                 segment.SegmentId == SEGMENT_REND_ENDGAME);
+    }
+
+    bool IsSolakarManastormSegment(
+        ManastormRun const& run)
+    {
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        return segment.MapId == MAP_BLACKROCK_SPIRE &&
+            segment.ObjectiveCreatureEntry == NPC_SOLAKAR_FLAMEWREATH &&
+            (segment.SegmentId == SEGMENT_SOLAKAR_NORMAL ||
+                segment.SegmentId == SEGMENT_SOLAKAR_ENDGAME);
     }
 
     bool IsEmberseerManastormSegment(
@@ -456,6 +483,73 @@ namespace
         return true;
     }
 
+    bool EnsureSolakar(
+        Map* map,
+        Player* player,
+        ManastormRun& run)
+    {
+        if (!map || !player)
+            return false;
+
+        ObjectGuid const objectiveGuid =
+            run.GetObjectiveCreatureGuid();
+
+        if (!objectiveGuid.IsEmpty())
+        {
+            Creature* objective =
+                ObjectAccessor::GetCreature(
+                    *player,
+                    objectiveGuid);
+
+            if (objective &&
+                objective->IsInWorld() &&
+                objective->IsAlive() &&
+                objective->GetEntry() ==
+                    NPC_SOLAKAR_FLAMEWREATH)
+            {
+                return true;
+            }
+        }
+
+        TempSummon* solakar =
+            map->SummonCreature(
+                NPC_SOLAKAR_FLAMEWREATH,
+                SOLAKAR_POSITION);
+
+        if (!solakar)
+            return false;
+
+        solakar->SetTempSummonType(
+            TEMPSUMMON_MANUAL_DESPAWN);
+
+        if (run.GetObjectiveCreatureGuid() !=
+            solakar->GetGUID())
+        {
+            ManastormMgr::Instance()
+                .OnCreatureAddWorld(
+                    solakar);
+        }
+
+        if (run.GetObjectiveCreatureGuid() !=
+            solakar->GetGUID())
+        {
+            solakar->DespawnOrUnsummon();
+            return false;
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped Solakar Flamewreath objective for Manastorm: "
+            "run={} segment={} map={} instance={} guid={}.",
+            run.GetRunId(),
+            run.GetSegment().SegmentId,
+            run.GetSegment().MapId,
+            run.GetInstanceId(),
+            solakar->GetGUID().GetRawValue());
+
+        return true;
+    }
+
     Creature* FindEmberseer(
         Map* map,
         Player* player,
@@ -578,6 +672,24 @@ namespace
         emberseer->SetImmuneToPC(false);
     }
 
+    void QueueSolakarStage(
+        Player* player,
+        ManastormRun const& run)
+    {
+        if (!player)
+            return;
+
+        PendingBlackrockSpireStage& pending =
+            sPendingSolakarStages[
+                run.GetRunId()];
+
+        pending.MemberGuid =
+            player->GetGUID().GetCounter();
+
+        pending.InstanceId =
+            run.GetInstanceId();
+    }
+
     void QueueEmberseerStage(
         Player* player,
         ManastormRun const& run)
@@ -585,7 +697,7 @@ namespace
         if (!player)
             return;
 
-        PendingEmberseerStage& pending =
+        PendingBlackrockSpireStage& pending =
             sPendingEmberseerStages[
                 run.GetRunId()];
 
@@ -631,6 +743,8 @@ namespace
                 EnsureBurningFelguard(map, player, *run);
             else if (IsRendManastormSegment(*run))
                 EnsureRend(map, player, *run);
+            else if (IsSolakarManastormSegment(*run))
+                QueueSolakarStage(player, *run);
         }
     };
 
@@ -693,13 +807,17 @@ namespace
             if (!ManastormModuleConfig::Enabled())
             {
                 sPendingEmberseerStages.clear();
+                sPendingSolakarStages.clear();
                 sCheckTimerMs =
                     CHECK_INTERVAL_MS;
                 return;
             }
 
-            if (sPendingEmberseerStages.empty())
+            if (sPendingEmberseerStages.empty() &&
+                sPendingSolakarStages.empty())
+            {
                 return;
+            }
 
             if (sCheckTimerMs > diff)
             {
@@ -711,6 +829,139 @@ namespace
                 CHECK_INTERVAL_MS;
 
             for (auto itr =
+                    sPendingSolakarStages.begin();
+                itr !=
+                    sPendingSolakarStages.end();)
+            {
+                uint64 const runId =
+                    itr->first;
+
+                PendingBlackrockSpireStage& pending =
+                    itr->second;
+
+                pending.WaitedMs =
+                    pending.WaitedMs >=
+                        PENDING_TIMEOUT_MS -
+                            CHECK_INTERVAL_MS
+                    ? PENDING_TIMEOUT_MS
+                    : pending.WaitedMs +
+                        CHECK_INTERVAL_MS;
+
+                Player* player =
+                    ObjectAccessor::FindConnectedPlayer(
+                        ObjectGuid::Create<
+                            HighGuid::Player>(
+                                pending.MemberGuid));
+
+                if (!player ||
+                    !player->IsInWorld() ||
+                    player->IsBeingTeleported())
+                {
+                    if (pending.WaitedMs <
+                        PENDING_TIMEOUT_MS)
+                    {
+                        ++itr;
+                        continue;
+                    }
+
+                    LOG_WARN(
+                        LOG_FILTER,
+                        "Discarded pending Manastorm Solakar activation after timeout: "
+                        "run={} instance={} member={}.",
+                        runId,
+                        pending.InstanceId,
+                        pending.MemberGuid);
+
+                    itr =
+                        sPendingSolakarStages.erase(
+                            itr);
+                    continue;
+                }
+
+                ManastormRun* run =
+                    ManastormMgr::Instance()
+                        .GetRunFor(
+                            player);
+
+                if (!run ||
+                    run->GetRunId() != runId ||
+                    !IsSolakarManastormSegment(
+                        *run) ||
+                    run->GetInstanceId() !=
+                        pending.InstanceId)
+                {
+                    itr =
+                        sPendingSolakarStages.erase(
+                            itr);
+                    continue;
+                }
+
+                // Solakar's native InitializeAI() immediately calls
+                // DoZoneInCombat(). Do not create him until the party has
+                // actually left the Manastorm safety bubble.
+                if (run->GetState() ==
+                    ManastormRunState::Preparing)
+                {
+                    ++itr;
+                    continue;
+                }
+
+                if (run->GetState() !=
+                    ManastormRunState::Active)
+                {
+                    itr =
+                        sPendingSolakarStages.erase(
+                            itr);
+                    continue;
+                }
+
+                Map* map =
+                    player->FindMap();
+
+                if (!map ||
+                    map->GetId() !=
+                        MAP_BLACKROCK_SPIRE ||
+                    map->GetInstanceId() !=
+                        pending.InstanceId)
+                {
+                    ++itr;
+                    continue;
+                }
+
+                if (EnsureSolakar(
+                        map,
+                        player,
+                        *run))
+                {
+                    itr =
+                        sPendingSolakarStages.erase(
+                            itr);
+                    continue;
+                }
+
+                if (pending.WaitedMs >=
+                    PENDING_TIMEOUT_MS)
+                {
+                    LOG_ERROR(
+                        LOG_FILTER,
+                        "Manastorm Solakar activation timed out: "
+                        "run={} segment={} map={} instance={} objective={}.",
+                        run->GetRunId(),
+                        run->GetSegment().SegmentId,
+                        run->GetSegment().MapId,
+                        run->GetInstanceId(),
+                        NPC_SOLAKAR_FLAMEWREATH);
+
+                    itr =
+                        sPendingSolakarStages.erase(
+                            itr);
+                    continue;
+                }
+
+                ++itr;
+            }
+
+            for (auto itr =
                     sPendingEmberseerStages.begin();
                 itr !=
                     sPendingEmberseerStages.end();)
@@ -718,7 +969,7 @@ namespace
                 uint64 const runId =
                     itr->first;
 
-                PendingEmberseerStage& pending =
+                PendingBlackrockSpireStage& pending =
                     itr->second;
 
                 pending.WaitedMs =
