@@ -69,6 +69,37 @@ User policy: Vanilla/Classic caches and segments; TBC excluded for now. The supp
 
 Read this compact catalogue before rescanning the full item dump. Recheck the source when IDs/names change or when investigating descriptions, spell slots, loot contents, or live availability. Keep confirmed evidence separate from reconstructed behavior.
 
+## Restoration migration index
+
+All 35 endgame cache IDs now have reviewed restoration definitions. This describes repository work,
+not live installation, original Ascension odds or completed in-game validation. The installed-loot audit
+below remains the historical supplied snapshot. Reuse the linked family reports and candidate CSVs.
+
+| Family | Cache IDs | Migration |
+| --- | --- | --- |
+| Normal Dungeon | 1278050 | SQL 49 |
+| Heroic Dungeon | 1278051 | SQL 50 |
+| Plain Mythic Dungeon | 1278054 | SQL 53 |
+| ZG Normal/Heroic/Mythic | 1278052, 1278053, 1278055 | SQL 54 |
+| MC Normal/Heroic/Mythic | 1278056, 1278058, 1278060 | SQL 26, then SQL 55 |
+| Later MC/Onyxia | 1278061, 1278062, 1278063, 1278065, 1278067 | SQL 26, then SQL 62 |
+| BWL Normal/Heroic/Mythic | 1278066, 1278068, 1278069 | SQL 57 |
+| AQ20 Normal/Heroic/Mythic | 1278070, 1278072, 1278074 | SQL 58 |
+| AQ40 Normal/Heroic/Mythic | 1278075, 1278077, 1278078 | SQL 59 |
+| Naxx Normal/Heroic/Mythic | 1278079, 1278081, 1278083 | SQL 60 |
+| Dungeon rank bands 1-40 | 1278059, 1278064, 1278073, 1278082 | SQL 61 |
+| Remaining Ascended raids | 1278057, 1278071, 1278076, 1278080, 1278084 | SQL 63 |
+
+SQL 57-61 and SQL 63 are self-contained. SQL 55/62 validate and reuse installed SQL 26 pools.
+If SQL 26 is already installed, apply the follow-ups without rebuilding its pools. If SQL 26 is absent,
+apply SQL 26, then SQL 55 and SQL 62. Rerunning SQL 26 resets its eight roots; reapply both follow-ups.
+Source runtime changes require a module rebuild and restart. Restoring inactive caches does not add them
+to SQL 47's active award catalogue. Leveling/generic 97883/97884 remain separate unresolved work.
+
+See [ONYXIA_MOLTEN_CORE_CACHE_REVIEW.md](ONYXIA_MOLTEN_CORE_CACHE_REVIEW.md),
+[RANKED_DUNGEON_CACHE_MAPPING.md](RANKED_DUNGEON_CACHE_MAPPING.md) and
+[ASCENDED_RAID_CACHE_MAPPING.md](ASCENDED_RAID_CACHE_MAPPING.md) for the later reconstruction policies.
+
 ## Exact item descriptions
 
 Extracted against the declared SQL column order (all 43 selected rows matched the schema column count). SQL string escapes are decoded; line breaks and placeholders below are retained. Empty descriptions are explicitly marked. Depth descriptions record the source snapshot; they do not override SQL 47. `946 to -1` is preserved literally.

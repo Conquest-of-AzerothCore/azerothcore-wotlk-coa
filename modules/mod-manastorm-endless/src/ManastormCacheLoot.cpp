@@ -286,9 +286,12 @@ namespace
             bool const rankedDungeonFamily = (container->GetEntry() == 1278059 || container->GetEntry() == 1278064 ||
                 container->GetEntry() == 1278073 || container->GetEntry() == 1278082) &&
                 entry->reference >= 9003801 && entry->reference <= 9003804;
+            bool const ascendedRaidFamily = (container->GetEntry() == 1278057 || container->GetEntry() == 1278071 ||
+                container->GetEntry() == 1278076 || container->GetEntry() == 1278080 ||
+                container->GetEntry() == 1278084) && entry->reference >= 9003901 && entry->reference <= 9003905;
             if (heroicTier || mythicTier || zulGurubFamily || moltenCoreFamily || blackwingLairFamily ||
                 ruinsOfAhnQirajFamily || templeOfAhnQirajFamily || naxxramasFamily || rankedDungeonFamily ||
-                laterMoltenCoreFamily)
+                laterMoltenCoreFamily || ascendedRaidFamily)
                 maxcount = 1; // One tier reward regardless of global reference amount rates.
         }
 
