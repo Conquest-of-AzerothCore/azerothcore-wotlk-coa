@@ -1224,8 +1224,18 @@ bool ManastormDataStore::LoadUnlocks()
             "`intro_segment_id`, "
             "`endgame_intro_segment_id`, "
             "`intro_message_id`, "
-            "`completion_message_id` "
-            "FROM `manastorm_unlock` "
+            "`completion_message_id`, "
+            "EXISTS (SELECT 1 FROM `manastorm_segment` AS `s` "
+            "WHERE `s`.`segment_id` = `u`.`intro_segment_id` AND `s`.`enabled` = 0), "
+            "EXISTS (SELECT 1 FROM `manastorm_segment` AS `s` "
+            "WHERE `s`.`segment_id` = `u`.`endgame_intro_segment_id` AND `s`.`enabled` = 0), "
+            "EXISTS (SELECT 1 FROM `manastorm_unlock_grant` AS `g` "
+            "LEFT JOIN `manastorm_segment` AS `s` ON `s`.`segment_id` = `g`.`content_id` "
+            "WHERE `g`.`unlock_id` = `u`.`unlock_id` AND `g`.`enabled` = 1 "
+            "AND (`g`.`grant_type` <> 1 OR `s`.`enabled` = 1)), "
+            "EXISTS (SELECT 1 FROM `manastorm_unlock_grant` AS `g` "
+            "WHERE `g`.`unlock_id` = `u`.`unlock_id` AND `g`.`enabled` = 1) "
+            "FROM `manastorm_unlock` AS `u` "
             "WHERE `enabled` = 1 "
             "ORDER BY `unlock_id`");
 
@@ -1342,9 +1352,26 @@ bool ManastormDataStore::LoadUnlocks()
             continue;
         }
 
+        // Disabled segments retain their SQL gates without becoming playable.
+        // An enabled but invalid segment is still a configuration error.
+        if (definition.Kind == ManastormUnlockKind::Introduction)
+        {
+            if (fields[9].Get<bool>())
+                definition.TrackMask &= ~ManastormTrackBits::Normal;
+            if (fields[10].Get<bool>())
+                definition.TrackMask &= ~ManastormTrackBits::Endgame;
+            if (!definition.TrackMask)
+                continue;
+        }
+
         if (definition.Kind ==
             ManastormUnlockKind::Direct)
         {
+            // Defer direct segment grants until at least one target is enabled.
+            // Missing grants still reach the ordinary validation below.
+            if (fields[12].Get<bool>() && !fields[11].Get<bool>())
+                continue;
+
             if (definition.IntroSegmentId ||
                 definition.EndgameIntroSegmentId ||
                 definition.IntroMessageId)
@@ -1555,6 +1582,9 @@ bool ManastormDataStore::LoadUnlockTriggers()
             ManastormUnlockDefinition& unlock =
                 unlockItr->second;
 
+            if (!(unlock.TrackMask & track))
+                continue;
+
             if (unlock.GetTriggerDepthForTrack(
                 track))
             {
@@ -1723,15 +1753,17 @@ bool ManastormDataStore::LoadUnlockGrants()
     QueryResult result =
         WorldDatabase.Query(
             "SELECT "
-            "`unlock_id`, "
-            "`grant_type`, "
-            "`content_id` "
-            "FROM `manastorm_unlock_grant` "
-            "WHERE `enabled` = 1 "
+            "`g`.`unlock_id`, "
+            "`g`.`grant_type`, "
+            "`g`.`content_id`, "
+            "CASE WHEN `s`.`enabled` = 0 THEN 1 ELSE 0 END "
+            "FROM `manastorm_unlock_grant` AS `g` "
+            "LEFT JOIN `manastorm_segment` AS `s` ON `s`.`segment_id` = `g`.`content_id` "
+            "WHERE `g`.`enabled` = 1 "
             "ORDER BY "
-            "`unlock_id`, "
-            "`grant_type`, "
-            "`content_id`");
+            "`g`.`unlock_id`, "
+            "`g`.`grant_type`, "
+            "`g`.`content_id`");
 
     if (!result)
     {
@@ -1810,6 +1842,9 @@ bool ManastormDataStore::LoadUnlockGrants()
         ManastormUnlockGrantType const grantType =
             ManastormUnlockGrantType(
                 grantTypeRaw);
+
+        if (grantType == ManastormUnlockGrantType::Segment && fields[3].Get<bool>())
+            continue;
 
         if (grantType ==
             ManastormUnlockGrantType::Segment &&
