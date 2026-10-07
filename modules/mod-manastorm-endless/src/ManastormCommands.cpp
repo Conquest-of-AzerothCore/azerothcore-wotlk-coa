@@ -35,7 +35,11 @@ namespace
         QueryResult result = WorldDatabase.Query(
             "SELECT "
             "`segment_id`, "
-            "COALESCE(NULLIF(`runtime_map_id`, 0), `map_id`), "
+            "CASE "
+            "WHEN `runtime_map_override_enabled` <> 0 "
+            "THEN `runtime_map_id` "
+            "ELSE `map_id` "
+            "END, "
             "COALESCE(NULLIF(`runtime_objective_creature_entry`, 0), "
             "`objective_creature_entry`), "
             "`chaotic_link_stacks` "
