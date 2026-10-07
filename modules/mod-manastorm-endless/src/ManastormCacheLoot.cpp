@@ -240,9 +240,22 @@ namespace
             : GlobalScript(
                 "manastorm_cache_loot_selector",
                 {
-                    GLOBALHOOK_ON_BEFORE_LOOT_EQUAL_CHANCED
+                    GLOBALHOOK_ON_BEFORE_LOOT_EQUAL_CHANCED,
+                    GLOBALHOOK_ON_AFTER_REF_COUNT
                 })
         {
+        }
+
+        void OnAfterRefCount(Player const* player, LootStoreItem* entry, Loot& loot,
+            bool /*canRate*/, uint16 /*lootMode*/, uint32& maxcount, LootStore const& store) override
+        {
+            if (!ManastormModuleConfig::Enabled() || !player || !entry || &store != &LootTemplates_Item)
+                return;
+
+            Item const* container = player->GetItemByGuid(loot.containerGUID);
+            if (container && container->GetEntry() == 1278051 &&
+                (entry->reference == 9003001 || entry->reference == 9003002))
+                maxcount = 1; // One tier reward regardless of global reference amount rates.
         }
 
         bool OnBeforeLootEqualChanced(
