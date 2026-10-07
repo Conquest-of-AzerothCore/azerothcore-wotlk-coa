@@ -27,6 +27,9 @@ namespace
     constexpr uint32 NPC_GROL_THE_DESTROYER = 7665;
     constexpr uint32 SEGMENT_GROL_NORMAL = 409;
     constexpr uint32 SEGMENT_GROL_ENDGAME = 478;
+    constexpr uint32 NPC_ARCHMAGE_ALLISTARJ = 7666;
+    constexpr uint32 SEGMENT_ALLISTARJ_NORMAL = 552;
+    constexpr uint32 SEGMENT_ALLISTARJ_ENDGAME = 553;
 
     constexpr uint32 MAP_MOLTEN_CORE = 409;
     constexpr uint32 NPC_ANCIENT_CORE_HOUND = 11671;
@@ -702,13 +705,13 @@ namespace
         }
     };
 
-    class manastorm_grol_invincibility_bypass :
+    class manastorm_blasted_lands_invincibility_bypass :
         public UnitScript
     {
     public:
-        manastorm_grol_invincibility_bypass()
+        manastorm_blasted_lands_invincibility_bypass()
             : UnitScript(
-                "manastorm_grol_invincibility_bypass",
+                "manastorm_blasted_lands_invincibility_bypass",
                 true,
                 {UNITHOOK_ON_UNIT_ENTER_COMBAT})
         {
@@ -728,10 +731,12 @@ namespace
                 unit->ToCreature();
 
             if (!creature ||
-                creature->GetEntry() !=
-                    NPC_GROL_THE_DESTROYER ||
                 creature->GetMapId() !=
-                    MAP_EASTERN_KINGDOMS)
+                    MAP_EASTERN_KINGDOMS ||
+                (creature->GetEntry() !=
+                    NPC_GROL_THE_DESTROYER &&
+                 creature->GetEntry() !=
+                    NPC_ARCHMAGE_ALLISTARJ))
             {
                 return;
             }
@@ -746,15 +751,24 @@ namespace
             ManastormSegment const& segment =
                 run->GetSegment();
 
-            if (segment.ObjectiveCreatureEntry !=
-                    NPC_GROL_THE_DESTROYER ||
-                (segment.SegmentId !=
-                    SEGMENT_GROL_NORMAL &&
-                 segment.SegmentId !=
-                    SEGMENT_GROL_ENDGAME))
-            {
+            bool const grol =
+                segment.ObjectiveCreatureEntry ==
+                    NPC_GROL_THE_DESTROYER &&
+                (segment.SegmentId ==
+                    SEGMENT_GROL_NORMAL ||
+                 segment.SegmentId ==
+                    SEGMENT_GROL_ENDGAME);
+
+            bool const allistarj =
+                segment.ObjectiveCreatureEntry ==
+                    NPC_ARCHMAGE_ALLISTARJ &&
+                (segment.SegmentId ==
+                    SEGMENT_ALLISTARJ_NORMAL ||
+                 segment.SegmentId ==
+                    SEGMENT_ALLISTARJ_ENDGAME);
+
+            if (!grol && !allistarj)
                 return;
-            }
 
             SmartAI* smartAI =
                 CAST_AI(
@@ -765,7 +779,7 @@ namespace
             {
                 LOG_ERROR(
                     LOG_FILTER,
-                    "Manastorm Grol objective is not using SmartAI: "
+                    "Manastorm Blasted Lands objective is not using SmartAI: "
                     "run={} segment={} map={} instance={} guid={}.",
                     run->GetRunId(),
                     segment.SegmentId,
@@ -776,9 +790,9 @@ namespace
                 return;
             }
 
-            // Native Grol is quest-gated by a SmartAI invincibility floor
-            // that is normally removed by Fel Curse (12938). The recovered
-            // Manastorm stage selects Grol directly as its objective, so
+            // Native Grol and Allistarj are quest-gated by a SmartAI
+            // invincibility floor normally removed by Fel Curse (12938).
+            // Their recovered Manastorm stages select them directly, so
             // bypass only that HP floor in the disposable Manastorm copy.
             // Enter-combat is used deliberately: SmartAI Reset may restore
             // the floor after an evade, and every new pull must remain
@@ -789,9 +803,11 @@ namespace
             LOG_INFO(
                 LOG_FILTER,
                 "Removed native Fel Curse invincibility floor from "
-                "Manastorm Grol objective: run={} segment={} instance={} guid={}.",
+                "Manastorm Blasted Lands objective: run={} segment={} "
+                "entry={} instance={} guid={}.",
                 run->GetRunId(),
                 segment.SegmentId,
+                creature->GetEntry(),
                 run->GetInstanceId(),
                 creature->GetGUID().GetRawValue());
         }
@@ -881,6 +897,6 @@ void AddSC_manastorm_runtime_compat()
 {
     new manastorm_blackrock_spire_rare_objective();
     new manastorm_molten_core_play_dead();
-    new manastorm_grol_invincibility_bypass();
+    new manastorm_blasted_lands_invincibility_bypass();
     new manastorm_forced_track_restore();
 }
