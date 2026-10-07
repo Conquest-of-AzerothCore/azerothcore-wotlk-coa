@@ -253,8 +253,14 @@ namespace
                 return;
 
             Item const* container = player->GetItemByGuid(loot.containerGUID);
-            if (container && container->GetEntry() == 1278051 &&
-                (entry->reference == 9003001 || entry->reference == 9003002))
+            if (!container)
+                return;
+
+            bool const heroicTier = container->GetEntry() == 1278051 &&
+                (entry->reference == 9003001 || entry->reference == 9003002);
+            bool const mythicTier = container->GetEntry() == 1278054 &&
+                (entry->reference == 9003101 || entry->reference == 9003102 || entry->reference == 9003103);
+            if (heroicTier || mythicTier)
                 maxcount = 1; // One tier reward regardless of global reference amount rates.
         }
 
