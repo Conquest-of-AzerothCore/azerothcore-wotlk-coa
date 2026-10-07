@@ -129,3 +129,16 @@ check flags the intentional module base migration. MySQL procedure execution, C+
 in-game openings remain untested.
 
 Source item dump SHA-256: 3e36f8748b12b89605ec278953ad4c9c3db505757d4bc9a7294ea19c052e243e.
+
+## SQL 26 MySQL temporary-table compatibility correction
+
+The original combined-pool UNION reads tmp_ms_mc_pool twice in one statement, causing MySQL error 1137
+before persistent writes. SQL 26 now uses one SELECT DISTINCT with CASE to map MC and Onyxia source IDs
+to the same combined pool IDs. DISTINCT preserves UNION's duplicate removal.
+
+A later namespace collision IF also reads tmp_ms_mc_family three times. Its three predicates now execute
+as separate IF statements with the same fatal collision error. All SQL 26 statements were checked for
+repeated temporary-table references. SQLite checks confirmed identical combined candidates, overlap
+deduplication and unchanged detection by each collision guard. Full MySQL execution remains untested.
+
+After the reported error, download the corrected SQL 26 and rerun the complete file, then run SQL 55.

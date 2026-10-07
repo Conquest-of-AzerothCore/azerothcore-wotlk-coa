@@ -1065,11 +1065,12 @@ WHERE `u`.`Candidates` = 1;
 -- Combined pools are leaf unions, not nested references (required by the hook).
 DROP TEMPORARY TABLE IF EXISTS `tmp_ms_mc_combined`;
 CREATE TEMPORARY TABLE `tmp_ms_mc_combined` ENGINE=InnoDB AS
-SELECT 9002040 + (`Entry` - 9002001) AS `Entry`, `Item`
-FROM `tmp_ms_mc_pool` WHERE `Entry` BETWEEN 9002001 AND 9002004
-UNION
-SELECT 9002040 + (`Entry` - 9002010) AS `Entry`, `Item`
-FROM `tmp_ms_mc_pool` WHERE `Entry` BETWEEN 9002010 AND 9002013;
+-- Read the temporary table once. DISTINCT preserves the old UNION deduplication.
+SELECT DISTINCT CASE WHEN `Entry` BETWEEN 9002001 AND 9002004
+    THEN 9002040 + (`Entry` - 9002001)
+    ELSE 9002040 + (`Entry` - 9002010) END AS `Entry`, `Item`
+FROM `tmp_ms_mc_pool`
+WHERE `Entry` BETWEEN 9002001 AND 9002004 OR `Entry` BETWEEN 9002010 AND 9002013;
 INSERT INTO `tmp_ms_mc_pool` (`Entry`, `Item`)
 SELECT `Entry`, `Item` FROM `tmp_ms_mc_combined`;
 
@@ -1146,10 +1147,15 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'MC cache reconstruction: InnoDB loot tables required';
     END IF;
     IF EXISTS (SELECT 1 FROM `reference_loot_template` AS `r` JOIN `tmp_ms_mc_family` AS `f` USING (`Entry`)
-        WHERE `r`.`Comment` NOT LIKE 'MS MC pool - %')
-        OR EXISTS (SELECT 1 FROM `reference_loot_template` AS `r` JOIN `tmp_ms_mc_family` AS `f` ON `f`.`Entry` =
-        `r`.`Reference`)
-        OR EXISTS (SELECT 1 FROM `item_loot_template` AS `r` JOIN `tmp_ms_mc_family` AS `f` ON `f`.`Entry` =
+        WHERE `r`.`Comment` NOT LIKE 'MS MC pool - %') THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'MC cache reconstruction: reserved reference namespace collision';
+    END IF;
+    -- Separate statements avoid reopening tmp_ms_mc_family in one IF expression.
+    IF EXISTS (SELECT 1 FROM `reference_loot_template` AS `r` JOIN `tmp_ms_mc_family` AS `f` ON `f`.`Entry` =
+        `r`.`Reference`) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'MC cache reconstruction: reserved reference namespace collision';
+    END IF;
+    IF EXISTS (SELECT 1 FROM `item_loot_template` AS `r` JOIN `tmp_ms_mc_family` AS `f` ON `f`.`Entry` =
         `r`.`Reference`
             LEFT JOIN `tmp_ms_mc_cache` AS `c` ON `c`.`Entry` = `r`.`Entry` WHERE `c`.`Entry` IS NULL) THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'MC cache reconstruction: reserved reference namespace collision';
