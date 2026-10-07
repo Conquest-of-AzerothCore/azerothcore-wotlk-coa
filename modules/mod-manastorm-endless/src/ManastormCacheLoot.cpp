@@ -260,7 +260,9 @@ namespace
                 (entry->reference == 9003001 || entry->reference == 9003002);
             bool const mythicTier = container->GetEntry() == 1278054 &&
                 (entry->reference == 9003101 || entry->reference == 9003102 || entry->reference == 9003103);
-            if (heroicTier || mythicTier)
+            bool const zulGurubFamily = (container->GetEntry() == 1278052 || container->GetEntry() == 1278053 ||
+                container->GetEntry() == 1278055) && entry->reference >= 9003201 && entry->reference <= 9003205;
+            if (heroicTier || mythicTier || zulGurubFamily)
                 maxcount = 1; // One tier reward regardless of global reference amount rates.
         }
 

@@ -461,7 +461,10 @@ bool ManastormRewards::IsCacheItemEntry(
     return
         itemEntry == 1278050 ||
         itemEntry == 1278051 ||
+        itemEntry == 1278052 ||
+        itemEntry == 1278053 ||
         itemEntry == 1278054 ||
+        itemEntry == 1278055 ||
         itemEntry == 1278056 ||
         itemEntry == 1278058 ||
         itemEntry == 1278060 ||
