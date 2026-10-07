@@ -28,26 +28,26 @@ DELETE FROM `manastorm_cache_bracket` WHERE `bracket_id` BETWEEN 1000 AND 1019;
 INSERT INTO `manastorm_cache_bracket`
 (`bracket_id`, `track`, `selector_kind`, `min_value`, `max_value`, `cache_item_entry`, `enabled`, `comment`)
 VALUES
-(1000, 2, 2, 1, 24, 1278050, 1, 'CLASSIC_CHAPTER_2'),
-(1001, 2, 2, 25, 105, 1278051, 1, 'CLASSIC_CHAPTER_2'),
-(1002, 2, 2, 106, 145, 1278052, 1, 'CLASSIC_CHAPTER_2'),
-(1003, 2, 2, 146, 185, 1278053, 1, 'CLASSIC_CHAPTER_2'),
-(1004, 2, 2, 186, 220, 1278055, 1, 'CLASSIC_CHAPTER_2'),
-(1005, 2, 2, 221, 280, 1278056, 1, 'CLASSIC_CHAPTER_2'),
-(1006, 2, 2, 281, 340, 1278058, 1, 'CLASSIC_CHAPTER_2'),
-(1007, 2, 2, 341, 425, 1278060, 1, 'CLASSIC_CHAPTER_2'),
-(1008, 2, 2, 426, 450, 1278066, 1, 'CLASSIC_CHAPTER_2'),
-(1009, 2, 2, 451, 475, 1278068, 1, 'CLASSIC_CHAPTER_2'),
-(1010, 2, 2, 476, 510, 1278069, 1, 'CLASSIC_CHAPTER_2'),
-(1011, 2, 2, 511, 535, 1278070, 1, 'CLASSIC_CHAPTER_2'),
-(1012, 2, 2, 536, 560, 1278072, 1, 'CLASSIC_CHAPTER_2'),
-(1013, 2, 2, 561, 610, 1278074, 1, 'CLASSIC_CHAPTER_2'),
-(1014, 2, 2, 611, 655, 1278075, 1, 'CLASSIC_CHAPTER_2'),
-(1015, 2, 2, 656, 700, 1278077, 1, 'CLASSIC_CHAPTER_2'),
-(1016, 2, 2, 701, 740, 1278078, 1, 'CLASSIC_CHAPTER_2'),
-(1017, 2, 2, 741, 840, 1278079, 1, 'CLASSIC_CHAPTER_2'),
-(1018, 2, 2, 841, 945, 1278081, 1, 'CLASSIC_CHAPTER_2'),
-(1019, 2, 2, 946, 4294967295, 1278083, 1, 'CLASSIC_CHAPTER_2');
+(1000, 2, 2, 1, 24, 1278050, 1, 'Manastorm Cache: Normal Dungeons'),
+(1001, 2, 2, 25, 105, 1278051, 1, 'Manastorm Cache: Heroic Dungeons'),
+(1002, 2, 2, 106, 145, 1278052, 1, 'Manastorm Cache: Zul''Gurub'),
+(1003, 2, 2, 146, 185, 1278053, 1, 'Manastorm Cache: Heroic Zul''Gurub'),
+(1004, 2, 2, 186, 220, 1278055, 1, 'Manastorm Cache: Mythic Zul''Gurub'),
+(1005, 2, 2, 221, 280, 1278056, 1, 'Manastorm Cache: Molten Core'),
+(1006, 2, 2, 281, 340, 1278058, 1, 'Manastorm Cache: Heroic Molten Core'),
+(1007, 2, 2, 341, 425, 1278060, 1, 'Manastorm Cache: Mythic Molten Core'),
+(1008, 2, 2, 426, 450, 1278066, 1, 'Manastorm Cache: Blackwing Lair'),
+(1009, 2, 2, 451, 475, 1278068, 1, 'Manastorm Cache: Heroic Blackwing Lair'),
+(1010, 2, 2, 476, 510, 1278069, 1, 'Manastorm Cache: Mythic Blackwing Lair'),
+(1011, 2, 2, 511, 535, 1278070, 1, 'Manastorm Cache: Ruins of Ahn''Qiraj'),
+(1012, 2, 2, 536, 560, 1278072, 1, 'Manastorm Cache: Heroic Ruins of Ahn''Qiraj'),
+(1013, 2, 2, 561, 610, 1278074, 1, 'Manastorm Cache: Mythic Ruins of Ahn''Qiraj'),
+(1014, 2, 2, 611, 655, 1278075, 1, 'Manastorm Cache: Temple of Ahn''Qiraj'),
+(1015, 2, 2, 656, 700, 1278077, 1, 'Manastorm Cache: Heroic Temple of Ahn''Qiraj'),
+(1016, 2, 2, 701, 740, 1278078, 1, 'Manastorm Cache: Mythic Temple of Ahn''Qiraj'),
+(1017, 2, 2, 741, 840, 1278079, 1, 'Manastorm Cache: Naxxramas'),
+(1018, 2, 2, 841, 945, 1278081, 1, 'Manastorm Cache: Heroic Naxxramas'),
+(1019, 2, 2, 946, 4294967295, 1278083, 1, 'Manastorm Cache: Mythic Naxxramas');
 
 DELETE FROM `manastorm_cache_unlock_requirement` WHERE `track` = 2 AND `item_entry` IN ( 1278050, 1278051, 1278052, 1278053, 1278055, 1278056, 1278058, 1278060, 1278066, 1278068, 1278069, 1278070, 1278072, 1278074, 1278075, 1278077, 1278078, 1278079, 1278081, 1278083 );
 INSERT INTO `manastorm_cache_unlock_requirement`
