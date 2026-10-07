@@ -467,10 +467,12 @@ bool ManastormRewards::IsCacheItemEntry(
         itemEntry == 1278055 ||
         itemEntry == 1278056 ||
         itemEntry == 1278058 ||
+        itemEntry == 1278059 ||
         itemEntry == 1278060 ||
         itemEntry == 1278061 ||
         itemEntry == 1278062 ||
         itemEntry == 1278063 ||
+        itemEntry == 1278064 ||
         itemEntry == 1278065 ||
         itemEntry == 1278066 ||
         itemEntry == 1278067 ||
@@ -478,12 +480,14 @@ bool ManastormRewards::IsCacheItemEntry(
         itemEntry == 1278069 ||
         itemEntry == 1278070 ||
         itemEntry == 1278072 ||
+        itemEntry == 1278073 ||
         itemEntry == 1278074 ||
         itemEntry == 1278075 ||
         itemEntry == 1278077 ||
         itemEntry == 1278078 ||
         itemEntry == 1278079 ||
         itemEntry == 1278081 ||
+        itemEntry == 1278082 ||
         itemEntry == 1278083;
 }
 
