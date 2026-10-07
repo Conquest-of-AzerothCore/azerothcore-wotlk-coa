@@ -9,6 +9,7 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "SmartAI.h"
 #include "Spell.h"
 #include "SpellAuras.h"
 #include "UnitScript.h"
@@ -21,6 +22,11 @@ namespace
 {
     constexpr char const* LOG_FILTER =
         "module.manastorm.endless";
+
+    constexpr uint32 MAP_EASTERN_KINGDOMS = 0;
+    constexpr uint32 NPC_GROL_THE_DESTROYER = 7665;
+    constexpr uint32 SEGMENT_GROL_NORMAL = 409;
+    constexpr uint32 SEGMENT_GROL_ENDGAME = 478;
 
     constexpr uint32 MAP_MOLTEN_CORE = 409;
     constexpr uint32 NPC_ANCIENT_CORE_HOUND = 11671;
@@ -696,6 +702,101 @@ namespace
         }
     };
 
+    class manastorm_grol_invincibility_bypass :
+        public UnitScript
+    {
+    public:
+        manastorm_grol_invincibility_bypass()
+            : UnitScript(
+                "manastorm_grol_invincibility_bypass",
+                true,
+                {UNITHOOK_ON_UNIT_ENTER_COMBAT})
+        {
+        }
+
+        void OnUnitEnterCombat(
+            Unit* unit,
+            Unit* /*victim*/) override
+        {
+            if (!ManastormModuleConfig::Enabled() ||
+                !unit)
+            {
+                return;
+            }
+
+            Creature* creature =
+                unit->ToCreature();
+
+            if (!creature ||
+                creature->GetEntry() !=
+                    NPC_GROL_THE_DESTROYER ||
+                creature->GetMapId() !=
+                    MAP_EASTERN_KINGDOMS)
+            {
+                return;
+            }
+
+            ManastormRun* run =
+                GetRunForStageCreature(
+                    creature);
+
+            if (!run)
+                return;
+
+            ManastormSegment const& segment =
+                run->GetSegment();
+
+            if (segment.ObjectiveCreatureEntry !=
+                    NPC_GROL_THE_DESTROYER ||
+                (segment.SegmentId !=
+                    SEGMENT_GROL_NORMAL &&
+                 segment.SegmentId !=
+                    SEGMENT_GROL_ENDGAME))
+            {
+                return;
+            }
+
+            SmartAI* smartAI =
+                CAST_AI(
+                    SmartAI,
+                    creature->AI());
+
+            if (!smartAI)
+            {
+                LOG_ERROR(
+                    LOG_FILTER,
+                    "Manastorm Grol objective is not using SmartAI: "
+                    "run={} segment={} map={} instance={} guid={}.",
+                    run->GetRunId(),
+                    segment.SegmentId,
+                    segment.MapId,
+                    run->GetInstanceId(),
+                    creature->GetGUID().GetRawValue());
+
+                return;
+            }
+
+            // Native Grol is quest-gated by a SmartAI invincibility floor
+            // that is normally removed by Fel Curse (12938). The recovered
+            // Manastorm stage selects Grol directly as its objective, so
+            // bypass only that HP floor in the disposable Manastorm copy.
+            // Enter-combat is used deliberately: SmartAI Reset may restore
+            // the floor after an evade, and every new pull must remain
+            // killable without changing public Blasted Lands behavior.
+            smartAI->SetInvincibilityHpLevel(
+                0);
+
+            LOG_INFO(
+                LOG_FILTER,
+                "Removed native Fel Curse invincibility floor from "
+                "Manastorm Grol objective: run={} segment={} instance={} guid={}.",
+                run->GetRunId(),
+                segment.SegmentId,
+                run->GetInstanceId(),
+                creature->GetGUID().GetRawValue());
+        }
+    };
+
     class manastorm_forced_track_restore :
         public UnitScript
     {
@@ -780,5 +881,6 @@ void AddSC_manastorm_runtime_compat()
 {
     new manastorm_blackrock_spire_rare_objective();
     new manastorm_molten_core_play_dead();
+    new manastorm_grol_invincibility_bypass();
     new manastorm_forced_track_restore();
 }
