@@ -262,7 +262,14 @@ namespace
                 (entry->reference == 9003101 || entry->reference == 9003102 || entry->reference == 9003103);
             bool const zulGurubFamily = (container->GetEntry() == 1278052 || container->GetEntry() == 1278053 ||
                 container->GetEntry() == 1278055) && entry->reference >= 9003201 && entry->reference <= 9003205;
-            if (heroicTier || mythicTier || zulGurubFamily)
+            bool const moltenCoreFamily =
+                (container->GetEntry() == 1278056 && (entry->reference == 9002022 || entry->reference == 9002001 ||
+                    entry->reference == 9002030)) ||
+                (container->GetEntry() == 1278058 && (entry->reference == 9002001 || entry->reference == 9002002 ||
+                    entry->reference == 9002030)) ||
+                (container->GetEntry() == 1278060 && (entry->reference == 9002002 || entry->reference == 9002003 ||
+                    entry->reference == 9002010 || entry->reference == 9002031));
+            if (heroicTier || mythicTier || zulGurubFamily || moltenCoreFamily)
                 maxcount = 1; // One tier reward regardless of global reference amount rates.
         }
 
