@@ -46,3 +46,9 @@ Verified grouped-reference processing, shared Loot/container GUID propagation, e
 The earlier direct-pool predicate model checks established rejection of missing items, changed tier metadata and existing cache conditions. The new tier mutation was exercised in a SQLite data model: 611 leaves per pool, exclusive 75/25 root group, unchanged Normal cache, and idempotent reapplication passed. The guard was checked separately. MySQL stored-procedure execution, C++ compilation and in-game opening were not tested.
 
 Source item dump SHA-256: 3e36f8748b12b89605ec278953ad4c9c3db505757d4bc9a7294ea19c052e243e.
+
+## SQL 50 temporary-table compatibility fix
+
+The initial SQL 50 tier-count IF referenced tmp_ms_heroic_candidate twice in one statement, causing MySQL error 1137 before persistent loot writes. Both counts now come from one conditional-aggregate SELECT into procedure-local variables. All candidate-table statements use a single reference. The failed invocation reaches neither persistent DELETE nor INSERT; rerun the complete corrected SQL 50, which recreates its temporary table and procedure.
+
+Conditional counts were checked against the 1222 candidate tuples and missing-tier/empty fixtures in SQLite. Full MySQL procedure execution remains untested. See [MySQL temporary-table restrictions](https://dev.mysql.com/doc/refman/8.4/en/temporary-table-problems.html).

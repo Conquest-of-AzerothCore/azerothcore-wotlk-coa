@@ -2476,6 +2476,8 @@ DROP PROCEDURE IF EXISTS `ms_heroic_cache_restore_20261007`;
 DELIMITER $$
 CREATE PROCEDURE `ms_heroic_cache_restore_20261007`()
 BEGIN
+    DECLARE `normal_count` INT UNSIGNED DEFAULT 0;
+    DECLARE `heroic_count` INT UNSIGNED DEFAULT 0;
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -2512,8 +2514,12 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Heroic cache: existing loot conditions require review';
     END IF;
 
-    IF (SELECT COUNT(*) FROM `tmp_ms_heroic_candidate` WHERE `ItemLevel` = 57) <> 611
-        OR (SELECT COUNT(*) FROM `tmp_ms_heroic_candidate` WHERE `ItemLevel` = 61) <> 611 THEN
+    -- MySQL temporary tables cannot be reopened twice in one statement.
+    SELECT COUNT(CASE WHEN `ItemLevel` = 57 THEN 1 END),
+        COUNT(CASE WHEN `ItemLevel` = 61 THEN 1 END)
+    INTO `normal_count`, `heroic_count`
+    FROM `tmp_ms_heroic_candidate`;
+    IF `normal_count` <> 611 OR `heroic_count` <> 611 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Heroic cache: expected 611 items per tier';
     END IF;
     IF EXISTS (SELECT 1 FROM `reference_loot_template`
