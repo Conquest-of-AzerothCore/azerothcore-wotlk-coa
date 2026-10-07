@@ -273,8 +273,12 @@ namespace
                 container->GetEntry() == 1278069) && entry->reference >= 9003401 && entry->reference <= 9003407;
             bool const ruinsOfAhnQirajFamily = (container->GetEntry() == 1278070 || container->GetEntry() == 1278072 ||
                 container->GetEntry() == 1278074) && entry->reference >= 9003501 && entry->reference <= 9003506;
+            bool const templeOfAhnQirajFamily = (container->GetEntry() == 1278075 || container->GetEntry() == 1278077 ||
+                container->GetEntry() == 1278078) && entry->reference >= 9003601 && entry->reference <= 9003605;
+            bool const naxxramasFamily = (container->GetEntry() == 1278079 || container->GetEntry() == 1278081 ||
+                container->GetEntry() == 1278083) && entry->reference >= 9003701 && entry->reference <= 9003706;
             if (heroicTier || mythicTier || zulGurubFamily || moltenCoreFamily || blackwingLairFamily ||
-                ruinsOfAhnQirajFamily)
+                ruinsOfAhnQirajFamily || templeOfAhnQirajFamily || naxxramasFamily)
                 maxcount = 1; // One tier reward regardless of global reference amount rates.
         }
 
