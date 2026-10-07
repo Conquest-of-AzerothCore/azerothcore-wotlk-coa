@@ -94,7 +94,15 @@ SQL 57-61 and SQL 63 are self-contained. SQL 55/62 validate and reuse installed 
 If SQL 26 is already installed, apply the follow-ups without rebuilding its pools. If SQL 26 is absent,
 apply SQL 26, then SQL 55 and SQL 62. Rerunning SQL 26 resets its eight roots; reapply both follow-ups.
 Source runtime changes require a module rebuild and restart. Restoring inactive caches does not add them
-to SQL 47's active award catalogue. Leveling/generic 97883/97884 remain separate unresolved work.
+to SQL 47's active award catalogue.
+
+The separate level-60 physical cache 97883 is corrected by SQL 64: 612 existing candidates certified
+against the full Classic 1.12 database and Ascension's Classic catalogue are retained. All 1725 above-60
+items and 255 further uncertified later/foreign items are excluded. SQL-only application requires a
+worldserver restart, without a rebuild. See [LEVEL60_CACHE_REVIEW.md](LEVEL60_CACHE_REVIEW.md) and its
+complete candidate decision CSV for provenance and acquisition limitations.
+97884 is intentionally the generic Potential Rewards UI identity, not a physical-cache fallback;
+SQL 15 and LoadPotentialRewards establish its role. Its empty loot is not a restoration gap.
 
 See [ONYXIA_MOLTEN_CORE_CACHE_REVIEW.md](ONYXIA_MOLTEN_CORE_CACHE_REVIEW.md),
 [RANKED_DUNGEON_CACHE_MAPPING.md](RANKED_DUNGEON_CACHE_MAPPING.md) and
