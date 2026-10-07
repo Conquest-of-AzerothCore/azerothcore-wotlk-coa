@@ -271,7 +271,10 @@ namespace
                     entry->reference == 9002010 || entry->reference == 9002031));
             bool const blackwingLairFamily = (container->GetEntry() == 1278066 || container->GetEntry() == 1278068 ||
                 container->GetEntry() == 1278069) && entry->reference >= 9003401 && entry->reference <= 9003407;
-            if (heroicTier || mythicTier || zulGurubFamily || moltenCoreFamily || blackwingLairFamily)
+            bool const ruinsOfAhnQirajFamily = (container->GetEntry() == 1278070 || container->GetEntry() == 1278072 ||
+                container->GetEntry() == 1278074) && entry->reference >= 9003501 && entry->reference <= 9003506;
+            if (heroicTier || mythicTier || zulGurubFamily || moltenCoreFamily || blackwingLairFamily ||
+                ruinsOfAhnQirajFamily)
                 maxcount = 1; // One tier reward regardless of global reference amount rates.
         }
 
