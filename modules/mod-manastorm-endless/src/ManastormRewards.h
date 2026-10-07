@@ -70,7 +70,10 @@ public:
         bool endgame,
         uint32 depth,
         uint32 playerLevel,
-        uint32& itemEntry) const;
+        uint32& itemEntry,
+        ObjectGuid::LowType characterGuid = 0,
+        uint8 mode = 0,
+        uint32 completingDepth = 0) const;
 
     bool IsCacheItemEntry(
         uint32 itemEntry) const;
@@ -110,6 +113,13 @@ private:
         uint32 MinValue = 0;
         uint32 MaxValue = 0;
         uint32 CacheItemEntry = 0;
+    };
+
+    struct CacheUnlockRequirement
+    {
+        uint32 ItemEntry = 0;
+        uint8 Track = 0;
+        uint32 CompletedDepth = 0;
     };
 
     struct RewardRule
@@ -166,6 +176,7 @@ private:
     uint32 GetActiveGameModeMask(ObjectGuid::LowType characterGuid) const;
 
     bool LoadCacheBrackets();
+    bool LoadCacheUnlockRequirements();
     bool LoadRewardRules();
     bool LoadGroupRewardMultipliers();
     bool LoadPotentialRewards();
@@ -185,6 +196,7 @@ private:
         uint32& nextRemainderBp) const;
 
     std::vector<CacheBracket> _cacheBrackets;
+    std::vector<CacheUnlockRequirement> _cacheUnlockRequirements;
     RewardRule _bedlam;
     RewardRule _bonzo;
     std::vector<RewardRule> _completionRewards;

@@ -386,7 +386,9 @@ void ManastormClientBridge::SendState(Player* player, ManastormRun const* run) c
                 run->GetDepth(),
                 uint32(
                     player->GetLevel()),
-                cacheItem))
+                cacheItem,
+                player->GetGUID().GetCounter(),
+                uint8(run->GetMode())))
         {
             LOG_ERROR(
                 LOG_FILTER,

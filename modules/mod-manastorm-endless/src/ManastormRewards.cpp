@@ -85,6 +85,7 @@ bool ManastormRewards::Load()
 {
     _loaded = false;
     _cacheBrackets.clear();
+    _cacheUnlockRequirements.clear();
     _bedlam = {};
     _bonzo = {};
     _completionRewards.clear();
@@ -93,6 +94,7 @@ bool ManastormRewards::Load()
     _treasureKeeper = {};
 
     if (!LoadCacheBrackets() ||
+        !LoadCacheUnlockRequirements() ||
         !LoadRewardRules() ||
         !LoadGroupRewardMultipliers() ||
         !LoadPotentialRewards() ||
@@ -290,11 +292,52 @@ bool ManastormRewards::LoadCacheBrackets()
     return true;
 }
 
+bool ManastormRewards::LoadCacheUnlockRequirements()
+{
+    QueryResult schema = WorldDatabase.Query(
+        "SELECT COUNT(*) FROM manastorm_cache_unlock_requirement");
+    if (!schema)
+    {
+        LOG_ERROR(LOG_FILTER, "Apply 47_manastorm_classic_cache_unlocks.sql before loading rewards.");
+        return false;
+    }
+
+    QueryResult result = WorldDatabase.Query(
+        "SELECT item_entry, track, required_completed_depth "
+        "FROM manastorm_cache_unlock_requirement WHERE enabled = 1 ORDER BY item_entry, track");
+    if (!result)
+        return true;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        CacheUnlockRequirement requirement;
+        requirement.ItemEntry = fields[0].Get<uint32>();
+        requirement.Track = fields[1].Get<uint8>();
+        requirement.CompletedDepth = fields[2].Get<uint32>();
+        if (!sObjectMgr->GetItemTemplate(requirement.ItemEntry) ||
+            (requirement.Track != ManastormTrackBits::Normal &&
+             requirement.Track != ManastormTrackBits::Endgame))
+        {
+            LOG_ERROR(LOG_FILTER, "Invalid Manastorm cache requirement for item {} track {}.",
+                requirement.ItemEntry, uint32(requirement.Track));
+            return false;
+        }
+
+        _cacheUnlockRequirements.push_back(requirement);
+    } while (result->NextRow());
+
+    return true;
+}
+
 bool ManastormRewards::ResolveCacheItemEntry(
     bool endgame,
     uint32 depth,
     uint32 playerLevel,
-    uint32& itemEntry) const
+    uint32& itemEntry,
+    ObjectGuid::LowType characterGuid,
+    uint8 mode,
+    uint32 completingDepth) const
 {
     itemEntry = 0;
 
@@ -318,28 +361,76 @@ bool ManastormRewards::ResolveCacheItemEntry(
     if (!value)
         return false;
 
-    for (CacheBracket const& bracket :
-        _cacheBrackets)
+    bool historyLoaded = false;
+    bool historyValid = false;
+    uint32 completedDepth = 0;
+    auto eligible = [&](CacheBracket const& bracket)
     {
-        if (bracket.Track !=
-                track ||
-            bracket.Selector !=
-                selector ||
-            value <
-                bracket.MinValue ||
-            value >
-                bracket.MaxValue)
+        for (CacheUnlockRequirement const& requirement : _cacheUnlockRequirements)
         {
-            continue;
+            if (requirement.ItemEntry != bracket.CacheItemEntry || requirement.Track != track ||
+                !requirement.CompletedDepth)
+                continue;
+
+            if (!historyLoaded)
+            {
+                historyLoaded = true;
+                if (characterGuid && mode >= 1 && mode <= 4)
+                {
+                    QueryResult history = CharacterDatabase.Query(
+                        "SELECT COALESCE(MAX(depth), 0) FROM character_manastorm_completed_depth "
+                        "WHERE guid = {} AND mode = {} AND track = {}",
+                        characterGuid, uint32(mode), uint32(track));
+                    if (history)
+                    {
+                        completedDepth = std::max(history->Fetch()[0].Get<uint32>(), completingDepth);
+                        historyValid = true;
+                    }
+                }
+            }
+
+            if (!historyValid || completedDepth < requirement.CompletedDepth)
+                return false;
         }
 
-        itemEntry =
-            bracket.CacheItemEntry;
+        return true;
+    };
 
+    CacheBracket const* matching = nullptr;
+    for (CacheBracket const& bracket : _cacheBrackets)
+    {
+        if (bracket.Track == track && bracket.Selector == selector &&
+            value >= bracket.MinValue && value <= bracket.MaxValue)
+        {
+            matching = &bracket;
+            break;
+        }
+    }
+
+    if (!matching)
+        return false;
+
+    if (eligible(*matching))
+    {
+        itemEntry = matching->CacheItemEntry;
         return true;
     }
 
-    return false;
+    // A locked tier falls back to the highest eligible lower bracket.
+    CacheBracket const* fallback = nullptr;
+    for (CacheBracket const& bracket : _cacheBrackets)
+    {
+        if (bracket.Track == track && bracket.Selector == selector &&
+            bracket.MinValue < matching->MinValue && eligible(bracket) &&
+            (!fallback || bracket.MinValue > fallback->MinValue))
+            fallback = &bracket;
+    }
+
+    if (!fallback)
+        return false;
+
+    itemEntry = fallback->CacheItemEntry;
+    return true;
 }
 
 bool ManastormRewards::IsCacheItemEntry(
@@ -363,7 +454,7 @@ bool ManastormRewards::IsCacheItemEntry(
 
     //
     // Preserved Classic dungeon and Molten Core caches targeted by the donor cache selector.
-    // They are not part of the active TBC depth resolver but already-owned or
+    // Some are outside the active depth catalogue, but already-owned or
     // manually granted copies must continue to use personalized opening after
     // mod-ascension-compat is removed.
     //
@@ -1239,7 +1330,10 @@ bool ManastormRewards::PrepareStageCompletion(
                     run.IsEndgame(),
                     run.GetDepth(),
                     playerLevel,
-                    cacheItemEntry))
+                    cacheItemEntry,
+                    characterGuid,
+                    uint8(run.GetMode()),
+                    run.GetDepth()))
             {
                 error =
                     "No enabled Manastorm cache bracket matches "
