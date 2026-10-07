@@ -8,7 +8,7 @@ Item 1278050, Manastorm Cache: Normal Dungeons. Exact advertised description:
     Contains:
     + Normal Dungeon Gear
 
-This is a read-only candidate-mapping scout. No migration, loot replacement, source change, or database write has been performed. Original exact cache membership/odds remain unrecovered.
+The user approved using the mapped 611 base items to restore cache 1278050. SQL 49 now implements that targeted CoA reconstruction. Original exact cache membership/odds remain unrecovered; no live database write has been performed.
 
 ## Findings
 
@@ -78,8 +78,16 @@ These 25 entries are present in the dump but were not matched to a menu-linked A
 
 [NORMAL_DUNGEON_CACHE_CANDIDATES.csv](NORMAL_DUNGEON_CACHE_CANDIDATES.csv) contains every candidate ID, exact name, item metadata, evidence classification and item-dump line. Its 611 rows are an inventory of candidates, not claimed recovered original cache membership.
 
-## Restoration decision still needed
+## Restoration migration
 
-The available evidence supports proposing this explicit base-item pool as a CoA reconstruction. Before implementation, distinguish that choice from recovering the original full Normal cache list. Exact quantities and probabilities are unknown; preserving the current single equal-choice group would be a CoA policy choice, with the existing primary-stat personalization still applicable. Do not manufacture or guess difficulty variants.
+[49_manastorm_classic_normal_dungeon_cache.sql](../data/sql/db-world/base/49_manastorm_classic_normal_dungeon_cache.sql) replaces only item_loot_template rows for cache 1278050 with the 611 explicit base IDs above. The 25 historical-catalogue-only entries are included in the approved reconstruction. The prior 207 level-80 candidates are removed from this cache.
+
+It retains one equal-choice group (Chance=0, GroupId=1, MinCount=MaxCount=1) and the existing primary-stat preference hook. This is a CoA policy choice, not recovered original probabilities. Heroic cache 1278051, other caches, item templates, reference pools, conditions, brackets and player progression are not written.
+
+Preflight requires the existing item_manastorm_cache binding, HAS_LOOT, an InnoDB item loot table, all 611 exact candidate identities/metadata, item level 57, required levels at most 60, and no existing loot conditions on this cache. Failure raises an error and rolls back before replacing loot. The migration uses a temporary procedure and requires CREATE ROUTINE permission, matching the SQL 26 pattern.
+
+Apply SQL 49 to acore_world and restart worldserver to load the new item loot. No C++ rebuild or character SQL is needed for this data-only change. Expected post-write query: 611 distinct candidates, item level 57, required levels 46-60. Migration is prepared, not applied to the live database.
+
+Validation: generated candidate rows and mutation/predicate SQL exercised in a SQLite data model; exact IDs, targeted replacement, unchanged unrelated cache rows and repeat application passed. Missing candidates, changed metadata/levels and existing conditions are rejected by the predicate model. MySQL stored-procedure execution and in-game opening were not tested. Formatting/safety checks passed except the existing backtick checker falsely flags COUNT, BINARY and SIGNAL's MESSAGE_TEXT keywords; SQL identifiers are quoted.
 
 Source item dump SHA-256: 3e36f8748b12b89605ec278953ad4c9c3db505757d4bc9a7294ea19c052e243e.
