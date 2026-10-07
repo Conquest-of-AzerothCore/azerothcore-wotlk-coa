@@ -269,6 +269,12 @@ namespace
                     entry->reference == 9002030)) ||
                 (container->GetEntry() == 1278060 && (entry->reference == 9002002 || entry->reference == 9002003 ||
                     entry->reference == 9002010 || entry->reference == 9002031));
+            bool const laterMoltenCoreFamily =
+                (container->GetEntry() == 1278061 && entry->reference == 9002040) ||
+                (container->GetEntry() == 1278062 && entry->reference == 9002004) ||
+                (container->GetEntry() == 1278063 && entry->reference == 9002041) ||
+                (container->GetEntry() == 1278065 && entry->reference == 9002042) ||
+                (container->GetEntry() == 1278067 && entry->reference == 9002043);
             bool const blackwingLairFamily = (container->GetEntry() == 1278066 || container->GetEntry() == 1278068 ||
                 container->GetEntry() == 1278069) && entry->reference >= 9003401 && entry->reference <= 9003407;
             bool const ruinsOfAhnQirajFamily = (container->GetEntry() == 1278070 || container->GetEntry() == 1278072 ||
@@ -281,7 +287,8 @@ namespace
                 container->GetEntry() == 1278073 || container->GetEntry() == 1278082) &&
                 entry->reference >= 9003801 && entry->reference <= 9003804;
             if (heroicTier || mythicTier || zulGurubFamily || moltenCoreFamily || blackwingLairFamily ||
-                ruinsOfAhnQirajFamily || templeOfAhnQirajFamily || naxxramasFamily || rankedDungeonFamily)
+                ruinsOfAhnQirajFamily || templeOfAhnQirajFamily || naxxramasFamily || rankedDungeonFamily ||
+                laterMoltenCoreFamily)
                 maxcount = 1; // One tier reward regardless of global reference amount rates.
         }
 

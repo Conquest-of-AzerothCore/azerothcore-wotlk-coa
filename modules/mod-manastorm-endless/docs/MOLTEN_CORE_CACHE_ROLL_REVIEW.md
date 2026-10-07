@@ -106,6 +106,8 @@ preference still chooses a gear item within the selected pure leaf pool.
 
 Five other SQL 26 cache roots, every reference row, item templates, conditions, Mode 1/2 transport and
 progression are unchanged. The older five caches are outside this follow-up's rate-guard scope.
+SQL 62 subsequently reviews and guards those five caches separately; see
+[ONYXIA_MOLTEN_CORE_CACHE_REVIEW.md](ONYXIA_MOLTEN_CORE_CACHE_REVIEW.md) for its prerequisite and pool evidence.
 
 ## Applying and validating
 
