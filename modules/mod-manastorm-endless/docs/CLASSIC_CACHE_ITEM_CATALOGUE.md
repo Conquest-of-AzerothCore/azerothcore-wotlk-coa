@@ -421,16 +421,10 @@ Chance to contain:
 @1951 - 2000+@
 ```
 
-## Loot audit checkpoint — 2026-10-07
+## Installed-loot audit - 2026-10-07
 
-The supplied item dump is dated 2026-09-25. Available module/spell/creature dumps do not contain `item_loot_template`, `reference_loot_template`, or `conditions`. Therefore no cache can yet be classified as populated or empty in the current live database from these files.
+The requested exports have now been inspected. [CLASSIC_CACHE_LOOT_AUDIT.md](CLASSIC_CACHE_LOOT_AUDIT.md) records every cache's installed row count, candidate count, script binding evidence, wrong-level gear findings, restoration priorities, and export fingerprints.
 
-Repository SQL 26 (`data/sql/db-world/base/26_manastorm_cache_molten_core_full_reconstruction.sql`) reconstructs eight Classic caches: 1278056, 1278058, 1278060, 1278061, 1278062, 1278063, 1278065, 1278067. Its expected direct row counts are 3, 3, 5, 1, 1, 1, 1, 1 respectively, with 15 reference pools. This proves an available migration, not that it was applied. Optional roll odds and the five later/Ascended profiles are explicitly reconstructed policy.
+33 of 35 Classic endgame caches have no loot rows. The other two (1278050/1278051) contain exclusively level-80 gear. Level-60 cache 97883 has 1725 above-60 candidates among 2592 total. SQL 26's expected eight-cache result is absent from this snapshot. No restoration has been executed.
 
-All other Classic endgame caches still require installed-loot verification; absence from SQL 26 alone is not evidence they are empty. The source item dump binds 97877–97883 and 1278050–1278051 to `item_ascension_manastorm_cache`; SQL 20 transfers those bindings to `item_manastorm_cache`. Check the current binding and scripted opening path as well as ordinary loot rows.
-
-### Evidence needed next
-
-Export current world tables `item_loot_template`, `reference_loot_template`, and `conditions` (structure and data). Include refreshed `item_template` rows for 97877–97884 and 1278050–1278084 to confirm post-migration script bindings. Full loot/reference tables allow nested references to be traced without missing a dependency. No credentials or character database required.
-
-For each cache, trace direct loot rows through every reference to actual item candidates, check missing references/items and applicable conditions, then compare intended gear families with reachable gear. Keep missing profiles, broken reference chains, partial coverage, and verified reachable loot distinct. Configured reachable loot is not a guarantee every opening yields an item or that runtime filters permit every candidate.
+The exact descriptions above remain the advertised source intent; installed loot is evaluated separately in the audit. This checkpoint supersedes the earlier request for missing loot exports.
