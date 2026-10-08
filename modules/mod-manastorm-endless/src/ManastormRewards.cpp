@@ -1,4 +1,5 @@
 #include "ManastormRewards.h"
+#include "ManastormExperience.h"
 
 #include "Creature.h"
 #include "Field.h"
@@ -99,7 +100,8 @@ bool ManastormRewards::Load()
         !LoadGroupRewardMultipliers() ||
         !LoadPotentialRewards() ||
         !LoadTreasureKeeperRule() ||
-        !ValidateCharacterSchema())
+        !ValidateCharacterSchema() ||
+        !ManastormExperience::Instance().Load())
     {
         return false;
     }

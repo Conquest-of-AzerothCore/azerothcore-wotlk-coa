@@ -9,6 +9,8 @@
 #include "ManastormDataStore.h"
 #include "ManastormRun.h"
 #include "ManastormRewards.h"
+#include "ManastormExperience.h"
+#include "ObjectAccessor.h"
 
 namespace
 {
@@ -512,6 +514,9 @@ bool ManastormProgression::RecordStageCompletion(
         return false;
     }
 
+    if (!ManastormExperience::Instance().PrepareCompletion(run, transaction, error))
+        return false;
+
     for (ObjectGuid::LowType characterGuid :
         run.GetMembers())
     {
@@ -798,6 +803,10 @@ bool ManastormProgression::RecordStageCompletion(
     ManastormRewards::Instance()
         .PublishCommitted(
             rewardPublications);
+
+    for (ObjectGuid::LowType guid : run.GetMembers())
+        ManastormExperience::Instance().Settle(
+            ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)));
 
     return true;
 }

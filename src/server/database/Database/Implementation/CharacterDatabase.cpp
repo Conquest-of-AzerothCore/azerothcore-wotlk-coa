@@ -702,6 +702,15 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_REP_MANASTORM_COMPLETION_REWARD, "INSERT INTO character_manastorm_completion_reward_state (guid, mode, track, reward_key, remainder_bp, earned) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE remainder_bp = VALUES(remainder_bp), earned = VALUES(earned)", CONNECTION_ASYNC);
 
     PrepareStatement(CHAR_INS_PLAYER_ANTICHEAT_ALERT, "INSERT INTO player_anticheat_alert (account, guid, name, reason, details, size) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_MANASTORM_XP_LEVEL,
+        "SELECT level, playerFlags FROM characters WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_MANASTORM_FLOOR_XP,
+        "SELECT base_xp FROM character_manastorm_pending_experience WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_ADD_MANASTORM_FLOOR_XP,
+        "INSERT INTO character_manastorm_pending_experience (guid, base_xp) VALUES (?, ?) "
+        "ON DUPLICATE KEY UPDATE base_xp = base_xp + VALUES(base_xp)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_CLAIM_MANASTORM_FLOOR_XP,
+        "UPDATE character_manastorm_pending_experience SET base_xp = base_xp - ? WHERE guid = ?", CONNECTION_ASYNC);
 }
 
 CharacterDatabaseConnection::CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo)

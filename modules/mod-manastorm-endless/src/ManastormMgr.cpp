@@ -24,6 +24,7 @@
 #include "ManastormGenerator.h"
 #include "ManastormProgression.h"
 #include "ManastormRewards.h"
+#include "ManastormExperience.h"
 #include "ManastormAffixEngine.h"
 #include "ManastormGreedyDemon.h"
 #include "ManastormVoiceOfMillhouse.h"
@@ -3929,6 +3930,7 @@ void ManastormMgr::OnPlayerLogin(Player* player)
 {
     if (!player || !player->GetSession())
         return;
+    ManastormExperience::Instance().Settle(player);
     ManastormRun* run = GetRunFor(player);
     if (!run)
     {
@@ -3973,6 +3975,8 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
 
     if (player->GetSession() && player->GetSession()->PlayerLoading())
         return;
+
+    ManastormExperience::Instance().OnMapEntry(player);
 
     ManastormRun* run =
         GetRunFor(player);
@@ -5957,6 +5961,8 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
     // when the player enters and the stage becomes ACTIVE.
     //
     // Later scripted spawns during ACTIVE are scaled immediately.
+    // Keep the core kill-reward path enabled for XP. Loot mode 0 suppresses
+    // ordinary item and money loot; disabling loot rewards also suppresses XP.
     //
     if (!creature->IsTrigger() &&
         !creature->IsPet() &&
@@ -5964,7 +5970,7 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
             creature))
     {
         creature->SetLootRewardDisabled(
-            true);
+            false);
         creature->SetReputationRewardDisabled(
             true);
         creature->SetLootMode(0);
