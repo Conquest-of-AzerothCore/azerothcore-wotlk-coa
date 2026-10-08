@@ -17,6 +17,16 @@ namespace
     constexpr uint32 NPC_EDWIN_VANCLEEF = 639;
     constexpr uint32 SEGMENT_GREENSKIN_NORMAL = 126;
     constexpr uint32 SEGMENT_GREENSKIN_ENDGAME = 228;
+    constexpr uint32 SEGMENT_VANCLEEF_NORMAL = 129;
+    constexpr uint32 SEGMENT_VANCLEEF_ENDGAME = 551;
+
+    // VanCleef's teleport is intentionally identical to Greenskin's.
+    // Use its known grid/arrival position; Greenskin's DB spawn GUID
+    // was not provided, so use a bounded nearby-creature lookup instead.
+    constexpr float GREENSKIN_ANCHOR_X = -100.544f;
+    constexpr float GREENSKIN_ANCHOR_Y = -791.458f;
+    constexpr float GREENSKIN_SEARCH_RANGE = 120.0f;
+
 
     // Exact persistent spawn from the in-game DB GUID tooltip.
     constexpr ObjectGuid::LowType VANCLEEF_SPAWN_ID = 79336;
@@ -140,6 +150,90 @@ namespace
         }
     };
 
+
+    bool IsVanCleefStage(ManastormRun const& run)
+    {
+        ManastormSegment const& segment = run.GetSegment();
+
+        return segment.MapId == MAP_DEADMINES &&
+            segment.ObjectiveCreatureEntry == NPC_EDWIN_VANCLEEF &&
+            (segment.SegmentId == SEGMENT_VANCLEEF_NORMAL ||
+             segment.SegmentId == SEGMENT_VANCLEEF_ENDGAME);
+    }
+
+    class manastorm_deadmines_vancleef_greenskin : public AllMapScript
+    {
+    public:
+        manastorm_deadmines_vancleef_greenskin()
+            : AllMapScript("manastorm_deadmines_vancleef_greenskin")
+        {
+        }
+
+        void OnPlayerEnterAll(Map* map, Player* player) override
+        {
+            if (!ManastormModuleConfig::Enabled() ||
+                !map ||
+                !player ||
+                map->GetId() != MAP_DEADMINES ||
+                !map->IsScriptedPrivateInstance())
+            {
+                return;
+            }
+
+            ManastormRun const* run =
+                ManastormMgr::Instance().GetRunFor(player);
+
+            if (!run ||
+                !IsVanCleefStage(*run) ||
+                run->GetInstanceId() != map->GetInstanceId() ||
+                (run->GetState() != ManastormRunState::Preparing &&
+                 run->GetState() != ManastormRunState::Active))
+            {
+                return;
+            }
+
+            // Both bosses share this route. Touch only the known anchor grid
+            // and find Greenskin near the player; no map-wide creature scan.
+            map->LoadGrid(GREENSKIN_ANCHOR_X, GREENSKIN_ANCHOR_Y);
+
+            Creature* greenskin =
+                player->FindNearestCreature(
+                    NPC_CAPTAIN_GREENSKIN,
+                    GREENSKIN_SEARCH_RANGE,
+                    true);
+
+            if (!greenskin ||
+                greenskin->GetMap() != map ||
+                greenskin->GetInstanceId() != run->GetInstanceId() ||
+                !greenskin->GetSpawnId())
+            {
+                LOG_WARN(
+                    LOG_FILTER,
+                    "Captain Greenskin not found near private Manastorm VanCleef start: "
+                    "run={} segment={} instance={} searchRange={}.",
+                    run->GetRunId(),
+                    run->GetSegment().SegmentId,
+                    run->GetInstanceId(),
+                    GREENSKIN_SEARCH_RANGE);
+                return;
+            }
+
+            // Suppress only this private stage's native Greenskin spawn.
+            // The 24-hour respawn delay outlives its disposable instance.
+            greenskin->DespawnOrUnsummon(0ms, 24h);
+
+            LOG_INFO(
+                LOG_FILTER,
+                "Despawned nearby Captain Greenskin for private Manastorm VanCleef stage: "
+                "run={} segment={} instance={} spawn={} entry={}.",
+                run->GetRunId(),
+                run->GetSegment().SegmentId,
+                run->GetInstanceId(),
+                greenskin->GetSpawnId(),
+                NPC_CAPTAIN_GREENSKIN);
+        }
+    };
+
     class manastorm_deadmines_sneed_door : public AllMapScript
     {
     public:
@@ -228,4 +322,5 @@ void AddSC_manastorm_deadmines_compat()
 {
     new manastorm_deadmines_sneed_door();
     new manastorm_deadmines_greenskin_vancleef();
+    new manastorm_deadmines_vancleef_greenskin();
 }
