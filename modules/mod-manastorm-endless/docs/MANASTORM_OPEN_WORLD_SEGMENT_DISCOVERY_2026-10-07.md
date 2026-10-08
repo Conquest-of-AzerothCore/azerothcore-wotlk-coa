@@ -209,16 +209,73 @@ Dalaran Crater Unlocked
 You have unlocked the Dalaran Crater map and creatures in future Manastorms!
 ```
 
-## Additional open-world candidates still needing exact resolution
+## Recovered Ascension-custom outdoor families intentionally deferred
 
-The recovered messages prove additional non-dungeon map/creature progression, but some still need their exact physical source/segment pairing verified before implementation:
+Several additional outdoor Manastorm families are now resolved far enough to preserve their native identities, but their objective creatures are **Ascension-custom creatures that are not present in the current AzerothCore world DB**.
+
+These stages must remain disabled until their original creature data/mechanics are recovered or a faithful reconstruction is authored. Do **not** invent a Vanilla replacement merely to make the segment runnable.
+
+| Family | Normal / Endgame segments | Native map | Native objective | Recovered objective name | Current status |
+|---|---:|---:|---:|---|---|
+| Grim Marsh | 584 / 585 | 1771 | 254285 | The Witch's Brew | Deferred — custom objective absent from current DB |
+| Iskarr Village | 577 / 579 | 1775 | 254295 | Njernthir | Deferred — custom objective absent from current DB |
+| Forgotten Mine | 580 / 581 | 1781 | 254272 | Geolord Vek | Deferred — custom objective absent from current DB |
+
+Recovered rows:
 
 ```text
 Grim Marsh
+584 -> map 1771 -> difficulty 0 -> encounter 5072 -> objective 254285
+585 -> map 1771 -> difficulty 2 -> encounter 5074 -> objective 254285
+
 Iskarr Village
+577 -> map 1775 -> difficulty 0 -> encounter 5066 -> objective 254295
+579 -> map 1775 -> difficulty 2 -> encounter 5068 -> objective 254295
+
+Forgotten Mine
+580 -> map 1781 -> difficulty 0 -> encounter 5069 -> objective 254272
+581 -> map 1781 -> difficulty 2 -> encounter 5071 -> objective 254272
+```
+
+The recovered progression messages independently confirm all three as authentic Manastorm outdoor families:
+
+```text
+Grim Marsh:
+depth 10 -> unlocked in next Manastorm
+depth 11 -> Grim Marsh map + creatures enter future Manastorms
+
+Iskarr Village:
+depth 18 -> unlocked in next Manastorm
+depth 19 -> Iskarr Village map + creatures enter future Manastorms
+
+Forgotten Mine:
+depth 48 -> unlocked in next Manastorm
+depth 49 -> Forgotten Mine map + creatures enter future Manastorms
+```
+
+### Deferred-content rule
+
+For recovered Ascension-custom objectives that are absent from the current DB:
+
+```text
+preserve native segment IDs
+preserve native map IDs
+preserve native objective IDs
+keep the stages disabled
+document the missing objective
+do not substitute an unrelated Vanilla creature
+resume only when original data or a faithful reconstruction is available
+```
+
+This is the same preservation-first principle used when Purgation Isle / Justicar Keltraesa cannot be mapped to a trustworthy current runtime objective.
+
+## Additional open-world candidates still needing exact resolution
+
+The following recovered non-dungeon families still need their exact physical representation and/or objective mapping resolved before implementation:
+
+```text
 Temple of Eternity
 Gadgetzan's End
-Forgotten Mine
 Caer Darrow
 Scarlet Mage Tower
 Lost Rigger Cove Docks
