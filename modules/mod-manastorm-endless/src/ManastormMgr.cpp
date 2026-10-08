@@ -332,6 +332,23 @@ namespace
     // Endless objective, summon the final native boss directly instead of
     // starting that prerequisite event.
     //
+    // Blasted Lands / Rise of the Defiler:
+    // Razelikh (7664) is normally quest-summoned and has no persistent
+    // creature spawn row. Spell 13461 ("Go Home") targets his native home
+    // point on the summit, which gives us the canonical spawn position.
+    constexpr uint32 MANASTORM_MAP_EASTERN_KINGDOMS = 0;
+    constexpr uint32 NPC_RAZELIKH_THE_DEFILER = 7664;
+    constexpr uint32 SEGMENT_RAZELIKH_NORMAL = 542;
+    constexpr uint32 SEGMENT_RAZELIKH_ENDGAME = 543;
+
+    Position const RAZELIKH_HOME_POSITION =
+    {
+        -11234.8f,
+         -2842.52f,
+           157.92f,
+             1.47f
+    };
+
     constexpr uint32 MANASTORM_MAP_SUNKEN_TEMPLE = 109;
     constexpr uint32 NPC_SHADE_OF_ERANIKUS = 5709;
     constexpr uint32 NPC_JAMMALAN_THE_PROPHET = 5710;
@@ -358,6 +375,96 @@ namespace
     constexpr uint32 NPC_BRIGHTWING = 5912;
     constexpr ObjectGuid::LowType SPAWN_BRIGHTWING = 517;
     constexpr uint32 SEGMENT_BRIGHTWING_ENDGAME = 703;
+
+    bool BootstrapRazelikhEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        if (!map)
+        {
+            error =
+                "Razelikh bootstrap has no destination map.";
+            return false;
+        }
+
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (segment.MapId !=
+                MANASTORM_MAP_EASTERN_KINGDOMS ||
+            segment.ObjectiveCreatureEntry !=
+                NPC_RAZELIKH_THE_DEFILER ||
+            (segment.SegmentId !=
+                SEGMENT_RAZELIKH_NORMAL &&
+             segment.SegmentId !=
+                SEGMENT_RAZELIKH_ENDGAME))
+        {
+            std::ostringstream message;
+
+            message
+                << "Razelikh bootstrap was requested for segment "
+                << segment.SegmentId
+                << " but runtime map/objective is "
+                << segment.MapId
+                << "/"
+                << segment.ObjectiveCreatureEntry
+                << ".";
+
+            error = message.str();
+            return false;
+        }
+
+        TempSummon* razelikh =
+            map->SummonCreature(
+                NPC_RAZELIKH_THE_DEFILER,
+                RAZELIKH_HOME_POSITION);
+
+        if (!razelikh)
+        {
+            error =
+                "Manastorm could not summon Razelikh the Defiler (7664).";
+            return false;
+        }
+
+        // Razelikh is a quest-summoned Vanilla objective rather than a
+        // persistent DB spawn. Own only this runtime copy for the disposable
+        // Manastorm stage while preserving his native SmartAI and combat kit.
+        razelikh->SetTempSummonType(
+            TEMPSUMMON_MANUAL_DESPAWN);
+
+        // SummonCreature() normally reaches the global creature hook already,
+        // but explicit registration is duplicate-safe and lets us reject a
+        // bootstrap that failed to become this run's exact objective.
+        ManastormMgr::Instance()
+            .OnCreatureAddWorld(
+                razelikh);
+
+        if (run.GetObjectiveCreatureGuid() !=
+            razelikh->GetGUID())
+        {
+            razelikh->DespawnOrUnsummon();
+
+            error =
+                "Razelikh was summoned but did not register as the runtime objective.";
+            return false;
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Bootstrapped Manastorm quest-summoned Razelikh objective: "
+            "run={} segment={} map={} instance={} objective={} guid={}.",
+            run.GetRunId(),
+            segment.SegmentId,
+            segment.MapId,
+            run.GetInstanceId(),
+            segment.ObjectiveCreatureEntry,
+            razelikh->GetGUID().GetRawValue());
+
+        return true;
+    }
 
     bool BootstrapSunkenTempleAtalAlarionEncounter(
         Map* map,
@@ -981,11 +1088,18 @@ namespace
 
     bool BootstrapSpecialEncounter(
         Map* map,
-        ManastormRun const& run,
+        ManastormRun& run,
         std::string& error)
     {
         switch (run.GetSegment().SegmentId)
         {
+        case SEGMENT_RAZELIKH_NORMAL:
+        case SEGMENT_RAZELIKH_ENDGAME:
+            return BootstrapRazelikhEncounter(
+                map,
+                run,
+                error);
+
         case SEGMENT_ATAL_ALARION_NORMAL:
         case SEGMENT_ATAL_ALARION_ENDGAME:
             return BootstrapSunkenTempleAtalAlarionEncounter(
