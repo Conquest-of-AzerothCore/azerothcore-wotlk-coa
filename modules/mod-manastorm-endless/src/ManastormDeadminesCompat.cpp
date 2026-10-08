@@ -219,7 +219,8 @@ namespace
             }
 
             // Suppress only this private stage's native Greenskin spawn.
-            // The 24-hour respawn delay outlives its disposable instance.
+            // Record its DB GUID before despawn (the creature may be removed).
+            ObjectGuid::LowType const spawnId = greenskin->GetSpawnId();
             greenskin->DespawnOrUnsummon(0ms, 24h);
 
             LOG_INFO(
@@ -229,7 +230,7 @@ namespace
                 run->GetRunId(),
                 run->GetSegment().SegmentId,
                 run->GetInstanceId(),
-                greenskin->GetSpawnId(),
+                spawnId,
                 NPC_CAPTAIN_GREENSKIN);
         }
     };
