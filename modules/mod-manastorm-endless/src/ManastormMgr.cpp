@@ -3670,6 +3670,12 @@ ManastormRun* ManastormMgr::StartRun(
             return nullptr;
         }
 
+        if (member->GetLevel() < 10)
+        {
+            error = "Every run member must be at least level 10 to enter Manastorm.";
+            return nullptr;
+        }
+
         endgame =
             endgame ||
             member->GetLevel() >=
