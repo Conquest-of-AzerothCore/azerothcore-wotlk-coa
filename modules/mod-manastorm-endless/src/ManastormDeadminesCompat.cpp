@@ -2,6 +2,7 @@
 #include "ManastormMgr.h"
 
 #include "AllMapScript.h"
+#include "Creature.h"
 #include "GameObject.h"
 #include "Log.h"
 #include "Map.h"
@@ -12,6 +13,16 @@ namespace
     constexpr char const* LOG_FILTER = "module.manastorm.endless";
 
     constexpr uint32 MAP_DEADMINES = 36;
+    constexpr uint32 NPC_CAPTAIN_GREENSKIN = 647;
+    constexpr uint32 NPC_EDWIN_VANCLEEF = 639;
+    constexpr uint32 SEGMENT_GREENSKIN_NORMAL = 126;
+    constexpr uint32 SEGMENT_GREENSKIN_ENDGAME = 228;
+
+    // Exact persistent spawn from the in-game DB GUID tooltip.
+    constexpr ObjectGuid::LowType VANCLEEF_SPAWN_ID = 79336;
+    constexpr float VANCLEEF_X = -87.369f;
+    constexpr float VANCLEEF_Y = -819.895f;
+
     constexpr uint32 NPC_SNEEDS_SHREDDER = 642;
     constexpr uint32 SEGMENT_SNEED_NORMAL = 113;
     constexpr uint32 SEGMENT_SNEED_ENDGAME = 213;
@@ -32,6 +43,102 @@ namespace
             (segment.SegmentId == SEGMENT_SNEED_NORMAL ||
              segment.SegmentId == SEGMENT_SNEED_ENDGAME);
     }
+
+
+    bool IsGreenskinStage(ManastormRun const& run)
+    {
+        ManastormSegment const& segment = run.GetSegment();
+
+        return segment.MapId == MAP_DEADMINES &&
+            segment.ObjectiveCreatureEntry == NPC_CAPTAIN_GREENSKIN &&
+            (segment.SegmentId == SEGMENT_GREENSKIN_NORMAL ||
+             segment.SegmentId == SEGMENT_GREENSKIN_ENDGAME);
+    }
+
+    class manastorm_deadmines_greenskin_vancleef : public AllMapScript
+    {
+    public:
+        manastorm_deadmines_greenskin_vancleef()
+            : AllMapScript("manastorm_deadmines_greenskin_vancleef")
+        {
+        }
+
+        void OnPlayerEnterAll(Map* map, Player* player) override
+        {
+            if (!ManastormModuleConfig::Enabled() ||
+                !map ||
+                !player ||
+                map->GetId() != MAP_DEADMINES ||
+                !map->IsScriptedPrivateInstance())
+            {
+                return;
+            }
+
+            ManastormRun const* run =
+                ManastormMgr::Instance().GetRunFor(player);
+
+            if (!run ||
+                !IsGreenskinStage(*run) ||
+                run->GetInstanceId() != map->GetInstanceId() ||
+                (run->GetState() != ManastormRunState::Preparing &&
+                 run->GetState() != ManastormRunState::Active))
+            {
+                return;
+            }
+
+            // VanCleef is near Greenskin's authored route. Load only his
+            // known grid so the DB spawn is available even if his area was
+            // outside the first player's initial visibility range.
+            map->LoadGrid(VANCLEEF_X, VANCLEEF_Y);
+
+            auto& spawns = map->GetCreatureBySpawnIdStore();
+            auto const range = spawns.equal_range(VANCLEEF_SPAWN_ID);
+
+            for (auto itr = range.first; itr != range.second; ++itr)
+            {
+                Creature* vancleef = itr->second;
+
+                if (!vancleef ||
+                    !vancleef->IsInWorld() ||
+                    vancleef->GetEntry() != NPC_EDWIN_VANCLEEF ||
+                    vancleef->GetSpawnId() != VANCLEEF_SPAWN_ID)
+                {
+                    continue;
+                }
+
+                // A second party member may enter after he was removed.
+                if (!vancleef->IsAlive())
+                    return;
+
+                // The map and instance guards above ensure this only touches
+                // VanCleef's real DB spawn in the disposable Greenskin stage.
+                // Keep him down longer than an Endless stage can reasonably
+                // last; don't modify or delete his world database record.
+                vancleef->DespawnOrUnsummon(0ms, 24h);
+
+                LOG_INFO(
+                    LOG_FILTER,
+                    "Despawned nearby Edwin VanCleef for private Manastorm Greenskin stage: "
+                    "run={} segment={} instance={} spawn={} entry={}.",
+                    run->GetRunId(),
+                    run->GetSegment().SegmentId,
+                    run->GetInstanceId(),
+                    VANCLEEF_SPAWN_ID,
+                    NPC_EDWIN_VANCLEEF);
+                return;
+            }
+
+            LOG_WARN(
+                LOG_FILTER,
+                "Could not find Edwin VanCleef DB spawn for Manastorm Greenskin stage: "
+                "run={} segment={} instance={} spawn={} entry={}.",
+                run->GetRunId(),
+                run->GetSegment().SegmentId,
+                run->GetInstanceId(),
+                VANCLEEF_SPAWN_ID,
+                NPC_EDWIN_VANCLEEF);
+        }
+    };
 
     class manastorm_deadmines_sneed_door : public AllMapScript
     {
@@ -120,4 +227,5 @@ namespace
 void AddSC_manastorm_deadmines_compat()
 {
     new manastorm_deadmines_sneed_door();
+    new manastorm_deadmines_greenskin_vancleef();
 }
