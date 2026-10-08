@@ -30,6 +30,9 @@ namespace
     constexpr uint32 NPC_ARCHMAGE_ALLISTARJ = 7666;
     constexpr uint32 SEGMENT_ALLISTARJ_NORMAL = 552;
     constexpr uint32 SEGMENT_ALLISTARJ_ENDGAME = 553;
+    constexpr uint32 NPC_LADY_SEVINE = 7667;
+    constexpr uint32 SEGMENT_SEVINE_NORMAL = 554;
+    constexpr uint32 SEGMENT_SEVINE_ENDGAME = 555;
 
     constexpr uint32 MAP_MOLTEN_CORE = 409;
     constexpr uint32 NPC_ANCIENT_CORE_HOUND = 11671;
@@ -736,7 +739,9 @@ namespace
                 (creature->GetEntry() !=
                     NPC_GROL_THE_DESTROYER &&
                  creature->GetEntry() !=
-                    NPC_ARCHMAGE_ALLISTARJ))
+                    NPC_ARCHMAGE_ALLISTARJ &&
+                 creature->GetEntry() !=
+                    NPC_LADY_SEVINE))
             {
                 return;
             }
@@ -767,7 +772,15 @@ namespace
                  segment.SegmentId ==
                     SEGMENT_ALLISTARJ_ENDGAME);
 
-            if (!grol && !allistarj)
+            bool const sevine =
+                segment.ObjectiveCreatureEntry ==
+                    NPC_LADY_SEVINE &&
+                (segment.SegmentId ==
+                    SEGMENT_SEVINE_NORMAL ||
+                 segment.SegmentId ==
+                    SEGMENT_SEVINE_ENDGAME);
+
+            if (!grol && !allistarj && !sevine)
                 return;
 
             SmartAI* smartAI =
@@ -790,9 +803,9 @@ namespace
                 return;
             }
 
-            // Native Grol and Allistarj are quest-gated by a SmartAI
-            // invincibility floor normally removed by Fel Curse (12938).
-            // Their recovered Manastorm stages select them directly, so
+            // Native Grol, Allistarj, and Lady Sevine are quest-gated by a
+            // SmartAI invincibility floor normally removed by Fel Curse
+            // (12938). Their recovered Manastorm stages select them directly, so
             // bypass only that HP floor in the disposable Manastorm copy.
             // Enter-combat is used deliberately: SmartAI Reset may restore
             // the floor after an evade, and every new pull must remain
