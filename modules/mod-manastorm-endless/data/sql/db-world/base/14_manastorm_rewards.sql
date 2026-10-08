@@ -195,18 +195,18 @@ VALUES
 (
     10111377,
     'Treasure Keeper',
-    '',
+    NULL,
     1,
     1,
     0,
-    14,
+    35,
     0,
     1,
     1.14286,
     1,
     1,
     20,
-    1,
+    0,
     0,
     1,
     2000,
@@ -218,7 +218,7 @@ VALUES
     0,
     0,
     0,
-    7,
+    12,
     0,
     '',
     0,
@@ -228,12 +228,12 @@ VALUES
     1,
     1,
     0,
-    999,
+    0,
     1,
     0,
-    64,
+    0,
     '',
-    0
+    NULL
 );
 
 INSERT IGNORE INTO `creature_template_model`
