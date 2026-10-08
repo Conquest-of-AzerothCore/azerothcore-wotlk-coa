@@ -82,7 +82,7 @@ WHERE `src`.`segment_id` IN (126, 228)
   AND `src`.`enabled` = 1
   AND (`src`.`flags` & 2) <> 0
 ON DUPLICATE KEY UPDATE
-    `flags` = (`flags` | VALUES(`flags`)),
+    `flags` = (`manastorm_segment_spawn`.`flags` | 3),
     `enabled` = 1;
 
 -- Match the required stack count from each corresponding Greenskin stage.
