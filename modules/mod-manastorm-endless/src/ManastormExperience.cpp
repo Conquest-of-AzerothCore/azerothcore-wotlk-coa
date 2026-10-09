@@ -7,7 +7,7 @@
 #include "Player.h"
 #include "QuestDef.h"
 #include "ScriptMgr.h"
-#include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 #include "World.h"
 #include "WorldSession.h"
 #include <algorithm>
