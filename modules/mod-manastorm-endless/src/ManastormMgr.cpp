@@ -376,6 +376,17 @@ namespace
     constexpr uint32 NPC_BRIGHTWING = 5912;
     constexpr ObjectGuid::LowType SPAWN_BRIGHTWING = 517;
     constexpr uint32 SEGMENT_BRIGHTWING_ENDGAME = 703;
+    // Earthcaller Halmgar is an Endgame-only Razorfen Kraul Manastorm rare.
+    // The native base-world creature spawn (entry 4842, map 47) has a
+    // 43,200-second respawn timer. Its original DB GUID and position are
+    // preserved rather than fabricating a second boss at the player teleport.
+    constexpr uint32 MANASTORM_MAP_RAZORFEN_KRAUL = 47;
+    constexpr uint32 NPC_EARTHCALLER_HALMGAR = 4842;
+    constexpr uint32 SEGMENT_HALMGAR_ENDGAME = 705;
+    constexpr ObjectGuid::LowType SPAWN_EARTHCALLER_HALMGAR = 1975863;
+    constexpr float HALMGAR_SPAWN_X = 2118.58f;
+    constexpr float HALMGAR_SPAWN_Y = 1695.32f;
+
 
     bool BootstrapRazelikhEncounter(
         Map* map,
@@ -1087,6 +1098,142 @@ namespace
         return true;
     }
 
+
+    bool BootstrapRazorfenKraulHalmgarEncounter(
+        Map* map,
+        ManastormRun const& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_RAZORFEN_KRAUL ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            segment.MapId != MANASTORM_MAP_RAZORFEN_KRAUL ||
+            segment.SegmentId != SEGMENT_HALMGAR_ENDGAME ||
+            segment.ObjectiveCreatureEntry != NPC_EARTHCALLER_HALMGAR)
+        {
+            error =
+                "Razorfen Kraul Halmgar rare bootstrap received a nonmatching private stage.";
+            return false;
+        }
+
+        CreatureData const* spawnData =
+            sObjectMgr->GetCreatureData(
+                SPAWN_EARTHCALLER_HALMGAR);
+
+        if (!spawnData ||
+            spawnData->mapid != MANASTORM_MAP_RAZORFEN_KRAUL ||
+            spawnData->id != NPC_EARTHCALLER_HALMGAR)
+        {
+            error =
+                "Razorfen Kraul Halmgar native DB spawn 1975863 is missing or does not match creature 4842 on map 47.";
+            return false;
+        }
+
+        // The physical boss is farther into the dungeon than teleport 2129.
+        // Load only the known original spawn's grid, not the whole instance.
+        map->LoadGrid(
+            HALMGAR_SPAWN_X,
+            HALMGAR_SPAWN_Y);
+
+        auto& spawns = map->GetCreatureBySpawnIdStore();
+        auto const range = spawns.equal_range(
+            SPAWN_EARTHCALLER_HALMGAR);
+
+        for (auto itr = range.first; itr != range.second; ++itr)
+        {
+            Creature* halmgar = itr->second;
+
+            if (!halmgar ||
+                !halmgar->IsInWorld() ||
+                !halmgar->IsAlive() ||
+                halmgar->GetEntry() != NPC_EARTHCALLER_HALMGAR)
+            {
+                continue;
+            }
+
+            // The normal DB spawn may have loaded before stage indexing
+            // existed. Register this exact instance-owned runtime creature.
+            ManastormMgr::Instance().OnCreatureAddWorld(halmgar);
+
+            if (run.GetObjectiveCreatureGuid() != halmgar->GetGUID())
+            {
+                error =
+                    "Existing living Razorfen Kraul Halmgar did not register as the Manastorm objective.";
+                return false;
+            }
+
+            LOG_INFO(
+                LOG_FILTER,
+                "Reused native Earthcaller Halmgar for private Manastorm stage: "
+                "run={} segment={} instance={} spawn={} guid={}.",
+                run.GetRunId(),
+                segment.SegmentId,
+                run.GetInstanceId(),
+                SPAWN_EARTHCALLER_HALMGAR,
+                halmgar->GetGUID().GetRawValue());
+            return true;
+        }
+
+        // A long native rare respawn must not leave an explicit Manastorm
+        // objective impossible. The private instance's respawn state is
+        // disposable; do not touch the public dungeon's DB/spawn timer.
+        map->RemoveCreatureRespawnTime(
+            SPAWN_EARTHCALLER_HALMGAR);
+
+        Creature* halmgar = new Creature();
+
+        if (!halmgar->LoadCreatureFromDB(
+                SPAWN_EARTHCALLER_HALMGAR,
+                map,
+                true,
+                true))
+        {
+            delete halmgar;
+            error =
+                "Could not load native Earthcaller Halmgar DB spawn 1975863 in private Razorfen Kraul.";
+            return false;
+        }
+
+        if (!halmgar->IsInWorld() ||
+            !halmgar->IsAlive() ||
+            halmgar->GetEntry() != NPC_EARTHCALLER_HALMGAR)
+        {
+            halmgar->AddObjectToRemoveList();
+            error =
+                "Native Earthcaller Halmgar spawn was loaded but is not a living creature 4842.";
+            return false;
+        }
+
+        // OnCreatureAddWorld is duplicate-safe for this same runtime GUID.
+        ManastormMgr::Instance().OnCreatureAddWorld(halmgar);
+
+        if (run.GetObjectiveCreatureGuid() != halmgar->GetGUID())
+        {
+            halmgar->AddObjectToRemoveList();
+            error =
+                "Native Earthcaller Halmgar failed Manastorm objective registration.";
+            return false;
+        }
+
+        LOG_INFO(
+            LOG_FILTER,
+            "Restored rare native Earthcaller Halmgar for private Manastorm stage: "
+            "run={} segment={} instance={} spawn={} objective={} guid={}.",
+            run.GetRunId(),
+            segment.SegmentId,
+            run.GetInstanceId(),
+            SPAWN_EARTHCALLER_HALMGAR,
+            NPC_EARTHCALLER_HALMGAR,
+            halmgar->GetGUID().GetRawValue());
+
+        return true;
+    }
+
     bool BootstrapSpecialEncounter(
         Map* map,
         ManastormRun& run,
@@ -1131,6 +1278,12 @@ namespace
 
         case SEGMENT_BRIGHTWING_ENDGAME:
             return BootstrapWailingCavernsBrightwingEncounter(
+                map,
+                run,
+                error);
+
+        case SEGMENT_HALMGAR_ENDGAME:
+            return BootstrapRazorfenKraulHalmgarEncounter(
                 map,
                 run,
                 error);
