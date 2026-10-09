@@ -6,6 +6,7 @@ void AddSC_manastorm_native_bridge();
 void AddSC_manastorm_runtime_compat();
 void AddSC_manastorm_blackrock_spire_compat();
 void AddSC_manastorm_deadmines_compat();
+void AddSC_manastorm_razorfen_kraul_compat();
 void AddSC_manastorm_molten_core_isolation();
 
 void Addmod_manastorm_endlessScripts()
@@ -20,5 +21,6 @@ void Addmod_manastorm_endlessScripts()
     AddSC_manastorm_runtime_compat();
     AddSC_manastorm_blackrock_spire_compat();
     AddSC_manastorm_deadmines_compat();
+    AddSC_manastorm_razorfen_kraul_compat();
     AddSC_manastorm_molten_core_isolation();
 }
