@@ -340,6 +340,7 @@ void AddSC_AscensionRunemasterSecondary();
 void AddSC_AscensionRunemasterBurnedEtching();
 void AddSC_AscensionRunemasterHurricane();
 void AddSC_AscensionWildcardCorruptedBlade();
+void AddSC_AscensionHeroCatFormAbilities();
 void AddSC_AscensionWildcardDarkIntent();
 void AddSC_AscensionRunemasterRiftClones();
 void AddSC_AscensionRunemasterDisappearance();
@@ -617,6 +618,7 @@ void AddCoAScripts()
     AddSC_AscensionRunemasterBurnedEtching();
     AddSC_AscensionRunemasterHurricane();
     AddSC_AscensionWildcardCorruptedBlade();
+    AddSC_AscensionHeroCatFormAbilities();
     AddSC_AscensionWildcardDarkIntent();
     AddSC_AscensionRunemasterRiftClones();
     AddSC_AscensionRunemasterDisappearance();

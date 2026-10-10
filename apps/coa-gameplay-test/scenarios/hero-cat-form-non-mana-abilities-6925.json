@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "A Hero uses non-mana abilities in Cat Form without leaving it; mana spells still need caster form (#6925)",
+  "contract": [
+    "Blind 2094 (energy) and Regrowth 8936 (mana) both carry SPELL_ATTR0_NOT_SHAPESHIFTED, so a Hero in Cat Form 768 was refused or knocked out of the form for both.",
+    "Cat Form now gives a Hero the hidden SPELL_AURA_MOD_IGNORE_SHAPESHIFT auras 9726361-9726364 (one per spell family). Rogue mask 9726363 covers Blind; no mask covers a mana spell, so Regrowth is still refused with SPELL_FAILED_NOT_SHAPESHIFT (68).",
+    "The auras leave with the form, and a stock Druid in Cat Form gets none of them."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hero", "name": "Catwalker", "race": 1, "class": 10, "level": 80 },
+    { "id": "druid", "name": "Catdruid", "race": 4, "class": 11, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "hero_dummy", "owner": "hero", "entry": 32666, "level": 80, "distance": 5, "stationary": true },
+    { "id": "druid_dummy", "owner": "druid", "entry": 32666, "level": 80, "distance": 5, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "learn", "actor": "hero", "spell": 768 },
+    { "action": "learn", "actor": "hero", "spell": 2094 },
+    { "action": "learn", "actor": "hero", "spell": 8936 },
+    { "action": "learn", "actor": "druid", "spell": 768 },
+    { "action": "learn", "actor": "druid", "spell": 2094 },
+    { "action": "cast", "actor": "hero", "spell": 768 },
+    { "action": "cast", "actor": "druid", "spell": 768 },
+    { "action": "assert", "label": "The Hero is in Cat Form", "actor": "hero", "metric": "aura", "spell": 768,
+      "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The Hero has the Rogue ability aura", "actor": "hero", "metric": "aura",
+      "spell": 9726363, "equals": 1 },
+    { "action": "assert", "label": "and the Warrior ability aura", "actor": "hero", "metric": "aura", "spell": 9726361,
+      "equals": 1 },
+    { "action": "assert", "label": "The Druid is in Cat Form", "actor": "druid", "metric": "aura", "spell": 768,
+      "equals": 1 },
+    { "action": "assert", "label": "A stock Druid gets no ability aura", "actor": "druid", "metric": "aura",
+      "spell": 9726363, "equals": 0 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "hero", "power": 3, "value": 100 },
+    { "action": "set_power", "actor": "druid", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "hero", "spell": 2094, "target": "hero_dummy" },
+    { "action": "cast", "actor": "druid", "spell": 2094, "target": "druid_dummy" },
+    { "action": "assert", "label": "The Hero casts Blind in Cat Form", "actor": "hero", "metric": "cast_failure",
+      "spell": 2094, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "and stays in Cat Form", "actor": "hero", "metric": "aura", "spell": 768,
+      "equals": 1 },
+    { "action": "assert", "label": "A stock Druid is still refused Blind in Cat Form", "actor": "druid",
+      "metric": "cast_failure", "spell": 2094, "equals": 68, "within_ms": 1000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "cast", "actor": "hero", "spell": 8936, "target": "hero" },
+    { "action": "assert", "label": "Regrowth still needs the Hero out of Cat Form", "actor": "hero",
+      "metric": "cast_failure", "spell": 8936, "equals": 68, "within_ms": 1000 },
+    { "action": "cancel_aura", "actor": "hero", "spell": 768 },
+    { "action": "assert", "label": "Leaving Cat Form removes the ability auras", "actor": "hero", "metric": "aura",
+      "spell": 9726363, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "all of them", "actor": "hero", "metric": "aura", "spell": 9726361, "equals": 0 }
+  ]
+}
