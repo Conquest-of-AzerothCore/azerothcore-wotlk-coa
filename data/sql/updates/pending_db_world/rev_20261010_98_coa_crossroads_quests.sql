@@ -4,8 +4,11 @@
 -- Givers and enders follow the quest texts and NextQuestInChain. Recorded on live realms (YouTube): reward texts of
 -- 255082 (PrimitiveWoW Part 12, 2026-08-08, 22:12) and 255083 (Part 13, 2026-08-11, 09:00), Raj'iri and Naj'iri's
 -- exchange (Part 12, 01:02; Part 13, 10:04 and 35:00), Voltzix Sprocketpop level 21 Orgrimmar (Part 12, 22:16)
--- and Rhuna level 35 Orgrimmar (JohnGamingFuntime, 2026-07-07, 17:44). Draft: spawns, the other NPCs' levels and
--- factions, displays the client lacks, quest item drops and the 255080 ender (Taz'iri) are not restored yet.
+-- and Rhuna level 35 Orgrimmar (JohnGamingFuntime, 2026-07-07, 17:44). Spawns stand on the quests' client
+-- QuestSuperTrack/SuperTrack points (patch-M, identical in the server DBC), facing the town centre (inferred). The
+-- 255080 ender is Raj'iri: its "Taz'iri" turn-in point 21368 lies 0.1 yd from Raj'iri's point 21366. Raj'iri, Martin
+-- and Brumbof take Rhuna's and Voltzix's Orgrimmar faction (inferred). Draft: Naj'iri's spawn, the other NPCs'
+-- levels, displays the client lacks and quest item drops are not restored yet.
 
 INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `RewardNextQuest`,
   `RewardXPDifficulty`, `RewardMoney`, `RewardMoneyDifficulty`, `Flags`, `RewardItem1`, `RewardAmount1`, `RewardItem2`,
@@ -63,6 +66,7 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), 
 
 UPDATE `creature_template` SET `minlevel` = 35, `maxlevel` = 35, `faction` = 29 WHERE `entry` = 41739;
 UPDATE `creature_template` SET `minlevel` = 21, `maxlevel` = 21, `faction` = 29 WHERE `entry` = 753524;
+UPDATE `creature_template` SET `faction` = 29 WHERE `entry` IN (41719,741722,753513);
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (41719,741719,41739,741722,753513,753524);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`) VALUES
@@ -86,9 +90,19 @@ DELETE FROM `creature_questender` WHERE `quest` IN (255078,255079,255080,255081,
 INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (41719, 255078),
 (41739, 255079),
+(41719, 255080),
 (741722, 255081),
 (753524, 255082),
 (753524, 255083);
+
+DELETE FROM `creature` WHERE `guid` BETWEEN 9010700 AND 9010704;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`)
+VALUES
+(9010700, 41719, 1, 0, 0, 1, 1, 0, -393.199, -2607.72, 96.343, 3.464, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Raj''iri at SuperTrack 21366, turn-in of 255078 and 255080'),
+(9010701, 753513, 1, 0, 0, 1, 1, 0, -543.303, -2708.61, 96.036, 0.756, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Brumbof Bramstum at SuperTrack 21367, objective of 255080 in the tauren lodge'),
+(9010702, 41739, 1, 0, 0, 1, 1, 0, -531.518, -2639.22, 96.066, 0.128, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Rhuna at SuperTrack 21372, turn-in of 255079'),
+(9010703, 741722, 1, 0, 0, 1, 1, 0, -464.983, -2536.49, 115.152, 4.766, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Martin Lesterfield at SuperTrack 21374, turn-in of 255081'),
+(9010704, 753524, 1, 0, 0, 1, 1, 0, -354.925, -2657.8, 96.201, 2.883, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Voltzix Sprocketpop at SuperTrack 21379, turn-in of 255083');
 
 DELETE FROM `creature_text` WHERE `CreatureID` IN (41719,741719);
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Probability`, `comment`) VALUES
