@@ -312,9 +312,6 @@ bool CanOffer(Player* player, uint32 questId)
     if (!player->SatisfyQuestRace(quest, false))
         return false;
 
-    if (!player->SatisfyQuestClass(quest, false))
-        return false;
-
     if (!player->SatisfyQuestExclusiveGroup(quest, false))
         return false;
 
