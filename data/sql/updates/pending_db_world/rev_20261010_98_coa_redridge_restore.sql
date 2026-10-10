@@ -4,6 +4,8 @@
 -- Positions follow the client QuestSuperTrack/SuperTrack points or observed object positions; displays marked
 -- stand-in replace Ascension models the client lacks. NPC levels follow Roman Murashoff's Ascension Redridge videos
 -- where they show one and are estimated otherwise; the captures carry none.
+-- Seventeen more Lakeshire NPCs from the creaturecache (WDB captures up to 2026-09-05) have no recorded position in
+-- any source; their spots, facings, levels and stand-in displays are estimated and marked so below.
 
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`,
   `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`,
@@ -25,7 +27,24 @@ VALUES
 (254969, 0, 0, 0, 0, 0, 'Servant of Azora', NULL, NULL, 0, 9, 9, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (254976, 0, 0, 0, 0, 0, 'Sah''kihnu', 'Hand of Gath''Ilzogg', NULL, 0, 26, 26, 0, 40, 0, 1, 1.14286, 1, 1, 20, 1, 0, 2.4, 2000, 2000, 1, 1, 1, 32768, 2048, 0, 0, 7, 0, 254976, 0, 0, 0, 0, 139, 186, '', 0, 1, 3.008, 1, 1.5, 1, 0, 0, 1, 0, 0, '', 0),
 (255201, 0, 0, 0, 0, 0, 'Damion Tyndall', 'Tailoring Trainer', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(255213, 0, 0, 0, 0, 0, 'Cateline', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0)
+(255213, 0, 0, 0, 0, 0, 'Cateline', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255208, 0, 0, 0, 0, 0, 'Vernell', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255212, 0, 0, 0, 0, 0, 'Emelyne', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255214, 0, 0, 0, 0, 0, 'Marinus', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255215, 0, 0, 0, 0, 0, 'Captured Blackrock Sentry', NULL, NULL, 0, 21, 21, 0, 35, 0, 1, 1.14286, 1, 1, 18, 1, 0, 1.7, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 3.75, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255216, 0, 0, 0, 0, 0, 'Fisherman Audric', 'Fishing Trainer', NULL, 5665, 20, 20, 0, 12, 81, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255217, 0, 0, 0, 0, 0, 'Peasant Worker', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255218, 0, 0, 0, 0, 0, 'Farmhand Sevim', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255219, 0, 0, 0, 0, 0, 'Lakeshire Guard', NULL, NULL, 0, 35, 35, 0, 11, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 4096, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 2.032, 1, 1, 1, 0, 0, 1, 0, 0, '', 0),
+(255220, 0, 0, 0, 0, 0, 'Sidonia Crastlor', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255221, 0, 0, 0, 0, 0, 'Reilly Osgood', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255467, 0, 0, 0, 0, 0, 'Elmar', 'Altar Boy', NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.28576, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255468, 0, 0, 0, 0, 0, 'Ivan', 'Altar Boy', NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.28576, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255469, 0, 0, 0, 0, 0, 'Paien', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.28576, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255470, 0, 0, 0, 0, 0, 'Solaina', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.28576, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255471, 0, 0, 0, 0, 0, 'Adelynn Tyndall', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.28576, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255472, 0, 0, 0, 0, 0, 'Edvard Tyndall', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255473, 0, 0, 0, 0, 0, 'Addison Rutherford', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0)
 ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
   `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`),
   `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `name` = VALUES(`name`),
@@ -56,8 +75,16 @@ ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
 -- stand-in 1294), Alexandria Rowen (811476, stand-in 3768), Damion Tyndall (255201, stand-in 1502) and Cateline
 -- (255213, stand-in 213). Corwin Branwick, the Servant of Azora and Sah'kihnu keep their client displays.
 -- Sah'kihnu's combat values copy Gath'Ilzogg (334) and are estimated; the creaturecache has none.
+-- The later Lakeshire NPCs carry Ascension displays the client lacks as well; their stand-ins are estimated, with the
+-- sex guessed from the name: Vernell 3254, Emelyne 1571, Marinus 5082, Fisherman Audric 4491, Peasant Worker 87/89,
+-- Farmhand Sevim 3614, Sidonia Crastlor 1295, Reilly Osgood 3331, Edvard Tyndall 1944 and Addison Rutherford 5038.
+-- The Captured Blackrock Sentry (6029), the Lakeshire Guard (3447) and the children keep their client displays.
+-- Levels, factions and flags are estimated: adults follow Cateline, children Jamin (5608), the guard Guard Pearce
+-- (935, same HealthModifier) and the sentry Blackrock Sentry (4065, same rank, HealthModifier and display), made
+-- friendly because it is captured. Fisherman Audric teaches what Matthew Hooper (1680) teaches.
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (255204,255206,255207,991477,991474,991475,991476,991482,
-  254969,254976,255201,255213);
+  254969,254976,255201,255213,255208,255212,255214,255215,255216,255217,255218,255219,255220,255221,255467,255468,
+  255469,255470,255471,255472,255473);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
 (255204, 0, 1541, 1, 1, 0),
@@ -71,12 +98,36 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 (254969, 0, 5018, 1, 1, 0),
 (254976, 0, 9849, 1, 1, 0),
 (255201, 0, 1502, 1, 1, 0),
-(255213, 0, 213, 1, 1, 0);
+(255213, 0, 213, 1, 1, 0),
+(255208, 0, 3254, 1, 1, 0),
+(255212, 0, 1571, 1, 1, 0),
+(255214, 0, 5082, 1, 1, 0),
+(255215, 0, 6029, 1, 1, 0),
+(255216, 0, 4491, 1, 1, 0),
+(255217, 0, 87, 1, 1, 0),
+(255217, 1, 89, 1, 1, 0),
+(255218, 0, 3614, 1, 1, 0),
+(255219, 0, 3447, 1, 1, 0),
+(255220, 0, 1295, 1, 1, 0),
+(255221, 0, 3331, 1, 1, 0),
+(255467, 0, 262, 1, 1, 0),
+(255468, 0, 221, 1, 1, 0),
+(255469, 0, 251, 1, 1, 0),
+(255470, 0, 252, 1, 1, 0),
+(255471, 0, 257, 1, 1, 0),
+(255472, 0, 1944, 1, 1, 0),
+(255473, 0, 5038, 1, 1, 0);
+
+DELETE FROM `creature_default_trainer` WHERE `CreatureId` = 255216;
+INSERT INTO `creature_default_trainer` (`CreatureId`, `TrainerId`) VALUES
+(255216, 98);
 
 -- Heights are the client SuperTrack points, which stand on the floors of the Lakeshire buildings.
 -- Jasper Gilleon, Corwin Branwick, Damion Tyndall and Cateline stand where the videos show them; their exact spots
 -- are estimated and their heights are client WMO floors (Red Mage Tower ground floor, inn upper floor, chapel).
-DELETE FROM `creature` WHERE `guid` BETWEEN 9950400 AND 9950411;
+-- Guids 9950412-9950430 are the position-unknown Lakeshire NPCs: every spot and facing is estimated, placed by
+-- role and family name next to existing NPCs, at client WMO floor or terrain height.
+DELETE FROM `creature` WHERE `guid` BETWEEN 9950400 AND 9950430;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`,
   `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`,
   `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`,
@@ -92,7 +143,26 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950408, 254969, 0, 0, 0, 1, 1, 0, -9228.15, -3348.43, 102.03, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Servant of Azora (client SuperTrack 8533, Tower of Ilgalar; facing estimated)'),
 (9950409, 254976, 0, 0, 0, 1, 1, 0, -9287.31, -2929.06, 163.85, 1.6, 900, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Sah''kihnu (client SuperTrack 8527, top of Stonewatch Tower; facing and respawn estimated)'),
 (9950410, 255201, 0, 0, 0, 1, 1, 0, -9236.5, -2157.0, 71.21, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Damion Tyndall (Lakeshire inn upper floor; spot and facing estimated)'),
-(9950411, 255213, 0, 0, 0, 1, 1, 0, -9423.7, -2075.6, 68.25, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Cateline (Lakeshire chapel pews; spot and facing estimated)');
+(9950411, 255213, 0, 0, 0, 1, 1, 0, -9423.7, -2075.6, 68.25, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Cateline (Lakeshire chapel pews; spot and facing estimated)'),
+(9950412, 255208, 0, 0, 0, 1, 1, 0, -9431.0, -2086.0, 67.55, 1.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Vernell (chapel pews; spot and facing estimated)'),
+(9950413, 255212, 0, 0, 0, 1, 1, 0, -9425.0, -2086.0, 67.55, 1.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Emelyne (chapel pews; spot and facing estimated)'),
+(9950414, 255214, 0, 0, 0, 1, 1, 0, -9431.0, -2090.0, 67.55, 1.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Marinus (chapel pews; spot and facing estimated)'),
+(9950415, 255467, 0, 0, 0, 1, 1, 0, -9432.5, -2075.5, 68.25, 4.7, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Elmar (chapel altar beside Father Norice; spot and facing estimated)'),
+(9950416, 255468, 0, 0, 0, 1, 1, 0, -9421.0, -2076.5, 68.25, 4.7, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Ivan (chapel altar beside Cateline; spot and facing estimated)'),
+(9950417, 255470, 0, 0, 0, 1, 1, 0, -9221.0, -2216.0, 66.18, 1.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Solaina (town hall near Magistrate Solomon; spot and facing estimated)'),
+(9950418, 255219, 0, 0, 0, 1, 1, 0, -9212.0, -2212.0, 66.18, 3.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (town hall; spot and facing estimated)'),
+(9950419, 255471, 0, 0, 0, 1, 1, 0, -9462.0, -2190.0, 70.21, 2.52, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Adelynn Tyndall (house of Luca Tyndall; spot and facing estimated)'),
+(9950420, 255472, 0, 0, 0, 1, 1, 0, -9458.0, -2186.0, 70.21, 3.08, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Edvard Tyndall (house of Luca Tyndall; spot and facing estimated)'),
+(9950421, 255469, 0, 0, 0, 1, 1, 0, -9266.0, -2203.0, 63.93, 5.92, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Paien (with the Lakeshire children; spot and facing estimated)'),
+(9950422, 255221, 0, 0, 0, 1, 1, 0, -9262.0, -2245.5, 63.93, 0.73, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Reilly Osgood (beside Verner Osgood; spot and facing estimated)'),
+(9950423, 255216, 0, 0, 0, 1, 1, 0, -9311.0, -2150.0, 63.48, 2.4, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Fisherman Audric (fishing dock by Matthew Hooper; spot and facing estimated)'),
+(9950424, 255217, 0, 0, 0, 1, 1, 0, -9283.0, -2275.0, 67.51, 1.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Peasant Worker (bridge works by Foreman Oslow; spot and facing estimated)'),
+(9950425, 255217, 0, 0, 0, 1, 1, 0, -9275.0, -2278.0, 67.63, 2.5, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Peasant Worker (bridge works by Foreman Oslow; spot and facing estimated)'),
+(9950426, 255217, 0, 0, 0, 1, 1, 0, -9287.0, -2284.0, 67.54, 0.4, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Peasant Worker (bridge works by Foreman Oslow; spot and facing estimated)'),
+(9950427, 255218, 0, 0, 0, 1, 1, 0, -9252.0, -2048.0, 77.0, 0.41, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Farmhand Sevim (Jainrose farm; spot and facing estimated)'),
+(9950428, 255220, 0, 0, 0, 1, 1, 0, -9661.0, -1954.0, 65.01, 3.94, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Sidonia Crastlor (Red Mage Tower ground floor by Meria; spot and facing estimated)'),
+(9950429, 255215, 0, 0, 0, 1, 1, 0, -9286.0, -2294.0, 67.52, 5.16, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Captured Blackrock Sentry (by Marshal Marris; spot and facing estimated)'),
+(9950430, 255473, 0, 0, 0, 1, 1, 0, -9245.0, -2165.0, 63.93, 0.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Addison Rutherford (Lakeshire square by the inn; spot and facing estimated)');
 
 -- Gnoll Food Barrel, Chalice of Tyrenel, Alther's Mill Plank, Codex of Secrets and Pristine Black Dragon Egg:
 -- WDB gameobject cache 2026-09-04..08.
