@@ -9,8 +9,11 @@
 -- 255080 ender is Raj'iri: its "Taz'iri" turn-in point 21368 lies 0.1 yd from Raj'iri's point 21366. Raj'iri, Martin
 -- and Brumbof take Rhuna's and Voltzix's Orgrimmar faction (inferred). Quest item drops use the 80% chance of the
 -- Barrens quest drops from the mobs the quest texts name, and Brumbof hands out the drumstick through a gossip option
--- (both inferred, no capture). Draft: Naj'iri's spawn, the other NPCs' levels and displays the client lacks are not
--- restored yet.
+-- (both inferred, no capture). Naj'iri takes her sister's faction. The client has none of the captured displays except
+-- Brumbof's 2129, so the others use stand-ins from the client (captured display in brackets): Raj'iri 4087 (112912) and
+-- Naj'iri 4089 (112911), troll women; Rhuna 2127 (256406), Una's tauren leatherworker; Martin Lesterfield 1574
+-- (112978), a Forsaken merchant; Voltzix Sprocketpop 10472 (919573), Roxxik's goblin engineer. Draft: Naj'iri's spawn
+-- and the other NPCs' levels are not restored yet.
 
 INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `RewardNextQuest`,
   `RewardXPDifficulty`, `RewardMoney`, `RewardMoneyDifficulty`, `Flags`, `RewardItem1`, `RewardAmount1`, `RewardItem2`,
@@ -68,17 +71,18 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), 
 
 UPDATE `creature_template` SET `minlevel` = 35, `maxlevel` = 35, `faction` = 29 WHERE `entry` = 41739;
 UPDATE `creature_template` SET `minlevel` = 21, `maxlevel` = 21, `faction` = 29 WHERE `entry` = 753524;
-UPDATE `creature_template` SET `faction` = 29 WHERE `entry` IN (41719,741722,753513);
+UPDATE `creature_template` SET `faction` = 29 WHERE `entry` IN (41719,741719,741722,753513);
+UPDATE `creature_template` SET `unit_class` = 1 WHERE `entry` IN (41719,741719,41739,741722,753513,753524);
 UPDATE `creature_template` SET `npcflag` = 1, `gossip_menu_id` = 9010700, `AIName` = 'SmartAI' WHERE `entry` = 753513;
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (41719,741719,41739,741722,753513,753524);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`) VALUES
-(41719, 0, 112912, 1, 1),
-(741719, 0, 112911, 1, 1),
-(41739, 0, 256406, 1, 1),
-(741722, 0, 112978, 1, 1),
+(41719, 0, 4087, 1, 1),
+(741719, 0, 4089, 1, 1),
+(41739, 0, 2127, 1, 1),
+(741722, 0, 1574, 1, 1),
 (753513, 0, 2129, 1, 1),
-(753524, 0, 919573, 1, 1);
+(753524, 0, 10472, 1, 1);
 
 DELETE FROM `creature_queststarter` WHERE `quest` IN (255078,255079,255080,255081,255082,255083);
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
