@@ -129,6 +129,9 @@ INSERT INTO `creature_default_trainer` (`CreatureId`, `TrainerId`) VALUES
 -- Heights are the client SuperTrack points, which stand on the floors of the Lakeshire buildings.
 -- Jasper Gilleon, Corwin Branwick, Damion Tyndall and Cateline stand where the videos show them; their exact spots
 -- are estimated and their heights are client WMO floors (Red Mage Tower ground floor, inn upper floor, chapel).
+-- In the videos Jasper works at the ground-floor desk behind the rune circle, so he sits on its chair (stand state 5,
+-- estimated), and Corwin stands on the top floor by the mage dummies. Every facing in the tower follows what the
+-- videos show: Meria toward Jasper, Hestlor toward the Uldum portal, Alexandria toward the stairwell (estimated).
 -- Guids 9950412-9950430 are the position-unknown Lakeshire NPCs: every spot and facing is estimated, placed by
 -- role and family name next to existing NPCs, at client WMO floor or terrain height.
 -- The chapel has no pews: its congregation stands in two rows on each side of the nave, facing the altar.
@@ -139,13 +142,13 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
   `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`,
   `CreateObject`, `Comment`) VALUES
 (9950400, 255206, 0, 0, 0, 1, 1, 0, -9453.16, -2314.81, 83.44, 1.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lady Idelia Solomon (client SuperTrack 21385/21397; facing estimated)'),
-(9950401, 991477, 0, 0, 0, 1, 1, 0, -9656.0, -1970.4, 99.49, 5.5, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Ley-Tracker Hestlor (client SuperTrack 21386, Red Mage Tower; facing estimated)'),
+(9950401, 991477, 0, 0, 0, 1, 1, 0, -9656.0, -1970.4, 99.49, 4.89, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Ley-Tracker Hestlor (client SuperTrack 21386, Red Mage Tower; facing the Uldum portal estimated)'),
 (9950402, 255204, 0, 0, 0, 1, 1, 0, -9466.77, -2186.57, 70.2, 0.3, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Luca Tyndall (client SuperTrack 21392; facing estimated)'),
 (9950403, 255207, 0, 0, 0, 1, 1, 0, -9428.72, -2075.62, 68.25, 4.7, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Father Norice (client SuperTrack 21396, chapel; facing estimated)'),
-(9950404, 991474, 0, 0, 0, 1, 1, 0, -9664.04, -1957.14, 65.01, 4.7, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Meria Crastlor (client SuperTrack 8504, Red Mage Tower; facing estimated)'),
-(9950405, 991475, 0, 0, 0, 1, 1, 0, -9660.5, -1960.0, 65.01, 2.4, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Jasper Gilleon (Red Mage Tower ground floor; spot and facing estimated)'),
-(9950406, 991482, 0, 0, 0, 1, 1, 0, -9667.5, -1960.0, 65.01, 0.8, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Corwin Branwick (Red Mage Tower ground floor; spot and facing estimated)'),
-(9950407, 991476, 0, 0, 0, 1, 1, 0, -9678.96, -1948.64, 90.7, 5.5, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Alexandria Rowen (client SuperTrack 8535, Red Mage Tower upstairs; facing estimated)'),
+(9950404, 991474, 0, 0, 0, 1, 1, 0, -9664.04, -1957.14, 65.01, 3.48, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Meria Crastlor (client SuperTrack 8504, Red Mage Tower; facing Jasper estimated)'),
+(9950405, 991475, 0, 0, 0, 1, 1, 0, -9678.01, -1961.99, 65.01, 3.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Jasper Gilleon (Red Mage Tower ground floor, on the desk chair; spot and facing estimated)'),
+(9950406, 991482, 0, 0, 0, 1, 1, 0, -9684.18, -1976.82, 99.49, 0.93, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Corwin Branwick (Red Mage Tower top floor by the mage dummies; spot and facing estimated)'),
+(9950407, 991476, 0, 0, 0, 1, 1, 0, -9678.96, -1948.64, 90.7, 5.29, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Alexandria Rowen (client SuperTrack 8535, Red Mage Tower upstairs; facing the stairwell estimated)'),
 (9950408, 254969, 0, 0, 0, 1, 1, 0, -9228.15, -3348.43, 102.03, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Servant of Azora (client SuperTrack 8533, Tower of Ilgalar; facing estimated)'),
 (9950409, 254976, 0, 0, 0, 1, 1, 0, -9287.31, -2929.06, 163.85, 1.6, 900, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Sah''kihnu (client SuperTrack 8527, top of Stonewatch Tower; facing and respawn estimated)'),
 (9950410, 255201, 0, 0, 0, 1, 1, 0, -9236.5, -2157.0, 71.21, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Damion Tyndall (Lakeshire inn upper floor; spot and facing estimated)'),
@@ -169,6 +172,11 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950428, 255220, 0, 0, 0, 1, 1, 0, -9661.0, -1954.0, 65.01, 3.94, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Sidonia Crastlor (Red Mage Tower ground floor by Meria; spot and facing estimated)'),
 (9950429, 255215, 0, 0, 0, 1, 1, 0, -9286.0, -2294.0, 67.52, 5.16, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Captured Blackrock Sentry (by Marshal Marris; spot and facing estimated)'),
 (9950430, 255473, 0, 0, 0, 1, 1, 0, -9245.0, -2165.0, 63.93, 0.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Addison Rutherford (Lakeshire square by the inn; spot and facing estimated)');
+
+DELETE FROM `creature_addon` WHERE `guid` = 9950405;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`,
+  `visibilityDistanceType`, `auras`) VALUES
+(9950405, 0, 0, 5, 0, 0, 0, '');
 
 -- Gnoll Food Barrel, Chalice of Tyrenel, Alther's Mill Plank, Codex of Secrets, Pristine Black Dragon Egg and the
 -- 254069 Gravestone (quest 254069, gossip 60071), the Eye of Ilgalar (gossip 60064) and the Red Mage Tower props
@@ -269,9 +277,12 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 -- The Gravestone stands at the 254069 objective point (client SuperTrack 8598) on the terrain; its facing is estimated.
 -- Red Mage Tower furnishing, the Portal to Stormwind and the Eye of Ilgalar stand at the positions the same catalogue
 -- observed (GameObjects-Bronzebeard dumps, AscensionDB revision built 2026-09-12). It keeps one sighting per entry and
--- no rotation, so every facing is estimated, and the second Human Enchanting Table under the Codex of Secrets and the
--- Human Enchanting Chest is estimated: both stand at the table-top height of the observed table's items.
-DELETE FROM `gameobject` WHERE `guid` BETWEEN 9001300 AND 9001368;
+-- no rotation, so every facing is estimated: props by the wall turn toward the tower centre, the top-floor table row
+-- and its items face the room, the Worgen rug lies parallel to that row and the Uldum portal opens between its
+-- crystals, as the videos show. Estimated objects: the Human Enchanting Table under the Codex of Secrets and the
+-- Human Enchanting Chest, a third one under the Lectern and Jars 3 (both raised onto it), the second Ley Crystal
+-- flanking the Uldum portal and stone pedestals under Busts 2-4 like the observed one under Bust 1.
+DELETE FROM `gameobject` WHERE `guid` BETWEEN 9001300 AND 9001380;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
@@ -296,54 +307,59 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 (9001318, 518612, 0, 0, 0, 1, 1, -9664.1, -1963.22, 100.817, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Codex of Secrets (observed position, client SuperTrack 8528; facing estimated)'),
 (9001319, 254685, 0, 0, 0, 1, 1, -9714.99, -2897.01, 53.525, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Pristine Black Dragon Egg (observed position, client SuperTrack 8505, the Rookery; facing estimated)'),
 (9001320, 254684, 0, 0, 0, 1, 1, -9105.3, -2412.26, 119.48, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Gravestone (client SuperTrack 8598, the grave of 254069; facing estimated)'),
-(9001321, 97398, 0, 0, 0, 1, 1, -9678.010, -1961.990, 64.917, 3.142, 0, 0, 1.000000, 0.000000, 120, 100, 1, '', 0, 'General Medium Chair (Red Mage Tower; observed position, facing estimated)'),
-(9001322, 97396, 0, 0, 0, 1, 1, -9669.344, -1961.957, 64.958, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Blue Rune Circle Large (Red Mage Tower; observed position, facing estimated)'),
-(9001323, 97430, 0, 0, 0, 1, 1, -9679.440, -1961.710, 64.971, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Human Townhall Commander Desk 2 (Red Mage Tower; observed position, facing estimated)'),
-(9001324, 97427, 0, 0, 0, 1, 1, -9669.521, -1969.705, 64.996, 1.571, 0, 0, 0.707107, 0.707107, 120, 100, 1, '', 0, 'Human Enchanting Jars 1 (Red Mage Tower; observed position, facing estimated)'),
-(9001325, 97418, 0, 0, 0, 1, 1, -9671.200, -1955.790, 65.008, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Inscription Bookstack 3 (Red Mage Tower; observed position, facing estimated)'),
-(9001326, 97379, 0, 0, 0, 1, 1, -9669.162, -1962.127, 65.014, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Floating Books (Red Mage Tower; observed position, facing estimated)'),
-(9001327, 97397, 0, 0, 0, 1, 1, -9667.880, -1954.230, 65.014, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Human Townhall Commander Desk Level 3 (Red Mage Tower; observed position, facing estimated)'),
-(9001328, 97431, 0, 0, 0, 1, 1, -9678.370, -1965.140, 65.014, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Human Townhall Commander Desk 0 (Red Mage Tower; observed position, facing estimated)'),
-(9001329, 97440, 0, 0, 0, 1, 1, -9673.582, -1968.998, 65.017, 1.571, 0, 0, 0.707107, 0.707107, 120, 100, 1, '', 0, 'Human Bookshelf Large 1 (Red Mage Tower; observed position, facing estimated)'),
-(9001330, 97395, 0, 0, 0, 1, 1, -9680.000, -1957.040, 66.348, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Arcane Prison (Red Mage Tower; observed position, facing estimated)'),
-(9001331, 97392, 0, 0, 0, 1, 1, -9667.950, -1968.460, 66.689, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Mage Tower Floating Book (Red Mage Tower; observed position, facing estimated)'),
-(9001332, 97428, 0, 0, 0, 1, 1, -9674.090, -1957.604, 67.649, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Inscription Bookstack 5 (Red Mage Tower; observed position, facing estimated)'),
-(9001333, 97433, 0, 0, 0, 1, 1, -9675.300, -1955.870, 69.677, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Human Enchanting Table Small (Red Mage Tower; observed position, facing estimated)'),
-(9001334, 97432, 0, 0, 0, 1, 1, -9676.250, -1954.950, 69.685, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Human Enchanting Jar 3 (Red Mage Tower; observed position, facing estimated)'),
-(9001335, 97415, 0, 0, 0, 1, 1, -9678.654, -1953.566, 70.928, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Human Enchanting Shelf Floating 2 (Red Mage Tower; observed position, facing estimated)'),
-(9001336, 97399, 0, 0, 0, 1, 1, -9658.170, -1959.460, 75.324, 3.142, 0, 0, 1.000000, 0.000000, 120, 100, 1, '', 0, 'Human Inn Table Small 2 (Red Mage Tower; observed position, facing estimated)'),
-(9001337, 97401, 0, 0, 0, 1, 1, -9658.300, -1959.600, 75.331, 3.142, 0, 0, 1.000000, 0.000000, 120, 100, 1, '', 0, 'Kultiras Long Rug (Red Mage Tower; observed position, facing estimated)'),
-(9001338, 97403, 0, 0, 0, 1, 1, -9658.330, -1959.574, 76.153, 3.142, 0, 0, 1.000000, 0.000000, 120, 100, 1, '', 0, 'Human Inn Food Plate 4 (Red Mage Tower; observed position, facing estimated)'),
-(9001339, 97426, 0, 0, 0, 1, 1, -9681.280, -1947.910, 90.688, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Stormwind Grave 12 (Red Mage Tower; observed position, facing estimated)'),
-(9001340, 97445, 0, 0, 0, 1, 1, -9687.660, -1955.700, 90.701, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Human Bookshelf Large 2 (Red Mage Tower; observed position, facing estimated)'),
-(9001341, 97448, 0, 0, 0, 1, 1, -9657.570, -1951.920, 92.184, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Mage Bust 2 (Red Mage Tower; observed position, facing estimated)'),
-(9001342, 97446, 0, 0, 0, 1, 1, -9684.834, -1971.438, 92.185, 0.785, 0, 0, 0.382683, 0.923880, 120, 100, 1, '', 0, 'Mage Bust 4 (Red Mage Tower; observed position, facing estimated)'),
-(9001343, 97449, 0, 0, 0, 1, 1, -9660.883, -1974.828, 92.188, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Mage Bust 3 (Red Mage Tower; observed position, facing estimated)'),
-(9001344, 97447, 0, 0, 0, 1, 1, -9681.291, -1947.920, 92.191, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Mage Bust 1 (Red Mage Tower; observed position, facing estimated)'),
-(9001345, 97394, 0, 0, 0, 1, 1, -9681.620, -1947.340, 92.240, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Magic Banner (Red Mage Tower; observed position, facing estimated)'),
-(9001346, 97443, 0, 0, 0, 1, 1, -9670.162, -1968.709, 99.203, 1.571, 0, 0, 0.707107, 0.707107, 120, 100, 1, '', 0, 'Worgen Rug 2 (Red Mage Tower; observed position, facing estimated)'),
-(9001347, 97420, 0, 0, 0, 1, 1, -9677.860, -1970.640, 99.295, 0.785, 0, 0, 0.382683, 0.923880, 120, 100, 1, '', 0, 'Floating Candles (Red Mage Tower; observed position, facing estimated)'),
-(9001348, 97413, 0, 0, 0, 1, 1, -9678.980, -1964.870, 99.366, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Table (Red Mage Tower; observed position, facing estimated)'),
-(9001349, 97417, 0, 0, 0, 1, 1, -9668.090, -1963.770, 99.388, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Jar 8 (Red Mage Tower; observed position, facing estimated)'),
-(9001350, 97407, 0, 0, 0, 1, 1, -9661.040, -1942.540, 99.438, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Glowing Blue Rune (Red Mage Tower; observed position, facing estimated)'),
-(9001351, 97406, 0, 0, 0, 1, 1, -9654.805, -1947.449, 99.476, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Human Inscription Desk (Red Mage Tower; observed position, facing estimated)'),
-(9001352, 97404, 0, 0, 0, 1, 1, -9658.020, -1942.824, 99.479, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Human Townhall Commander Shelf 3 (Red Mage Tower; observed position, facing estimated)'),
-(9001353, 97444, 0, 0, 0, 1, 1, -9686.100, -1976.740, 99.485, 0.785, 0, 0, 0.382683, 0.923880, 120, 100, 1, '', 0, 'Human Mage Dummy (Red Mage Tower; observed position, facing estimated)'),
-(9001354, 97439, 0, 0, 0, 1, 1, -9655.781, -1944.297, 99.487, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Human Bookshelf 6 (Red Mage Tower; observed position, facing estimated)'),
-(9001355, 97435, 0, 0, 0, 1, 1, -9674.000, -1942.350, 99.488, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Bookshelf Large 3 (Red Mage Tower; observed position, facing estimated)'),
-(9001356, 97421, 0, 0, 0, 1, 1, -9675.870, -1964.700, 100.553, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Dwarf Book Open Lecturn (Red Mage Tower; observed position, facing estimated)'),
-(9001357, 97405, 0, 0, 0, 1, 1, -9656.550, -1949.330, 100.711, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Vampire Magic Quill Floating (Red Mage Tower; observed position, facing estimated)'),
-(9001358, 97425, 0, 0, 0, 1, 1, -9674.700, -1963.260, 100.760, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Jars 3 (Red Mage Tower; observed position, facing estimated)'),
-(9001359, 97416, 0, 0, 0, 1, 1, -9661.520, -1962.230, 100.824, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Chest (Red Mage Tower; observed position, facing estimated)'),
-(9001360, 97423, 0, 0, 0, 1, 1, -9679.190, -1964.440, 100.842, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Inscription Bookstack 2 (Red Mage Tower; observed position, facing estimated)'),
-(9001361, 97422, 0, 0, 0, 1, 1, -9678.120, -1965.200, 100.933, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Scattered Papers (Red Mage Tower; observed position, facing estimated)'),
-(9001362, 97424, 0, 0, 0, 1, 1, -9680.271, -1964.902, 101.163, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Box (Red Mage Tower; observed position, facing estimated)'),
-(9001363, 97411, 0, 0, 0, 1, 1, -9655.460, -1973.350, 101.641, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Uldum Star Portal (Red Mage Tower; observed position, facing estimated)'),
-(9001364, 97438, 0, 0, 0, 1, 1, -9664.141, -1961.158, 101.763, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Shelf Floating 1 (Red Mage Tower; observed position, facing estimated)'),
-(9001365, 97437, 0, 0, 0, 1, 1, -9657.850, -1976.250, 102.106, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Ley Crystal (Red Mage Tower; observed position, facing estimated)'),
+(9001321, 97398, 0, 0, 0, 1, 1, -9678.010, -1961.990, 64.917, 3.142, 0, 0, 1.000000, 0.000000, 120, 100, 1, '', 0, 'General Medium Chair (Red Mage Tower; observed position; facing estimated)'),
+(9001322, 97396, 0, 0, 0, 1, 1, -9669.344, -1961.957, 64.958, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Blue Rune Circle Large (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001323, 97430, 0, 0, 0, 1, 1, -9679.440, -1961.710, 64.971, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Human Townhall Commander Desk 2 (Red Mage Tower; observed position; facing estimated)'),
+(9001324, 97427, 0, 0, 0, 1, 1, -9669.521, -1969.705, 64.996, 1.772, 0, 0, 0.774533, 0.632533, 120, 100, 1, '', 0, 'Human Enchanting Jars 1 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001325, 97418, 0, 0, 0, 1, 1, -9671.200, -1955.790, 65.008, 4.641, 0, 0, 0.731806, -0.681514, 120, 100, 1, '', 0, 'Inscription Bookstack 3 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001326, 97379, 0, 0, 0, 1, 1, -9669.162, -1962.127, 65.014, 2.403, 0, 0, 0.932657, 0.360765, 120, 100, 1, '', 0, 'Floating Books (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001327, 97397, 0, 0, 0, 1, 1, -9667.880, -1954.230, 65.014, 4.152, 0, 0, 0.875057, -0.484020, 120, 100, 1, '', 0, 'Human Townhall Commander Desk Level 3 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001328, 97431, 0, 0, 0, 1, 1, -9678.370, -1965.140, 65.014, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Human Townhall Commander Desk 0 (Red Mage Tower; observed position; facing estimated)'),
+(9001329, 97440, 0, 0, 0, 1, 1, -9673.582, -1968.998, 65.017, 1.343, 0, 0, 0.622323, 0.782761, 120, 100, 1, '', 0, 'Human Bookshelf Large 1 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001330, 97395, 0, 0, 0, 1, 1, -9680.000, -1957.040, 66.348, 5.948, 0, 0, 0.166768, -0.985996, 120, 100, 1, '', 0, 'Arcane Prison (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001331, 97392, 0, 0, 0, 1, 1, -9667.950, -1968.460, 66.689, 1.968, 0, 0, 0.832747, 0.553653, 120, 100, 1, '', 0, 'Mage Tower Floating Book (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001332, 97428, 0, 0, 0, 1, 1, -9674.090, -1957.604, 67.649, 5.537, 0, 0, 0.364648, -0.931146, 120, 100, 1, '', 0, 'Inscription Bookstack 5 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001333, 97433, 0, 0, 0, 1, 1, -9675.300, -1955.870, 69.677, 5.456, 0, 0, 0.401811, -0.915722, 120, 100, 1, '', 0, 'Human Enchanting Table Small (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001334, 97432, 0, 0, 0, 1, 1, -9676.250, -1954.950, 69.685, 5.467, 0, 0, 0.396775, -0.917916, 120, 100, 1, '', 0, 'Human Enchanting Jar 3 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001335, 97415, 0, 0, 0, 1, 1, -9678.654, -1953.566, 70.928, 5.551, 0, 0, 0.358098, -0.933684, 120, 100, 1, '', 0, 'Human Enchanting Shelf Floating 2 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001336, 97399, 0, 0, 0, 1, 1, -9658.170, -1959.460, 75.324, 3.182, 0, 0, 0.999795, -0.020243, 120, 100, 1, '', 0, 'Human Inn Table Small 2 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001337, 97401, 0, 0, 0, 1, 1, -9658.300, -1959.600, 75.331, 3.172, 0, 0, 0.999885, -0.015146, 120, 100, 1, '', 0, 'Kultiras Long Rug (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001338, 97403, 0, 0, 0, 1, 1, -9658.330, -1959.574, 76.153, 3.174, 0, 0, 0.999869, -0.016167, 120, 100, 1, '', 0, 'Human Inn Food Plate 4 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001339, 97426, 0, 0, 0, 1, 1, -9681.280, -1947.910, 90.688, 5.393, 0, 0, 0.430743, -0.902475, 120, 100, 1, '', 0, 'Stormwind Grave 12 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001340, 97445, 0, 0, 0, 1, 1, -9687.660, -1955.700, 90.701, 6.023, 0, 0, 0.129665, -0.991558, 120, 100, 1, '', 0, 'Human Bookshelf Large 2 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001341, 97448, 0, 0, 0, 1, 1, -9657.570, -1951.920, 92.184, 3.667, 0, 0, 0.965664, -0.259793, 120, 100, 1, '', 0, 'Mage Bust 2 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001342, 97446, 0, 0, 0, 1, 1, -9684.834, -1971.438, 92.185, 0.709, 0, 0, 0.347126, 0.937819, 120, 100, 1, '', 0, 'Mage Bust 4 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001343, 97449, 0, 0, 0, 1, 1, -9660.883, -1974.828, 92.188, 2.192, 0, 0, 0.889429, 0.457074, 120, 100, 1, '', 0, 'Mage Bust 3 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001344, 97447, 0, 0, 0, 1, 1, -9681.291, -1947.920, 92.191, 5.394, 0, 0, 0.430312, -0.902680, 120, 100, 1, '', 0, 'Mage Bust 1 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001345, 97394, 0, 0, 0, 1, 1, -9681.620, -1947.340, 92.240, 5.387, 0, 0, 0.433362, -0.901220, 120, 100, 1, '', 0, 'Magic Banner (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001346, 97443, 0, 0, 0, 1, 1, -9670.162, -1968.709, 99.203, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Worgen Rug 2 (Red Mage Tower; observed position; facing estimated: long side parallel to the table row as in the video)'),
+(9001347, 97420, 0, 0, 0, 1, 1, -9677.860, -1970.640, 99.295, 1.032, 0, 0, 0.493421, 0.869791, 120, 100, 1, '', 0, 'Floating Candles (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001348, 97413, 0, 0, 0, 1, 1, -9678.980, -1964.870, 99.366, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Table (Red Mage Tower; observed position; facing estimated: turned to the room like the rest of the video''s table row)'),
+(9001349, 97417, 0, 0, 0, 1, 1, -9668.090, -1963.770, 99.388, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Jar 8 (Red Mage Tower; observed position; facing estimated: turned to the room like the rest of the video''s table row)'),
+(9001350, 97407, 0, 0, 0, 1, 1, -9661.040, -1942.540, 99.438, 4.173, 0, 0, 0.870034, -0.492992, 120, 100, 1, '', 0, 'Glowing Blue Rune (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001351, 97406, 0, 0, 0, 1, 1, -9654.805, -1947.449, 99.476, 3.786, 0, 0, 0.948503, -0.316768, 120, 100, 1, '', 0, 'Human Inscription Desk (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001352, 97404, 0, 0, 0, 1, 1, -9658.020, -1942.824, 99.479, 4.047, 0, 0, 0.899273, -0.437387, 120, 100, 1, '', 0, 'Human Townhall Commander Shelf 3 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001353, 97444, 0, 0, 0, 1, 1, -9686.100, -1976.740, 99.485, 0.854, 0, 0, 0.413949, 0.910300, 120, 100, 1, '', 0, 'Human Mage Dummy (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001354, 97439, 0, 0, 0, 1, 1, -9655.781, -1944.297, 99.487, 3.926, 0, 0, 0.923977, -0.382448, 120, 100, 1, '', 0, 'Human Bookshelf 6 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001355, 97435, 0, 0, 0, 1, 1, -9674.000, -1942.350, 99.488, 4.853, 0, 0, 0.655651, -0.755064, 120, 100, 1, '', 0, 'Human Bookshelf Large 3 (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001356, 97421, 0, 0, 0, 1, 1, -9675.870, -1964.700, 100.88, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Dwarf Book Open Lecturn (Red Mage Tower; observed x/y, z raised from 100.553 onto the estimated second table; facing estimated: turned to the room like the rest of the video''s table row)'),
+(9001357, 97405, 0, 0, 0, 1, 1, -9656.550, -1949.330, 100.711, 3.761, 0, 0, 0.952353, -0.304997, 120, 100, 1, '', 0, 'Vampire Magic Quill Floating (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
+(9001358, 97425, 0, 0, 0, 1, 1, -9674.700, -1963.260, 100.88, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Jars 3 (Red Mage Tower; observed x/y, z raised from 100.760 onto the estimated second table; facing estimated: turned to the room like the rest of the video''s table row)'),
+(9001359, 97416, 0, 0, 0, 1, 1, -9661.520, -1962.230, 100.824, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Chest (Red Mage Tower; observed position; facing estimated: turned to the room like the rest of the video''s table row)'),
+(9001360, 97423, 0, 0, 0, 1, 1, -9679.190, -1964.440, 100.842, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Inscription Bookstack 2 (Red Mage Tower; observed position; facing estimated: turned to the room like the rest of the video''s table row)'),
+(9001361, 97422, 0, 0, 0, 1, 1, -9678.120, -1965.200, 100.933, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Scattered Papers (Red Mage Tower; observed position; facing estimated: turned to the room like the rest of the video''s table row)'),
+(9001362, 97424, 0, 0, 0, 1, 1, -9680.271, -1964.902, 101.163, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Box (Red Mage Tower; observed position; facing estimated: turned to the room like the rest of the video''s table row)'),
+(9001363, 97411, 0, 0, 0, 1, 1, -9655.460, -1973.350, 101.641, 0.876, 0, 0, 0.424129, 0.905602, 120, 100, 1, '', 0, 'Uldum Star Portal (Red Mage Tower; observed position; facing estimated: opening toward the room between its crystals as in the video)'),
+(9001364, 97438, 0, 0, 0, 1, 1, -9664.141, -1961.158, 101.763, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Shelf Floating 1 (Red Mage Tower; observed position; facing estimated: turned to the room like the rest of the video''s table row)'),
+(9001365, 97437, 0, 0, 0, 1, 1, -9657.850, -1976.250, 102.106, 2.269, 0, 0, 0.906419, 0.422379, 120, 100, 1, '', 0, 'Ley Crystal (Red Mage Tower; observed position; facing estimated: turned toward the tower centre)'),
 (9001366, 97413, 0, 0, 0, 1, 1, -9662.8, -1962.7, 99.39, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Table (Red Mage Tower, under the Codex of Secrets; spot and facing estimated)'),
-(9001367, 195139, 0, 0, 0, 1, 1, -9688.553, -1948.303, 99.486, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Portal to Stormwind (Red Mage Tower top floor; observed position, facing estimated)'),
-(9001368, 254683, 0, 0, 0, 1, 1, -9270.980, -3310.740, 150.929, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Eye of Ilgalar (observed position, client SuperTrack 8532, Tower of Ilgalar; facing estimated)');
+(9001367, 195139, 0, 0, 0, 1, 1, -9688.553, -1948.303, 99.486, 5.682, 0, 0, 0.296100, -0.955157, 120, 100, 1, '', 0, 'Portal to Stormwind (Red Mage Tower top floor; observed position; facing estimated: toward the tower centre)'),
+(9001368, 254683, 0, 0, 0, 1, 1, -9270.980, -3310.740, 150.929, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Eye of Ilgalar (observed position, client SuperTrack 8532, Tower of Ilgalar; facing estimated)'),
+(9001369, 97413, 0, 0, 0, 1, 1, -9674.85, -1964.2, 99.37, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Table (Red Mage Tower, under the Lectern and Jars 3 whose observed z float above the floor; spot and facing estimated from the video''s table row)'),
+(9001370, 97437, 0, 0, 0, 1, 1, -9653.07, -1970.45, 102.106, 2.626, 0, 0, 0.966927, 0.255055, 120, 100, 1, '', 0, 'Ley Crystal (Red Mage Tower; second crystal of the pair flanking the Uldum portal in the video; spot mirrored from the observed crystal, estimated)'),
+(9001371, 97426, 0, 0, 0, 1, 1, -9657.57, -1951.92, 90.69, 3.667, 0, 0, 0.965664, -0.259793, 120, 100, 1, '', 0, 'Stone pedestal under Bust 2 (Red Mage Tower; like the observed pedestal under Bust 1; spot and facing estimated)'),
+(9001372, 97426, 0, 0, 0, 1, 1, -9684.834, -1971.438, 90.69, 0.709, 0, 0, 0.347126, 0.937819, 120, 100, 1, '', 0, 'Stone pedestal under Bust 4 (Red Mage Tower; like the observed pedestal under Bust 1; spot and facing estimated)'),
+(9001373, 97426, 0, 0, 0, 1, 1, -9660.883, -1974.828, 90.69, 2.192, 0, 0, 0.889429, 0.457074, 120, 100, 1, '', 0, 'Stone pedestal under Bust 3 (Red Mage Tower; like the observed pedestal under Bust 1; spot and facing estimated)');
 
 -- 'Pefectly Good Planks' keeps the title as captured.
 INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `QuestInfoID`,
