@@ -19,7 +19,7 @@ VALUES
 (255204, 0, 0, 0, 0, 0, 'Luca Tyndall', NULL, NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (255206, 0, 0, 0, 0, 0, 'Lady Idelia Solomon', NULL, NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (255207, 0, 0, 0, 0, 0, 'Father Norice', NULL, NULL, 0, 35, 35, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(991477, 0, 0, 0, 0, 0, 'Ley-Tracker Hestlor', 'Master Mage', NULL, 0, 30, 30, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(991477, 0, 0, 0, 0, 0, 'Ley-Tracker Hestlor', 'Master Mage', NULL, 0, 30, 30, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991474, 0, 0, 0, 0, 0, 'Meria Crastlor', 'Mage Adept', NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991475, 0, 0, 0, 0, 0, 'Jasper Gilleon', 'Novice Mage', NULL, 0, 15, 15, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991476, 0, 0, 0, 0, 0, 'Alexandria Rowen', 'Novice Mage', NULL, 0, 15, 15, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
@@ -44,7 +44,8 @@ VALUES
 (255470, 0, 0, 0, 0, 0, 'Solaina', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.28576, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (255471, 0, 0, 0, 0, 0, 'Adelynn Tyndall', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.28576, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (255472, 0, 0, 0, 0, 0, 'Edvard Tyndall', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(255473, 0, 0, 0, 0, 0, 'Addison Rutherford', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0)
+(255473, 0, 0, 0, 0, 0, 'Addison Rutherford', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(254971, 0, 0, 0, 0, 0, 'Archmage Minervia', NULL, NULL, 0, 25, 25, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0)
 ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
   `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`),
   `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `name` = VALUES(`name`),
@@ -82,9 +83,11 @@ ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
 -- Levels, factions and flags are estimated: adults follow Cateline, children Jamin (5608), the guard Guard Pearce
 -- (935, same HealthModifier) and the sentry Blackrock Sentry (4065, same rank, HealthModifier and display), made
 -- friendly because it is captured. Fisherman Audric teaches what Matthew Hooper (1680) teaches.
+-- Archmage Minervia (254971) wears the stand-in 1495 for her Ascension display 254971; her level, faction and flags
+-- are estimated.
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (255204,255206,255207,991477,991474,991475,991476,991482,
   254969,254976,255201,255213,255208,255212,255214,255215,255216,255217,255218,255219,255220,255221,255467,255468,
-  255469,255470,255471,255472,255473);
+  255469,255470,255471,255472,255473,254971);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
 (255204, 0, 1541, 1, 1, 0),
@@ -116,7 +119,8 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 (255470, 0, 252, 1, 1, 0),
 (255471, 0, 257, 1, 1, 0),
 (255472, 0, 1944, 1, 1, 0),
-(255473, 0, 5038, 1, 1, 0);
+(255473, 0, 5038, 1, 1, 0),
+(254971, 0, 1495, 1, 1, 0);
 
 DELETE FROM `creature_default_trainer` WHERE `CreatureId` = 255216;
 INSERT INTO `creature_default_trainer` (`CreatureId`, `TrainerId`) VALUES
@@ -127,7 +131,9 @@ INSERT INTO `creature_default_trainer` (`CreatureId`, `TrainerId`) VALUES
 -- are estimated and their heights are client WMO floors (Red Mage Tower ground floor, inn upper floor, chapel).
 -- Guids 9950412-9950430 are the position-unknown Lakeshire NPCs: every spot and facing is estimated, placed by
 -- role and family name next to existing NPCs, at client WMO floor or terrain height.
-DELETE FROM `creature` WHERE `guid` BETWEEN 9950400 AND 9950430;
+-- Guid 9950431 is a trigger bunny at the Tower of Ilgalar search point of 254068 (client SuperTrack 8532, height on
+-- the top WMO floor).
+DELETE FROM `creature` WHERE `guid` BETWEEN 9950400 AND 9950431;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`,
   `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`,
   `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`,
@@ -162,10 +168,11 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950427, 255218, 0, 0, 0, 1, 1, 0, -9252.0, -2048.0, 77.0, 0.41, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Farmhand Sevim (Jainrose farm; spot and facing estimated)'),
 (9950428, 255220, 0, 0, 0, 1, 1, 0, -9661.0, -1954.0, 65.01, 3.94, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Sidonia Crastlor (Red Mage Tower ground floor by Meria; spot and facing estimated)'),
 (9950429, 255215, 0, 0, 0, 1, 1, 0, -9286.0, -2294.0, 67.52, 5.16, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Captured Blackrock Sentry (by Marshal Marris; spot and facing estimated)'),
-(9950430, 255473, 0, 0, 0, 1, 1, 0, -9245.0, -2165.0, 63.93, 0.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Addison Rutherford (Lakeshire square by the inn; spot and facing estimated)');
+(9950430, 255473, 0, 0, 0, 1, 1, 0, -9245.0, -2165.0, 63.93, 0.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Addison Rutherford (Lakeshire square by the inn; spot and facing estimated)'),
+(9950431, 23837, 0, 0, 0, 1, 1, 0, -9270.88, -3310.78, 150.09, 0.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'ELM General Purpose Bunny (Tower of Ilgalar search point for 254068, client SuperTrack 8532)');
 
--- Gnoll Food Barrel, Chalice of Tyrenel, Alther's Mill Plank, Codex of Secrets and Pristine Black Dragon Egg:
--- WDB gameobject cache 2026-09-04..08.
+-- Gnoll Food Barrel, Chalice of Tyrenel, Alther's Mill Plank, Codex of Secrets, Pristine Black Dragon Egg and the
+-- 254069 Gravestone (quest 254069, gossip 60071): WDB gameobject cache 2026-09-04..08.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`,
   `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`,
@@ -175,7 +182,8 @@ VALUES
 (255063, 3, 185436, 'Chalice of Tyrenel', '', 'Collecting', '', 1, 43, 255063, 0, 1, 0, 0, 0, 0, 255114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
 (255064, 3, 4651, 'Alther''s Mill Plank', '', 'Collecting', '', 0.3, 43, 255064, 0, 1, 0, 0, 0, 0, 255117, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
 (518612, 2, 6619, 'Codex of Secrets', '', '', '', 1, 0, 93, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
-(254685, 3, 980926, 'Pristine Black Dragon Egg', '', 'Looting', '', 1.5, 43, 254685, 0, 0, 0, 0, 0, 0, 254071, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0)
+(254685, 3, 980926, 'Pristine Black Dragon Egg', '', 'Looting', '', 1.5, 43, 254685, 0, 0, 0, 0, 0, 0, 254071, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(254684, 10, 1010093, 'Gravestone', '', '', '', 1, 0, 254069, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60071, 0, 0, 0, 0, 'SmartGameObjectAI', '', 0)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`),
   `size` = VALUES(`size`), `Data0` = VALUES(`Data0`), `Data1` = VALUES(`Data1`), `Data2` = VALUES(`Data2`),
@@ -212,7 +220,8 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 
 -- Object spawns at the quests' client SuperTrack objective points; the Codex of Secrets and the egg stand where an
 -- addon observed them on Bronzebeard (AscensionDB gameobjects catalogue). Respawn times are estimated.
-DELETE FROM `gameobject` WHERE `guid` BETWEEN 9001300 AND 9001319;
+-- The Gravestone stands at the 254069 objective point (client SuperTrack 8598) on the terrain; its facing is estimated.
+DELETE FROM `gameobject` WHERE `guid` BETWEEN 9001300 AND 9001320;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
@@ -235,7 +244,8 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 (9001316, 255064, 0, 0, 0, 1, 1, -9220.62, -2702.3, 88.8, 4.4, 0, 0, 0.808496, -0.588501, 120, 100, 1, '', 0, 'Alther''s Mill Plank (client SuperTrack 21393, Alther''s Mill; spread and facings estimated)'),
 (9001317, 255064, 0, 0, 0, 1, 1, -9228.62, -2693.3, 88.8, 0.9, 0, 0, 0.434966, 0.900447, 120, 100, 1, '', 0, 'Alther''s Mill Plank (client SuperTrack 21393, Alther''s Mill; spread and facings estimated)'),
 (9001318, 518612, 0, 0, 0, 1, 1, -9664.1, -1963.22, 100.817, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Codex of Secrets (observed position, client SuperTrack 8528; facing estimated)'),
-(9001319, 254685, 0, 0, 0, 1, 1, -9714.99, -2897.01, 53.525, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Pristine Black Dragon Egg (observed position, client SuperTrack 8505, the Rookery; facing estimated)');
+(9001319, 254685, 0, 0, 0, 1, 1, -9714.99, -2897.01, 53.525, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Pristine Black Dragon Egg (observed position, client SuperTrack 8505, the Rookery; facing estimated)'),
+(9001320, 254684, 0, 0, 0, 1, 1, -9105.3, -2412.26, 119.48, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Gravestone (client SuperTrack 8598, the grave of 254069; facing estimated)');
 
 -- 'Pefectly Good Planks' keeps the title as captured.
 INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `QuestInfoID`,
@@ -345,8 +355,8 @@ INSERT INTO `quest_template_addon` (`ID`, `MaxLevel`, `AllowableClasses`, `Sourc
 (255116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (255117, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
--- 254067-254069 need scripted credit (asking Hestlor and Solomon, the Tower of Ilgalar search, Minervia and her
--- staff) that no capture describes, so they get their enders but no starter yet.
+-- Starters of 254067-254069 are estimated from the speaker of each captured Details text: Alexandria Rowen,
+-- Barkeep Daniels and the Servant of Azora.
 DELETE FROM `creature_queststarter` WHERE `quest` IN (254067,254068,254069,254070,254071,255111,255112,255113,255114,255116,255117);
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (255206, 255111),
@@ -355,7 +365,10 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (255207, 255114),
 (255206, 255116),
 (341, 255117),
-(991474, 254071);
+(991474, 254071),
+(991476, 254067),
+(346, 254068),
+(254969, 254069);
 
 DELETE FROM `creature_questender` WHERE `quest` IN (254067,254068,254069,254070,254071,255111,255112,255113,255114,255116,255117);
 INSERT INTO `creature_questender` (`id`, `quest`) VALUES
@@ -377,6 +390,46 @@ INSERT INTO `gameobject_queststarter` (`id`, `quest`) VALUES
 DELETE FROM `gameobject_questender` WHERE `quest` = 254070;
 INSERT INTO `gameobject_questender` (`id`, `quest`) VALUES
 (518612, 254070);
+
+-- Minervia chain credits. No capture describes the live scripts, so every trigger below is estimated; the credit
+-- entries, items and points are the captured ones.
+-- 254067: talking to Ley-Tracker Hestlor and Magistrate Solomon while on the quest credits them.
+-- 254068: reaching the Tower of Ilgalar search point (client SuperTrack 8532) credits the Servant of Azora.
+-- 254069: the Gravestone's gossip 60071 credits Archmage Minervia, gives her staff and shows her for one minute.
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 344 AND `AIName` = '';
+DELETE FROM `smart_scripts` WHERE (`entryorguid` IN (991477,344) AND `source_type` = 0)
+  OR (`entryorguid` = -9950431 AND `source_type` = 0) OR (`entryorguid` = 254684 AND `source_type` = 1);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`,
+  `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`,
+  `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`,
+  `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`,
+  `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(991477, 0, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 991477, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Ley-Tracker Hestlor - On Gossip Hello - Quest Credit ''Minervia''s Legacy'''),
+(344, 0, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 344, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Magistrate Solomon - On Gossip Hello - Quest Credit ''Minervia''s Legacy'''),
+(-9950431, 0, 0, 0, 10, 0, 100, 0, 1, 15, 1000, 1000, 1, 0, 33, 254969, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'ELM General Purpose Bunny - Within 15 Range Out of Combat LoS - Quest Credit ''Minervia''s Past'''),
+(254684, 1, 0, 1, 62, 0, 100, 0, 60071, 0, 0, 0, 0, 0, 33, 254971, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravestone - On Gossip Option 0 Selected - Quest Credit ''Minervia''s Fate'''),
+(254684, 1, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 56, 354659, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravestone - On Link - Add Item ''Archmage Minervia''s Staff'''),
+(254684, 1, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 12, 254971, 3, 60000, 0, 0, 0, 8, 0, 0, 0, 0, -9103.0, -2410.0, 120.21, 3.9, 'Gravestone - On Link - Summon Creature ''Archmage Minervia'''),
+(254684, 1, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravestone - On Link - Close Gossip');
+
+-- The option text is estimated from the captured objective 'Investigate the grave at Lakeshire.'
+DELETE FROM `gossip_menu_option` WHERE `MenuID` = 60071;
+INSERT INTO `gossip_menu_option` (`MenuID`, `OptionID`, `OptionIcon`, `OptionText`, `OptionBroadcastTextID`,
+  `OptionType`, `OptionNpcFlag`, `ActionMenuID`, `ActionPoiID`, `BoxCoded`, `BoxMoney`, `BoxText`,
+  `BoxBroadcastTextID`, `VerifiedBuild`) VALUES
+(60071, 0, 0, 'Investigate the grave.', 0, 1, 1, 0, 0, 0, 0, '', 0, 0);
+
+DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId` = 22 AND `SourceEntry` IN (991477,344,-9950431)
+  AND `SourceId` = 0)
+  OR (`SourceTypeOrReferenceId` = 15 AND `SourceGroup` = 60071);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`,
+  `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`,
+  `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(22, 1, 991477, 0, 0, 9, 0, 254067, 0, 0, 0, 0, 0, '', 'Ley-Tracker Hestlor - credit only on ''Minervia''s Legacy'''),
+(22, 1, 344, 0, 0, 9, 0, 254067, 0, 0, 0, 0, 0, '', 'Magistrate Solomon - credit only on ''Minervia''s Legacy'''),
+(22, 1, -9950431, 0, 0, 9, 0, 254068, 0, 0, 0, 0, 0, '', 'Tower of Ilgalar bunny - credit only on ''Minervia''s Past'''),
+(15, 60071, 0, 0, 0, 9, 0, 254069, 0, 0, 0, 0, 0, '', 'Gravestone - option only on ''Minervia''s Fate'''),
+(15, 60071, 0, 0, 0, 2, 0, 354659, 1, 0, 1, 0, 0, '', 'Gravestone - option only without ''Archmage Minervia''s Staff''');
 
 -- Redridge quest levels and requirements: Ascension questcache.wdb captures 2026-09-07..08.
 UPDATE `quest_template` SET `QuestLevel` = -1 WHERE `ID` IN (19,20,34,89,91,92,94,115,116,118,119,120,121,122,124,126,
