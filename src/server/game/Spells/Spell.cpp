@@ -7739,7 +7739,9 @@ SpellCastResult Spell::CheckItems(uint32* param1, uint32* param2)
                     if (m_targets.GetItemTarget()->GetOwnerGUID() != m_caster->GetGUID())
                         return SPELL_FAILED_CANT_BE_DISENCHANTED;
 
-                    ItemTemplate const* itemProto = m_targets.GetItemTarget()->GetTemplate();
+                    Item* disenchantTarget = m_targets.GetItemTarget();
+                    ItemTemplate const* itemProto = LocalLevelScaling::InstanceTemplateFor(
+                        disenchantTarget, disenchantTarget->GetTemplate());
                     if (!itemProto)
                         return SPELL_FAILED_CANT_BE_DISENCHANTED;
 
