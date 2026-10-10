@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Missile Barrage keeps the missile count of a Hero's low Arcane Missiles ranks (#6879)",
+  "contract": [
+    "Missile Barrage 44401 takes a flat 2.5 sec (effect 0, SPELLMOD_DURATION) off the next Arcane Missiles channel and lowers its 1 sec missile interval by 0.5 sec (effect 1). Rank 14 42846 (5 sec) still fires five missiles 42845, twice as fast.",
+    "Rank 1 5143 channels 3 sec, three missiles 7268. With the flat reduction it kept 0.5 sec of channel and fired one missile. Heroes roll and train the low ranks (Wildcard rolls rank 1).",
+    "For a Hero the reduction is half the channel of the highest rank known, at most 2.5 sec: rank 1 channels 1.5 sec and still fires three missiles. A stock Mage is unchanged."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "wild", "name": "Barragewild", "race": 1, "class": 10, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "pick", "name": "Barragepick", "race": 1, "class": 10, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "mage", "name": "Barragemage", "race": 1, "class": 8, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "wild_target", "owner": "wild", "entry": 1601, "level": 80, "health": 10000000, "distance": 12,
+      "stationary": true },
+    { "id": "pick_target", "owner": "pick", "entry": 1601, "level": 80, "health": 10000000, "distance": 12,
+      "stationary": true },
+    { "id": "mage_target", "owner": "mage", "entry": 1601, "level": 80, "health": 10000000, "distance": 12,
+      "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Barragewild" },
+    { "action": "learn", "actor": "wild", "spell": 5143 },
+    { "action": "learn", "actor": "pick", "spell": 42846 },
+    { "action": "unlearn", "actor": "mage", "spell": 42846 },
+    { "action": "learn", "actor": "mage", "spell": 5143 },
+    { "action": "assert", "label": "The Wildcard Hero knows rank 1 only", "actor": "wild", "metric": "knows_spell",
+      "spell": 42846, "equals": 0 },
+    { "action": "set_aura", "actor": "wild", "spell": 44401, "stacks": 1 },
+    { "action": "set_aura", "actor": "pick", "spell": 44401, "stacks": 1 },
+    { "action": "set_aura", "actor": "mage", "spell": 44401, "stacks": 1 },
+    { "action": "wait", "ms": 300 },
+    { "action": "cast", "actor": "wild", "spell": 5143, "target": "wild_target" },
+    { "action": "cast", "actor": "pick", "spell": 42846, "target": "pick_target" },
+    { "action": "cast", "actor": "mage", "spell": 5143, "target": "mage_target" },
+    { "action": "assert", "label": "Rank 1 is accepted", "actor": "wild", "metric": "cast_failure", "spell": 5143,
+      "equals": 0 },
+    { "action": "wait", "ms": 4000 },
+    { "action": "assert", "label": "Missile Barrage was consumed", "actor": "wild", "metric": "aura", "spell": 44401,
+      "equals": 0 },
+    { "action": "assert", "label": "Hero rank 1 with Missile Barrage fires all three missiles", "actor": "wild",
+      "metric": "spell_damage_count", "spell": 7268, "target": "wild_target", "equals": 3 },
+    { "action": "assert", "label": "Hero rank 14 with Missile Barrage still fires five missiles", "actor": "pick",
+      "metric": "spell_damage_count", "spell": 42845, "target": "pick_target", "equals": 5 },
+    { "action": "assert", "label": "A stock Mage's rank 1 keeps the stock flat reduction", "actor": "mage",
+      "metric": "spell_damage_count", "spell": 7268, "target": "mage_target", "equals": 1 }
+  ]
+}
