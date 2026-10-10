@@ -36,6 +36,7 @@
 #include "InstanceSaveMgr.h"
 #include "Language.h"
 #include "Log.h"
+#include "MailMgr.h"
 #include "MapMgr.h"
 #include "Metric.h"
 #include "MotdMgr.h"
@@ -2105,7 +2106,8 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
             return;
         }
 
-        // check mailbox
+        // check mailbox: count from the database, the cached count can drift from the real mailbox (#6999)
+        sMailMgr->RecountMailCount(factionChangeInfo->Guid.GetCounter());
         if (playerData->MailCount)
         {
             SendCharFactionChange(CHAR_CREATE_CHARACTER_DELETE_MAIL, factionChangeInfo.get());

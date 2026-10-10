@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Ethereal Bazaar profession hats halve their profession's cast times",
+  "contract": "Issue #4824: each Bazaar profession hat has an Equip spell that lowers casting time by 50% (aura 108, casting time modifier) without a class mask; SpellAffect.dbc names the spells of its profession, which maskless modifiers follow since #6161. The hat halves the cast time of its own profession's spells only. Without a hat, Bolt of Linen Cloth (Tailoring) takes 2000 ms and Linen Bandage (First Aid) 1500 ms. With the Tailor's Hat (1004013) on, Bolt of Linen Cloth takes 1000 ms and Linen Bandage stays at 1500 ms.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "crafter", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Bolt of Linen Cloth without a hat", "actor": "crafter", "metric": "spell_cast_time_ms", "spell": 2963, "equals": 2000 },
+    { "action": "assert", "label": "Linen Bandage without a hat", "actor": "crafter", "metric": "spell_cast_time_ms", "spell": 3275, "equals": 1500 },
+    { "action": "add_item", "actor": "crafter", "item": 1004013, "count": 1 },
+    { "action": "equip", "actor": "crafter", "item": 1004013, "slot": 0 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "the Tailor's Hat applies its speed aura", "actor": "crafter", "metric": "aura", "spell": 1004013, "equals": 1 },
+    { "action": "assert", "label": "Bolt of Linen Cloth with the Tailor's Hat takes half as long", "actor": "crafter", "metric": "spell_cast_time_ms", "spell": 2963, "equals": 1000 },
+    { "action": "assert", "label": "Linen Bandage (First Aid) is unchanged by the Tailor's Hat", "actor": "crafter", "metric": "spell_cast_time_ms", "spell": 3275, "equals": 1500 }
+  ]
+}
