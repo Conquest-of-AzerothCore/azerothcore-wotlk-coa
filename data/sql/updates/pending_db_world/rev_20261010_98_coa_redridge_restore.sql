@@ -19,7 +19,7 @@ VALUES
 (255204, 0, 0, 0, 0, 0, 'Luca Tyndall', NULL, NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (255206, 0, 0, 0, 0, 0, 'Lady Idelia Solomon', NULL, NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (255207, 0, 0, 0, 0, 0, 'Father Norice', NULL, NULL, 0, 35, 35, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(991477, 0, 0, 0, 0, 0, 'Ley-Tracker Hestlor', 'Master Mage', NULL, 0, 30, 30, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(991477, 0, 0, 0, 0, 0, 'Ley-Tracker Hestlor', 'Master Mage', NULL, 0, 30, 30, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991474, 0, 0, 0, 0, 0, 'Meria Crastlor', 'Mage Adept', NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991475, 0, 0, 0, 0, 0, 'Jasper Gilleon', 'Novice Mage', NULL, 0, 15, 15, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991476, 0, 0, 0, 0, 0, 'Alexandria Rowen', 'Novice Mage', NULL, 0, 15, 15, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
@@ -131,8 +131,8 @@ INSERT INTO `creature_default_trainer` (`CreatureId`, `TrainerId`) VALUES
 -- are estimated and their heights are client WMO floors (Red Mage Tower ground floor, inn upper floor, chapel).
 -- Guids 9950412-9950430 are the position-unknown Lakeshire NPCs: every spot and facing is estimated, placed by
 -- role and family name next to existing NPCs, at client WMO floor or terrain height.
--- Guid 9950431 is a trigger bunny at the Tower of Ilgalar search point of 254068 (client SuperTrack 8532, height on
--- the top WMO floor).
+-- The chapel has no pews: its congregation stands in two rows on each side of the nave, facing the altar.
+-- Guid 9950431, an earlier trigger bunny for 254068, stays in the delete range so it is removed.
 DELETE FROM `creature` WHERE `guid` BETWEEN 9950400 AND 9950431;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`,
   `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`,
@@ -149,12 +149,12 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950408, 254969, 0, 0, 0, 1, 1, 0, -9228.15, -3348.43, 102.03, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Servant of Azora (client SuperTrack 8533, Tower of Ilgalar; facing estimated)'),
 (9950409, 254976, 0, 0, 0, 1, 1, 0, -9287.31, -2929.06, 163.85, 1.6, 900, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Sah''kihnu (client SuperTrack 8527, top of Stonewatch Tower; facing and respawn estimated)'),
 (9950410, 255201, 0, 0, 0, 1, 1, 0, -9236.5, -2157.0, 71.21, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Damion Tyndall (Lakeshire inn upper floor; spot and facing estimated)'),
-(9950411, 255213, 0, 0, 0, 1, 1, 0, -9423.7, -2075.6, 68.25, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Cateline (Lakeshire chapel pews; spot and facing estimated)'),
-(9950412, 255208, 0, 0, 0, 1, 1, 0, -9431.0, -2086.0, 67.55, 1.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Vernell (chapel pews; spot and facing estimated)'),
-(9950413, 255212, 0, 0, 0, 1, 1, 0, -9425.0, -2086.0, 67.55, 1.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Emelyne (chapel pews; spot and facing estimated)'),
-(9950414, 255214, 0, 0, 0, 1, 1, 0, -9431.0, -2090.0, 67.55, 1.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Marinus (chapel pews; spot and facing estimated)'),
-(9950415, 255467, 0, 0, 0, 1, 1, 0, -9432.5, -2075.5, 68.25, 4.7, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Elmar (chapel altar beside Father Norice; spot and facing estimated)'),
-(9950416, 255468, 0, 0, 0, 1, 1, 0, -9421.0, -2076.5, 68.25, 4.7, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Ivan (chapel altar beside Cateline; spot and facing estimated)'),
+(9950411, 255213, 0, 0, 0, 1, 1, 0, -9425.4, -2082.5, 67.55, 1.42, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Cateline (Lakeshire chapel nave, front row; spot and facing estimated)'),
+(9950412, 255208, 0, 0, 0, 1, 1, 0, -9434.2, -2082.5, 67.55, 1.42, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Vernell (chapel nave, front row; spot and facing estimated)'),
+(9950413, 255212, 0, 0, 0, 1, 1, 0, -9425.9, -2086.5, 67.55, 1.42, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Emelyne (chapel nave, second row; spot and facing estimated)'),
+(9950414, 255214, 0, 0, 0, 1, 1, 0, -9434.7, -2086.5, 67.55, 1.42, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Marinus (chapel nave, second row; spot and facing estimated)'),
+(9950415, 255467, 0, 0, 0, 1, 1, 0, -9431.8, -2076.3, 68.25, 4.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Elmar (chapel altar beside Father Norice; spot and facing estimated)'),
+(9950416, 255468, 0, 0, 0, 1, 1, 0, -9425.6, -2076.3, 68.25, 4.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Ivan (chapel altar beside Father Norice; spot and facing estimated)'),
 (9950417, 255470, 0, 0, 0, 1, 1, 0, -9221.0, -2216.0, 66.18, 1.57, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Solaina (town hall near Magistrate Solomon; spot and facing estimated)'),
 (9950418, 255219, 0, 0, 0, 1, 1, 0, -9212.0, -2212.0, 66.18, 3.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (town hall; spot and facing estimated)'),
 (9950419, 255471, 0, 0, 0, 1, 1, 0, -9462.0, -2190.0, 70.21, 2.52, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Adelynn Tyndall (house of Luca Tyndall; spot and facing estimated)'),
@@ -168,11 +168,11 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950427, 255218, 0, 0, 0, 1, 1, 0, -9252.0, -2048.0, 77.0, 0.41, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Farmhand Sevim (Jainrose farm; spot and facing estimated)'),
 (9950428, 255220, 0, 0, 0, 1, 1, 0, -9661.0, -1954.0, 65.01, 3.94, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Sidonia Crastlor (Red Mage Tower ground floor by Meria; spot and facing estimated)'),
 (9950429, 255215, 0, 0, 0, 1, 1, 0, -9286.0, -2294.0, 67.52, 5.16, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Captured Blackrock Sentry (by Marshal Marris; spot and facing estimated)'),
-(9950430, 255473, 0, 0, 0, 1, 1, 0, -9245.0, -2165.0, 63.93, 0.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Addison Rutherford (Lakeshire square by the inn; spot and facing estimated)'),
-(9950431, 23837, 0, 0, 0, 1, 1, 0, -9270.88, -3310.78, 150.09, 0.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'ELM General Purpose Bunny (Tower of Ilgalar search point for 254068, client SuperTrack 8532)');
+(9950430, 255473, 0, 0, 0, 1, 1, 0, -9245.0, -2165.0, 63.93, 0.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Addison Rutherford (Lakeshire square by the inn; spot and facing estimated)');
 
 -- Gnoll Food Barrel, Chalice of Tyrenel, Alther's Mill Plank, Codex of Secrets, Pristine Black Dragon Egg and the
--- 254069 Gravestone (quest 254069, gossip 60071): WDB gameobject cache 2026-09-04..08.
+-- 254069 Gravestone (quest 254069, gossip 60071), the Eye of Ilgalar (gossip 60064) and the Red Mage Tower props
+-- 97379-97449: WDB gameobject cache 2026-09-04..08.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`,
   `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`,
@@ -183,7 +183,53 @@ VALUES
 (255064, 3, 4651, 'Alther''s Mill Plank', '', 'Collecting', '', 0.3, 43, 255064, 0, 1, 0, 0, 0, 0, 255117, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
 (518612, 2, 6619, 'Codex of Secrets', '', '', '', 1, 0, 93, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
 (254685, 3, 980926, 'Pristine Black Dragon Egg', '', 'Looting', '', 1.5, 43, 254685, 0, 0, 0, 0, 0, 0, 254071, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
-(254684, 10, 1010093, 'Gravestone', '', '', '', 1, 0, 254069, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60071, 0, 0, 0, 0, 'SmartGameObjectAI', '', 0)
+(254684, 10, 1010093, 'Gravestone', '', '', '', 1, 0, 254069, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60071, 0, 0, 0, 0, 'SmartGameObjectAI', '', 0),
+(254683, 10, 621, 'Eye of Ilgalar', '', 'Gazing Into', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60064, 0, 0, 0, 0, 'SmartGameObjectAI', '', 0),
+(97379, 5, 1016266, 'Floating Books RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97392, 5, 1022454, 'Mage Tower Floating Book RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97394, 5, 87502, 'Magic Banner RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97395, 5, 7631, 'Arcane Prison RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97396, 5, 60710, 'Blue Rune Circle Large RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97397, 5, 1034378, 'Human Townhall Commander Desk Level 3 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97398, 5, 91, 'General Medium Chair RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97399, 5, 1034594, 'Human Inn Table Small 2 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97401, 5, 1048414, 'Kultiras Long Rug RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97403, 5, 1045158, 'Human Inn Food Plate 4 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97404, 5, 1026045, 'Human Townhall Commander Shelf 3 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97405, 5, 1061306, 'Vampire Magic Quill Floating RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97406, 5, 1015592, 'Human Inscription Desk RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97407, 5, 63145, 'Glowing Blue Rune RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97411, 5, 1013619, 'Uldum Star Portal RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97413, 5, 1015582, 'Human Enchanting Table RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97415, 5, 1056949, 'Human Enchanting Shelf Floating 2 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97416, 5, 1015578, 'Human Enchanting Chest RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97417, 5, 1014917, 'Human Enchanting Jar 8 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97418, 5, 1016159, 'Inscription Bookstack 3 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97420, 5, 1031712, 'Floating Candles RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97421, 5, 1025945, 'Dwarf Book Open Lecturn RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97422, 5, 1030129, 'Scattered Papers RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97423, 5, 1049727, 'Inscription Bookstack 2 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97424, 5, 1029694, 'Human Enchanting Box RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97425, 5, 1051575, 'Human Enchanting Jars 3 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97426, 5, 1017648, 'Stormwind Grave 12 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97427, 5, 1015977, 'Human Enchanting Jars 1 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97428, 5, 1015411, 'Inscription Bookstack 5 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97430, 5, 1034377, 'Human Townhall Commander Desk 2 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97431, 5, 1034375, 'Human Townhall Commander Desk 0 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97432, 5, 1015588, 'Human Enchanting Jar 3 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97433, 5, 1030877, 'Human Enchanting Table Small RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97435, 5, 100183, 'Human Bookshelf Large 3 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97437, 5, 1060048, 'Ley Crystal RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97438, 5, 1060148, 'Human Enchanting Shelf Floating 1 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97439, 5, 1060149, 'Human Bookshelf 6 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97440, 5, 1060150, 'Human Bookshelf Large 1 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97443, 5, 1060453, 'Worgen Rug 2 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97444, 5, 1026036, 'Human Mage Dummy RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97445, 5, 1026236, 'Human Bookshelf Large 2 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97446, 5, 1026237, 'Mage Bust 4 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97447, 5, 1026238, 'Mage Bust 1 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97448, 5, 1026239, 'Mage Bust 2 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(97449, 5, 1026240, 'Mage Bust 3 RPG Prop', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`),
   `size` = VALUES(`size`), `Data0` = VALUES(`Data0`), `Data1` = VALUES(`Data1`), `Data2` = VALUES(`Data2`),
@@ -221,7 +267,11 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 -- Object spawns at the quests' client SuperTrack objective points; the Codex of Secrets and the egg stand where an
 -- addon observed them on Bronzebeard (AscensionDB gameobjects catalogue). Respawn times are estimated.
 -- The Gravestone stands at the 254069 objective point (client SuperTrack 8598) on the terrain; its facing is estimated.
-DELETE FROM `gameobject` WHERE `guid` BETWEEN 9001300 AND 9001320;
+-- Red Mage Tower furnishing, the Portal to Stormwind and the Eye of Ilgalar stand at the positions the same catalogue
+-- observed (GameObjects-Bronzebeard dumps, AscensionDB revision built 2026-09-12). It keeps one sighting per entry and
+-- no rotation, so every facing is estimated, and the second Human Enchanting Table under the Codex of Secrets and the
+-- Human Enchanting Chest is estimated: both stand at the table-top height of the observed table's items.
+DELETE FROM `gameobject` WHERE `guid` BETWEEN 9001300 AND 9001368;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
@@ -243,9 +293,57 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 (9001315, 255064, 0, 0, 0, 1, 1, -9225.12, -2706.3, 88.8, 1.1, 0, 0, 0.522687, 0.852525, 120, 100, 1, '', 0, 'Alther''s Mill Plank (client SuperTrack 21393, Alther''s Mill; spread and facings estimated)'),
 (9001316, 255064, 0, 0, 0, 1, 1, -9220.62, -2702.3, 88.8, 4.4, 0, 0, 0.808496, -0.588501, 120, 100, 1, '', 0, 'Alther''s Mill Plank (client SuperTrack 21393, Alther''s Mill; spread and facings estimated)'),
 (9001317, 255064, 0, 0, 0, 1, 1, -9228.62, -2693.3, 88.8, 0.9, 0, 0, 0.434966, 0.900447, 120, 100, 1, '', 0, 'Alther''s Mill Plank (client SuperTrack 21393, Alther''s Mill; spread and facings estimated)'),
-(9001318, 518612, 0, 0, 0, 1, 1, -9664.1, -1963.22, 100.817, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Codex of Secrets (observed position, client SuperTrack 8528; facing estimated)'),
+(9001318, 518612, 0, 0, 0, 1, 1, -9664.1, -1963.22, 100.817, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Codex of Secrets (observed position, client SuperTrack 8528; facing estimated)'),
 (9001319, 254685, 0, 0, 0, 1, 1, -9714.99, -2897.01, 53.525, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Pristine Black Dragon Egg (observed position, client SuperTrack 8505, the Rookery; facing estimated)'),
-(9001320, 254684, 0, 0, 0, 1, 1, -9105.3, -2412.26, 119.48, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Gravestone (client SuperTrack 8598, the grave of 254069; facing estimated)');
+(9001320, 254684, 0, 0, 0, 1, 1, -9105.3, -2412.26, 119.48, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Gravestone (client SuperTrack 8598, the grave of 254069; facing estimated)'),
+(9001321, 97398, 0, 0, 0, 1, 1, -9678.010, -1961.990, 64.917, 3.142, 0, 0, 1.000000, 0.000000, 120, 100, 1, '', 0, 'General Medium Chair (Red Mage Tower; observed position, facing estimated)'),
+(9001322, 97396, 0, 0, 0, 1, 1, -9669.344, -1961.957, 64.958, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Blue Rune Circle Large (Red Mage Tower; observed position, facing estimated)'),
+(9001323, 97430, 0, 0, 0, 1, 1, -9679.440, -1961.710, 64.971, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Human Townhall Commander Desk 2 (Red Mage Tower; observed position, facing estimated)'),
+(9001324, 97427, 0, 0, 0, 1, 1, -9669.521, -1969.705, 64.996, 1.571, 0, 0, 0.707107, 0.707107, 120, 100, 1, '', 0, 'Human Enchanting Jars 1 (Red Mage Tower; observed position, facing estimated)'),
+(9001325, 97418, 0, 0, 0, 1, 1, -9671.200, -1955.790, 65.008, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Inscription Bookstack 3 (Red Mage Tower; observed position, facing estimated)'),
+(9001326, 97379, 0, 0, 0, 1, 1, -9669.162, -1962.127, 65.014, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Floating Books (Red Mage Tower; observed position, facing estimated)'),
+(9001327, 97397, 0, 0, 0, 1, 1, -9667.880, -1954.230, 65.014, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Human Townhall Commander Desk Level 3 (Red Mage Tower; observed position, facing estimated)'),
+(9001328, 97431, 0, 0, 0, 1, 1, -9678.370, -1965.140, 65.014, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Human Townhall Commander Desk 0 (Red Mage Tower; observed position, facing estimated)'),
+(9001329, 97440, 0, 0, 0, 1, 1, -9673.582, -1968.998, 65.017, 1.571, 0, 0, 0.707107, 0.707107, 120, 100, 1, '', 0, 'Human Bookshelf Large 1 (Red Mage Tower; observed position, facing estimated)'),
+(9001330, 97395, 0, 0, 0, 1, 1, -9680.000, -1957.040, 66.348, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Arcane Prison (Red Mage Tower; observed position, facing estimated)'),
+(9001331, 97392, 0, 0, 0, 1, 1, -9667.950, -1968.460, 66.689, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Mage Tower Floating Book (Red Mage Tower; observed position, facing estimated)'),
+(9001332, 97428, 0, 0, 0, 1, 1, -9674.090, -1957.604, 67.649, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Inscription Bookstack 5 (Red Mage Tower; observed position, facing estimated)'),
+(9001333, 97433, 0, 0, 0, 1, 1, -9675.300, -1955.870, 69.677, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Human Enchanting Table Small (Red Mage Tower; observed position, facing estimated)'),
+(9001334, 97432, 0, 0, 0, 1, 1, -9676.250, -1954.950, 69.685, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Human Enchanting Jar 3 (Red Mage Tower; observed position, facing estimated)'),
+(9001335, 97415, 0, 0, 0, 1, 1, -9678.654, -1953.566, 70.928, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Human Enchanting Shelf Floating 2 (Red Mage Tower; observed position, facing estimated)'),
+(9001336, 97399, 0, 0, 0, 1, 1, -9658.170, -1959.460, 75.324, 3.142, 0, 0, 1.000000, 0.000000, 120, 100, 1, '', 0, 'Human Inn Table Small 2 (Red Mage Tower; observed position, facing estimated)'),
+(9001337, 97401, 0, 0, 0, 1, 1, -9658.300, -1959.600, 75.331, 3.142, 0, 0, 1.000000, 0.000000, 120, 100, 1, '', 0, 'Kultiras Long Rug (Red Mage Tower; observed position, facing estimated)'),
+(9001338, 97403, 0, 0, 0, 1, 1, -9658.330, -1959.574, 76.153, 3.142, 0, 0, 1.000000, 0.000000, 120, 100, 1, '', 0, 'Human Inn Food Plate 4 (Red Mage Tower; observed position, facing estimated)'),
+(9001339, 97426, 0, 0, 0, 1, 1, -9681.280, -1947.910, 90.688, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Stormwind Grave 12 (Red Mage Tower; observed position, facing estimated)'),
+(9001340, 97445, 0, 0, 0, 1, 1, -9687.660, -1955.700, 90.701, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Human Bookshelf Large 2 (Red Mage Tower; observed position, facing estimated)'),
+(9001341, 97448, 0, 0, 0, 1, 1, -9657.570, -1951.920, 92.184, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Mage Bust 2 (Red Mage Tower; observed position, facing estimated)'),
+(9001342, 97446, 0, 0, 0, 1, 1, -9684.834, -1971.438, 92.185, 0.785, 0, 0, 0.382683, 0.923880, 120, 100, 1, '', 0, 'Mage Bust 4 (Red Mage Tower; observed position, facing estimated)'),
+(9001343, 97449, 0, 0, 0, 1, 1, -9660.883, -1974.828, 92.188, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Mage Bust 3 (Red Mage Tower; observed position, facing estimated)'),
+(9001344, 97447, 0, 0, 0, 1, 1, -9681.291, -1947.920, 92.191, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Mage Bust 1 (Red Mage Tower; observed position, facing estimated)'),
+(9001345, 97394, 0, 0, 0, 1, 1, -9681.620, -1947.340, 92.240, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Magic Banner (Red Mage Tower; observed position, facing estimated)'),
+(9001346, 97443, 0, 0, 0, 1, 1, -9670.162, -1968.709, 99.203, 1.571, 0, 0, 0.707107, 0.707107, 120, 100, 1, '', 0, 'Worgen Rug 2 (Red Mage Tower; observed position, facing estimated)'),
+(9001347, 97420, 0, 0, 0, 1, 1, -9677.860, -1970.640, 99.295, 0.785, 0, 0, 0.382683, 0.923880, 120, 100, 1, '', 0, 'Floating Candles (Red Mage Tower; observed position, facing estimated)'),
+(9001348, 97413, 0, 0, 0, 1, 1, -9678.980, -1964.870, 99.366, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Table (Red Mage Tower; observed position, facing estimated)'),
+(9001349, 97417, 0, 0, 0, 1, 1, -9668.090, -1963.770, 99.388, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Jar 8 (Red Mage Tower; observed position, facing estimated)'),
+(9001350, 97407, 0, 0, 0, 1, 1, -9661.040, -1942.540, 99.438, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Glowing Blue Rune (Red Mage Tower; observed position, facing estimated)'),
+(9001351, 97406, 0, 0, 0, 1, 1, -9654.805, -1947.449, 99.476, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Human Inscription Desk (Red Mage Tower; observed position, facing estimated)'),
+(9001352, 97404, 0, 0, 0, 1, 1, -9658.020, -1942.824, 99.479, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Human Townhall Commander Shelf 3 (Red Mage Tower; observed position, facing estimated)'),
+(9001353, 97444, 0, 0, 0, 1, 1, -9686.100, -1976.740, 99.485, 0.785, 0, 0, 0.382683, 0.923880, 120, 100, 1, '', 0, 'Human Mage Dummy (Red Mage Tower; observed position, facing estimated)'),
+(9001354, 97439, 0, 0, 0, 1, 1, -9655.781, -1944.297, 99.487, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Human Bookshelf 6 (Red Mage Tower; observed position, facing estimated)'),
+(9001355, 97435, 0, 0, 0, 1, 1, -9674.000, -1942.350, 99.488, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Bookshelf Large 3 (Red Mage Tower; observed position, facing estimated)'),
+(9001356, 97421, 0, 0, 0, 1, 1, -9675.870, -1964.700, 100.553, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Dwarf Book Open Lecturn (Red Mage Tower; observed position, facing estimated)'),
+(9001357, 97405, 0, 0, 0, 1, 1, -9656.550, -1949.330, 100.711, 3.927, 0, 0, 0.923880, -0.382683, 120, 100, 1, '', 0, 'Vampire Magic Quill Floating (Red Mage Tower; observed position, facing estimated)'),
+(9001358, 97425, 0, 0, 0, 1, 1, -9674.700, -1963.260, 100.760, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Jars 3 (Red Mage Tower; observed position, facing estimated)'),
+(9001359, 97416, 0, 0, 0, 1, 1, -9661.520, -1962.230, 100.824, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Chest (Red Mage Tower; observed position, facing estimated)'),
+(9001360, 97423, 0, 0, 0, 1, 1, -9679.190, -1964.440, 100.842, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Inscription Bookstack 2 (Red Mage Tower; observed position, facing estimated)'),
+(9001361, 97422, 0, 0, 0, 1, 1, -9678.120, -1965.200, 100.933, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Scattered Papers (Red Mage Tower; observed position, facing estimated)'),
+(9001362, 97424, 0, 0, 0, 1, 1, -9680.271, -1964.902, 101.163, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Box (Red Mage Tower; observed position, facing estimated)'),
+(9001363, 97411, 0, 0, 0, 1, 1, -9655.460, -1973.350, 101.641, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Uldum Star Portal (Red Mage Tower; observed position, facing estimated)'),
+(9001364, 97438, 0, 0, 0, 1, 1, -9664.141, -1961.158, 101.763, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Shelf Floating 1 (Red Mage Tower; observed position, facing estimated)'),
+(9001365, 97437, 0, 0, 0, 1, 1, -9657.850, -1976.250, 102.106, 2.356, 0, 0, 0.923880, 0.382683, 120, 100, 1, '', 0, 'Ley Crystal (Red Mage Tower; observed position, facing estimated)'),
+(9001366, 97413, 0, 0, 0, 1, 1, -9662.8, -1962.7, 99.39, 4.712, 0, 0, 0.707107, -0.707107, 120, 100, 1, '', 0, 'Human Enchanting Table (Red Mage Tower, under the Codex of Secrets; spot and facing estimated)'),
+(9001367, 195139, 0, 0, 0, 1, 1, -9688.553, -1948.303, 99.486, 5.498, 0, 0, 0.382683, -0.923880, 120, 100, 1, '', 0, 'Portal to Stormwind (Red Mage Tower top floor; observed position, facing estimated)'),
+(9001368, 254683, 0, 0, 0, 1, 1, -9270.980, -3310.740, 150.929, 0.000, 0, 0, 0.000000, 1.000000, 120, 100, 1, '', 0, 'Eye of Ilgalar (observed position, client SuperTrack 8532, Tower of Ilgalar; facing estimated)');
 
 -- 'Pefectly Good Planks' keeps the title as captured.
 INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `QuestInfoID`,
@@ -394,11 +492,12 @@ INSERT INTO `gameobject_questender` (`id`, `quest`) VALUES
 -- Minervia chain credits. No capture describes the live scripts, so every trigger below is estimated; the credit
 -- entries, items and points are the captured ones.
 -- 254067: talking to Ley-Tracker Hestlor and Magistrate Solomon while on the quest credits them.
--- 254068: reaching the Tower of Ilgalar search point (client SuperTrack 8532) credits the Servant of Azora.
+-- 254068: gazing into the Eye of Ilgalar (gossip 60064) at the search point (client SuperTrack 8532) credits the Servant
+-- of Azora.
 -- 254069: the Gravestone's gossip 60071 credits Archmage Minervia, gives her staff and shows her for one minute.
 UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 344 AND `AIName` = '';
 DELETE FROM `smart_scripts` WHERE (`entryorguid` IN (991477,344) AND `source_type` = 0)
-  OR (`entryorguid` = -9950431 AND `source_type` = 0) OR (`entryorguid` = 254684 AND `source_type` = 1);
+  OR (`entryorguid` = -9950431 AND `source_type` = 0) OR (`entryorguid` IN (254684,254683) AND `source_type` = 1);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`,
   `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`,
   `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`,
@@ -406,11 +505,21 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
   `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (991477, 0, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 991477, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Ley-Tracker Hestlor - On Gossip Hello - Quest Credit ''Minervia''s Legacy'''),
 (344, 0, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 344, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Magistrate Solomon - On Gossip Hello - Quest Credit ''Minervia''s Legacy'''),
-(-9950431, 0, 0, 0, 10, 0, 100, 0, 1, 15, 1000, 1000, 1, 0, 33, 254969, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'ELM General Purpose Bunny - Within 15 Range Out of Combat LoS - Quest Credit ''Minervia''s Past'''),
+(254683, 1, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 254969, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Eye of Ilgalar - On Gossip Hello - Quest Credit ''Minervia''s Past'''),
 (254684, 1, 0, 1, 62, 0, 100, 0, 60071, 0, 0, 0, 0, 0, 33, 254971, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravestone - On Gossip Option 0 Selected - Quest Credit ''Minervia''s Fate'''),
 (254684, 1, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 56, 354659, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravestone - On Link - Add Item ''Archmage Minervia''s Staff'''),
 (254684, 1, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 12, 254971, 3, 60000, 0, 0, 0, 8, 0, 0, 0, 0, -9103.0, -2410.0, 120.21, 3.9, 'Gravestone - On Link - Summon Creature ''Archmage Minervia'''),
 (254684, 1, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gravestone - On Link - Close Gossip');
+
+-- The Eye of Ilgalar's text: Ascension npccache.wdb capture (conquest-of-azeroth, 2026-09-04..08); the capture's
+-- probability 0 is written as 1 like the other Ascension texts here.
+DELETE FROM `gossip_menu` WHERE `MenuID` = 60064;
+INSERT INTO `gossip_menu` (`MenuID`, `TextID`) VALUES
+(60064, 60064);
+
+DELETE FROM `npc_text` WHERE `ID` = 60064;
+INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `Probability0`) VALUES
+(60064, '<The orb hums with arcane energy.>', '<The orb hums with arcane energy.>', 1);
 
 -- The option text is estimated from the captured objective 'Investigate the grave at Lakeshire.'
 DELETE FROM `gossip_menu_option` WHERE `MenuID` = 60071;
@@ -421,13 +530,14 @@ INSERT INTO `gossip_menu_option` (`MenuID`, `OptionID`, `OptionIcon`, `OptionTex
 
 DELETE FROM `conditions` WHERE (`SourceTypeOrReferenceId` = 22 AND `SourceEntry` IN (991477,344,-9950431)
   AND `SourceId` = 0)
+  OR (`SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 254683 AND `SourceId` = 1)
   OR (`SourceTypeOrReferenceId` = 15 AND `SourceGroup` = 60071);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`,
   `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`,
   `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (22, 1, 991477, 0, 0, 9, 0, 254067, 0, 0, 0, 0, 0, '', 'Ley-Tracker Hestlor - credit only on ''Minervia''s Legacy'''),
 (22, 1, 344, 0, 0, 9, 0, 254067, 0, 0, 0, 0, 0, '', 'Magistrate Solomon - credit only on ''Minervia''s Legacy'''),
-(22, 1, -9950431, 0, 0, 9, 0, 254068, 0, 0, 0, 0, 0, '', 'Tower of Ilgalar bunny - credit only on ''Minervia''s Past'''),
+(22, 1, 254683, 1, 0, 9, 0, 254068, 0, 0, 0, 0, 0, '', 'Eye of Ilgalar - credit only on ''Minervia''s Past'''),
 (15, 60071, 0, 0, 0, 9, 0, 254069, 0, 0, 0, 0, 0, '', 'Gravestone - option only on ''Minervia''s Fate'''),
 (15, 60071, 0, 0, 0, 2, 0, 354659, 1, 0, 1, 0, 0, '', 'Gravestone - option only without ''Archmage Minervia''s Staff''');
 
