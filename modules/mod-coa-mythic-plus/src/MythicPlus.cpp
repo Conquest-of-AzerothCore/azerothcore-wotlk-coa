@@ -426,27 +426,19 @@ namespace
                                    : sConfigMgr->GetOption<uint32>("MythicPlus.DefaultForces.Normal", 1);
     }
 
-    // Kill credit in the creature's base entry; the six Ring of Law arena
-    // bosses credit Ring of Law (High Justice Grimstone), the one the client
-    // lists for Blackrock Depths - Prison.
-    uint32 CreditEntry(Creature* creature)
-    {
-        uint32 base = BaseEntry(creature->GetEntry());
-        if (creature->GetMapId() == 230 && base >= 9027 && base <= 9032)
-            return 10096;
-        return base;
-    }
-
     // The boss of the run's wing this kill completes, as the client lists it
-    // in DungeonEncounterExtra.dbc, or nullptr.
+    // in DungeonEncounterExtra.dbc, or nullptr. The Ring of Law ends with one
+    // of six arena bosses, and the client lists each with its own encounter
+    // (2981-2986 for Blackrock Depths - Prison), final like Ring of Law itself;
+    // the progress packet carries the killed boss's own id, as on Ascension.
     WingEncounter const* FindWingEncounter(Run const& run, Creature* creature)
     {
         std::vector<WingEncounter> const* list = Data::Instance().GetWingEncounters(run.lfgId);
         if (!list)
             return nullptr;
-        uint32 const credit = CreditEntry(creature);
+        uint32 const base = BaseEntry(creature->GetEntry());
         for (WingEncounter const& encounter : *list)
-            if (encounter.creature == credit || encounter.creature == creature->GetEntry())
+            if (encounter.creature == base || encounter.creature == creature->GetEntry())
                 return &encounter;
         return nullptr;
     }
