@@ -1,8 +1,11 @@
 -- Crossroads (The Barrens) Ascension quests 255078-255083 and their NPCs, restored from Ascension captures.
 -- Quests: client quest cache, conquest-of-azeroth mode, captured 2026-09-10 (hertigservices/ascension-data); paragraph
 -- breaks from the Dawnrise quest cache capture (2026-09-01). NPCs: client creature cache, same mode and date.
--- Givers and enders follow the quest texts and NextQuestInChain. Draft: spawns, levels, factions, displays the client
--- lacks, quest item drops and the 255080 ender (Taz'iri) are not restored yet.
+-- Givers and enders follow the quest texts and NextQuestInChain. Recorded on live realms (YouTube): reward texts of
+-- 255082 (PrimitiveWoW Part 12, 2026-08-08, 22:12) and 255083 (Part 13, 2026-08-11, 09:00), Raj'iri and Naj'iri's
+-- exchange (Part 12, 01:02; Part 13, 10:04 and 35:00), Voltzix Sprocketpop level 21 Orgrimmar (Part 12, 22:16)
+-- and Rhuna level 35 Orgrimmar (JohnGamingFuntime, 2026-07-07, 17:44). Draft: spawns, the other NPCs' levels and
+-- factions, displays the client lacks, quest item drops and the 255080 ender (Taz'iri) are not restored yet.
 
 INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `RewardNextQuest`,
   `RewardXPDifficulty`, `RewardMoney`, `RewardMoneyDifficulty`, `Flags`, `RewardItem1`, `RewardAmount1`, `RewardItem2`,
@@ -40,6 +43,11 @@ INSERT INTO `quest_template_addon` (`ID`, `PrevQuestID`) VALUES
 (255080, 255079),
 (255083, 255082);
 
+DELETE FROM `quest_offer_reward` WHERE `ID` IN (255082,255083);
+INSERT INTO `quest_offer_reward` (`ID`, `RewardText`) VALUES
+(255082, 'They''re dead? Good! Knew I could count on ya!'),
+(255083, 'Sounds like that''s the last of ''em! Actually, I heard they''re packin'' up and heading back to...somewhere, I didn''t pay much attention.$B$BWhat matters is they''re leaving, something about hazard expenses.');
+
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `npcflag`, `type`, `type_flags`, `HealthModifier`,
   `ManaModifier`)
 VALUES
@@ -52,6 +60,9 @@ VALUES
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), `npcflag` = VALUES(`npcflag`),
     `type` = VALUES(`type`), `type_flags` = VALUES(`type_flags`), `HealthModifier` = VALUES(`HealthModifier`),
     `ManaModifier` = VALUES(`ManaModifier`);
+
+UPDATE `creature_template` SET `minlevel` = 35, `maxlevel` = 35, `faction` = 29 WHERE `entry` = 41739;
+UPDATE `creature_template` SET `minlevel` = 21, `maxlevel` = 21, `faction` = 29 WHERE `entry` = 753524;
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (41719,741719,41739,741722,753513,753524);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`) VALUES
@@ -78,3 +89,10 @@ INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (741722, 255081),
 (753524, 255082),
 (753524, 255083);
+
+DELETE FROM `creature_text` WHERE `CreatureID` IN (41719,741719);
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Probability`, `comment`) VALUES
+(41719, 0, 0, 'Feel like dancin'' now?', 12, 100, 'Raj''iri - ask Naj''iri to dance'),
+(41719, 1, 0, 'How about now mon?', 12, 100, 'Raj''iri - ask Naj''iri again'),
+(741719, 0, 0, 'Not really mon...', 12, 100, 'Naj''iri - decline'),
+(741719, 1, 0, 'Alright, just for a bit...', 12, 100, 'Naj''iri - agree');
