@@ -5216,6 +5216,13 @@ UPDATE `gameobject_template` SET `AIName` = 'SmartGameObjectAI', `ScriptName` = 
 
 DELETE FROM `spell_script_names` WHERE `ScriptName` = 'spell_coa_abbess_relic_prayer';
 
+-- Mirror Shard (2300546) ambush fix (2026-10-10): the Curse Shard summon row (id 1,
+-- action_type 12 SMART_ACTION_SUMMON_CREATURE) carried event_chance 100, the same bug as
+-- Living Heresy above - same fix, same reasoning: changed to 40, leaving the credit row
+-- (id 0, action_type 33) and the despawn row (id 2, action_type 41) at 100 since they must
+-- keep firing every time regardless of whether the ambush itself procs. The sibling Kobold
+-- Warren row (2300579, id 1) already used a reduced chance (75%), so this file's own
+-- precedent confirms 100% was never the intent for a chest-ambush summon.
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (2300579, 2300546) AND `source_type` = 1;
 INSERT INTO `smart_scripts`
 (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`)
@@ -5224,7 +5231,7 @@ VALUES
 (2300579, 1, 1, 0, 8, 0, 75, 0, 267031, 0, 0, 0, 0, 0, 12, 162915, 4, 30000, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Kobold Warren - Destroy completed: 75% Kobold Prospector ambush at the warren'),
 (2300579, 1, 2, 0, 8, 0, 100, 0, 267031, 0, 0, 0, 0, 0, 41, 0, 60, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Kobold Warren - destroyed, back in 60 s'),
 (2300546, 1, 0, 0, 8, 0, 100, 0, 256702, 0, 0, 0, 0, 0, 33, 162920, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Mirror Shard - Inspecting completed: credit 162920'),
-(2300546, 1, 1, 0, 8, 0, 100, 0, 256702, 0, 0, 0, 0, 0, 12, 162919, 4, 30000, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Mirror Shard - Inspecting completed: Curse Shard at the shard'),
+(2300546, 1, 1, 0, 8, 0, 40, 0, 256702, 0, 0, 0, 0, 0, 12, 162919, 4, 30000, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Mirror Shard - Inspecting completed: Curse Shard at the shard (40% ambush chance)'),
 (2300546, 1, 2, 0, 8, 0, 100, 0, 256702, 0, 0, 0, 0, 0, 41, 0, 60, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Mirror Shard - inspected, back in 60 s');
 
 -- Smart-event conditions key on the entryorguid and the row id + 1.
