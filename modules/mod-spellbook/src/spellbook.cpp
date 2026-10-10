@@ -208,6 +208,17 @@ namespace
         return itr != table.end() && itr->ClassId == classId && itr->SpellId == spellId;
     }
 
+    /// Whether Explode is currently replaced by Echo of Nozdormu for this character, in
+    /// which case the book lists no Explode rank at all: the conversion already covers the
+    /// whole chain on the action bars, so offering its ranks would only re-announce a spell
+    /// the character no longer casts. Keyed on the aura AscensionPyromancer::Refresh itself
+    /// uses, so the window and the conversion cannot disagree.
+    bool ReplacedByEchoOfNozdormu(Player* player, uint32 spellId)
+    {
+        return player && player->getClass() == CLASS_PYROMANCER && player->HasAura(520937) &&
+            sSpellMgr->GetFirstSpellInChain(spellId) == 800792;
+    }
+
     bool CanLearnTalentReplacement(Player* player, uint32 spellId)
     {
         if (player->getClass() == CLASS_PYROMANCER &&
@@ -258,6 +269,12 @@ namespace
             // A spell the talent trees grant is the tree's to hand out, whatever source
             // below would otherwise reach it through.
             if (windowView && IsTreeSpell(classId, spellId))
+                return;
+
+            // Explode while Echo of Nozdormu replaces it: neither its known ranks nor its
+            // upgrades are listed, so the window cannot sell back a spell the conversion
+            // just took off the bars.
+            if (windowView && ReplacedByEchoOfNozdormu(player, spellId))
                 return;
 
             if (windowView && !CanLearnTalentReplacement(player, spellId))
@@ -592,6 +609,7 @@ namespace
         {
             if (!AscensionFelsworn::CanLearnRift(player, wanted) ||
                 !CanLearnTalentReplacement(player, wanted) ||
+                ReplacedByEchoOfNozdormu(player, wanted) ||
                 IsTreeSpell(uint32(player->getClass()), wanted) ||
                 HasRankOrBetter(player, wanted) ||
                 (player->getClass() == CLASS_GUARDIAN && AscensionGuardian::Ballad(wanted)))

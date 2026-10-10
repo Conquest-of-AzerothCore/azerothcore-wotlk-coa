@@ -857,7 +857,8 @@ public:
     {
         if (!automaticProgression || rank.ClassId != player->getClass() ||
             rank.RequiredLevel > player->GetLevel() ||
-            !player->HasSpell(rank.FirstSpellId) || player->HasSpell(rank.SpellId))
+            !player->HasSpell(rank.FirstSpellId) || player->HasSpell(rank.SpellId) ||
+            (rank.FirstSpellId == 800792 && player->HasAura(520937)))
             continue;
 
         if (sSpellMgr->GetSpellInfo(rank.SpellId))
