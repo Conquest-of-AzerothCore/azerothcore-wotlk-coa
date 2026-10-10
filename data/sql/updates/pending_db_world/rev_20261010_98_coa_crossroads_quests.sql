@@ -7,8 +7,10 @@
 -- and Rhuna level 35 Orgrimmar (JohnGamingFuntime, 2026-07-07, 17:44). Spawns stand on the quests' client
 -- QuestSuperTrack/SuperTrack points (patch-M, identical in the server DBC), facing the town centre (inferred). The
 -- 255080 ender is Raj'iri: its "Taz'iri" turn-in point 21368 lies 0.1 yd from Raj'iri's point 21366. Raj'iri, Martin
--- and Brumbof take Rhuna's and Voltzix's Orgrimmar faction (inferred). Draft: Naj'iri's spawn, the other NPCs'
--- levels, displays the client lacks and quest item drops are not restored yet.
+-- and Brumbof take Rhuna's and Voltzix's Orgrimmar faction (inferred). Quest item drops use the 80% chance of the
+-- Barrens quest drops from the mobs the quest texts name, and Brumbof hands out the drumstick through a gossip option
+-- (both inferred, no capture). Draft: Naj'iri's spawn, the other NPCs' levels and displays the client lacks are not
+-- restored yet.
 
 INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `RewardNextQuest`,
   `RewardXPDifficulty`, `RewardMoney`, `RewardMoneyDifficulty`, `Flags`, `RewardItem1`, `RewardAmount1`, `RewardItem2`,
@@ -67,6 +69,7 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), 
 UPDATE `creature_template` SET `minlevel` = 35, `maxlevel` = 35, `faction` = 29 WHERE `entry` = 41739;
 UPDATE `creature_template` SET `minlevel` = 21, `maxlevel` = 21, `faction` = 29 WHERE `entry` = 753524;
 UPDATE `creature_template` SET `faction` = 29 WHERE `entry` IN (41719,741722,753513);
+UPDATE `creature_template` SET `npcflag` = 1, `gossip_menu_id` = 9010700, `AIName` = 'SmartAI' WHERE `entry` = 753513;
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (41719,741719,41739,741722,753513,753524);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`) VALUES
@@ -110,3 +113,34 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Pro
 (41719, 1, 0, 'How about now mon?', 12, 100, 'Raj''iri - ask Naj''iri again'),
 (741719, 0, 0, 'Not really mon...', 12, 100, 'Naj''iri - decline'),
 (741719, 1, 0, 'Alright, just for a bit...', 12, 100, 'Naj''iri - agree');
+
+DELETE FROM `creature_loot_template` WHERE `Item` IN (355118,355119,355120,355123);
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
+(3272, 355118, 0, 80, 1, 1, 0, 1, 1, 'Kolkar Wrangler - Centaur Windflute (255078)'),
+(3273, 355118, 0, 80, 1, 1, 0, 1, 1, 'Kolkar Stormer - Centaur Windflute (255078)'),
+(4127, 355119, 0, 80, 1, 1, 0, 1, 1, 'Hecklefang Hyena - Hyena Skin (255079)'),
+(3248, 355120, 0, 80, 1, 1, 0, 1, 1, 'Barrens Giraffe - Giraffe Leather (255079)'),
+(3379, 355123, 0, 80, 1, 1, 0, 1, 1, 'Burning Blade Bruiser - Demonic Scripture (255081)'),
+(3380, 355123, 0, 80, 1, 1, 0, 1, 1, 'Burning Blade Acolyte - Demonic Scripture (255081)');
+
+DELETE FROM `npc_text` WHERE `ID` = 9010700;
+INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `lang0`, `Probability0`) VALUES
+(9010700, 'The beat never stops in this lodge, $c.', 'The beat never stops in this lodge, $c.', 0, 1);
+
+DELETE FROM `gossip_menu` WHERE `MenuID` = 9010700;
+INSERT INTO `gossip_menu` (`MenuID`, `TextID`) VALUES
+(9010700, 9010700);
+
+DELETE FROM `gossip_menu_option` WHERE `MenuID` = 9010700;
+INSERT INTO `gossip_menu_option` (`MenuID`, `OptionID`, `OptionIcon`, `OptionText`, `OptionBroadcastTextID`, `OptionType`, `OptionNpcFlag`, `ActionMenuID`, `ActionPoiID`, `BoxCoded`, `BoxMoney`, `BoxText`, `BoxBroadcastTextID`) VALUES
+(9010700, 0, 0, 'Do you have an extra drumstick you can spare?', 0, 1, 1, 0, 0, 0, 0, '', 0);
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = 9010700;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 9010700, 0, 0, 0, 9, 0, 255080, 0, 0, 0, 0, 0, '', 'Brumbof Bramstum - drumstick option only while Dancing to the Beat is taken'),
+(15, 9010700, 0, 0, 0, 2, 0, 355122, 1, 0, 1, 0, 0, '', 'Brumbof Bramstum - drumstick option only without a Drumstick');
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 753513 AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(753513, 0, 0, 1, 62, 0, 100, 0, 9010700, 0, 0, 0, 0, 0, 56, 355122, 1, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Brumbof Bramstum - On Gossip Option 0 Selected - Add Drumstick'),
+(753513, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Brumbof Bramstum - Linked - Close Gossip');
