@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Fire Fire Fireball counts two Fireballs in combat and the third fires a wave (#6789)",
+  "contract": [
+    "Fire Fire Fireball 283064: after casting Fireball twice in combat, the third Fireball has its cast time increased by 0.44 sec (Carbon Buildup 283068) and fires an additional wave of Fireballs 283069 toward the target.",
+    "Spell.dbc gave 283064 and its stack aura 283066 ProcFlags 0x10, so melee-class spells such as Sinister Strike built the stacks and no Fireball counted or paid off.",
+    "Each Fireball cast in combat adds one 283066 stack; at two stacks Carbon Buildup is applied. The third Fireball fires three 283069 and removes both auras."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "hero", "name": "Firefirehero", "race": 1, "class": 10, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "hero", "entry": 1601, "level": 80, "health": 10000000, "distance": 4,
+      "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "learn", "actor": "hero", "spell": 42833 },
+    { "action": "learn", "actor": "hero", "spell": 48638 },
+    { "action": "learn", "actor": "hero", "spell": 283064 },
+    { "action": "add_item", "actor": "hero", "item": 25 },
+    { "action": "equip", "actor": "hero", "item": 25, "slot": 15 },
+    { "action": "assert", "label": "The Hero wields a sword for Sinister Strike", "actor": "hero",
+      "metric": "equipped_item", "slot": 15, "equals": 25 },
+    { "action": "snapshot", "actor": "hero", "metric": "spell_cast_time_ms", "spell": 42833, "save_as": "fireball_cast" },
+    { "action": "attack", "actor": "hero", "target": "target" },
+    { "action": "assert", "label": "The Hero is in combat", "actor": "hero", "metric": "combat", "equals": 1,
+      "within_ms": 3000 },
+    { "action": "set_power", "actor": "hero", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "hero", "spell": 48638, "target": "target" },
+    { "action": "assert", "label": "Sinister Strike is accepted", "actor": "hero", "metric": "cast_failure",
+      "spell": 48638, "equals": 0, "within_ms": 1000 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "assert", "label": "A melee-class spell builds no Fire Fire Fireball stack", "actor": "hero",
+      "metric": "aura_stacks", "spell": 283066, "equals": 0 },
+    { "action": "stop_attack", "actor": "hero" },
+    { "action": "cast", "actor": "hero", "spell": 42833, "target": "target" },
+    { "action": "wait", "ms": 4500 },
+    { "action": "assert", "label": "The first Fireball adds one stack", "actor": "hero", "metric": "aura_stacks",
+      "spell": 283066, "equals": 1 },
+    { "action": "assert", "label": "and no Carbon Buildup yet", "actor": "hero", "metric": "aura", "spell": 283068,
+      "equals": 0 },
+    { "action": "cast", "actor": "hero", "spell": 42833, "target": "target" },
+    { "action": "wait", "ms": 4500 },
+    { "action": "assert", "label": "The second Fireball adds the second stack", "actor": "hero",
+      "metric": "aura_stacks", "spell": 283066, "equals": 2 },
+    { "action": "assert", "label": "and applies Carbon Buildup", "actor": "hero", "metric": "aura", "spell": 283068,
+      "equals": 1 },
+    { "action": "assert", "label": "Carbon Buildup adds 0.44 sec to Fireball", "actor": "hero",
+      "metric": "spell_cast_time_ms", "spell": 42833, "relative_to": "fireball_cast", "equals": 440 },
+    { "action": "assert", "label": "No wave has fired before the third Fireball", "actor": "hero",
+      "metric": "spell_damage_count", "spell": 283069, "target": "target", "equals": 0 },
+    { "action": "cast", "actor": "hero", "spell": 42833, "target": "target" },
+    { "action": "wait", "ms": 5000 },
+    { "action": "assert", "label": "The third Fireball fires a wave of three Fireballs", "actor": "hero",
+      "metric": "spell_damage_count", "spell": 283069, "target": "target", "equals": 3 },
+    { "action": "assert", "label": "and consumes Carbon Buildup", "actor": "hero", "metric": "aura", "spell": 283068,
+      "equals": 0 },
+    { "action": "assert", "label": "and the stacks", "actor": "hero", "metric": "aura_stacks", "spell": 283066,
+      "equals": 0 }
+  ]
+}
