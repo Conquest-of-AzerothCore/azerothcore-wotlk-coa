@@ -82,6 +82,20 @@
       "label": "Normal acquisition owns Explode before its conversion"
     },
     {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 21,
+      "spell": 800792
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 800792,
+      "label": "The bar holds ordinary Explode before the conversion"
+    },
+    {
       "action": "specialization",
       "actor": "pyro",
       "id": 39
@@ -103,6 +117,33 @@
       "equals": 1,
       "within_ms": 2000,
       "label": "Draconic grants the level26 Echo rank normally"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "client_knows_spell",
+      "spell": 803408,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The client learns the converted rank without a relog"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "client_spellbook_copies",
+      "spell": 803408,
+      "equals": 2,
+      "within_ms": 2000,
+      "label": "The client is told the Echo rank once by learning it and once by the conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 803408,
+      "within_ms": 2000,
+      "label": "The converted rank takes the Explode button on the bar"
     },
     {
       "action": "assert",
@@ -216,6 +257,23 @@
       "label": "Incineration restores ordinary Explode"
     },
     {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 800792,
+      "label": "The bar returns to ordinary Explode without the conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 803408,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "Incineration takes the Echo rank back"
+    },
+    {
       "action": "gossip_hello",
       "actor": "pyro"
     },
@@ -290,6 +348,30 @@
       "spell": 502060,
       "equals": 1,
       "within_ms": 1000
+    },
+    {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 22,
+      "spell": 502057
+    },
+    {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 23,
+      "spell": 502058
+    },
+    {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 24,
+      "spell": 502059
+    },
+    {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 25,
+      "spell": 502060
     },
     {
       "action": "specialization",
@@ -384,6 +466,106 @@
       "metric": "trainer_window_state",
       "spell": 502060,
       "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 803408,
+      "within_ms": 2000,
+      "label": "Every known Explode button on the bar shows the converted Echo rank"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 22,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 23,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 24,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 25,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "client_knows_spell",
+      "spell": 803408,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The client knows the converted rank live"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "client_spellbook_copies",
+      "spell": 803408,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The re-conversion nets a single Echo copy while five ranks convert into it"
+    },
+    {
+      "action": "relog",
+      "actor": "pyro"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 803408,
+      "within_ms": 8000,
+      "label": "The converted bar survives a relog"
+    },
+    {
+      "action": "client_packet",
+      "actor": "pyro",
+      "opcode": 296,
+      "early": true,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 26
+        },
+        {
+          "u32": 803408
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 26,
+      "equals": 803408,
+      "within_ms": 2000,
+      "label": "The converted rank can be placed on the bar like a dragged book row"
     }
   ]
 }
