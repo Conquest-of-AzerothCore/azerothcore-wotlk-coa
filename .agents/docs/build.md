@@ -11,6 +11,9 @@ make -j$(nproc) && make install
 
 C++20 required (`CMAKE_CXX_STANDARD 20`). Useful flags: `BUILD_TESTING=ON` (Google Test), `NOPCH=1` (disable precompiled headers). Full set in `conf/dist/config.cmake`. `compile_commands.json` is exported automatically.
 
+On macOS, `verify_all.py` configures with `-DCMAKE_C_FLAGS_RELWITHDEBINFO` and `-DCMAKE_CXX_FLAGS_RELWITHDEBINFO`
+set to `-O2 -g1 -DNDEBUG`; pass the same to a manual configure to get its object sizes and link times.
+
 ## Verification
 
 Verify with `python -B tools/verify_all.py` ([guide](../../docs/coa/verification.md)); do not run `ctest`,

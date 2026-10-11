@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "A Wildcard Hero's rank trainer gates ranks at the client's Spell.dbc level (#6922)",
+  "contract": "A Hero's rank trainer rows take each rank's level from Spell.dbc, which the client's rank tooltips show: Life Tap rank 2 (1455) is level 16 and rank 3 (1456) level 26. SpellInfoCorrections moves Life Tap ranks 2-8 to level 6 for stock AzerothCore, which a stock warlock trainer row never reads, so the Hero rows built from the corrected SpellInfo let a level 18 Hero buy every rank. The Book of Ascension teaches rank 2 at level 18, refuses rank 3 there, and teaches it at level 26.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "wild", "name": "Wildtap", "race": 1, "class": 10, "level": 18}
+  ],
+  "creatures": [
+    {"id": "book", "owner": "wild", "entry": 75115, "distance": 2, "faction": 35}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Wildtap"},
+    {"action": "assert", "actor": "wild", "metric": "game_mode_mask", "min": 64},
+    {"action": "set_money", "actor": "wild", "value": 10000000},
+
+    {"action": "learn", "label": "A rolled Life Tap at rank 1", "actor": "wild", "spell": 1454},
+    {"action": "trainer_buy", "label": "Buy Life Tap rank 2 (level 16)", "actor": "wild", "target": "book", "spell": 1455},
+    {"action": "assert", "label": "The book taught rank 2", "actor": "wild", "metric": "knows_spell", "spell": 1455, "equals": 1},
+    {"action": "trainer_buy", "label": "Ask for rank 3 (level 26) at level 18", "actor": "wild", "target": "book", "spell": 1456},
+    {"action": "assert", "label": "The purchase is answered with a refusal", "actor": "wild", "metric": "spellbook_buy_failed", "spell": 1456, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "Below level 26 rank 3 is not taught", "actor": "wild", "metric": "knows_spell", "spell": 1456, "equals": 0},
+    {"action": "set_level", "actor": "wild", "value": 26},
+    {"action": "trainer_buy", "label": "Buy rank 3 at level 26", "actor": "wild", "target": "book", "spell": 1456},
+    {"action": "assert", "label": "The book taught rank 3", "actor": "wild", "metric": "knows_spell", "spell": 1456, "equals": 1},
+    {"action": "trainer_buy", "label": "Ask for rank 4 (level 36) at level 26", "actor": "wild", "target": "book", "spell": 11687},
+    {"action": "assert", "label": "Rank 4 is refused below its level", "actor": "wild", "metric": "knows_spell", "spell": 11687, "equals": 0}
+  ]
+}

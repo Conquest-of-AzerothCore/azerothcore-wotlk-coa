@@ -287,6 +287,13 @@ namespace lfg
                 if (dungeon.type == LFG_TYPE_RANDOM && dungeon.expansion == maxExpansion && dungeon.difficulty == DUNGEON_DIFFICULTY_NORMAL)
                     dungeon.maxlevel = std::max<uint8>(dungeon.maxlevel, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
 
+        // CoA: the Classic dungeons scale, and Ascension let anyone in their target range (TargetLevelMin,
+        // 15 for most) queue for them; MinLevel is only the level they were made for.
+        for (auto& [id, dungeon] : LfgDungeonStore)
+            if (dungeon.type == LFG_TYPE_DUNGEON && dungeon.expansion == EXPANSION_CLASSIC && dungeon.difficulty == DUNGEON_DIFFICULTY_NORMAL)
+                if (LFGDungeonEntry const* entry = sLFGDungeonStore.LookupEntry(id); entry && entry->TargetLevelMin && entry->TargetLevelMin < dungeon.minlevel)
+                    dungeon.minlevel = uint8(entry->TargetLevelMin);
+
         // Fill teleport locations from DB
         //                                                   0          1           2           3            4
         QueryResult result = WorldDatabase.Query("SELECT dungeonId, position_x, position_y, position_z, orientation FROM lfg_dungeon_template");

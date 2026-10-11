@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Elwynn: a ghost released at the north-eastern Riverpaw camp reaches a Spirit Healer (#7175)",
+  "contract": "A player who dies in Elwynn Forest releases at the nearest zone 12 graveyard that has a Spirit Healer. The death point is the Riverpaw camp spawn at (-8985.59,-854.958,69.1153). Shadewell Spring 6074 (-8594.75,-615.457,144.698) is nearer but has no Spirit Healer, so it serves only the Inquisitorial dungeon zones. The nearest remaining graveyard is the Tower of Azora 1468 (about 630 yards), ahead of Northshire 105 (about 668 yards), and its Spirit Healer 6491 stands 3 yards from it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8985.59,
+    "y": -854.958,
+    "z": 69.1153,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Tower of Azora graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -9580,
+      "max": -9550,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -621,
+      "max": -591
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

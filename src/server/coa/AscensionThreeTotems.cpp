@@ -45,7 +45,6 @@ constexpr float CHARGE_RANGE = 30.0f;
 constexpr float CHARGE_SPEED = 12.0f;
 constexpr float CHARGE_MIN_RUN = 2.0f;
 constexpr float WALL_TOLERANCE = 1.0f;
-constexpr int32 TRAMPLE_DAMAGE = 1000000;
 constexpr uint32 CHARGE_RUN_GRACE_MS = 1000;
 constexpr uint32 TREMOR_PULSE_MS = 1000;
 constexpr uint32 ENRAGE_HEALTH_PCT = 50;
@@ -364,21 +363,6 @@ private:
     uint32 _tremorPulseMs = 0;
 };
 
-class spell_coa_malgorm_trample : public SpellScript
-{
-    PrepareSpellScript(spell_coa_malgorm_trample);
-
-    void Crush(SpellEffIndex)
-    {
-        SetHitDamage(TRAMPLE_DAMAGE);
-    }
-
-    void Register() override
-    {
-        OnEffectHitTarget += SpellEffectFn(spell_coa_malgorm_trample::Crush, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
-    }
-};
-
 class spell_coa_grimtotem_disguise : public AuraScript
 {
     PrepareAuraScript(spell_coa_grimtotem_disguise);
@@ -415,7 +399,6 @@ void AddSC_AscensionThreeTotems()
 {
     RegisterCreatureAI(npc_coa_malgorm_hollowhoof);
     RegisterSpellAndAuraScriptPair(spell_coa_corrupting_totem, spell_coa_corrupting_totem_aura);
-    RegisterSpellScript(spell_coa_malgorm_trample);
     RegisterSpellScript(spell_coa_grimtotem_disguise);
     for (uint32 disguise : { SPELL_GRIMTOTEM_DISGUISE_WARRIOR, SPELL_GRIMTOTEM_DISGUISE_GUARD })
         Ascension::ClientSpellPatches::Instance().Register(disguise);

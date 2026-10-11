@@ -141,6 +141,8 @@ void GainSpirit(Player* player, uint8 count)
     for (uint8 i = 0; i < count; ++i)
     {
         Cast(player, player, Spirit);
+        if (player->HasAura(TrueSpirit))
+            Cast(player, player, TrueSpiritReady);
         if (player->HasAura(SpiritDevotee))
             Cast(player, player, SpiritMana);
     }

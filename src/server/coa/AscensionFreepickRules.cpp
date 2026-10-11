@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <limits>
 #include <string_view>
+#include <unordered_set>
 
 namespace AscensionFreepick
 {
@@ -647,5 +648,25 @@ ApplyCheck CheckApply(Build const& base, std::vector<Entry> const& upload, UnitC
     }
     check.Entries = target.Entries();
     return check;
+}
+
+std::vector<std::uint32_t> TaughtSpells(std::uint32_t spellId, LearnedSpells const& learned)
+{
+    std::vector<std::uint32_t> spells;
+    std::vector<std::uint32_t> pending = { spellId };
+    std::unordered_set<std::uint32_t> seen;
+    while (!pending.empty())
+    {
+        std::uint32_t const current = pending.back();
+        pending.pop_back();
+        if (!seen.insert(current).second)
+            continue;
+        std::vector<std::uint32_t> const next = learned(current);
+        if (next.empty())
+            spells.push_back(current);
+        else
+            pending.insert(pending.end(), next.rbegin(), next.rend());
+    }
+    return spells;
 }
 }

@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "name": "A Mythical Cache gives a Houndmaster Agility gear, not Intellect gear",
+  "contract": "A Mythical Cache (Mythic 1, 2093952) gives one random level 60 Mythic 1 item. ChrSpecs.dbc lists a specialization's primary stats in priority order (fields 8-10): Witch Hunter Houndmaster (11) lists Agility, then Intellect, and on the live realm a Witch Hunter received Agility gear from Spoils and Caches, with Intellect at most as a lesser stat. The cache prefers items whose strongest of Strength, Agility, Intellect and Spirit is the first listed attribute, so after eight opens no reward may have a stronger attribute than Agility. Over 40% of the Mythic 1 items a Houndmaster may wear have Intellect as their strongest attribute, so a cache that treats every listed stat alike fails this check in about 98 of 100 runs.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "houndmaster",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "houndmaster",
+      "id": 11,
+      "label": "houndmaster picks Houndmaster (ChrSpecs 11, primary stats Agility then Intellect)"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "add_item",
+      "actor": "houndmaster",
+      "item": 2093952,
+      "count": 8
+    },
+    {
+      "action": "use_item",
+      "actor": "houndmaster",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "houndmaster",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "houndmaster",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "houndmaster",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "houndmaster",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "houndmaster",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "houndmaster",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "houndmaster",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "item_count",
+      "item": 2093952,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "carried_item_count",
+      "min_required_level": 60,
+      "label": "8 Mythical Caches put 8 level 60 rewards in the bags",
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "carried_item_count",
+      "min_required_level": 60,
+      "label": "No reward has a primary attribute stronger than Agility",
+      "off_stat": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "houndmaster",
+      "metric": "carried_item_count",
+      "min_required_level": 60,
+      "label": "The rewards include Agility gear",
+      "dominant_stat": 3,
+      "min": 1
+    }
+  ]
+}

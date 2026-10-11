@@ -1200,7 +1200,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             }
         default:
             {
-                switch (GetEntry())
+                switch (GetStockPetEntry(GetEntry()))
                 {
                     case NPC_FIRE_ELEMENTAL:
                         {

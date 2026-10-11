@@ -31,6 +31,7 @@ int main()
     Player primal;
     primal.cls = CLASS_WILDWALKER;
     primal.auras[680406] = {};
+    primal.level = 34;
     aura_ascension_mountain_threshold threshold;
     threshold.fixtureOwner = &primal;
     threshold.Changed(nullptr, AURA_EFFECT_HANDLE_REAL);
@@ -38,8 +39,14 @@ int main()
     {
         threshold.stacks = count;
         threshold.Changed(nullptr, AURA_EFFECT_HANDLE_CHANGE_AMOUNT);
-        assert(primal.casts.size() == (count == 5 ? 1u : 0u));
+        assert(primal.casts.empty());
     }
+    primal.level = 40;
+    threshold.stacks = 3;
+    threshold.Changed(nullptr, AURA_EFFECT_HANDLE_CHANGE_AMOUNT);
+    threshold.stacks = 5;
+    threshold.Changed(nullptr, AURA_EFFECT_HANDLE_CHANGE_AMOUNT);
+    assert(primal.casts.size() == 1 && std::get<1>(primal.casts[0]) == 680472);
     threshold.Changed(nullptr, AURA_EFFECT_HANDLE_CHANGE_AMOUNT);
     assert(primal.casts.size() == 1 && std::get<1>(primal.casts[0]) == 680472);
     aura_ascension_mountain_threshold loaded;

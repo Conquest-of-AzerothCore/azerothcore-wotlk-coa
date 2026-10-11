@@ -115,11 +115,16 @@
       "within_ms": 5000
     },
     {
-      "label": "beat the recruit down to its invincibility floor",
+      "label": "weaken the recruit above its surrender threshold",
       "action": "attack_nearby",
       "actor": "p",
       "entry": 255339,
-      "damage_pct": 99
+      "damage_pct": 98
+    },
+    {
+      "label": "allow the recruit to react before the second hit",
+      "action": "wait",
+      "ms": 1200
     },
     {
       "label": "finish the beating",

@@ -1498,9 +1498,14 @@ namespace CoAChallenges
 
         // ---- 5. XP / profession XP ----
         RUN("CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE", [](Player* p) {
-            uint32 gain = 100;
-            sScriptMgr->OnPlayerUpdateCraftingSkill(p, nullptr, 0, gain);
-            return gain == 0; });
+            uint32 craftGain = 1;
+            sScriptMgr->OnPlayerUpdateCraftingSkill(p, nullptr, 0, craftGain);
+            uint32 gatherGain = 1;
+            sScriptMgr->OnPlayerUpdateGatheringSkill(p, SKILL_MINING, 1, 25, 50, 75, gatherGain);
+            uint32 amtProfession = 1000; sScriptMgr->OnPlayerGiveXP(p, amtProfession, nullptr, XPSOURCE_PROFESSION);
+            uint32 amtSkill = 1000; sScriptMgr->OnPlayerGiveXP(p, amtSkill, nullptr, XPSOURCE_PROFESSION_SKILL);
+            uint32 amtKill = 1000; sScriptMgr->OnPlayerGiveXP(p, amtKill, nullptr, XPSOURCE_KILL);
+            return craftGain == 1 && gatherGain == 1 && amtProfession == 0 && amtSkill == 0 && amtKill == 1000; });
         RUN("CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_QUESTS", [](Player* p) {
             uint32 amt = 1000; sScriptMgr->OnPlayerGiveXP(p, amt, nullptr, XPSOURCE_KILL); return amt == 0; });
         RUN("CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_CREATURES", [](Player* p) {

@@ -77,7 +77,7 @@ void SyncReplacements(Player* player)
             continue;
         if (child && !player->HasSpell(child))
             player->learnSpell(child, true);
-        player->SetTemporarySpellReplacement(id, child);
+        player->SetTemporarySpellReplacement(id, child, child != Volley);
     }
 }
 }

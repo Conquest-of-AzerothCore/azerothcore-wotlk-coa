@@ -1467,18 +1467,75 @@ void SpellMgr::CopyToSpellTwins(Store& store)
     }
 }
 
-void SpellMgr::LoadSpellTwins()
+void SpellMgr::LoadSpellTwins(bool ranked)
 {
-    _spellTwins.clear();
-    if (_spellTwinSource)
-        for (auto const& [source, twin] : _spellTwinSource())
-            if (GetSpellInfo(source) && GetSpellInfo(twin))
-                _spellTwins.emplace(source, twin);
+    if (!ranked)
+    {
+        _spellTwins.clear();
+        _spellTwinSources.clear();
+        _spellNamesakes.clear();
+        _spellNamesakeSources.clear();
+        if (_spellNamesakeSource)
+        {
+            for (auto const& [stock, spell] : _spellNamesakeSource())
+            {
+                if (!GetSpellInfo(stock) || !GetSpellInfo(spell))
+                    continue;
+                _spellNamesakes.emplace(stock, spell);
+                _spellNamesakeSources[spell] = stock;
+            }
+        }
+    }
 
-    CopyToSpellTwins(mSpellCooldownOverrideMap);
+    if (_spellTwinSource)
+    {
+        for (auto const& [source, twin] : _spellTwinSource(ranked))
+        {
+            if (!GetSpellInfo(source) || !GetSpellInfo(twin))
+                continue;
+            if (auto const previous = _spellTwinSources.find(twin); previous != _spellTwinSources.end())
+            {
+                auto const [begin, end] = _spellTwins.equal_range(previous->second);
+                for (auto itr = begin; itr != end; ++itr)
+                {
+                    if (itr->second == twin)
+                    {
+                        _spellTwins.erase(itr);
+                        break;
+                    }
+                }
+            }
+            _spellTwins.emplace(source, twin);
+            _spellTwinSources[twin] = source;
+        }
+    }
+
+    if (ranked)
+        CopyToSpellTwins(mSpellCooldownOverrideMap);
 
     LOG_INFO("server.loading", ">> Loaded {} spell twins", _spellTwins.size());
     LOG_INFO("server.loading", " ");
+}
+
+uint32 SpellMgr::GetSpellTwinSource(uint32 spellId) const
+{
+    if (auto const itr = _spellTwinSources.find(spellId); itr != _spellTwinSources.end())
+        return itr->second;
+    if (auto const itr = _spellNamesakeSources.find(spellId); itr != _spellNamesakeSources.end())
+        return itr->second;
+    return spellId;
+}
+
+std::vector<uint32> SpellMgr::GetSpellAndRelatives(uint32 spellId) const
+{
+    std::vector<uint32> spells = { spellId };
+    auto const [twinBegin, twinEnd] = _spellTwins.equal_range(spellId);
+    for (auto itr = twinBegin; itr != twinEnd; ++itr)
+        spells.push_back(itr->second);
+    auto const [namesakeBegin, namesakeEnd] = _spellNamesakes.equal_range(spellId);
+    for (auto itr = namesakeBegin; itr != namesakeEnd; ++itr)
+        spells.push_back(itr->second);
+    return spells;
 }
 
 void SpellMgr::LoadSpellRequired()
@@ -1545,11 +1602,14 @@ void SpellMgr::LoadSpellRequired()
     std::vector<std::pair<uint32, uint32>> twinRequirements;
     for (auto const& [spellId, spellReq] : mSpellReq)
     {
-        auto const twin = _spellTwins.find(spellId);
-        if (twin == _spellTwins.end() || mSpellReq.contains(twin->second))
-            continue;
-        auto const reqTwin = _spellTwins.find(spellReq);
-        twinRequirements.emplace_back(twin->second, reqTwin != _spellTwins.end() ? reqTwin->second : spellReq);
+        auto const [begin, end] = _spellTwins.equal_range(spellId);
+        for (auto twin = begin; twin != end; ++twin)
+        {
+            if (mSpellReq.contains(twin->second))
+                continue;
+            auto const reqTwin = _spellTwins.find(spellReq);
+            twinRequirements.emplace_back(twin->second, reqTwin != _spellTwins.end() ? reqTwin->second : spellReq);
+        }
     }
     for (auto const& [spellId, spellReq] : twinRequirements)
     {
@@ -2803,12 +2863,13 @@ void SpellMgr::LoadSpellLinked()
     for (auto const& [trigger, effects] : mSpellLinkedMap)
     {
         int32 const spellId = std::abs(trigger) % SPELL_LINKED_MAX_SPELLS;
-        auto const twin = _spellTwins.find(spellId);
-        if (twin == _spellTwins.end())
-            continue;
-        int32 const twinTrigger = trigger + (trigger < 0 ? -1 : 1) * (int32(twin->second) - spellId);
-        if (!mSpellLinkedMap.contains(twinTrigger))
-            twinLinks.emplace(twinTrigger, effects);
+        auto const [begin, end] = _spellTwins.equal_range(spellId);
+        for (auto twin = begin; twin != end; ++twin)
+        {
+            int32 const twinTrigger = trigger + (trigger < 0 ? -1 : 1) * (int32(twin->second) - spellId);
+            if (!mSpellLinkedMap.contains(twinTrigger))
+                twinLinks.emplace(twinTrigger, effects);
+        }
     }
     mSpellLinkedMap.merge(twinLinks);
 

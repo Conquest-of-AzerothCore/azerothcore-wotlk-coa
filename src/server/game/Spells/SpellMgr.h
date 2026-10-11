@@ -795,10 +795,18 @@ public:
     void SetAddedSpellRanks(AddedSpellRanks ranks) { _addedSpellRanks = ranks; }
     void LoadAddedSpellRanks();
     /// (source, twin) spell pairs a module adds; a twin without its own database row takes its source's
-    using SpellTwins = std::vector<std::pair<uint32, uint32>> (*)();
+    /// called before spell corrections (ranked = false) and again once rank chains are known (ranked = true)
+    using SpellTwins = std::vector<std::pair<uint32, uint32>> (*)(bool ranked);
     void SetSpellTwins(SpellTwins twins) { _spellTwinSource = twins; }
-    void LoadSpellTwins();
-    [[nodiscard]] std::unordered_map<uint32, uint32> const& GetSpellTwins() const { return _spellTwins; }
+    /// (stock, spell) pairs that share a name but not a layout: matched by id lookups, never given stock data
+    using SpellNamesakes = std::vector<std::pair<uint32, uint32>> (*)();
+    void SetSpellNamesakes(SpellNamesakes namesakes) { _spellNamesakeSource = namesakes; }
+    /// a stock spell with its twins and namesakes
+    [[nodiscard]] std::vector<uint32> GetSpellAndRelatives(uint32 spellId) const;
+    void LoadSpellTwins(bool ranked);
+    [[nodiscard]] std::unordered_multimap<uint32, uint32> const& GetSpellTwins() const { return _spellTwins; }
+    /// the spell a twin takes its data from, or the spell itself
+    [[nodiscard]] uint32 GetSpellTwinSource(uint32 spellId) const;
     void LoadSpellRequired();
     void LoadSpellLearnSkills();
     void LoadSpellTargetPositions();
@@ -834,7 +842,11 @@ private:
 
     AddedSpellRanks            _addedSpellRanks = nullptr;
     SpellTwins                 _spellTwinSource = nullptr;
-    std::unordered_map<uint32, uint32> _spellTwins;
+    std::unordered_multimap<uint32, uint32> _spellTwins;
+    std::unordered_map<uint32, uint32> _spellTwinSources;
+    SpellNamesakes             _spellNamesakeSource = nullptr;
+    std::unordered_multimap<uint32, uint32> _spellNamesakes;
+    std::unordered_map<uint32, uint32> _spellNamesakeSources;
     SpellDifficultySearcherMap mSpellDifficultySearcherMap;
     SpellChainMap              mSpellChains;
     SpellsRequiringSpellMap    mSpellsReqSpell;

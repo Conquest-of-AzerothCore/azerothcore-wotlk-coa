@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "name": "Hero Architect lists, creates, rates and protects builds through the native build-creator requests",
+  "contract": "The Collections Hero Architect tab (Ascension_BuildCreator) is C_BuildCreator in Extensions.dll. QueryAllBuilds sends CMSG 0x062E {category name}; the server answers with SMSG 0x062F pages {text, u32 page, u32 pages, u32 count, entries}. QueryBuild sends 0x0630 {id} and receives 0x0631 {text, entry}. PublishBuild sends the pending entry as 0x0626 (new) or 0x0628 (save) and receives 0x0627 / 0x0629 {PUBLISH_BUILD_* result, entry on success, id on a failed save}. RateBuild sends 0x062A {id, u8 up} and receives 0x062B {RATE_BUILD_*}; DeleteBuild sends 0x062C {id} and receives 0x062D {DELETE_BUILD_*}. At login the server sends the account's owned build ids (0x0634) and upvoted build ids (0x0635), as the live realm did. The board is seeded with the 357 Dawnrise builds harvested on 2026-08-29: Level60PvP holds six, including Shadow Rogue (punish the meta) e3ef4781-0365-4e98-a759-3a92fc5867b6, and Level60PvE holds The Tankiest Bear cac04950-5c76-4ae9-80ed-c81553578d08. Ownership and votes belong to the account. A player cannot publish into Build Draft categories, edit or delete a build another account owns, or upvote a build twice.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "author", "race": 1, "class": 10, "level": 60 },
+    { "id": "alt", "race": 1, "class": 10, "level": 60, "account_of": "author" },
+    { "id": "other", "race": 1, "class": 10, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "Login sends the account's owned builds", "actor": "author",
+      "metric": "server_packet_u32", "opcode": 1588, "index": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Login sends the account's upvoted builds", "actor": "author",
+      "metric": "server_packet_u32", "opcode": 1589, "index": 0, "equals": 0
+    },
+
+    {
+      "action": "client_packet", "label": "Browse Level 60 PvP", "actor": "author", "opcode": 1582,
+      "fields": [ { "string": "Level60PvP" } ]
+    },
+    {
+      "action": "assert", "label": "The category arrives in one page", "actor": "author", "metric": "server_packet_u32",
+      "opcode": 1583, "offset": 0, "skip_strings": 1, "index": 1, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The page holds the six seeded PvP builds", "actor": "author",
+      "metric": "server_packet_u32", "opcode": 1583, "offset": 0, "skip_strings": 1, "index": 2, "equals": 6
+    },
+    {
+      "action": "assert", "label": "including Shadow Rogue (punish the meta)", "actor": "author",
+      "metric": "server_packet_contains", "opcode": 1583, "text": "Shadow Rogue (punish the meta)", "equals": 1
+    },
+    {
+      "action": "assert", "label": "and no build of another category", "actor": "author",
+      "metric": "server_packet_contains", "opcode": 1583, "text": "The Tankiest Bear", "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "Browse Level 60 PvE", "actor": "author", "opcode": 1582,
+      "fields": [ { "string": "Level60PvE" } ]
+    },
+    {
+      "action": "assert", "label": "212 PvE builds need several pages", "actor": "author",
+      "metric": "server_packet_u32", "opcode": 1583, "offset": 0, "skip_strings": 1, "index": 1, "min": 2,
+      "within_ms": 2000
+    },
+
+    {
+      "action": "client_packet", "label": "Open The Tankiest Bear", "actor": "author", "opcode": 1584,
+      "fields": [ { "string": "cac04950-5c76-4ae9-80ed-c81553578d08" } ]
+    },
+    {
+      "action": "assert", "label": "The build arrives", "actor": "author", "metric": "server_packet_contains",
+      "opcode": 1585, "text": "The Tankiest Bear", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "Open a build that does not exist", "actor": "author", "opcode": 1584,
+      "fields": [ { "string": "00000000-0000-4000-8000-000000000000" } ]
+    },
+    {
+      "action": "assert", "label": "It answers with an entry that has no spells", "actor": "author",
+      "metric": "server_packet_u32", "opcode": 1585, "offset": 82, "index": 0, "equals": 0, "within_ms": 2000
+    },
+
+    {
+      "action": "client_packet", "label": "Publish a new PvP build", "actor": "author", "opcode": 1574,
+      "fields": [
+        { "string": "" }, { "string": "" }, { "string": "" }, { "string": "" }, { "u32": 10 }, { "string": "" },
+        { "string": "Harness Shadow Duelist" }, { "string": "" }, { "string": "Corruption, then Shadow Bolt." },
+        { "string": "spell_shadow_shadowbolt" }, { "u32": 0 }, { "u64": 0 }, { "u64": 0 }, { "u32": 3 },
+        { "u32": 8 }, { "u32": 3 },
+        { "u32": 2 },
+        { "u32": 172 }, { "u32": 1 }, { "u8": 0 }, { "u8": 0 }, { "u8": 0 }, { "u8": 0 }, { "u32": 0 },
+        { "string": "" },
+        { "u32": 686 }, { "u32": 4 }, { "u8": 1 }, { "u8": 0 }, { "u8": 0 }, { "u8": 0 }, { "u32": 0 },
+        { "string": "core" },
+        { "u32": 0 },
+        { "u32": 1 }, { "u32": 10 }, { "string": "" },
+        { "u32": 1 }, { "u32": 1 }, { "string": "" },
+        { "u8": 0 }, { "u32": 1 }, { "u32": 0 }
+      ]
+    },
+    {
+      "action": "assert", "label": "The build is published", "actor": "author", "metric": "server_packet_contains",
+      "opcode": 1575, "text": "PUBLISH_BUILD_OK", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "and returned to its author", "actor": "author", "metric": "server_packet_contains",
+      "opcode": 1575, "text": "Harness Shadow Duelist", "equals": 1
+    },
+    {
+      "action": "client_packet", "label": "Browse Level 60 PvP again", "actor": "author", "opcode": 1582,
+      "fields": [ { "string": "Level60PvP" } ]
+    },
+    {
+      "action": "assert", "label": "The category now lists seven builds", "actor": "author",
+      "metric": "server_packet_u32", "opcode": 1583, "offset": 0, "skip_strings": 1, "index": 2, "equals": 7,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "Another account browses Level 60 PvP", "actor": "other", "opcode": 1582,
+      "fields": [ { "string": "Level60PvP" } ]
+    },
+    {
+      "action": "assert", "label": "Other players see the new build", "actor": "other",
+      "metric": "server_packet_contains", "opcode": 1583, "text": "Harness Shadow Duelist", "equals": 1,
+      "within_ms": 2000
+    },
+
+    {
+      "action": "client_packet", "label": "Publish a build without spells", "actor": "author", "opcode": 1574,
+      "fields": [
+        { "string": "" }, { "string": "" }, { "string": "" }, { "string": "" }, { "u32": 10 }, { "string": "" },
+        { "string": "Empty" }, { "string": "" }, { "string": "Nothing yet." }, { "string": "spell_shadow_shadowbolt" },
+        { "u32": 0 }, { "u64": 0 }, { "u64": 0 }, { "u32": 3 }, { "u32": 8 }, { "u32": 3 },
+        { "u32": 0 }, { "u32": 0 },
+        { "u32": 1 }, { "u32": 10 }, { "string": "" },
+        { "u32": 1 }, { "u32": 1 }, { "string": "" },
+        { "u8": 0 }, { "u32": 0 }, { "u32": 0 }
+      ]
+    },
+    {
+      "action": "assert", "label": "A build needs spells", "actor": "author", "metric": "server_packet_contains",
+      "opcode": 1575, "text": "PUBLISH_BUILD_NO_SPELLS", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "Publish into Build Draft", "actor": "author", "opcode": 1574,
+      "fields": [
+        { "string": "" }, { "string": "" }, { "string": "" }, { "string": "" }, { "u32": 10 }, { "string": "" },
+        { "string": "Drafted" }, { "string": "" }, { "string": "Draft build." }, { "string": "spell_shadow_shadowbolt" },
+        { "u32": 0 }, { "u64": 0 }, { "u64": 0 }, { "u32": 8 }, { "u32": 8 }, { "u32": 3 },
+        { "u32": 1 },
+        { "u32": 172 }, { "u32": 1 }, { "u8": 0 }, { "u8": 0 }, { "u8": 0 }, { "u8": 0 }, { "u32": 0 },
+        { "string": "" },
+        { "u32": 0 },
+        { "u32": 1 }, { "u32": 10 }, { "string": "" },
+        { "u32": 1 }, { "u32": 1 }, { "string": "" },
+        { "u8": 0 }, { "u32": 0 }, { "u32": 0 }
+      ]
+    },
+    {
+      "action": "assert", "label": "Only a GM publishes into Build Draft", "actor": "author",
+      "metric": "server_packet_contains", "opcode": 1575, "text": "PUBLISH_BUILD_BAD_CATEGORY", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "Save over a seeded build", "actor": "author", "opcode": 1576,
+      "fields": [
+        { "string": "cac04950-5c76-4ae9-80ed-c81553578d08" }, { "string": "" }, { "string": "" }, { "string": "" },
+        { "u32": 10 }, { "string": "" },
+        { "string": "Stolen Bear" }, { "string": "" }, { "string": "Mine now." }, { "string": "spell_shadow_shadowbolt" },
+        { "u32": 0 }, { "u64": 0 }, { "u64": 0 }, { "u32": 2 }, { "u32": 2 }, { "u32": 0 },
+        { "u32": 1 },
+        { "u32": 172 }, { "u32": 1 }, { "u8": 0 }, { "u8": 0 }, { "u8": 0 }, { "u8": 0 }, { "u32": 0 },
+        { "string": "" },
+        { "u32": 0 },
+        { "u32": 1 }, { "u32": 10 }, { "string": "" },
+        { "u32": 1 }, { "u32": 1 }, { "string": "" },
+        { "u8": 0 }, { "u32": 0 }, { "u32": 0 }
+      ]
+    },
+    {
+      "action": "assert", "label": "Another account's build cannot be saved over", "actor": "author",
+      "metric": "server_packet_contains", "opcode": 1577, "text": "PUBLISH_BUILD_NO_PERMISSION", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "and the refusal names the build", "actor": "author",
+      "metric": "server_packet_contains", "opcode": 1577, "text": "cac04950-5c76-4ae9-80ed-c81553578d08", "equals": 1
+    },
+    {
+      "action": "client_packet", "label": "Delete a seeded build", "actor": "author", "opcode": 1580,
+      "fields": [ { "string": "cac04950-5c76-4ae9-80ed-c81553578d08" } ]
+    },
+    {
+      "action": "assert", "label": "Another account's build cannot be deleted", "actor": "author",
+      "metric": "server_packet_contains", "opcode": 1581, "text": "DELETE_BUILD_NO_PERMISSION", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "Delete a build that does not exist", "actor": "author", "opcode": 1580,
+      "fields": [ { "string": "00000000-0000-4000-8000-000000000000" } ]
+    },
+    {
+      "action": "assert", "label": "A missing build is reported", "actor": "author", "metric": "server_packet_contains",
+      "opcode": 1581, "text": "DELETE_BUILD_NOT_FOUND", "equals": 1, "within_ms": 2000
+    },
+
+    {
+      "action": "client_packet", "label": "Upvote The Tankiest Bear", "actor": "author", "opcode": 1578,
+      "fields": [ { "string": "cac04950-5c76-4ae9-80ed-c81553578d08" }, { "u8": 1 } ]
+    },
+    {
+      "action": "assert", "label": "The vote counts", "actor": "author", "metric": "server_packet_contains",
+      "opcode": 1579, "text": "RATE_BUILD_OK", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "The alt upvotes it too", "actor": "alt", "opcode": 1578,
+      "fields": [ { "string": "cac04950-5c76-4ae9-80ed-c81553578d08" }, { "u8": 1 } ]
+    },
+    {
+      "action": "assert", "label": "An account votes once", "actor": "alt", "metric": "server_packet_contains",
+      "opcode": 1579, "text": "RATE_BUILD_ALREADY_UPVOTED", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "Upvote a build that does not exist", "actor": "other", "opcode": 1578,
+      "fields": [ { "string": "00000000-0000-4000-8000-000000000000" }, { "u8": 1 } ]
+    },
+    {
+      "action": "assert", "label": "A missing build cannot be rated", "actor": "other",
+      "metric": "server_packet_contains", "opcode": 1579, "text": "RATE_BUILD_NOT_FOUND", "equals": 1,
+      "within_ms": 2000
+    },
+
+    { "action": "relog", "actor": "alt" },
+    {
+      "action": "assert", "label": "The alt logs in owning the account's build", "actor": "alt",
+      "metric": "server_packet_u32", "opcode": 1588, "index": 0, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "and with the account's upvote", "actor": "alt", "metric": "server_packet_u32",
+      "opcode": 1589, "index": 0, "equals": 1
+    },
+    {
+      "action": "assert", "label": "which is The Tankiest Bear", "actor": "alt", "metric": "server_packet_contains",
+      "opcode": 1589, "text": "cac04950-5c76-4ae9-80ed-c81553578d08", "equals": 1
+    },
+    { "action": "relog", "actor": "other" },
+    {
+      "action": "assert", "label": "Another account owns nothing", "actor": "other", "metric": "server_packet_u32",
+      "opcode": 1588, "index": 0, "equals": 0, "within_ms": 5000
+    },
+
+    {
+      "action": "client_packet", "label": "Withdraw the upvote", "actor": "alt", "opcode": 1578,
+      "fields": [ { "string": "cac04950-5c76-4ae9-80ed-c81553578d08" }, { "u8": 0 } ]
+    },
+    {
+      "action": "assert", "label": "The vote is withdrawn", "actor": "alt", "metric": "server_packet_contains",
+      "opcode": 1579, "text": "RATE_BUILD_OK", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "Withdraw it again", "actor": "alt", "opcode": 1578,
+      "fields": [ { "string": "cac04950-5c76-4ae9-80ed-c81553578d08" }, { "u8": 0 } ]
+    },
+    {
+      "action": "assert", "label": "There is no vote left to withdraw", "actor": "alt",
+      "metric": "server_packet_contains", "opcode": 1579, "text": "RATE_BUILD_NOT_UPVOTED", "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

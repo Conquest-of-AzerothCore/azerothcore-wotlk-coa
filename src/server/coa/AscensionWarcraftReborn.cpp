@@ -7,6 +7,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
@@ -39,24 +40,51 @@ bool Exists(uint32 spellId)
     return sSpellMgr->GetSpellInfo(spellId) != nullptr;
 }
 
-std::vector<std::pair<uint32, uint32>> LoadTwins()
+std::optional<SpellLayout> LayoutOf(std::uint32_t spellId)
 {
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo)
+        return std::nullopt;
+    SpellLayout layout;
+    layout.Name = spellInfo->SpellName[0];
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    {
+        layout.Effects[i] = spellInfo->Effects[i].Effect;
+        layout.Auras[i] = spellInfo->Effects[i].ApplyAuraName;
+    }
+    return layout;
+}
+
+std::vector<std::pair<uint32, uint32>> BaseTwins;
+
+std::vector<std::pair<uint32, uint32>> LoadNamesakes()
+{
+    if (!AscensionFreepick::ReadRealm().WarcraftReborn)
+        return {};
+    return SpellNamesakes(sSpellMgr->GetSpellInfoStoreSize(), &LayoutOf);
+}
+
+std::vector<std::pair<uint32, uint32>> LoadTwins(bool ranked)
+{
+    if (!ranked)
+    {
+        BaseTwins.clear();
+        if (AscensionFreepick::ReadRealm().WarcraftReborn)
+            BaseTwins = SpellTwins(sSpellMgr->GetSpellInfoStoreSize(), &LayoutOf);
+        return BaseTwins;
+    }
     if (!RebornRealm)
         return {};
-    return SpellTwins(sSpellMgr->GetSpellInfoStoreSize(), [](std::uint32_t spellId) -> std::optional<SpellLayout>
+    return RankTwins(BaseTwins,
+        [](std::uint32_t spellId)
         {
+            std::vector<std::uint32_t> ranks;
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-            if (!spellInfo)
-                return std::nullopt;
-            SpellLayout layout;
-            layout.Name = spellInfo->SpellName[0];
-            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            {
-                layout.Effects[i] = spellInfo->Effects[i].Effect;
-                layout.Auras[i] = spellInfo->Effects[i].ApplyAuraName;
-            }
-            return layout;
-        });
+            for (spellInfo = spellInfo ? spellInfo->GetNextRankSpell() : nullptr; spellInfo; spellInfo = spellInfo->GetNextRankSpell())
+                ranks.push_back(spellInfo->Id);
+            return ranks;
+        },
+        [](std::uint32_t spellId) { return sSpellMgr->GetFirstSpellInChain(spellId); }, &LayoutOf);
 }
 
 std::vector<std::vector<uint32>> LoadRankChains()
@@ -236,6 +264,36 @@ class spell_ascension_reborn_dark_apotheosis_only : public SpellScript
     }
 };
 
+class aura_ascension_reborn_dark_apotheosis : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_reborn_dark_apotheosis);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ DARK_APOTHEOSIS_PASSIVES[0], DARK_APOTHEOSIS_PASSIVES[1] });
+    }
+
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    {
+        for (uint32 passive : DARK_APOTHEOSIS_PASSIVES)
+            GetTarget()->CastSpell(GetTarget(), passive, true);
+    }
+
+    void Remove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        for (uint32 passive : DARK_APOTHEOSIS_PASSIVES)
+            GetTarget()->RemoveAurasDueToSpell(passive, GetTarget()->GetGUID());
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_reborn_dark_apotheosis::Apply, EFFECT_0,
+            SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_reborn_dark_apotheosis::Remove, EFFECT_0,
+            SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 class AscensionWarcraftRebornPlayer final : public PlayerScript
 {
 public:
@@ -289,13 +347,36 @@ public:
 }
 }
 
+class spell_ascension_reborn_proc_trigger_spell : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_proc_trigger_spell);
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        uint32 const triggered = aurEff->GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
+        Unit* target = eventInfo.GetProcTarget();
+        if (triggered && target)
+            GetTarget()->CastSpell(target, triggered, true, nullptr, aurEff);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_ascension_reborn_proc_trigger_spell::HandleProc, EFFECT_ALL, SPELL_AURA_DUMMY);
+    }
+};
+
 void AddAscensionWarcraftRebornScripts()
 {
+    RegisterSpellScript(spell_ascension_reborn_proc_trigger_spell);
     new AscensionWarcraftReborn::AscensionWarcraftRebornPlayer();
     new AscensionWarcraftReborn::AscensionWarcraftRebornWorld();
     RegisterSpellScriptWithArgs(AscensionWarcraftReborn::spell_ascension_reborn_dark_apotheosis_only,
         "spell_ascension_reborn_dark_apotheosis_only");
+    RegisterSpellScriptWithArgs(AscensionWarcraftReborn::aura_ascension_reborn_dark_apotheosis,
+        "aura_ascension_reborn_dark_apotheosis");
     sSpellMgr->SetAddedSpellRanks(&AscensionWarcraftReborn::LoadRankChains);
     sSpellMgr->SetSpellTwins(&AscensionWarcraftReborn::LoadTwins);
+    sSpellMgr->SetSpellNamesakes(&AscensionWarcraftReborn::LoadNamesakes);
     Trainer::SetClassTrainerFor(&AscensionWarcraftReborn::TrainerFor);
 }

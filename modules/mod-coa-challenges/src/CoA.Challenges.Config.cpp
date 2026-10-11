@@ -14,7 +14,7 @@ namespace CoAChallenges
             return;
 
         // One row per active challenge (multiple groups can be active).
-        CharacterDatabase.Execute(
+        CharacterDatabase.DirectExecute(
             "CREATE TABLE IF NOT EXISTS coa_character_challenge ("
             "guid INT UNSIGNED NOT NULL, "
             "challengeId INT UNSIGNED NOT NULL, "
@@ -68,7 +68,7 @@ namespace CoAChallenges
             "PRIMARY KEY (guid, challengeId, objective)) "
             "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
         // Completed challenges/trials (leaderboard source).
-        CharacterDatabase.Execute(
+        CharacterDatabase.DirectExecute(
             "CREATE TABLE IF NOT EXISTS coa_challenge_completion ("
             "guid INT UNSIGNED NOT NULL, "
             "challengeId INT UNSIGNED NOT NULL, "
@@ -109,9 +109,16 @@ namespace CoAChallenges
                 char alter[256];
                 snprintf(alter, sizeof(alter),
                     "ALTER TABLE %s ADD COLUMN startTime INT UNSIGNED NOT NULL DEFAULT 0", t.table);
-                CharacterDatabase.Execute(alter);
+                CharacterDatabase.DirectExecute(alter);
             }
         }
+        CharacterDatabase.DirectExecute(
+            "INSERT IGNORE INTO coa_account_challenge_completion "
+            "(account, challengeId, level, completeTime, startTime) "
+            "SELECT c.account, completion.challengeId, completion.level, completion.completeTime, completion.startTime "
+            "FROM coa_challenge_completion AS completion "
+            "INNER JOIN characters AS c ON c.guid = completion.guid "
+            "ORDER BY completion.completeTime, completion.guid");
         // The completion PK must include `level` (multi-level challenges
         // 211/425 store one completion per level; leaderboards filter by level).
         if (!CharacterDatabase.Query(

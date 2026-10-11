@@ -23,6 +23,7 @@
 #include "ObjectGuid.h"
 #include "QuestDef.h"
 #include <map>
+#include <mutex>
 
 class WorldSession;
 class ObjectGuid;
@@ -272,6 +273,9 @@ public:
     [[nodiscard]] bool IsGossipOptionCoded(uint32 selection) const { return _gossipMenu.IsMenuItemCoded(selection); }
 
     void SendGossipMenu(uint32 titleTextId, ObjectGuid objectGUID);
+    void SendDynamicGossipMenu(std::string const& text, ObjectGuid objectGUID);
+    bool SendDynamicGossipText(uint32 textId, ObjectGuid objectGUID);
+    void ClearDynamicGossipText();
     void SendCloseGossip();
     void SendPointOfInterest(uint32 poiId) const;
 
@@ -292,5 +296,9 @@ private:
     GossipMenu _gossipMenu;
     QuestMenu  _questMenu;
     WorldSession* _session;
+    std::mutex _dynamicTextMutex;
+    uint32 _dynamicTextId = 0;
+    ObjectGuid _dynamicTextGUID;
+    std::string _dynamicText;
 };
 #endif

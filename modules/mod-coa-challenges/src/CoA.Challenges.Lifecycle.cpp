@@ -55,6 +55,15 @@ namespace CoAChallenges
         return false;
     }
 
+    bool HasAccountCompletionLevel(uint32 account, uint32 challengeID, uint32 level)
+    {
+        auto* statement = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_ACCOUNT_CHALLENGE_COMPLETION);
+        statement->SetData(0, account);
+        statement->SetData(1, challengeID);
+        statement->SetData(2, level);
+        return CharacterDatabase.Query(statement) != nullptr;
+    }
+
     // Death update (SMSG 0x5A6): same 26-byte active-entry layout as 0x596,
     // with the deaths-used counter incremented. Handler 0x1369D0 overwrites
     // the active record, then derives (remaining, total) from the record +
@@ -1446,19 +1455,30 @@ namespace CoAChallenges
         // Rewards marked IsFirstCompletion are only given the first time this
         // level is completed (relevant only when re-completion is allowed).
         bool const firstCompletion = !HasCompletionLevel(guid, challengeID, level);
+        uint32 const account = player->GetSession()->GetAccountId();
+        bool const firstItemReward = firstCompletion && (!IsTrialChallenge(challengeID)
+            || !HasAccountCompletionLevel(account, challengeID, level));
 
         // Rewards are handed out while the challenge is still recorded as active, and the
         // completion row that marks it done is written straight after. Granting last meant a
         // failed grant (or a realm drop in between) consumed the challenge and paid nothing,
         // with no way to retry; granting first at worst leaves the challenge complete with the
         // reward already paid, which the row written below then records.
-        GrantChallengeRewards(player, challengeID, level, firstCompletion);
+        GrantChallengeRewards(player, challengeID, level, firstItemReward, firstCompletion);
 
-        CharacterDatabase.DirectExecute(
+        CharacterDatabaseTransaction completion = CharacterDatabase.BeginTransaction();
+        completion->Append(
             "INSERT IGNORE INTO coa_challenge_completion (guid, challengeId, level, completeTime, startTime) "
             "VALUES ({}, {}, {}, UNIX_TIMESTAMP(), {})", guid, challengeID, level, startTime);
-        CharacterDatabase.DirectExecute(
+        auto* accountCompletion = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_ACCOUNT_CHALLENGE_COMPLETION);
+        accountCompletion->SetData(0, account);
+        accountCompletion->SetData(1, challengeID);
+        accountCompletion->SetData(2, level);
+        accountCompletion->SetData(3, startTime);
+        completion->Append(accountCompletion);
+        completion->Append(
             "DELETE FROM coa_character_challenge WHERE guid = {} AND challengeId = {}", guid, challengeID);
+        CharacterDatabase.DirectCommitTransaction(completion);
         ClearCharChallengeCache(guid);
         RemoveChallengeSpell(player, challengeID);
         RemoveMeterAuras(player);

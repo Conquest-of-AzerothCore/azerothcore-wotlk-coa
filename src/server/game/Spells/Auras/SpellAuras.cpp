@@ -1640,7 +1640,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 98, 0))
                     {
                         uint32 spellId = 0;
-                        switch (aurEff->GetId())
+                        switch (sSpellMgr->GetSpellTwinSource(aurEff->GetId()))
                         {
                             case 53759:
                                 spellId = 60947;
@@ -1673,7 +1673,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 else if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL && GetSpellInfo()->SpellFamilyFlags[0] & 0x00000001)
                 {
                     // Rapture
-                    if (Aura const* aura = caster->GetAuraOfRankedSpell(47535))
+                    Aura const* rapture = caster->GetAuraOfRankedSpell(47535);
+                    auto const [twinBegin, twinEnd] = sSpellMgr->GetSpellTwins().equal_range(47535);
+                    for (auto twin = twinBegin; !rapture && twin != twinEnd; ++twin)
+                        rapture = caster->GetAuraOfRankedSpell(twin->second);
+                    if (Aura const* aura = rapture)
                     {
                         // check cooldown
                         if (caster->IsPlayer())
@@ -1693,9 +1697,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (AuraEffect const* aurEff = aura->GetEffect(0))
                         {
                             float multiplier = (float)aurEff->GetAmount();
-                            if (aurEff->GetId() == 47535)
+                            uint32 const raptureRank = sSpellMgr->GetSpellTwinSource(aurEff->GetId());
+                            if (raptureRank == 47535)
                                 multiplier -= 0.5f;
-                            else if (aurEff->GetId() == 47537)
+                            else if (raptureRank == 47537)
                                 multiplier += 0.5f;
 
                             int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
@@ -1831,7 +1836,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00400000)
             {
                 // Master of Subtlety
-                if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpell(31221, 0))
+                if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(31221, 0))
                 {
                     if (!apply)
                         target->CastSpell(target, 31666, true);
@@ -1845,7 +1850,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                 }
                 // Overkill
-                if (target->HasAura(58426))
+                if (target->HasAuraOrTwin(58426))
                 {
                     if (!apply)
                         target->CastSpell(target, 58428, true);

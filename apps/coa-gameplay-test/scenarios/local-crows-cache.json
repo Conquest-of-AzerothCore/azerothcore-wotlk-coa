@@ -1,0 +1,567 @@
+{
+  "schema": 1,
+  "name": "Local Crows Cache handoff and rewards",
+  "contract": "Tanaris cache has a crow warning and ten-second damage/movement-interruptible claim for living level-60 High-Risk players. Carrier cannot open outside Gadgetzan; death drops an instant-claim chest. Safe opening gives five distinct ilvl-95 Heroic Bloodforged Naxxramas items and three stacks of twenty High-Risk cloth. Requires CrowsCache.Enable=1. Existing zone PvP rules are retained. Automatic cycles are deferred by the isolated test configuration so the manual countdown is the only event. First announcement is thirty minutes before appearance and broadcasts a map location without a crow; self addon resync restores that location, cancelling removes it, and automatic scheduling creates the next warning. First claim removes the public location for both factions. Warning threshold/cadence boundaries and client hover/map rendering are independently covered by unit and Lua harness checks. All four warning texts and the final-five-minute crow appearance are exercised natively; sixty seconds is the one-minute testing countdown.",
+  "players": [
+    {
+      "id": "owner",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "name": "Cacheowner"
+    },
+    {
+      "id": "captor",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": -7830.0,
+    "y": -3465.0,
+    "z": 56.87,
+    "o": 0
+  },
+  "timeout_ms": 150000,
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "owner",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "captor",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "outsider",
+      "value": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "owner",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "owner",
+      "enabled": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "captor",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "captor",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "owner",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "teleport",
+      "actor": "outsider",
+      "map": 0,
+      "x": -8913.26,
+      "y": -123.592,
+      "z": 81.7266
+    },
+    {
+      "action": "console",
+      "command": "crows start 1800"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "system_message_contains",
+      "text": "in 30 minutes",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 994310,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "whispers_received",
+      "from": "owner",
+      "text": "COACrows\tP;1;1;-7831;-3465",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "whispers_received",
+      "from": "outsider",
+      "text": "COACrows\tP;1;1;-7831;-3465",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "whisper",
+      "actor": "owner",
+      "to": "Cacheowner",
+      "language": 4294967295,
+      "text": "COACrows\tSYNC"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "whispers_received",
+      "from": "owner",
+      "text": "COACrows\tP;1;1;-7831;-3465",
+      "equals": 2,
+      "within_ms": 1500
+    },
+    {
+      "action": "console",
+      "command": "crows cancel"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "whispers_received",
+      "from": "owner",
+      "text": "COACrows\tD;1",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "teleport",
+      "actor": "outsider",
+      "map": 1,
+      "x": -7830,
+      "y": -3465,
+      "z": 56.87
+    },
+    {
+      "action": "console",
+      "command": "crows start 900"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "system_message_contains",
+      "text": "in 15 minutes!",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 994310,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "console",
+      "command": "crows cancel"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 994310,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "console",
+      "command": "crows start 300"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "system_message_contains",
+      "text": "in 5 minutes!",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 994310,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "console",
+      "command": "crows cancel"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 994310,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "console",
+      "command": "crows start 60"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "system_message_contains",
+      "text": "in 1 minute!",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 994310,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "console",
+      "command": "crows cancel"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 994310,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "console",
+      "command": "crows schedule 3"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "whispers_received",
+      "from": "owner",
+      "text": "COACrows\tP;5;1;-7831;-3465",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_creature_count",
+      "entry": 994310,
+      "within_ms": 1500,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "nearby_gameobject_count",
+      "entry": 994311,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "console",
+      "command": "crows status"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "outsider",
+      "entry": 994311
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "owner",
+      "entry": 994311
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "set_moving",
+      "actor": "owner",
+      "enabled": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0
+    },
+    {
+      "action": "set_moving",
+      "actor": "owner",
+      "enabled": false
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "owner",
+      "entry": 994311
+    },
+    {
+      "action": "attack",
+      "actor": "captor",
+      "target": "owner"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "health",
+      "max": 99999
+    },
+    {
+      "action": "stop_attack",
+      "actor": "captor"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "owner",
+      "entry": 994311
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1615010,
+      "within_ms": 1500,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "whispers_received",
+      "from": "owner",
+      "text": "COACrows\tD;5",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "whispers_received",
+      "from": "outsider",
+      "text": "COACrows\tD;5",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 1005000,
+      "within_ms": 1500,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "owner",
+      "item": 1615010,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1
+    },
+    {
+      "action": "die",
+      "actor": "owner"
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "outsider",
+      "entry": 994312
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "captor",
+      "entry": 994312
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "aura",
+      "spell": 1005000,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "captor",
+      "map": 1,
+      "x": -7154.0,
+      "y": -3826.0,
+      "z": 44.5,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "aura",
+      "spell": 1005000,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "captor",
+      "metric": "carried_item_count",
+      "save_as": "before_rewards"
+    },
+    {
+      "action": "use_item",
+      "actor": "captor",
+      "item": 1615010,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "item_count",
+      "item": 967008,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "item_count",
+      "item": 967014,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "item_count",
+      "item": 967017,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "carried_item_count",
+      "relative_to": "before_rewards",
+      "equals": 64
+    }
+  ]
+}

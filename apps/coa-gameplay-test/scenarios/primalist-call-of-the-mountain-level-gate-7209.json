@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Call of the Mountain buff requires level 40 (#7209)",
+  "contract": "Call of the Mountain (680406) is a Level 40 passive (CharacterAdvancement 9216, RequiredLevel 40): reaching 5 stacks of Earth's Rage (806068) must not grant the Mountain buff (680472) before level 40, even when the passive is present. A level-34 Primalist holding the passive and stacked to 5 must stay buff-free; after leveling to 40 the same 5-stack crossing must grant it.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "primalist", "race": 1, "class": 31, "level": 34 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "primalist", "entry": 36, "level": 34, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "label": "Fixture: hold the level-40 passive early", "actor": "primalist", "spell": 680406 },
+    { "action": "set_aura", "label": "Earth's Rage stacked to 5 at level 34", "actor": "primalist", "spell": 806068, "stacks": 5 },
+    {
+      "action": "assert", "label": "No Mountain buff before level 40 (#7209)",
+      "actor": "primalist", "metric": "aura", "spell": 680472, "equals": 0, "within_ms": 2000
+    },
+    { "action": "set_level", "label": "Level to 40", "actor": "primalist", "value": 40 },
+    { "action": "set_aura", "label": "Drop back under the threshold", "actor": "primalist", "spell": 806068, "stacks": 4 },
+    { "action": "set_aura", "label": "Cross 5 stacks at level 40", "actor": "primalist", "spell": 806068, "stacks": 5 },
+    {
+      "action": "assert", "label": "The threshold still grants the buff at 40",
+      "actor": "primalist", "metric": "aura", "spell": 680472, "equals": 1, "within_ms": 2000
+    },
+    { "action": "assert", "actor": "primalist", "metric": "alive", "equals": 1 }
+  ]
+}

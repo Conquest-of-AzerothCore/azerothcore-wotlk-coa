@@ -632,7 +632,7 @@ class spell_warl_create_healthstone : public SpellScript
             // Improved Healthstone
             if (AuraEffect const* aurEff = unitTarget->GetDummyAuraEffect(SPELLFAMILY_WARLOCK, 284, 0))
             {
-                switch (aurEff->GetId())
+                switch (sSpellMgr->GetSpellTwinSource(aurEff->GetId()))
                 {
                     case SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R1:
                         rank = 1;
@@ -1497,7 +1497,10 @@ class spell_warl_improved_drain_soul : public AuraScript
         // Make sure that dying unit is afflicted by the caster's Drain Soul debuff
         Unit* caster = eventInfo.GetActor();
         Unit* victim = eventInfo.GetActionTarget();
-        return victim->GetAuraApplicationOfRankedSpell(SPELL_WARLOCK_DRAIN_SOUL_R1, caster->GetGUID()) != nullptr;
+        for (uint32 drainSoul : sSpellMgr->GetSpellAndRelatives(SPELL_WARLOCK_DRAIN_SOUL_R1))
+            if (victim->GetAuraApplicationOfRankedSpell(drainSoul, caster->GetGUID()))
+                return true;
+        return false;
     }
 
     void HandleProc(ProcEventInfo& eventInfo)
@@ -1545,6 +1548,12 @@ class spell_warl_seed_of_corruption_dummy : public AuraScript
         GetUnitOwner()->CastSpell(GetUnitOwner(), SPELL_WARLOCK_SEED_OF_CORRUPTION_VISUAL, true, nullptr, aurEff);
 
         uint32 spellId = sSpellMgr->GetSpellWithRank(SPELL_WARLOCK_SEED_OF_CORRUPTION_DAMAGE_R1, GetSpellInfo()->GetRank());
+        if (sSpellMgr->GetSpellTwinSource(GetId()) != GetId())
+        {
+            std::vector<uint32> const relatives = sSpellMgr->GetSpellAndRelatives(spellId);
+            if (relatives.size() > 1)
+                spellId = relatives[1];
+        }
         caster->CastSpell(GetUnitOwner(), spellId, true, nullptr, aurEff);
     }
 
@@ -1656,7 +1665,7 @@ class spell_warl_soul_leech : public AuraScript
         caster->CastCustomSpell(SPELL_WARLOCK_SOUL_LEECH_HEAL, SPELLVALUE_BASE_POINT0, healAmount, caster, true, nullptr, aurEff);
 
         // Improved Soul Leech code below
-        AuraEffect const* impSoulLeech = GetTarget()->GetAuraEffectOfRankedSpell(SPELL_WARLOCK_IMP_SOUL_LEECH_R1, EFFECT_1, aurEff->GetCasterGUID());
+        AuraEffect const* impSoulLeech = GetTarget()->GetAuraEffectOfRankedSpellOrTwin(SPELL_WARLOCK_IMP_SOUL_LEECH_R1, EFFECT_1, aurEff->GetCasterGUID());
         if (!impSoulLeech)
             return;
 

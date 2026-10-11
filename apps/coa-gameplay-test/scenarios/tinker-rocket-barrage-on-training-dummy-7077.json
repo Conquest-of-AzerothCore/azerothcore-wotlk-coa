@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "name": "Tinker Rocket Barrage launches from a Bomb Toss on a training dummy (#7077)",
+  "contract": [
+    "Rocket Barrage (805314): 'causes damage dealt by Bomb Toss on enemies with 10 stacks to launch a Rocket Barrage",
+    "at their location', and raises the Tracer mark (653247) limit from five to ten. The report used a training",
+    "dummy. Its script sets every hit's damage to zero after the combat log is sent, so the player still sees the",
+    "Bomb Toss damage; the Rocket Barrage aura (803438) must still launch there.",
+    "Auto Shot and Bomb Toss each add one mark on a landed hit; the Bomb Toss cooldown is reset between throws so",
+    "ten marks are reached inside the mark's twelve-second duration."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 32666,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 450265
+    },
+    {
+      "action": "equip",
+      "actor": "tinker",
+      "item": 450265,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 450265
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 653245
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 805314
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 266
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 75
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 653245
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 653246,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Tracer Augmentation is active on the gun"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 75,
+      "target": "dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 10,
+      "within_ms": 1550,
+      "label": "Auto Shot and Bomb Toss build the Rocket Barrage maximum of ten marks"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_cast_count",
+      "spell": 803438,
+      "min": 1,
+      "within_ms": 2000,
+      "label": "Bomb Toss on ten marks launches Rocket Barrage at the training dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 803438,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The Rocket Barrage aura lands on the training dummy"
+    }
+  ]
+}

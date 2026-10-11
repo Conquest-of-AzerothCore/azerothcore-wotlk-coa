@@ -21,12 +21,13 @@ struct TaughtAbility
     std::uint32_t SpellId;
 };
 
-inline constexpr std::array<TaughtAbility, 20> TaughtAbilities =
+inline constexpr std::array<TaughtAbility, 21> TaughtAbilities =
 {{
     { 12, 3, 0, 804729, 804834 },
     { 13, 6, 0, 561069, 801662 },
     { 15, 11, 0, 801343, 578118 },
     { 15, 11, 0, 801343, 680263 },
+    { 15, 12, 10, 92094, 680230 },
     { 16, 13, 10, 92097, 804019 },
     { 20, 99, 10, 92114, 800157 },
     { 20, 99, 10, 92114, 674 },
