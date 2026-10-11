@@ -354,8 +354,11 @@ namespace
     // not loaded from a permanent dungeon creature spawn.
     constexpr uint32 MANASTORM_MAP_ZUL_FARRAK = 209;
     constexpr uint32 NPC_GAHZRILLA = 7273;
+    constexpr uint32 NPC_HYDROMANCER_VELRATHA = 7795;
     constexpr uint32 SEGMENT_GAHZRILLA_NORMAL = 198;
     constexpr uint32 SEGMENT_GAHZRILLA_ENDGAME = 392;
+    constexpr uint32 SEGMENT_VELRATHA_NORMAL = 538;
+    constexpr uint32 SEGMENT_VELRATHA_ENDGAME = 548;
 
     // Native Zul'Farrak gong-event (2488) summon position in the pool.
     // Source: historical DB-event summon coordinates, not the player
@@ -1416,6 +1419,127 @@ namespace
         return true;
     }
 
+    bool BootstrapZulFarrakVelrathaEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_ZUL_FARRAK ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            segment.MapId != MANASTORM_MAP_ZUL_FARRAK ||
+            segment.ObjectiveCreatureEntry != NPC_HYDROMANCER_VELRATHA ||
+            (segment.SegmentId != SEGMENT_VELRATHA_NORMAL &&
+             segment.SegmentId != SEGMENT_VELRATHA_ENDGAME))
+        {
+            error = "Hydromancer Velratha bootstrap received a nonmatching private Manastorm stage.";
+            return false;
+        }
+
+        // Velratha naturally patrols the Gahz'rilla pool. Unlike Gahz'rilla
+        // she is a persistent native DB creature, NOT a gong summon.
+        // Read her actual map-209 spawn; never invent boss coordinates or
+        // replace her native movement AI with a stationary duplicate.
+        QueryResult nativeSpawn = WorldDatabase.Query(
+            "SELECT `guid`, `position_x`, `position_y` "
+            "FROM `creature` "
+            "WHERE `map` = 209 AND `id` = 7795 "
+            "AND (`spawnMask` & 1) <> 0 "
+            "ORDER BY POW(`position_x` - 1706.51, 2) + "
+            "POW(`position_y` - 1161.51, 2), `guid` "
+            "LIMIT 1");
+
+        if (!nativeSpawn)
+        {
+            error = "No native Hydromancer Velratha (7795) creature spawn exists on map 209; provide a verified DB spawn before creating a replacement.";
+            return false;
+        }
+
+        Field* fields = nativeSpawn->Fetch();
+        ObjectGuid::LowType const spawnId =
+            fields[0].Get<uint32>();
+        float const spawnX = fields[1].Get<float>();
+        float const spawnY = fields[2].Get<float>();
+
+        CreatureData const* spawnData =
+            sObjectMgr->GetCreatureData(spawnId);
+        if (!spawnData ||
+            spawnData->mapid != MANASTORM_MAP_ZUL_FARRAK ||
+            spawnData->id != NPC_HYDROMANCER_VELRATHA)
+        {
+            error = "Native Hydromancer Velratha DB GUID does not resolve to creature 7795 on map 209.";
+            return false;
+        }
+
+        // Load only the original boss's grid, not the dungeon.
+        map->LoadGrid(spawnX, spawnY);
+
+        auto& spawned = map->GetCreatureBySpawnIdStore();
+        auto const range = spawned.equal_range(spawnId);
+        for (auto itr = range.first; itr != range.second; ++itr)
+        {
+            Creature* velratha = itr->second;
+            if (!velratha || !velratha->IsInWorld() ||
+                !velratha->IsAlive() ||
+                velratha->GetEntry() != NPC_HYDROMANCER_VELRATHA)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(velratha);
+            if (run.GetObjectiveCreatureGuid() != velratha->GetGUID())
+            {
+                error = "Native Hydromancer Velratha loaded but did not register as the Manastorm objective.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER,
+                "Reused native Hydromancer Velratha in private Manastorm: "
+                "run={} segment={} instance={} spawn={} guid={}.",
+                run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+                spawnId, velratha->GetGUID().GetRawValue());
+            return true;
+        }
+
+        // An isolated fresh stage must not be blocked by an inherited
+        // respawn timer. Restore the *same* original DB creature only here.
+        map->RemoveCreatureRespawnTime(spawnId);
+
+        Creature* velratha = new Creature();
+        if (!velratha->LoadCreatureFromDB(spawnId, map, true, true))
+        {
+            delete velratha;
+            error = "Could not load the native Hydromancer Velratha DB spawn in private Zul'Farrak.";
+            return false;
+        }
+
+        if (!velratha->IsInWorld() || !velratha->IsAlive() ||
+            velratha->GetEntry() != NPC_HYDROMANCER_VELRATHA)
+        {
+            velratha->AddObjectToRemoveList();
+            error = "Restored native Hydromancer Velratha is not a living creature 7795.";
+            return false;
+        }
+
+        ManastormMgr::Instance().OnCreatureAddWorld(velratha);
+        if (run.GetObjectiveCreatureGuid() != velratha->GetGUID())
+        {
+            velratha->AddObjectToRemoveList();
+            error = "Restored Hydromancer Velratha failed Manastorm objective registration.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER,
+            "Restored native Hydromancer Velratha in private Manastorm: "
+            "run={} segment={} instance={} spawn={} guid={}.",
+            run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+            spawnId, velratha->GetGUID().GetRawValue());
+
+        return true;
+    }
+
     bool BootstrapSpecialEncounter(
         Map* map,
         ManastormRun& run,
@@ -1426,6 +1550,11 @@ namespace
         case SEGMENT_GAHZRILLA_NORMAL:
         case SEGMENT_GAHZRILLA_ENDGAME:
             return BootstrapZulFarrakGahzrillaEncounter(
+                map, run, error);
+
+        case SEGMENT_VELRATHA_NORMAL:
+        case SEGMENT_VELRATHA_ENDGAME:
+            return BootstrapZulFarrakVelrathaEncounter(
                 map, run, error);
 
         case SEGMENT_HELNURATH_NORMAL:
@@ -6013,6 +6142,31 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
              segment.SegmentId == SEGMENT_HELNURATH_ENDGAME))
         {
             creature->DespawnOrUnsummon(0ms, 24h);
+            return;
+        }
+    }
+
+    // No Gahz'rilla may join Velratha's separate private Manastorm stage.
+    // This guards against a gong event spawning him after the stage starts.
+    // Do not change ordinary Zul'Farrak or Gahz'rilla's own segments.
+    if (creature->GetEntry() == NPC_GAHZRILLA &&
+        map->GetId() == MANASTORM_MAP_ZUL_FARRAK &&
+        map->IsScriptedPrivateInstance() &&
+        run->GetInstanceId() == map->GetInstanceId() &&
+        (run->GetState() == ManastormRunState::Preparing ||
+         run->GetState() == ManastormRunState::Active))
+    {
+        ManastormSegment const& segment = run->GetSegment();
+        if (segment.MapId == MANASTORM_MAP_ZUL_FARRAK &&
+            segment.ObjectiveCreatureEntry == NPC_HYDROMANCER_VELRATHA &&
+            (segment.SegmentId == SEGMENT_VELRATHA_NORMAL ||
+             segment.SegmentId == SEGMENT_VELRATHA_ENDGAME))
+        {
+            creature->DespawnOrUnsummon(0ms, 24h);
+            LOG_INFO(LOG_FILTER,
+                "Suppressed Gahz'rilla in private Velratha stage: "
+                "run={} segment={} instance={}.",
+                run->GetRunId(), segment.SegmentId, run->GetInstanceId());
             return;
         }
     }
