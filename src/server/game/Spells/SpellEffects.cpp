@@ -4856,11 +4856,7 @@ void Spell::EffectDisEnchant(SpellEffIndex /*effIndex*/)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (!itemTarget)
-        return;
-
-    ItemTemplate const* disenchantProto = LocalLevelScaling::InstanceTemplateFor(itemTarget, itemTarget->GetTemplate());
-    if (!disenchantProto || !disenchantProto->DisenchantID)
+    if (!itemTarget || !itemTarget->GetTemplate()->DisenchantID)
         return;
 
     if (Player* caster = m_caster->ToPlayer())

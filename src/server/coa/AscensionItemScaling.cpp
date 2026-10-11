@@ -74,8 +74,10 @@ struct Curves
     CurveSet block;
     CurveSet sellPrice;
     std::map<CurveKey, std::map<uint32, int32>> randomProperties;
-    std::map<CurveKey, std::map<uint32, uint32>> disenchantIds;
+    std::map<CurveKey, DisenchantLadder> disenchantLadders;
 };
+
+constexpr uint32 AnySubClass = UINT32_MAX;
 
 bool Eligible(ItemTemplate const& proto)
 {
@@ -96,6 +98,13 @@ CurveKey KeyOf(ItemTemplate const& proto)
 {
     uint32 const inventoryType = proto.InventoryType == INVTYPE_ROBE ? INVTYPE_CHEST : proto.InventoryType;
     return { proto.Class, proto.SubClass, inventoryType, proto.Quality };
+}
+
+CurveKey SlotKeyOf(ItemTemplate const& proto)
+{
+    CurveKey key = KeyOf(proto);
+    std::get<1>(key) = AnySubClass;
+    return key;
 }
 
 double DamagePerSecond(ItemTemplate const& proto)
@@ -147,8 +156,9 @@ std::unique_ptr<Curves> BuildCurves()
         curves->sellPrice[key].Add(proto->ItemLevel, proto->SellPrice);
         if (proto->RandomProperty)
             curves->randomProperties[key].emplace(proto->ItemLevel, proto->RandomProperty);
-        if (proto->DisenchantID)
-            curves->disenchantIds[key].emplace(proto->ItemLevel, proto->DisenchantID);
+        for (CurveKey const& ladder : { key, SlotKeyOf(*proto) })
+            curves->disenchantLadders[ladder].Add(proto->ItemLevel, proto->DisenchantID,
+                proto->RequiredDisenchantSkill);
     }
 
     for (CurveSet* set : { &curves->armor, &curves->damagePerSecond, &curves->block, &curves->sellPrice })
@@ -164,19 +174,34 @@ double SetRatio(CurveSet const& set, CurveKey const& key, uint32 fromLevel, uint
     return curve == set.end() ? fallback : CurveRatio(curve->second, fromLevel, toLevel, fallback);
 }
 
+DisenchantBracket BracketAtOrBelow(Curves const& curves, CurveKey const& key, uint32 itemLevel)
+{
+    auto const ladder = curves.disenchantLadders.find(key);
+    return ladder == curves.disenchantLadders.end() ? DisenchantBracket{} : ladder->second.AtOrBelow(itemLevel);
+}
+
+void RebracketDisenchant(ItemTemplate& proto, ItemTemplate const& base, Curves const& curves)
+{
+    if (!Disenchantable(base.DisenchantID, base.RequiredDisenchantSkill))
+        return;
+
+    DisenchantBracket const bracket = NearestDisenchantBracket(
+        BracketAtOrBelow(curves, KeyOf(base), proto.ItemLevel),
+        BracketAtOrBelow(curves, SlotKeyOf(base), proto.ItemLevel));
+    if (!bracket.disenchantId)
+        return;
+
+    proto.DisenchantID = bracket.disenchantId;
+    proto.RequiredDisenchantSkill = std::max(base.RequiredDisenchantSkill, bracket.requiredSkill);
+}
+
 std::unique_ptr<ItemTemplate> BuildTemplate(uint32 entry, ItemTemplate const& base, uint32 lift, Curves const& curves)
 {
     auto proto = std::make_unique<ItemTemplate>(base);
     uint32 const itemLevel = base.ItemLevel + lift;
     proto->ItemId = entry;
     proto->ItemLevel = itemLevel;
-
-    CurveKey const key = KeyOf(base);
-    if (base.DisenchantID)
-        if (auto const donors = curves.disenchantIds.find(key); donors != curves.disenchantIds.end())
-            if (auto donor = donors->second.upper_bound(itemLevel); donor != donors->second.begin())
-                proto->DisenchantID = std::prev(donor)->second;
-
+    RebracketDisenchant(*proto, base, curves);
     if (CapturedStats::Record const* record = capturedStats.Find(base.ItemId, itemLevel))
     {
         record->Apply(*proto);
@@ -201,6 +226,7 @@ std::unique_ptr<ItemTemplate> BuildTemplate(uint32 entry, ItemTemplate const& ba
         &proto->ShadowRes, &proto->ArcaneRes })
         *resistance = ScaleSigned(*resistance, points);
 
+    CurveKey const key = KeyOf(base);
     proto->Armor = ScaleUnsigned(base.Armor, SetRatio(curves.armor, key, base.ItemLevel, itemLevel, points));
     proto->Block = ScaleUnsigned(base.Block, SetRatio(curves.block, key, base.ItemLevel, itemLevel, points));
 
