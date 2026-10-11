@@ -18,6 +18,7 @@
   "steps": [
     { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
     { "action": "assert", "label": "The Orc starts in Durotar", "actor": "orc", "metric": "map_id", "equals": 1 },
+    { "action": "set_phase", "label": "The Orc joins the world phase Undertaker Mordo is spawned in before travelling", "actor": "orc", "value": 1 },
     { "action": "add_item", "label": "The Orc receives a Travel Permit", "actor": "orc", "item": 977028, "count": 1 },
     { "action": "use_item", "label": "The Orc uses the permit", "actor": "orc", "item": 977028, "spell": 1001088 },
     { "action": "wait", "label": "Let the destination menu open", "ms": 2000 },
@@ -26,7 +27,6 @@
     { "action": "wait", "label": "Let the transfer finish", "ms": 5000 },
     { "action": "assert", "label": "The Orc arrives in the Eastern Kingdoms", "actor": "orc", "metric": "map_id", "equals": 0, "within_ms": 10000 },
     { "action": "assert", "label": "At the Shadow Grave start, x", "actor": "orc", "metric": "position_x", "min": 1670, "max": 1684 },
-    { "action": "set_phase", "label": "The Orc joins the world phase Undertaker Mordo is spawned in", "actor": "orc", "value": 1 },
     { "action": "wait", "label": "Let the grid load", "ms": 3000 },
     { "action": "assert", "label": "Undertaker Mordo is within reach", "actor": "orc", "metric": "nearby_creature_count", "entry": 1568, "equals": 1 },
     { "action": "assert", "label": "Mordo shows the available-quest marker to the Orc", "actor": "orc", "metric": "dialog_status", "entry": 1568, "equals": 8, "within_ms": 5000 },
