@@ -1,5 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "GameObject.h"
+#include "GameObjectScript.h"
+#include "GlobalScript.h"
 #include "GossipDef.h"
 #include "Item.h"
 #include "ObjectAccessor.h"
@@ -7,6 +9,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
+#include "SpellInfo.h"
 #include "SpellScript.h"
 #include <array>
 
@@ -17,6 +20,12 @@ enum TravelPermit : uint32
     ItemTravelPermit = 977028,
     SenderTravelPermit = 977028,
     MaxTravelLevel = 8
+};
+
+enum HomeboundPortal : uint32
+{
+    SpellHomeboundPortal = 93187,
+    GameObjectHomeboundPortal = 80775
 };
 
 struct Destination
@@ -97,7 +106,7 @@ class spell_ascension_homebound_portal : public SpellScript
     {
         Player* traveller = GetCaster()->ToPlayer();
         GameObject* portal = GetHitGObj();
-        if (!traveller || !portal)
+        if (!traveller || !portal || portal->GetEntry() != GameObjectHomeboundPortal)
             return;
         Player* owner = ObjectAccessor::FindConnectedPlayer(portal->GetOwnerGUID());
         if (!owner)
@@ -110,6 +119,31 @@ class spell_ascension_homebound_portal : public SpellScript
     {
         OnEffectHitTarget += SpellEffectFn(spell_ascension_homebound_portal::SendToOwnerHearth, EFFECT_0,
             SPELL_EFFECT_DUMMY);
+    }
+};
+
+class AscensionHomeboundPortalContract : public GlobalScript
+{
+public:
+    AscensionHomeboundPortalContract()
+        : GlobalScript("AscensionHomeboundPortalContract", {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* spellInfo) override
+    {
+        if (spellInfo->Id == SpellHomeboundPortal)
+            spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_GAMEOBJECT_TARGET);
+    }
+};
+
+class go_ascension_homebound_portal : public GameObjectScript
+{
+public:
+    go_ascension_homebound_portal() : GameObjectScript("go_ascension_homebound_portal") { }
+
+    bool OnGossipHello(Player* traveller, GameObject* portal) override
+    {
+        traveller->CastSpell(portal, SpellHomeboundPortal, false);
+        return true;
     }
 };
 
@@ -139,5 +173,7 @@ void AddAscensionTravelPermitScripts()
 {
     RegisterSpellScript(spell_ascension_travel_permit);
     RegisterSpellScript(spell_ascension_homebound_portal);
+    new AscensionHomeboundPortalContract();
+    new go_ascension_homebound_portal();
     new item_ascension_travel_permit();
 }

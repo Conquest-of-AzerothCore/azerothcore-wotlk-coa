@@ -25,6 +25,15 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(actor=actor), self.assertRaisesRegex(ValueError, 'expected a player id'):
                 run.validate(self.scenario)
 
+    def test_nearby_gameobject_use_owner_requires_a_player(self):
+        step = {'action': 'use_nearby_gameobject', 'actor': 'caster', 'entry': 80775, 'owner': 'caster'}
+        self.scenario['steps'].append(step)
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        for owner in ('target', 'missing', 1):
+            step['owner'] = owner
+            with self.subTest(owner=owner), self.assertRaisesRegex(ValueError, 'owner needs a player'):
+                run.validate(self.scenario)
+
     def test_spell_cast_and_proc_counts_can_share_relative_snapshots(self):
         for measured, captured in (('spell_cast_count', 'spell_proc_count'),
                                    ('spell_proc_count', 'spell_cast_count')):
