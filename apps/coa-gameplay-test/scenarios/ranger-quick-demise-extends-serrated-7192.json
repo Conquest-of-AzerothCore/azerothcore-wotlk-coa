@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "A Quick Demise extends a high-rank Serrated Shot bleed (#7192)",
+  "contract": "A Quick Demise 560810 reads 'Auto shots now have a $h% (20%) chance to extend the duration of your Serrated Shot by $/1000;561109s1 sec (2 sec)'. Its proc half already ships: the spell_proc row in rev_20260921_40_ranger_dead_procs.sql (ProcFlags 64 = DONE_RANGED_AUTO_ATTACK, deferring to the record's own 20% ProcChance) uses the same shape as the proven Superb Shot row (ranger-superb-shot-auto-shot-focus), and the proc system casts trigger 561109 on the struck enemy. That trigger is a single SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION (177) with +2000 ms and MiscValue 500073, the first rank of the 7-rank Serrated Shot chain (500073, 501704-501707, 575836, 575837). Spell::EffectAscensionModifyAuraDuration resolved the aura with an exact spell-id lookup, so only a rank-1 bleed was ever extended; any higher rank (e.g. rank 7 at level 80, or rank 6 at the reporter's level 60) never moved and the talent did nothing. The fix resolves the aura rank-aware via GetAuraOfRankedSpell, which also repairs the identical rank-blind lookup behind Taldaram's Torment extension 807359. This scenario isolates the duration half deterministically: it applies a rank-7 bleed, drives the 561109 trigger as a fixture cast (the harness only submits casts for known spells, so the helper is learned first; in live play the proc system casts it and knowledge is irrelevant), and requires the remaining duration to grow by ~2 sec. The 20% auto-shot roll itself is not asserted here.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "learn", "actor": "ranger", "spell": 575837 },
+    { "action": "learn", "actor": "ranger", "spell": 561109 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "label": "Serrated Shot needs Advantage", "actor": "ranger", "spell": 804329, "stacks": 5 },
+    { "action": "cast", "label": "Serrated Shot rank 7 applies its bleed", "actor": "ranger", "spell": 575837, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: Serrated Shot went off",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 575837,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the rank-7 bleed is on the target",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 575837,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "dummy", "metric": "aura_duration_ms", "spell": 575837, "save_as": "bleed_before" },
+    { "action": "cast", "label": "A Quick Demise trigger extends the bleed", "actor": "ranger", "spell": 561109, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: the trigger cast went off",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 561109,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the rank-7 bleed grows by ~2 sec",
+      "actor": "dummy",
+      "metric": "aura_duration_ms",
+      "spell": 575837,
+      "relative_to": "bleed_before",
+      "min": 1000,
+      "max": 2100
+    }
+  ]
+}
