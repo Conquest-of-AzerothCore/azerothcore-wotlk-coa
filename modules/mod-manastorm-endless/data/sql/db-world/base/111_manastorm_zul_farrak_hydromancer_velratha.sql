@@ -22,6 +22,9 @@
 -- The user already configured links on Ghaz'rilla's two stages.
 -- Copy only active RouteCreature|ChaoticLinkEligible roles from
 --   198 -> 538 (Normal) and 392 -> 548 (Endgame).
+-- CRITICAL: exclude any candidate whose native creature entry is the
+-- destination segment's objective (Ghaz'rilla's links may include Velratha).
+-- The target boss must never be a Chaotic Link to itself.
 -- Do this from the ACTUAL server DB at SQL application time. Preserve
 -- existing Velratha spawn roles and configured nonzero stack counts.
 -- If sources are empty when this SQL runs, nothing can be copied:
@@ -76,11 +79,16 @@ INSERT INTO `manastorm_segment_spawn`
 SELECT
     538, ss.`spawn_guid`, (ss.`flags` & 3), 1
 FROM `manastorm_segment_spawn` AS ss
+JOIN `creature` AS npc ON npc.`guid` = ss.`spawn_guid`
 JOIN `manastorm_segment` AS src ON src.`segment_id` = 198
 JOIN `manastorm_segment` AS dst ON dst.`segment_id` = 538
 WHERE ss.`segment_id` = 198
   AND ss.`enabled` = 1
-  AND (ss.`flags` & 2) <> 0
+  AND (ss.`flags` & 3) = 3
+  AND npc.`map` = 209
+  AND npc.`id` <> COALESCE(
+      NULLIF(dst.`runtime_objective_creature_entry`, 0),
+      dst.`objective_creature_entry`)
   AND src.`map_id` = 209
   AND src.`objective_creature_entry` = 7273
   AND dst.`map_id` = 209
@@ -94,11 +102,16 @@ INSERT INTO `manastorm_segment_spawn`
 SELECT
     548, ss.`spawn_guid`, (ss.`flags` & 3), 1
 FROM `manastorm_segment_spawn` AS ss
+JOIN `creature` AS npc ON npc.`guid` = ss.`spawn_guid`
 JOIN `manastorm_segment` AS src ON src.`segment_id` = 392
 JOIN `manastorm_segment` AS dst ON dst.`segment_id` = 548
 WHERE ss.`segment_id` = 392
   AND ss.`enabled` = 1
-  AND (ss.`flags` & 2) <> 0
+  AND (ss.`flags` & 3) = 3
+  AND npc.`map` = 209
+  AND npc.`id` <> COALESCE(
+      NULLIF(dst.`runtime_objective_creature_entry`, 0),
+      dst.`objective_creature_entry`)
   AND src.`map_id` = 209
   AND src.`objective_creature_entry` = 7273
   AND dst.`map_id` = 209
@@ -109,36 +122,40 @@ ON DUPLICATE KEY UPDATE
 
 -- Copy actual boss Link requirements AFTER copying candidates.
 -- Never overwrite a nonzero manually configured Velratha count.
--- A copy is accepted only when the target has enough active candidates.
+-- Bound the copied requirement to the actual active candidate count,
+-- excluding the removed objective-boss candidate. Avoid an unbreakable
+-- Link aura when source and destination have different valid rosters.
 UPDATE `manastorm_segment` AS dst
 JOIN `manastorm_segment` AS src ON src.`segment_id` = 198
-SET dst.`chaotic_link_stacks` = src.`chaotic_link_stacks`
+SET dst.`chaotic_link_stacks` = LEAST(
+    src.`chaotic_link_stacks`,
+    (SELECT COUNT(*) FROM `manastorm_segment_spawn` AS activeLinks
+     WHERE activeLinks.`segment_id` = dst.`segment_id`
+       AND activeLinks.`enabled` = 1
+       AND (activeLinks.`flags` & 3) = 3))
 WHERE dst.`segment_id` = 538
   AND src.`map_id` = 209
   AND dst.`map_id` = 209
   AND src.`objective_creature_entry` = 7273
   AND dst.`objective_creature_entry` = 7795
   AND dst.`chaotic_link_stacks` = 0
-  AND src.`chaotic_link_stacks` <=
-      (SELECT COUNT(*) FROM `manastorm_segment_spawn`
-       WHERE `segment_id` = 538
-         AND `enabled` = 1
-         AND (`flags` & 2) <> 0);
+  AND src.`chaotic_link_stacks` > 0;
 
 UPDATE `manastorm_segment` AS dst
 JOIN `manastorm_segment` AS src ON src.`segment_id` = 392
-SET dst.`chaotic_link_stacks` = src.`chaotic_link_stacks`
+SET dst.`chaotic_link_stacks` = LEAST(
+    src.`chaotic_link_stacks`,
+    (SELECT COUNT(*) FROM `manastorm_segment_spawn` AS activeLinks
+     WHERE activeLinks.`segment_id` = dst.`segment_id`
+       AND activeLinks.`enabled` = 1
+       AND (activeLinks.`flags` & 3) = 3))
 WHERE dst.`segment_id` = 548
   AND src.`map_id` = 209
   AND dst.`map_id` = 209
   AND src.`objective_creature_entry` = 7273
   AND dst.`objective_creature_entry` = 7795
   AND dst.`chaotic_link_stacks` = 0
-  AND src.`chaotic_link_stacks` <=
-      (SELECT COUNT(*) FROM `manastorm_segment_spawn`
-       WHERE `segment_id` = 548
-         AND `enabled` = 1
-         AND (`flags` & 2) <> 0);
+  AND src.`chaotic_link_stacks` > 0;
 
 -- Review both tracks, copied links and their required break counts:
 -- SELECT s.segment_id, s.objective_creature_entry,
