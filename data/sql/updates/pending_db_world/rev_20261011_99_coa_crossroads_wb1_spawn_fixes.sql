@@ -26,7 +26,6 @@ WHERE `guid` = 13292 AND `id` = 4166;
 -- Spawns left above or below the patch-WB1 terrain rest on the ground again.
 UPDATE `gameobject` SET `position_z` = 95.338 WHERE `guid` = 13449 AND `id` = 143982;
 UPDATE `gameobject` SET `position_z` = 98.653 WHERE `guid` = 13504 AND `id` = 3705;
-UPDATE `gameobject` SET `position_z` = 97.219 WHERE `guid` = 15112 AND `id` = 123328;
 UPDATE `creature` SET `position_z` = 95.421 WHERE `guid` = 19414 AND `id` = 3501;
 UPDATE `creature` SET `position_z` = 95.881 WHERE `guid` = 19423 AND `id` = 3501;
 UPDATE `creature` SET `position_z` = 96.585 WHERE `guid` = 19429 AND `id` = 3501;
@@ -34,3 +33,7 @@ UPDATE `creature` SET `position_z` = 96.585 WHERE `guid` = 19429 AND `id` = 3501
 -- The Silverleaf node under the longhouse floor grows behind its south wall.
 UPDATE `gameobject` SET `position_x` = -560.510, `position_y` = -2704.870, `position_z` = 94.034
 WHERE `guid` = 213150 AND `id` = 3725;
+
+-- The Campfire left in the patch-WB1 walkway wall burns on open ground north of it.
+UPDATE `gameobject` SET `position_x` = -389.500, `position_y` = -2709.500, `position_z` = 97.320
+WHERE `guid` = 15112 AND `id` = 123328;
