@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Hero's Call and Warchief's Command boards start their zone quests and the named officer ends them",
-  "contract": "The Ascension WDB captures (2026-09-08) hold Hero's Call 14204-14228 and Warchief's Command 14229-14252, missing from the server. Each is taken from its faction's call board (Hero's Call Board 402000, Warchief's Command Board 402001) and handed in to the officer its objective names, at the client QuestSuperTrack turn-in point. Hero's Call: Redridge Mountains! 14209 (level 20) is handed in to Guard Howe 903 and pays 150 Rune of Ascension 375250; Warchief's Command: The Barrens! 14232 (level 10) is handed in to Sergra Darkthorn 3338 and pays no runes. The duplicate Hillsbrad quest 14217 is not offered by the board.",
+  "contract": "The Ascension WDB captures (2026-09-08) hold Hero's Call 14204-14228 and Warchief's Command 14229-14252, missing from the server. Each is taken from its faction's call board (Hero's Call Board 402000, Warchief's Command Board 402001) and handed in to the officer its objective names, at the client QuestSuperTrack turn-in point. Hero's Call: Redridge Mountains! 14209 (level 20) is handed in to Guard Howe 903 and pays 150 Rune of Ascension 375250; Warchief's Command: The Barrens! 14232 (level 10) is handed in to Sergra Darkthorn 3338 and pays no runes. The board window lists these zone-sorted orders in its PvE category, next to the PvE dailies. The duplicate Hillsbrad quest 14217 is not offered by the board.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -44,6 +44,34 @@
       "action": "summon_gameobject",
       "actor": "alliance",
       "entry": 402000
+    },
+    {
+      "label": "open the Hero's Call Board window",
+      "action": "use_gameobject",
+      "actor": "alliance",
+      "entry": 402000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "PvE Quests",
+      "equals": 1
+    },
+    {
+      "label": "open the PvE category",
+      "action": "gossip_select",
+      "actor": "alliance",
+      "option": 0
+    },
+    {
+      "label": "the PvE category lists the zone order",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_menu_has",
+      "quest": 14209,
+      "equals": 1
     },
     {
       "label": "take Hero's Call: Redridge Mountains! from the Hero's Call Board",

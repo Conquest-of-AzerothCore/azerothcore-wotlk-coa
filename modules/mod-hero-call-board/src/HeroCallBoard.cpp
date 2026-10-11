@@ -77,7 +77,11 @@ namespace
 
     std::optional<uint32> CategoryOf(Quest const* quest)
     {
-        switch (quest->GetZoneOrSort())
+        int32 const sort = quest->GetZoneOrSort();
+        if (sort > 0)
+            return CategoryPvE;
+
+        switch (sort)
         {
             case SortPvE: return CategoryPvE;
             case SortPvP: return CategoryPvP;
@@ -86,14 +90,10 @@ namespace
         }
     }
 
-    int32 SortOf(uint32 category)
+    bool InCategory(Quest const* quest, uint32 category)
     {
-        switch (category)
-        {
-            case CategoryPvP: return SortPvP;
-            case CategoryProfessions: return SortProfessions;
-            default: return SortPvE;
-        }
+        std::optional<uint32> const questCategory = CategoryOf(quest);
+        return questCategory && *questCategory == category;
     }
 
     void SendBoardMenu(Player* player, GameObject* board)
@@ -133,14 +133,13 @@ namespace
     {
         ClearGossipMenuFor(player);
         QuestMenu& menu = player->PlayerTalkClass->GetQuestMenu();
-        int32 const sort = SortOf(category);
 
         // Filter before adding: both categories together can exceed the 32-entry menu limit.
         auto const involved = sObjectMgr->GetGOQuestInvolvedRelationBounds(board->GetEntry());
         for (auto itr = involved.first; itr != involved.second; ++itr)
         {
             Quest const* quest = sObjectMgr->GetQuestTemplate(itr->second);
-            if (!quest || quest->GetZoneOrSort() != sort || menu.HasItem(itr->second))
+            if (!quest || !InCategory(quest, category) || menu.HasItem(itr->second))
                 continue;
 
             QuestStatus const status = player->GetQuestStatus(itr->second);
@@ -154,7 +153,7 @@ namespace
         for (auto itr = available.first; itr != available.second; ++itr)
         {
             Quest const* quest = sObjectMgr->GetQuestTemplate(itr->second);
-            if (quest && quest->GetZoneOrSort() == sort && !menu.HasItem(itr->second)
+            if (quest && InCategory(quest, category) && !menu.HasItem(itr->second)
                 && player->CanSeeStartQuest(quest) && player->CanTakeQuest(quest, false))
                 offered.push_back(quest);
         }
