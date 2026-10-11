@@ -5933,6 +5933,36 @@ public:
     return true;
   }
 
+  bool GrantMysticAltarVanityItems(Player *player) {
+    std::shared_ptr<PlayerCollectionState> state = GetState(player);
+    if (!state)
+      return false;
+
+    std::size_t vanityBefore = state->OwnedVanityItems.size();
+    for (uint32 itemId : MysticAltarVanityItems) {
+      if (!_vanityItems.contains(itemId))
+        continue;
+
+      if (state->OwnedVanityItems.insert(itemId).second) {
+        CharacterDatabasePreparedStatement *stmt =
+            CharacterDatabase.GetPreparedStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION);
+        stmt->SetData(0, state->AccountId);
+        stmt->SetData(1, itemId);
+        CharacterDatabase.Execute(stmt);
+      }
+    }
+
+    SendVanityCollection(player, *state);
+
+    LOG_INFO("coa",
+             "Granted Mystic Altar vanity items to {} (account {}) "
+             "regardless of this realm's CoA.RealmOffersMysticAltars "
+             "setting: +{} vanity items",
+             player->GetName(), state->AccountId,
+             state->OwnedVanityItems.size() - vanityBefore);
+    return true;
+  }
+
   bool GrantFullAppearanceCollection(Player *player) {
     std::shared_ptr<PlayerCollectionState> state = GetState(player);
     if (!state)
@@ -7612,6 +7642,8 @@ public:
          Console::No},
         {"localtransmogall", HandleLocalTransmogAllCommand, SEC_ADMINISTRATOR,
          Console::No},
+        {"localmysticaltarall", HandleLocalMysticAltarAllCommand,
+         SEC_ADMINISTRATOR, Console::No},
         {"bankground", HandleBankGroundCommand, SEC_ADMINISTRATOR, Console::No}};
     return commandTable;
   }
@@ -7678,6 +7710,39 @@ public:
           .SendSysMessage(
               "You have been granted the full Ascension transmog "
               "collection.");
+    return true;
+  }
+
+  static bool HandleLocalMysticAltarAllCommand(ChatHandler *handler,
+                                               Optional<PlayerIdentifier> player) {
+    if (!player)
+      player = PlayerIdentifier::FromTargetOrSelf(handler);
+
+    if (!player || !player->IsConnected())
+    {
+      handler->SendSysMessage("That player must be online for this command.");
+      return true;
+    }
+
+    Player *target = player->GetConnectedPlayer();
+    if (!AscensionCollectionService::Instance().GrantMysticAltarVanityItems(target))
+    {
+      handler->PSendSysMessage(
+          "Could not grant the Mystic Altar vanity items to {}: their "
+          "Ascension collection state isn't loaded (bot, or collection data "
+          "failed to load).",
+          player->GetName());
+      return true;
+    }
+
+    handler->PSendSysMessage(
+        "Granted the Mystic Altar vanity items to {} (account-wide "
+        "ownership; this realm may not offer altars to use them on).",
+        player->GetName());
+    if (handler->GetPlayer() != target)
+      ChatHandler(target->GetSession())
+          .SendSysMessage(
+              "You have been granted the Mystic Altar vanity items.");
     return true;
   }
 
