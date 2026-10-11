@@ -1,0 +1,400 @@
+{
+  "schema": 1,
+  "name": "Adventure Mode withholds profession experience but keeps profession skill-ups",
+  "contract": "Issue #7193: Adventure Mode (211) carries NO_PROFESSION_EXPERIENCE. Profession experience is the character experience granted for gathering and crafting: the Potion of Profession Experience (spell 1008028) 'increases experience gained from professions' through the profession bit (4) of the SPELL_AURA_MOD_XP_PCT source mask, and Ascension's knowledge-base article 'profession-experience' is titled 'Gain Exp from Crafting and Gathering'. The Adventure Mode aura 302053 and the challenge description say nothing about blocking profession skill. An orange Mining, Herbalism or Skinning gather (required 1 at skill 1/75) and an orange Minor Healing Potion craft (2330 at Alchemy 1/75) therefore raise the skill in the mode exactly as for a character outside it, while the mode's character gives no experience for them.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "adventurer",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 5000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "adventurer",
+      "challenge": 211,
+      "level": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Adventure Mode starts",
+      "actor": "adventurer",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Adventure Mode tier 1 aura",
+      "actor": "adventurer",
+      "metric": "aura",
+      "spell": 302053,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The control character is outside the mode",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 302053,
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "adventurer",
+      "skill": 186,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "adventurer",
+      "metric": "xp",
+      "save_as": "adventurer_186_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "adventurer",
+      "skill": 186,
+      "required": 1
+    },
+    {
+      "action": "set_skill",
+      "actor": "outsider",
+      "skill": 186,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "xp",
+      "save_as": "outsider_186_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "outsider",
+      "skill": 186,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "label": "An orange Mining gather raises the skill outside the mode",
+      "actor": "outsider",
+      "metric": "skill_value",
+      "skill": 186,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "An orange Mining gather gives experience outside the mode",
+      "actor": "outsider",
+      "metric": "xp",
+      "relative_to": "outsider_186_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "An orange Mining gather raises the skill in Adventure Mode",
+      "actor": "adventurer",
+      "metric": "skill_value",
+      "skill": 186,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "An orange Mining gather gives no experience in Adventure Mode",
+      "actor": "adventurer",
+      "metric": "xp",
+      "relative_to": "adventurer_186_before",
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "adventurer",
+      "skill": 182,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "adventurer",
+      "metric": "xp",
+      "save_as": "adventurer_182_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "adventurer",
+      "skill": 182,
+      "required": 1
+    },
+    {
+      "action": "set_skill",
+      "actor": "outsider",
+      "skill": 182,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "xp",
+      "save_as": "outsider_182_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "outsider",
+      "skill": 182,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "label": "An orange Herbalism gather raises the skill outside the mode",
+      "actor": "outsider",
+      "metric": "skill_value",
+      "skill": 182,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "An orange Herbalism gather raises the skill in Adventure Mode",
+      "actor": "adventurer",
+      "metric": "skill_value",
+      "skill": 182,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "An orange Herbalism gather gives no experience in Adventure Mode",
+      "actor": "adventurer",
+      "metric": "xp",
+      "relative_to": "adventurer_182_before",
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "adventurer",
+      "skill": 393,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "adventurer",
+      "metric": "xp",
+      "save_as": "adventurer_393_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "adventurer",
+      "skill": 393,
+      "required": 1
+    },
+    {
+      "action": "set_skill",
+      "actor": "outsider",
+      "skill": 393,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "xp",
+      "save_as": "outsider_393_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "outsider",
+      "skill": 393,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "label": "An orange Skinning gather raises the skill outside the mode",
+      "actor": "outsider",
+      "metric": "skill_value",
+      "skill": 393,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "An orange Skinning gather raises the skill in Adventure Mode",
+      "actor": "adventurer",
+      "metric": "skill_value",
+      "skill": 393,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "An orange Skinning gather gives no experience in Adventure Mode",
+      "actor": "adventurer",
+      "metric": "xp",
+      "relative_to": "adventurer_393_before",
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "adventurer",
+      "skill": 171,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "adventurer",
+      "spell": 2330
+    },
+    {
+      "action": "add_item",
+      "actor": "adventurer",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "adventurer",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "adventurer",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "adventurer",
+      "metric": "xp",
+      "save_as": "adventurer_craft_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "adventurer",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "adventurer_potions_before"
+    },
+    {
+      "action": "cast",
+      "actor": "adventurer",
+      "spell": 2330
+    },
+    {
+      "action": "assert",
+      "label": "The recipe produces its potion",
+      "actor": "adventurer",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "adventurer_potions_before",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "actor": "outsider",
+      "skill": 171,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "outsider",
+      "spell": 2330
+    },
+    {
+      "action": "add_item",
+      "actor": "outsider",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "outsider",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "outsider",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "xp",
+      "save_as": "outsider_craft_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "outsider_potions_before"
+    },
+    {
+      "action": "cast",
+      "actor": "outsider",
+      "spell": 2330
+    },
+    {
+      "action": "assert",
+      "label": "The recipe produces its potion",
+      "actor": "outsider",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "outsider_potions_before",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "An orange craft raises Alchemy outside the mode",
+      "actor": "outsider",
+      "metric": "skill_value",
+      "skill": 171,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "An orange craft raises Alchemy in Adventure Mode",
+      "actor": "adventurer",
+      "metric": "skill_value",
+      "skill": 171,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "An orange craft gives no experience in Adventure Mode",
+      "actor": "adventurer",
+      "metric": "xp",
+      "relative_to": "adventurer_craft_before",
+      "equals": 0
+    }
+  ]
+}

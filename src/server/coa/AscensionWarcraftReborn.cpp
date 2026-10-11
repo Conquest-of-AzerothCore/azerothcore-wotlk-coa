@@ -264,6 +264,36 @@ class spell_ascension_reborn_dark_apotheosis_only : public SpellScript
     }
 };
 
+class aura_ascension_reborn_dark_apotheosis : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_reborn_dark_apotheosis);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ DARK_APOTHEOSIS_PASSIVES[0], DARK_APOTHEOSIS_PASSIVES[1] });
+    }
+
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    {
+        for (uint32 passive : DARK_APOTHEOSIS_PASSIVES)
+            GetTarget()->CastSpell(GetTarget(), passive, true);
+    }
+
+    void Remove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        for (uint32 passive : DARK_APOTHEOSIS_PASSIVES)
+            GetTarget()->RemoveAurasDueToSpell(passive, GetTarget()->GetGUID());
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_reborn_dark_apotheosis::Apply, EFFECT_0,
+            SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_reborn_dark_apotheosis::Remove, EFFECT_0,
+            SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 class AscensionWarcraftRebornPlayer final : public PlayerScript
 {
 public:
@@ -343,6 +373,8 @@ void AddAscensionWarcraftRebornScripts()
     new AscensionWarcraftReborn::AscensionWarcraftRebornWorld();
     RegisterSpellScriptWithArgs(AscensionWarcraftReborn::spell_ascension_reborn_dark_apotheosis_only,
         "spell_ascension_reborn_dark_apotheosis_only");
+    RegisterSpellScriptWithArgs(AscensionWarcraftReborn::aura_ascension_reborn_dark_apotheosis,
+        "aura_ascension_reborn_dark_apotheosis");
     sSpellMgr->SetAddedSpellRanks(&AscensionWarcraftReborn::LoadRankChains);
     sSpellMgr->SetSpellTwins(&AscensionWarcraftReborn::LoadTwins);
     sSpellMgr->SetSpellNamesakes(&AscensionWarcraftReborn::LoadNamesakes);

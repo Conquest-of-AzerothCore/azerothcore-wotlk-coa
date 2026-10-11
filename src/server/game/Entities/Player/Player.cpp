@@ -8439,7 +8439,8 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
             switch (loot_type)
             {
                 case LOOT_DISENCHANTING:
-                    loot->FillLoot(item->GetTemplate()->DisenchantID, LootTemplates_Disenchant, this, true);
+                    loot->FillLoot(LocalLevelScaling::InstanceTemplateFor(item, item->GetTemplate())->DisenchantID,
+                        LootTemplates_Disenchant, this, true);
                     break;
                 case LOOT_PROSPECTING:
                     loot->FillLoot(item->GetEntry(), LootTemplates_Prospecting, this, true);
@@ -13965,7 +13966,7 @@ bool Player::CanTitanGrip(ItemTemplate const* weapon) const
         (weapon->SubClass != ITEM_SUBCLASS_WEAPON_POLEARM || commander));
 }
 
-void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement)
+void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement, bool redirect)
 {
     auto itr = m_temporarySpellReplacements.find(original);
     uint32 previous = itr == m_temporarySpellReplacements.end() ? original : itr->second;
@@ -13977,6 +13978,7 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement)
     if (!replacement)
     {
         m_temporarySpellReplacements.erase(original);
+        m_temporarySpellReplacementKeepsCast.erase(original);
         replacement = original;
     }
     else
@@ -13985,6 +13987,10 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement)
             return;
         m_temporarySpellReplacements[original] = replacement;
         m_temporarySpellReplacementOrigins[replacement] = original;
+        if (redirect)
+            m_temporarySpellReplacementKeepsCast.erase(original);
+        else
+            m_temporarySpellReplacementKeepsCast[original] = 1;
     }
     if (previous != replacement && IsInWorld() && HasActiveSpell(original))
     {
@@ -14007,6 +14013,13 @@ uint32 Player::GetTemporarySpellReplacement(uint32 original) const
     auto itr = m_temporarySpellReplacements.find(original);
     return itr != m_temporarySpellReplacements.end() && HasActiveSpell(original) && HasActiveSpell(itr->second) ?
         itr->second : original;
+}
+
+uint32 Player::GetCastReplacement(uint32 original) const
+{
+    if (m_temporarySpellReplacementKeepsCast.count(original))
+        return original;
+    return GetTemporarySpellReplacement(original);
 }
 
 bool Player::IsTemporarySpellReplacementStandIn(uint32 spellId) const

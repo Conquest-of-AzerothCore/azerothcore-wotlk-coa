@@ -61,7 +61,7 @@ class aura_ascension_mountain_threshold : public AuraScript
             return;
         if (crossedDown)
             owner->RemoveAurasDueToSpell(MountainBuff, owner->GetGUID());
-        else if (crossedUp && owner->IsAlive() && owner->HasAura(CallOfTheMountain))
+        else if (crossedUp && owner->IsAlive() && owner->GetLevel() >= 40 && owner->HasAura(CallOfTheMountain))
             owner->CastSpell(owner, MountainBuff, true);
     }
 

@@ -4,6 +4,10 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "World.h"
+
+#include <algorithm>
+#include <limits>
 
 namespace AscensionQuestLog
 {
@@ -15,14 +19,17 @@ WorldPacket BuildField(ObjectGuid guid, uint32 field, uint32 value)
     data << guid << field << value;
     return data;
 }
+}
 
-uint32 OfferedRewardXP(Player* player, Quest const* quest)
+uint32 RewardXPForDisplay(Player* player, Quest const* quest)
 {
+    if (!player)
+        return 0;
     uint32 xp = sScriptMgr->OnPlayerShouldBeRewardedWithMoneyInsteadOfExp(player)
         ? 0 : player->CalculateQuestRewardXP(quest);
     sScriptMgr->OnPlayerQuestComputeXP(player, quest, xp);
-    return xp;
-}
+    return static_cast<uint32>(std::min(double(xp) * sWorld->getRate(RATE_XP_GLOBAL),
+        double(std::numeric_limits<uint32>::max())));
 }
 
 WorldPacket BuildRewardXP(ObjectGuid guid, uint16 slot, uint32 rewardXP)
@@ -41,7 +48,7 @@ void SendSlot(Player* player, uint16 slot)
     if (!quest)
         return;
 
-    WorldPacket rewardXP = BuildRewardXP(player->GetGUID(), slot, OfferedRewardXP(player, quest));
+    WorldPacket rewardXP = BuildRewardXP(player->GetGUID(), slot, RewardXPForDisplay(player, quest));
     player->SendDirectMessage(&rewardXP);
     WorldPacket level = BuildLevel(player->GetGUID(), slot, uint32(player->GetQuestLevel(quest)));
     player->SendDirectMessage(&level);

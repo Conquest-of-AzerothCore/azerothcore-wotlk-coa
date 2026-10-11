@@ -421,8 +421,11 @@ struct Actor
     uint32 challengeStartLastCode = 0;
     std::map<uint64, std::map<uint16, uint32>> unitValues;
     std::map<uint32, uint32> creatureQueryRank;
+    std::map<uint32, uint32> clientCastTimeMs;
+    std::map<uint32, uint32> clientAttributes;
     std::map<uint32, uint32> questQueryFlags;
     std::map<uint32, uint32> questQueryFirstChoiceItem;
+    std::map<uint32, uint32> questOfferXP;
     uint32 lastQuestWindow = 0;
     uint32 lastStableResult = 0;
     uint32 lfgProposalId = 0;
@@ -629,7 +632,8 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_SUPERCEDED_SPELL && packet.GetOpcode() != SMSG_REMOVED_SPELL &&
         packet.GetOpcode() != SMSG_ITEM_QUERY_SINGLE_RESPONSE && packet.GetOpcode() != SMSG_MOVE_KNOCK_BACK &&
         packet.GetOpcode() != SMSG_DUEL_REQUESTED && packet.GetOpcode() != SMSG_DUEL_COUNTDOWN &&
-        packet.GetOpcode() != SMSG_DUEL_COMPLETE && packet.GetOpcode() != SMSG_SEND_MAIL_RESULT)
+        packet.GetOpcode() != SMSG_DUEL_COMPLETE && packet.GetOpcode() != SMSG_FRIEND_STATUS &&
+        packet.GetOpcode() != SMSG_SEND_MAIL_RESULT)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -790,6 +794,17 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
 
     ++actor.packetOrdinal;
 
+    if (packet.GetOpcode() == CoASpellbook::SMSG_PATCH_SPELL &&
+        packet.size() >= (CoASpellbook::SMSG_PATCH_SPELL_CAST_TIME_INDEX_DWORD + 1) * sizeof(uint32))
+    {
+        uint32 const streamedSpell = packet.read<uint32>(0);
+        uint32 const castTimeIndex = packet.read<uint32>(
+            CoASpellbook::SMSG_PATCH_SPELL_CAST_TIME_INDEX_DWORD * sizeof(uint32));
+        if (SpellCastTimesEntry const* entry = sSpellCastTimesStore.LookupEntry(castTimeIndex))
+            actor.clientCastTimeMs[streamedSpell] = entry->CastTime > 0 ? uint32(entry->CastTime) : 0;
+        actor.clientAttributes[streamedSpell] = packet.read<uint32>(4 * sizeof(uint32));
+    }
+
     if (packet.GetOpcode() == CoASpellbook::SMSG_PATCH_SPELL_CUSTOM_ATTR)
     {
         WorldPacket row(packet);
@@ -897,6 +912,31 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() == SMSG_QUESTGIVER_REQUEST_ITEMS ||
         packet.GetOpcode() == SMSG_QUESTGIVER_QUEST_DETAILS)
         actor.lastQuestWindow = packet.GetOpcode();
+
+    if (packet.GetOpcode() == SMSG_QUESTGIVER_OFFER_REWARD)
+    {
+        WorldPacket offer(packet);
+        ObjectGuid giver;
+        uint32 quest;
+        std::string title;
+        std::string text;
+        uint8 enableNext;
+        uint32 flags;
+        uint32 suggestedPlayers;
+        uint32 emotes;
+        offer >> giver >> quest >> title >> text >> enableNext >> flags >> suggestedPlayers >> emotes;
+        offer.read_skip(std::size_t(emotes) * 2 * sizeof(uint32));
+        uint32 choices;
+        offer >> choices;
+        offer.read_skip(std::size_t(choices) * 3 * sizeof(uint32));
+        uint32 items;
+        offer >> items;
+        offer.read_skip(std::size_t(items) * 3 * sizeof(uint32));
+        uint32 money;
+        uint32 xp;
+        offer >> money >> xp;
+        actor.questOfferXP[quest] = xp;
+    }
 
     if (packet.GetOpcode() == SMSG_INITIAL_SPELLS)
     {
@@ -2111,6 +2151,24 @@ private:
             auto itr = actor.creatureQueryRank.find(step.get<uint32>("entry"));
             return itr == actor.creatureQueryRank.end() ? -1 : int64(itr->second);
         }
+        if (metric == "client_cast_time_ms")
+        {
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.clientCastTimeMs.find(step.get<uint32>("spell"));
+            return itr == actor.clientCastTimeMs.end() ? -1 : int64(itr->second);
+        }
+        if (metric == "client_attributes")
+        {
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.clientAttributes.find(step.get<uint32>("spell"));
+            return itr == actor.clientAttributes.end() ? -1 : int64(itr->second);
+        }
+        if (metric == "quest_offer_sent_xp")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            auto const found = actor.questOfferXP.find(step.get<uint32>("quest"));
+            return found == actor.questOfferXP.end() ? -1 : int64(found->second);
+        }
         if (metric == "quest_level" || metric == "quest_xp")
         {
             Player* player = unit->ToPlayer();
@@ -2723,6 +2781,8 @@ private:
         }
         if (metric == "melee_crit_chance")
             return player->GetFloatValue(PLAYER_CRIT_PERCENTAGE);
+        if (metric == "ranged_taken_crit_chance")
+            return player->GetUnitCriticalChance(RANGED_ATTACK, GetUnit(step.get<std::string>("target")));
         if (metric == "dodge_chance")
             return player->GetFloatValue(PLAYER_DODGE_PERCENTAGE);
         if (metric == "parry_chance")
@@ -3802,7 +3862,7 @@ private:
             });
             return selected == known.end() ? 0 : selected->Rank;
         }
-        if (metric == "server_packet_u32" || metric == "server_packet_float")
+        if (metric == "server_packet_u8" || metric == "server_packet_u32" || metric == "server_packet_float")
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));
             uint16 const opcode = uint16(step.get<uint32>("opcode"));
@@ -3830,7 +3890,8 @@ private:
                     return -1;
                 ++offset;
             }
-            offset += std::size_t(index) * sizeof(uint32);
+            std::size_t const fieldSize = metric == "server_packet_u8" ? sizeof(uint8) : sizeof(uint32);
+            offset += std::size_t(index) * fieldSize;
             if (metric == "server_packet_float" && step.get<bool>("from_end", false))
             {
                 std::size_t const tail = (std::size_t(index) + 1) * sizeof(uint32);
@@ -3838,10 +3899,10 @@ private:
                     return -1;
                 offset = payload->size() - tail;
             }
-            if (offset > payload->size() || payload->size() - offset < sizeof(uint32))
+            if (offset > payload->size() || payload->size() - offset < fieldSize)
                 return -1;
             uint32 value = 0;
-            for (uint32 byte = 0; byte < sizeof(uint32); ++byte)
+            for (std::size_t byte = 0; byte < fieldSize; ++byte)
                 value |= uint32(uint8((*payload)[offset + byte])) << (byte * 8);
             if (metric == "server_packet_float")
             {
@@ -4986,7 +5047,14 @@ private:
             Require(request.ItemGuid == item->GetGUID() && request.DestinationSlot == slot,
                 "Equipment packet did not round-trip");
             player->GetSession()->HandleAutoEquipItemSlotOpcode(request);
-            if (player->GetItemByPos(INVENTORY_SLOT_BAG_0, uint8(slot)) != item)
+            if (step.get<bool>("rejected", false))
+            {
+                Require(player->GetItemByPos(INVENTORY_SLOT_BAG_0, uint8(slot)) != item,
+                    "Equipment change was expected to be rejected");
+                uint16 destination = 0;
+                record.put("result", std::to_string(player->CanEquipItem(uint8(slot), destination, item, true)));
+            }
+            else if (player->GetItemByPos(INVENTORY_SLOT_BAG_0, uint8(slot)) != item)
             {
                 uint16 destination = 0;
                 InventoryResult equip = player->CanEquipItem(uint8(slot), destination, item, true);

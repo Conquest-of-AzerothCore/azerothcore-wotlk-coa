@@ -69,4 +69,37 @@ int main()
     assert(CurveRatio(curve, 10, 20, 9.0) == 2.0 && CurveRatio(curve, 10, 50, 9.0) == 9.0);
     for (unsigned level = 11; level <= 40; ++level)
         assert(curve.At(level) >= curve.At(level - 1));
+
+    assert(Disenchantable(61, 0) && Disenchantable(61, 300));
+    assert(!Disenchantable(0, 300) && !Disenchantable(61, std::uint32_t(-1)));
+
+    DisenchantLadder empty;
+    assert(empty.AtOrBelow(80).disenchantId == 0 && empty.AtOrBelow(80).itemLevel == 0);
+
+    DisenchantLadder sameSubClass;
+    sameSubClass.Add(66, 61, 275);
+    sameSubClass.Add(66, 61, 275);
+    sameSubClass.Add(66, 62, 275);
+    sameSubClass.Add(70, 63, 300);
+    sameSubClass.Add(70, 62, 300);
+    sameSubClass.Add(90, 0, 300);
+    sameSubClass.Add(95, 64, std::uint32_t(-1));
+    sameSubClass.Add(0, 64, 300);
+    assert(sameSubClass.AtOrBelow(65).disenchantId == 0);
+    DisenchantBracket const common = sameSubClass.AtOrBelow(68);
+    assert(common.itemLevel == 66 && common.disenchantId == 61 && common.requiredSkill == 275);
+    DisenchantBracket const tied = sameSubClass.AtOrBelow(120);
+    assert(tied.itemLevel == 70 && tied.disenchantId == 62 && tied.requiredSkill == 300);
+
+    DisenchantLadder sameSlot;
+    sameSlot.Add(66, 65, 275);
+    sameSlot.Add(66, 64, 300);
+    sameSlot.Add(66, 64, 275);
+    sameSlot.Add(100, 67, 325);
+    DisenchantBracket const slotTie = sameSlot.AtOrBelow(70);
+    assert(slotTie.disenchantId == 64 && slotTie.requiredSkill == 275);
+    assert(NearestDisenchantBracket(sameSubClass.AtOrBelow(70), sameSlot.AtOrBelow(70)).disenchantId == 62);
+    assert(NearestDisenchantBracket(sameSubClass.AtOrBelow(66), sameSlot.AtOrBelow(66)).disenchantId == 61);
+    assert(NearestDisenchantBracket(sameSubClass.AtOrBelow(110), sameSlot.AtOrBelow(110)).disenchantId == 67);
+    assert(NearestDisenchantBracket(empty.AtOrBelow(110), empty.AtOrBelow(110)).disenchantId == 0);
 }

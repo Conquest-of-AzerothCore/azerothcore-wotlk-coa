@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Disenchant: a custom epic weapon yields the stock bracket's Nexus Crystal",
+  "contract": "Custom weapons and armour take the disenchant bracket of the closest stock item with the same class, slot and quality at or below their item level. Bloodrazor 200809 (custom epic one-hand sword, item level 56, RequiredDisenchantSkill 200) shares that bracket with stock epic one-hand weapons of item level 56, DisenchantID 64, whose only loot is one Nexus Crystal 20725. A character with Enchanting 300 casts Disenchant 13262 on it: the cast opens a disenchant loot window holding exactly one Nexus Crystal, collecting it adds the crystal, and closing the window consumes the sword. Level-lifted copies are not exercised here.",
+  "players": [
+    { "id": "enchanter", "race": 1, "class": 1, "level": 60 }
+  ],
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_skill", "actor": "enchanter", "skill": 333, "value": 300, "maximum": 300 },
+    { "action": "learn", "actor": "enchanter", "spell": 13262 },
+    { "action": "add_item", "actor": "enchanter", "item": 200809 },
+    {
+      "action": "cast", "label": "Disenchant Bloodrazor",
+      "actor": "enchanter", "spell": 13262, "target_item": 200809
+    },
+    {
+      "action": "assert", "label": "the disenchant loot window holds one item",
+      "actor": "enchanter", "metric": "loot_count", "equals": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "the item is a Nexus Crystal",
+      "actor": "enchanter", "metric": "loot_entry", "equals": 20725
+    },
+    { "action": "collect_loot", "actor": "enchanter" },
+    {
+      "action": "assert", "label": "one Nexus Crystal reaches the bags",
+      "actor": "enchanter", "metric": "item_count", "item": 20725, "equals": 1, "within_ms": 2000
+    },
+    { "action": "close_loot", "actor": "enchanter" },
+    {
+      "action": "assert", "label": "closing the loot window consumes the sword",
+      "actor": "enchanter", "metric": "item_count", "item": 200809, "equals": 0, "within_ms": 2000
+    }
+  ]
+}

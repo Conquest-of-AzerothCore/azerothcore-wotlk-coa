@@ -13,6 +13,11 @@ using namespace Acore::ChatCommands;
 namespace CoAChallenges
 {
 
+    bool UsesCoreProfessionXP(Player* player)
+    {
+        return player && ActiveChallenges(player->GetGUID().GetCounter()).contains(167);
+    }
+
     // Heal-path helpers (defined below, used by HealBlocked earlier in this TU).
     void AllowBandageHeal(uint32 guid);
     bool ConsumeBandageAllow(uint32 guid);
@@ -1613,22 +1618,20 @@ namespace CoAChallenges
             return true;
         }
 
-        void OnPlayerUpdateCraftingSkill(Player* player, SkillLineAbilityEntry const* skill, uint32 /*current_level*/, uint32& gain) override
+        void OnPlayerUpdateCraftingSkill(Player* player, SkillLineAbilityEntry const* skill, uint32 /*current_level*/, uint32& /*gain*/) override
         {
-            if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE"))
-                gain = 0;
-            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
+            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS")
+                && !UsesCoreProfessionXP(player))
             {
                 std::lock_guard<std::mutex> lock(CraftRarityMutex);
                 CraftRarity[player->GetGUID().GetCounter()] = CraftedItemRarity(skill);
             }
         }
 
-        void OnPlayerUpdateGatheringSkill(Player* player, uint32 /*skill_id*/, uint32 /*current*/, uint32 /*gray*/, uint32 /*green*/, uint32 /*yellow*/, uint32& gain) override
+        void OnPlayerUpdateGatheringSkill(Player* player, uint32 /*skill_id*/, uint32 /*current*/, uint32 /*gray*/, uint32 /*green*/, uint32 /*yellow*/, uint32& /*gain*/) override
         {
-            if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE"))
-                gain = 0;
-            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
+            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS")
+                && !UsesCoreProfessionXP(player))
             {
                 // Gathering has no crafted item: flat XP, also clears a stale
                 // craft entry from a failed skill-up roll.
@@ -1654,6 +1657,8 @@ namespace CoAChallenges
             if (!player || !IsProfessionSkill(skillId))
                 return;
             if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
+                return;
+            if (UsesCoreProfessionXP(player))
                 return;
             uint32 mult = 1;
             {
@@ -1747,7 +1752,9 @@ namespace CoAChallenges
             }
             else if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
             {
-                if (xpSource != XPSOURCE_PROFESSION_SKILL)
+                uint8 const professionSource = UsesCoreProfessionXP(player)
+                    ? XPSOURCE_PROFESSION : XPSOURCE_PROFESSION_SKILL;
+                if (xpSource != professionSource)
                     amount = 0;
             }
 
@@ -3693,6 +3700,20 @@ namespace CoAChallenges
         uint32 Last = 0;
     };
 
+    // The same scans also test group members, bots and friendly bystanders, which
+    // the core refuses on its own; the PvP challenge notices are only for a player
+    // the core would otherwise let the attacker fight, so they ask the core once
+    // with this hook stood aside.
+    thread_local bool CoreAttackProbeActive = false;
+
+    bool CoreAllowsAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell)
+    {
+        CoreAttackProbeActive = true;
+        bool const allowed = attacker->IsValidAttackTarget(target, spell);
+        CoreAttackProbeActive = false;
+        return allowed;
+    }
+
     class CoAChallengesUnit : public UnitScript
     {
     public:
@@ -3713,9 +3734,9 @@ namespace CoAChallenges
         // Gate is Unit::_IsValidAttackTarget (both melee and spells). Pets/
         // guardians are resolved to their owner. Battlegrounds/arenas keep their
         // own rules (only the open world is restricted).
-        bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* /*spell*/) override
+        bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell) override
         {
-            if (!attacker || !target)
+            if (!attacker || !target || CoreAttackProbeActive)
                 return true;
             Player* a = attacker->GetCharmerOrOwnerPlayerOrPlayerItself();
             if (!a)
@@ -3756,7 +3777,8 @@ namespace CoAChallenges
                 {
                     PveOnlyNotice* notice = a->CustomData.GetDefault<PveOnlyNotice>(PveOnlyNoticeKey);
                     uint32 const now = getMSTime();
-                    if (!notice->Last || now - notice->Last >= PveOnlyNoticeIntervalMs)
+                    if ((!notice->Last || now - notice->Last >= PveOnlyNoticeIntervalMs)
+                        && CoreAllowsAttack(attacker, target, spell))
                     {
                         notice->Last = now;
                         NotifyPlayer(a, "Your challenge is PvE only: you cannot fight players.");
@@ -3784,7 +3806,7 @@ namespace CoAChallenges
                 if (a->IsMaxLevel() != t->IsMaxLevel())
                     blocked = true;
             }
-            if (blocked && a->GetSession())
+            if (blocked && a->GetSession() && CoreAllowsAttack(attacker, target, spell))
                 NotifyPlayer(a,
                     "Your challenge restricts who you may fight in PvP.");
             return !blocked;

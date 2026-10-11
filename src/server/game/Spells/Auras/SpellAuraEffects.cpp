@@ -2200,11 +2200,11 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         if (PowerType != POWER_MANA)
         {
             uint32 oldPower = target->GetPower(PowerType);
+            bool const powerAlreadyActive = target->IsPlayer() &&
+                target->ToPlayer()->HasActivePowerType(PowerType);
             // reset power to default values only at power change
             if (target->getPowerType() != PowerType)
             {
-                bool const powerAlreadyActive = target->IsPlayer() &&
-                    target->ToPlayer()->HasActivePowerType(PowerType);
                 target->setPowerType(PowerType);
                 if (powerAlreadyActive)
                     target->SetPower(PowerType, oldPower);
@@ -2225,6 +2225,8 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                         {
                             case FORM_CAT:
                                 {
+                                    if (powerAlreadyActive)
+                                        break;
                                     int32 basePoints = int32(std::min(oldPower, FurorChance));
                                     target->SetPower(POWER_ENERGY, 0);
                                     target->CastCustomSpell(target, 17099, &basePoints, nullptr, nullptr, true, nullptr, this);

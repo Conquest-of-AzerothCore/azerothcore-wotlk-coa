@@ -21,6 +21,7 @@ constexpr std::uint32_t REBORN_SKILL_OFFSET = 11000;
 constexpr std::uint32_t ROW_ALTERNATE = 0x80000;
 constexpr std::size_t REQUIRED_ABILITY_COUNT = 3;
 constexpr std::uint32_t DARK_APOTHEOSIS = 1154321;
+constexpr std::array<std::uint32_t, 2> DARK_APOTHEOSIS_PASSIVES = { 1154322, 1154323 };
 constexpr std::array<std::uint32_t, 3> DARK_APOTHEOSIS_SPELLS = { 1159674, 1161363, 1161294 };
 
 struct Grant
