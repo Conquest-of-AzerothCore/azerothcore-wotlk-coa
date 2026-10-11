@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Reaching a level offers the Hero's Call or Warchief's Command zone orders it unlocks as a pop-up",
-  "contract": "The Ascension client shows a \"Quest Discovered!\" pop-up for SMSG 0x927 {quest, 0} (OFFER) and accepts it with CMSG_QUESTGIVER_ACCEPT_QUEST carrying no quest giver. Reaching a level offers the faction's zone orders whose minimum level was just reached: an Alliance character reaching 20 is offered Hero's Call: Redridge Mountains! 14209 and Hero's Call: Duskwood! 14208, not the level 10 orders it already passed nor the Horde order 14243; a Horde character reaching 10 is offered Warchief's Command: The Barrens! 14232, not the level 15 order 14233. Accepting the pop-up adds the order to the quest log; an order above the character's level is refused. The client forgets its pop-ups on logout, so logging in offers the two open orders with the highest minimum level again (14208 and 14222 at level 20, not the level 10 orders and not the accepted 14209).",
+  "contract": "The Ascension client shows a \"Quest Discovered!\" pop-up for SMSG 0x927 {quest, 0} (OFFER) and accepts it with CMSG_QUESTGIVER_ACCEPT_QUEST carrying no quest giver. Reaching a level offers every zone order of the faction whose minimum level was just reached: the fixture's level-up from 1 to 19 offers the three level 10 orders 14204, 14212 and 14220, and reaching 20 offers Hero's Call: Redridge Mountains! 14209 and Hero's Call: Duskwood! 14208, not the level 10 orders again nor the Horde order 14243; a Horde character reaching 10 is offered Warchief's Command: The Barrens! 14232, not the level 15 order 14233. Accepting the pop-up adds the order to the quest log; an order above the character's level is refused. The client forgets its pop-ups on logout, so logging in offers the two open orders with the highest minimum level: logging in again at 20 offers 14208 and 14222, not the level 10 orders and not the accepted 14209.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -58,13 +58,22 @@
       "equals": 1
     },
     {
-      "label": "a level 10 order is not offered again",
+      "label": "the level 10 order offered on the fixture's level-up to 19 is not offered again at 20",
       "action": "assert",
       "actor": "alliance",
       "metric": "server_packets",
       "opcode": 2343,
       "row": 14204,
-      "equals": 0
+      "equals": 1
+    },
+    {
+      "label": "a level-up offers every order it unlocks, without the login limit",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 2343,
+      "row": 14220,
+      "equals": 1
     },
     {
       "label": "the Horde level 20 order is not offered to the Alliance",
@@ -172,7 +181,7 @@
       "metric": "server_packets",
       "opcode": 2343,
       "row": 14204,
-      "equals": 0
+      "equals": 1
     },
     {
       "label": "the Horde character reaches level 10",
