@@ -17,7 +17,7 @@ INSERT IGNORE INTO `game_tele`
      `orientation`, `map`, `name`)
 VALUES
     (2141, -46.2375, 751.226, -28.8181, 1.45615, 429,
-     'Manastorm_DireMaul_LordHel\\'nurath');
+     'Manastorm_DireMaul_LordHel\'nurath');
 
 -- StartingUnlocked (bit 0x1), same baseline as preceding Dire Maul stages.
 UPDATE `manastorm_segment`
