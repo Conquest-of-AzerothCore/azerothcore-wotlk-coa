@@ -105,9 +105,9 @@ INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 DELETE FROM `creature` WHERE `guid` BETWEEN 9010700 AND 9010704;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`)
 VALUES
-(9010700, 41719, 1, 0, 0, 1, 1, 0, -393.199, -2607.72, 96.343, 3.464, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Raj''iri at SuperTrack 21366, turn-in of 255078 and 255080'),
-(9010701, 753513, 1, 0, 0, 1, 1, 0, -543.303, -2708.61, 96.036, 0.756, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Brumbof Bramstum at SuperTrack 21367, objective of 255080 in the tauren lodge'),
-(9010702, 41739, 1, 0, 0, 1, 1, 0, -531.518, -2639.22, 96.066, 0.128, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Rhuna at SuperTrack 21372, turn-in of 255079'),
+(9010700, 41719, 1, 0, 0, 1, 1, 0, -393.124, -2607.53, 96.351, 2.32863, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Raj''iri at SuperTrack 21366, turn-in of 255078 and 255080'),
+(9010701, 753513, 1, 0, 0, 1, 1, 0, -546.686, -2705.27, 96.037, 1.57543, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Brumbof Bramstum by the lodge drums near SuperTrack 21367, objective of 255080 in the tauren lodge'),
+(9010702, 41739, 1, 0, 0, 1, 1, 0, -531.499, -2639.09, 96.066, 4.26463, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Rhuna at SuperTrack 21372, turn-in of 255079'),
 (9010703, 741722, 1, 0, 0, 1, 1, 0, -464.983, -2536.49, 115.152, 4.766, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Martin Lesterfield at SuperTrack 21374, turn-in of 255081'),
 (9010704, 753524, 1, 0, 0, 1, 1, 0, -354.925, -2657.8, 96.201, 2.883, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Crossroads: Voltzix Sprocketpop at SuperTrack 21379, turn-in of 255083');
 
