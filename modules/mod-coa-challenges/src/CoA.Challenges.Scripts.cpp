@@ -3701,16 +3701,16 @@ namespace CoAChallenges
     };
 
     // The same scans also test group members, bots and friendly bystanders, which
-    // the core refuses on its own; the PVE_ONLY notice is only for a player the
-    // core would otherwise let the attacker fight, so it asks the core once with
-    // this hook stood aside.
-    thread_local bool PveOnlyProbeActive = false;
+    // the core refuses on its own; the PvP challenge notices are only for a player
+    // the core would otherwise let the attacker fight, so they ask the core once
+    // with this hook stood aside.
+    thread_local bool CoreAttackProbeActive = false;
 
     bool CoreAllowsAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell)
     {
-        PveOnlyProbeActive = true;
+        CoreAttackProbeActive = true;
         bool const allowed = attacker->IsValidAttackTarget(target, spell);
-        PveOnlyProbeActive = false;
+        CoreAttackProbeActive = false;
         return allowed;
     }
 
@@ -3736,7 +3736,7 @@ namespace CoAChallenges
         // own rules (only the open world is restricted).
         bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell) override
         {
-            if (!attacker || !target || PveOnlyProbeActive)
+            if (!attacker || !target || CoreAttackProbeActive)
                 return true;
             Player* a = attacker->GetCharmerOrOwnerPlayerOrPlayerItself();
             if (!a)
@@ -3806,7 +3806,7 @@ namespace CoAChallenges
                 if (a->IsMaxLevel() != t->IsMaxLevel())
                     blocked = true;
             }
-            if (blocked && a->GetSession())
+            if (blocked && a->GetSession() && CoreAllowsAttack(attacker, target, spell))
                 NotifyPlayer(a,
                     "Your challenge restricts who you may fight in PvP.");
             return !blocked;
