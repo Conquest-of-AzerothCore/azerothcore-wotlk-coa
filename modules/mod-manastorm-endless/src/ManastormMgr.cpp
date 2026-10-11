@@ -352,6 +352,19 @@ namespace
 
     // Lord Hel'nurath is summoned during the Warlock Dreadsteed ritual,
     // not loaded from a permanent dungeon creature spawn.
+    constexpr uint32 MANASTORM_MAP_ZUL_FARRAK = 209;
+    constexpr uint32 NPC_GAHZRILLA = 7273;
+    constexpr uint32 SEGMENT_GAHZRILLA_NORMAL = 198;
+    constexpr uint32 SEGMENT_GAHZRILLA_ENDGAME = 392;
+
+    // Native Zul'Farrak gong-event (2488) summon position in the pool.
+    // Source: historical DB-event summon coordinates, not the player
+    // entrance teleport. Only used for private Manastorm objective stages.
+    Position const GAHZRILLA_GONG_POSITION =
+    {
+        1667.54f, 1190.57f, -2.80444f, 0.890118f
+    };
+
     constexpr uint32 MANASTORM_MAP_DIRE_MAUL = 429;
     constexpr uint32 NPC_LORD_HELNURATH = 14506;
     constexpr uint32 NPC_IMMOLTHAR = 11496;
@@ -1320,6 +1333,89 @@ namespace
         return true;
     }
 
+    bool BootstrapZulFarrakGahzrillaEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_ZUL_FARRAK ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            segment.MapId != MANASTORM_MAP_ZUL_FARRAK ||
+            segment.ObjectiveCreatureEntry != NPC_GAHZRILLA ||
+            (segment.SegmentId != SEGMENT_GAHZRILLA_NORMAL &&
+             segment.SegmentId != SEGMENT_GAHZRILLA_ENDGAME))
+        {
+            error = "Gahz'rilla bootstrap received a nonmatching private Manastorm stage.";
+            return false;
+        }
+
+        // The native boss is gong-summoned rather than a standing world
+        // spawn. Prepare the genuine pool grid, not the whole instance.
+        map->LoadGrid(
+            GAHZRILLA_GONG_POSITION.GetPositionX(),
+            GAHZRILLA_GONG_POSITION.GetPositionY());
+
+        // Respect a boss that may already have been created by a DB gong
+        // script in this isolated instance; never create a second objective.
+        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        {
+            Creature* existing = spawn.second;
+            if (!existing || !existing->IsInWorld() ||
+                !existing->IsAlive() ||
+                existing->GetEntry() != NPC_GAHZRILLA)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(existing);
+            if (run.GetObjectiveCreatureGuid() != existing->GetGUID())
+            {
+                error = "Existing Gahz'rilla failed Manastorm objective registration.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER,
+                "Reused existing Gahz'rilla for private Manastorm stage: "
+                "run={} segment={} instance={} guid={}.",
+                run.GetRunId(), segment.SegmentId,
+                run.GetInstanceId(), existing->GetGUID().GetRawValue());
+            return true;
+        }
+
+        TempSummon* gahzrilla = map->SummonCreature(
+            NPC_GAHZRILLA,
+            GAHZRILLA_GONG_POSITION);
+
+        if (!gahzrilla)
+        {
+            error = "Failed to summon native Gahz'rilla (7273) in the private Zul'Farrak pool.";
+            return false;
+        }
+
+        gahzrilla->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
+
+        // Registration is duplicate-safe: OnCreatureAddWorld may already
+        // have run from the creature's normal world-add hook.
+        ManastormMgr::Instance().OnCreatureAddWorld(gahzrilla);
+        if (run.GetObjectiveCreatureGuid() != gahzrilla->GetGUID())
+        {
+            gahzrilla->DespawnOrUnsummon();
+            error = "Summoned Gahz'rilla did not register as the private Manastorm objective.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER,
+            "Summoned native Gahz'rilla for private Manastorm stage: "
+            "run={} segment={} instance={} guid={}.",
+            run.GetRunId(), segment.SegmentId,
+            run.GetInstanceId(), gahzrilla->GetGUID().GetRawValue());
+
+        return true;
+    }
+
     bool BootstrapSpecialEncounter(
         Map* map,
         ManastormRun& run,
@@ -1327,6 +1423,11 @@ namespace
     {
         switch (run.GetSegment().SegmentId)
         {
+        case SEGMENT_GAHZRILLA_NORMAL:
+        case SEGMENT_GAHZRILLA_ENDGAME:
+            return BootstrapZulFarrakGahzrillaEncounter(
+                map, run, error);
+
         case SEGMENT_HELNURATH_NORMAL:
         case SEGMENT_HELNURATH_ENDGAME:
             return BootstrapDireMaulHelnurathEncounter(
