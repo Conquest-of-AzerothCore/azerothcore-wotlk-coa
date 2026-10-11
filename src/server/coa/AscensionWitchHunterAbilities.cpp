@@ -253,7 +253,10 @@ class spell_ascension_witch_hunter_ability : public SpellScript
             if (Noctis(GetSpellInfo()) && dealt && player->HasAura(707067))
                 target->RemoveAurasDueToSpell(680517, player->GetGUID());
         }
-        if (Heartseeking(GetSpellInfo()) && dealt)
+        // Saber Slash (Fire) 680230 is the Inquisition melee generator but its DBC family flags carry no
+        // Heartseeking bit, so it needs the same damage-to-rage conversion by ID. Keep it ID-based: setting
+        // the flag would also retarget its EFFECT_2 trigger (Wrangler's Net 802007) to 807316 in ApplyContracts.
+        if ((Heartseeking(GetSpellInfo()) || id == 680230) && dealt)
             player->RewardRage(dealt, 0, true);
         if (Desecrate(GetSpellInfo()) && dealt && player->HasAura(560208) &&
             target->HasAura(680517, player->GetGUID()))

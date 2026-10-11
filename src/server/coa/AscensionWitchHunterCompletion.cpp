@@ -142,7 +142,10 @@ void ApplyContracts(SpellInfo* info)
         info->TargetAuraState = info->CasterAuraState = 0;
     if (id == 802006)
         info->Effects[EFFECT_2].TriggerSpell = 680386;
-    if (Dusk(info))
+    // Saber Slash (Fire) 680230 is authored with an off-hand requirement but no main-hand one, so a normal
+    // main-hand weapon cannot cast it. Strip it like the Dusk strikes: the Inquisition basic generator must
+    // work with a main-hand weapon (removal only adds castability for dual-wielders too).
+    if (Dusk(info) || id == 680230)
         info->AttributesEx3 &= ~SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON;
     if (Heartseeking(info))
         info->Effects[EFFECT_2].TriggerSpell = 807316;
