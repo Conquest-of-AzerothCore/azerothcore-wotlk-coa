@@ -3700,6 +3700,20 @@ namespace CoAChallenges
         uint32 Last = 0;
     };
 
+    // The same scans also test group members, bots and friendly bystanders, which
+    // the core refuses on its own; the PVE_ONLY notice is only for a player the
+    // core would otherwise let the attacker fight, so it asks the core once with
+    // this hook stood aside.
+    thread_local bool PveOnlyProbeActive = false;
+
+    bool CoreAllowsAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell)
+    {
+        PveOnlyProbeActive = true;
+        bool const allowed = attacker->IsValidAttackTarget(target, spell);
+        PveOnlyProbeActive = false;
+        return allowed;
+    }
+
     class CoAChallengesUnit : public UnitScript
     {
     public:
@@ -3720,9 +3734,9 @@ namespace CoAChallenges
         // Gate is Unit::_IsValidAttackTarget (both melee and spells). Pets/
         // guardians are resolved to their owner. Battlegrounds/arenas keep their
         // own rules (only the open world is restricted).
-        bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* /*spell*/) override
+        bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell) override
         {
-            if (!attacker || !target)
+            if (!attacker || !target || PveOnlyProbeActive)
                 return true;
             Player* a = attacker->GetCharmerOrOwnerPlayerOrPlayerItself();
             if (!a)
@@ -3763,7 +3777,8 @@ namespace CoAChallenges
                 {
                     PveOnlyNotice* notice = a->CustomData.GetDefault<PveOnlyNotice>(PveOnlyNoticeKey);
                     uint32 const now = getMSTime();
-                    if (!notice->Last || now - notice->Last >= PveOnlyNoticeIntervalMs)
+                    if ((!notice->Last || now - notice->Last >= PveOnlyNoticeIntervalMs)
+                        && CoreAllowsAttack(attacker, target, spell))
                     {
                         notice->Last = now;
                         NotifyPlayer(a, "Your challenge is PvE only: you cannot fight players.");
