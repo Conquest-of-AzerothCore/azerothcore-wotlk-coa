@@ -3,7 +3,10 @@
 -- Lakeshire NPCs and objects, plus field differences in existing Redridge data.
 -- Positions follow the client QuestSuperTrack/SuperTrack points or observed object positions; displays marked
 -- stand-in replace Ascension models the client lacks. NPC levels follow Roman Murashoff's Ascension Redridge videos
--- where they show one and are estimated otherwise; the captures carry none.
+-- where they show one and are estimated otherwise; the captures carry none. Luca Tyndall, Lady Idelia Solomon and
+-- Father Norice instead take their levels, Luca's axe and pose, Idelia's spot, the Guard Pearce and Guard Ashlock
+-- moves and nine Lakeshire Guards from a live CoA world export (pale_reach_and_redridge.sql, 2026-10-11) whose source
+-- is unknown.
 -- Seventeen more Lakeshire NPCs from the creaturecache (WDB captures up to 2026-09-05) have no recorded position in
 -- any source; their spots, facings, levels and stand-in displays are estimated and marked so below.
 
@@ -16,9 +19,9 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
   `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`,
   `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`)
 VALUES
-(255204, 0, 0, 0, 0, 0, 'Luca Tyndall', NULL, NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(255206, 0, 0, 0, 0, 0, 'Lady Idelia Solomon', NULL, NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(255207, 0, 0, 0, 0, 0, 'Father Norice', NULL, NULL, 0, 35, 35, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255204, 0, 0, 0, 0, 0, 'Luca Tyndall', NULL, NULL, 0, 20, 20, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255206, 0, 0, 0, 0, 0, 'Lady Idelia Solomon', NULL, NULL, 0, 30, 30, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255207, 0, 0, 0, 0, 0, 'Father Norice', NULL, NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991477, 0, 0, 0, 0, 0, 'Ley-Tracker Hestlor', 'Master Mage', NULL, 0, 30, 30, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991474, 0, 0, 0, 0, 0, 'Meria Crastlor', 'Mage Adept', NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991475, 0, 0, 0, 0, 0, 'Jasper Gilleon', 'Novice Mage', NULL, 0, 15, 15, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
@@ -141,9 +144,9 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
   `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`,
   `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`,
   `CreateObject`, `Comment`) VALUES
-(9950400, 255206, 0, 0, 0, 1, 1, 0, -9453.16, -2314.81, 83.44, 1.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lady Idelia Solomon (client SuperTrack 21385/21397; facing estimated)'),
+(9950400, 255206, 0, 0, 0, 1, 1, 0, -9440.38, -2306.45, 83.4431, 1.54181, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lady Idelia Solomon (live CoA world export 2026-10-11, source unknown)'),
 (9950401, 991477, 0, 0, 0, 1, 1, 0, -9656.0, -1970.4, 99.49, 4.89, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Ley-Tracker Hestlor (client SuperTrack 21386, Red Mage Tower; facing the Uldum portal estimated)'),
-(9950402, 255204, 0, 0, 0, 1, 1, 0, -9466.77, -2186.57, 70.2, 0.3, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Luca Tyndall (client SuperTrack 21392; facing estimated)'),
+(9950402, 255204, 0, 0, 0, 1, 1, 1, -9466.25, -2186.6, 70.1972, 1.07997, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Luca Tyndall (live CoA world export 2026-10-11, source unknown)'),
 (9950403, 255207, 0, 0, 0, 1, 1, 0, -9428.72, -2075.62, 68.25, 4.7, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Father Norice (client SuperTrack 21396, chapel; facing estimated)'),
 (9950404, 991474, 0, 0, 0, 1, 1, 0, -9664.04, -1957.14, 65.01, 3.48, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Meria Crastlor (client SuperTrack 8504, Red Mage Tower; facing Jasper estimated)'),
 (9950405, 991475, 0, 0, 0, 1, 1, 0, -9678.01, -1961.99, 65.01, 3.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Jasper Gilleon (Red Mage Tower ground floor, on the desk chair; spot and facing estimated)'),
@@ -173,10 +176,45 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950429, 255215, 0, 0, 0, 1, 1, 0, -9286.0, -2294.0, 67.52, 5.16, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Captured Blackrock Sentry (by Marshal Marris; spot and facing estimated)'),
 (9950430, 255473, 0, 0, 0, 1, 1, 0, -9245.0, -2165.0, 63.93, 0.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Addison Rutherford (Lakeshire square by the inn; spot and facing estimated)');
 
-DELETE FROM `creature_addon` WHERE `guid` = 9950405;
+-- Nine Lakeshire Guards around the town hall, Luca Tyndall's Hamhock's Ham Hacker and work emote 234, and the
+-- guards' sitting and emote 69 poses: live CoA world export (pale_reach_and_redridge.sql, 2026-10-11, rows marked
+-- 'placed in game'), source unknown.
+DELETE FROM `creature_equip_template` WHERE `CreatureID` = 255204;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
+(255204, 1, 2827, 0, 0, 0);
+
+DELETE FROM `creature` WHERE `guid` BETWEEN 9965147 AND 9965155;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`,
+  `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`,
+  `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`,
+  `CreateObject`, `Comment`) VALUES
+(9965147, 10037, 0, 0, 0, 1, 1, 0, -9445.97, -2318.83, 75.5701, 1.4303, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (live CoA world export 2026-10-11, source unknown)'),
+(9965148, 10037, 0, 0, 0, 1, 1, 0, -9441.94, -2315.92, 75.5555, 4.5601, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (live CoA world export 2026-10-11, source unknown)'),
+(9965149, 10037, 0, 0, 0, 1, 1, 0, -9445.78, -2315.3, 75.6253, 4.60251, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (live CoA world export 2026-10-11, source unknown)'),
+(9965150, 10037, 0, 0, 0, 1, 1, 0, -9447.2, -2313.26, 75.2872, 4.95673, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (live CoA world export 2026-10-11, source unknown)'),
+(9965151, 10037, 0, 0, 0, 1, 1, 0, -9451.96, -2317.94, 75.4158, 1.38237, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (live CoA world export 2026-10-11, source unknown)'),
+(9965152, 10037, 0, 0, 0, 1, 1, 0, -9448.54, -2292.81, 72.6894, 0.772904, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (live CoA world export 2026-10-11, source unknown)'),
+(9965153, 10037, 0, 0, 0, 1, 1, 0, -9437.47, -2293.3, 72.3666, 3.52022, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (live CoA world export 2026-10-11, source unknown)'),
+(9965154, 10037, 0, 0, 0, 1, 1, 0, -9439.9, -2294.53, 72.4386, 0.421822, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (live CoA world export 2026-10-11, source unknown)'),
+(9965155, 10037, 0, 0, 0, 1, 1, 0, -9431.9, -2308.33, 72.4847, 1.45933, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Lakeshire Guard (live CoA world export 2026-10-11, source unknown)');
+
+DELETE FROM `creature_addon` WHERE `guid` IN (9950402,9950405) OR `guid` BETWEEN 9965147 AND 9965155;
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`,
   `visibilityDistanceType`, `auras`) VALUES
-(9950405, 0, 0, 5, 0, 0, 0, '');
+(9950402, 0, 0, 0, 0, 234, 0, ''),
+(9950405, 0, 0, 5, 0, 0, 0, ''),
+(9965147, 0, 0, 5, 0, 0, 0, ''),
+(9965148, 0, 0, 5, 0, 0, 0, ''),
+(9965149, 0, 0, 5, 0, 0, 0, ''),
+(9965151, 0, 0, 5, 0, 0, 0, ''),
+(9965152, 0, 0, 0, 0, 69, 0, ''),
+(9965155, 0, 0, 5, 0, 0, 0, '');
+
+-- Guard Pearce and Guard Ashlock: live CoA world export 2026-10-11, source unknown.
+UPDATE `creature` SET `position_x` = -9417.57, `position_y` = -2286.87, `position_z` = 67.9547,
+  `orientation` = 3.11022 WHERE `guid` = 6157 AND `id` = 935;
+UPDATE `creature` SET `position_x` = -9415.32, `position_y` = -2263.41, `position_z` = 67.5423,
+  `orientation` = 3.37411 WHERE `guid` = 6715 AND `id` = 932;
 
 -- patch-WB1 moved the Lakeshire flagpole and banners from beside Deputy Feldon about 21 yards east and put the
 -- gryphon roosts where they stood. Feldon moves to his client SuperTrack point 528 (quests 244 and 246) next to
@@ -474,6 +512,13 @@ INSERT INTO `quest_template_addon` (`ID`, `MaxLevel`, `AllowableClasses`, `Sourc
 (255114, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (255116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (255117, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+-- The Servant of Azora's reward text for 254068 as shown in Roman Murashoff's Ascension Redridge video BPZDdztVTZU
+-- at 11:51; the questcache does not carry reward texts.
+DELETE FROM `quest_offer_reward` WHERE `ID` = 254068;
+INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, `EmoteDelay1`, `EmoteDelay2`,
+  `EmoteDelay3`, `EmoteDelay4`, `RewardText`, `VerifiedBuild`) VALUES
+(254068, 0, 0, 0, 0, 0, 0, 0, 0, 'Well it sure is good to see a friendly face out here. I don''t suppose you saw another gnome while you were in the tower, did you? No?$B$BMaybe it really wasn''t Morganth finding a way to hide him from the eye then...$B$BI''m sure I''ll find him, Azora''s power is on my side after all. Since you saved me the trouble of scouting this place, maybe I could help you with something in return?$B$BI am always pleased to share the wisdom of Azora with travelers like yourself.', 0);
 
 -- Starters of 254067-254069 are estimated from the speaker of each captured Details text: Alexandria Rowen,
 -- Barkeep Daniels and the Servant of Azora.
