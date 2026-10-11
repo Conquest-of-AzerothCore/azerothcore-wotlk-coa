@@ -1,6 +1,7 @@
 #include "ManastormMgr.h"
 #include "ManastormModuleConfig.h"
 #include "AllMapScript.h"
+#include "Creature.h"
 #include "GameObject.h"
 #include "InstanceScript.h"
 #include "Log.h"
@@ -11,6 +12,9 @@ namespace
 {
     constexpr uint32 MAP_DIRE_MAUL = 429;
     constexpr uint32 NPC_IMMOLTHAR = 11496;
+    constexpr uint32 NPC_HELNURATH = 14506;
+    constexpr uint32 SEGMENT_HELNURATH_NORMAL = 687;
+    constexpr uint32 SEGMENT_HELNURATH_ENDGAME = 688;
     constexpr uint32 SEGMENT_NORMAL = 686;
     constexpr uint32 SEGMENT_ENDGAME = 685;
     constexpr uint32 TYPE_PYLONS_STATE = 2;
@@ -35,10 +39,19 @@ namespace
                 return;
 
             ManastormSegment const& segment = run->GetSegment();
-            if (segment.MapId != MAP_DIRE_MAUL ||
-                segment.ObjectiveCreatureEntry != NPC_IMMOLTHAR ||
-                (segment.SegmentId != SEGMENT_NORMAL &&
-                 segment.SegmentId != SEGMENT_ENDGAME))
+            if (segment.MapId != MAP_DIRE_MAUL)
+                return;
+
+            bool const immoltharStage =
+                segment.ObjectiveCreatureEntry == NPC_IMMOLTHAR &&
+                (segment.SegmentId == SEGMENT_NORMAL ||
+                 segment.SegmentId == SEGMENT_ENDGAME);
+            bool const helnurathStage =
+                segment.ObjectiveCreatureEntry == NPC_HELNURATH &&
+                (segment.SegmentId == SEGMENT_HELNURATH_NORMAL ||
+                 segment.SegmentId == SEGMENT_HELNURATH_ENDGAME);
+
+            if (!immoltharStage && !helnurathStage)
                 return;
 
             InstanceMap* instanceMap = map->ToInstanceMap();
@@ -51,7 +64,8 @@ namespace
                 return;
             }
 
-            // Native Dire Maul releases Immol'thar when the five pylons are done.
+            // Open the native force field in either private encounter.
+            // Hel'nurath's stage suppresses Immol'thar separately.
             instance->SetData(TYPE_PYLONS_STATE, ALL_PYLONS_OFF);
 
             // Handle a force field already loaded at player arrival.
