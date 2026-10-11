@@ -57,6 +57,8 @@ uint32 NextEntry = 1;
 
 std::mutex ActiveLock;
 std::unordered_map<ObjectGuid, ActiveBuilds> Active;
+std::unordered_set<ObjectGuid> DeferredAutoLearn;
+std::atomic<bool> AnyDeferred = false;
 
 std::mutex PendingLock;
 std::unordered_map<WorldSession const*, std::deque<WorldPacket>> PendingRequests;
@@ -411,6 +413,40 @@ void StoreActiveBuild(Player* player, uint32 spec, ActiveBuild const& active)
     CharacterDatabase.Execute(statement);
 }
 
+void AutoLearn(Player* player, ActiveBuild const& active)
+{
+    if (!active.Flags[0] || !AscensionFreepick::HasFreepickBuild(player))
+        return;
+    std::vector<AscensionFreepick::GuideSpell> spells;
+    uint32 primaryStat = 0;
+    {
+        std::lock_guard<std::mutex> lock(CatalogLock);
+        Build const* build = Find(active.Id);
+        if (!build)
+            return;
+        for (Spell const& spell : build->Spells)
+            spells.push_back({ spell.SpellId, spell.Level });
+        primaryStat = build->PrimaryStat;
+    }
+    AscensionFreepick::UploadResult const result = AscensionFreepick::ApplyGuide(player, spells, primaryStat);
+    if (std::string_view(result.Result) == AscensionFreepick::UPDATE_RESULTS[AscensionFreepick::UPDATE_NOT_TRAVERSIBLE] &&
+        (player->IsInCombat() || !player->IsAlive()))
+    {
+        std::lock_guard<std::mutex> lock(ActiveLock);
+        DeferredAutoLearn.insert(player->GetGUID());
+        AnyDeferred = true;
+    }
+    LOG_INFO("coa", "Hero Architect auto-learn of {} for {} at level {}: {} {} entry {} rank {}", active.Id,
+        player->GetName(), player->GetLevel(), result.Result, result.Learn, result.EntryId, result.Rank);
+}
+
+ActiveBuild CurrentActiveBuild(Player const* player)
+{
+    std::lock_guard<std::mutex> lock(ActiveLock);
+    auto const itr = Active.find(player->GetGUID());
+    return itr == Active.end() ? ActiveBuild() : itr->second[AscensionFreepick::ActiveSpecialization(player)];
+}
+
 void HandleActivate(Player* player, WorldPacket& packet)
 {
     std::string id;
@@ -434,6 +470,7 @@ void HandleActivate(Player* player, WorldPacket& packet)
     {
         StoreActiveBuild(player, spec, next);
         SendActiveBuild(player, spec, next);
+        AutoLearn(player, next);
     }
     SendText(player, SMSG_ACTIVATE_BUILD_RESULT, ACTIVATE_RESULTS[result]);
 }
@@ -665,7 +702,13 @@ class AscensionBuildCreatorPlayer final : public PlayerScript
 {
 public:
     AscensionBuildCreatorPlayer() : PlayerScript("AscensionBuildCreatorPlayer", { PLAYERHOOK_ON_LOGIN,
-        PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_DELETE_FROM_DB }) { }
+        PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_LEVEL_CHANGED }) { }
+
+    void OnPlayerLevelChanged(Player* player, uint8 oldLevel) override
+    {
+        if (player->GetLevel() > oldLevel)
+            AutoLearn(player, CurrentActiveBuild(player));
+    }
 
     void OnPlayerLogin(Player* player) override
     {
@@ -686,6 +729,8 @@ public:
         {
             std::lock_guard<std::mutex> lock(ActiveLock);
             Active.erase(player->GetGUID());
+            DeferredAutoLearn.erase(player->GetGUID());
+            AnyDeferred = !DeferredAutoLearn.empty();
         }
         std::lock_guard<std::mutex> lock(PendingLock);
         PendingRequests.erase(player->GetSession());
@@ -694,6 +739,17 @@ public:
 
     void OnPlayerUpdate(Player* player, uint32) override
     {
+        if (AnyDeferred && !player->IsInCombat() && player->IsAlive())
+        {
+            bool deferred = false;
+            {
+                std::lock_guard<std::mutex> lock(ActiveLock);
+                deferred = DeferredAutoLearn.erase(player->GetGUID()) != 0;
+                AnyDeferred = !DeferredAutoLearn.empty();
+            }
+            if (deferred)
+                AutoLearn(player, CurrentActiveBuild(player));
+        }
         if (!AnyPending)
             return;
         std::deque<WorldPacket> requests;
