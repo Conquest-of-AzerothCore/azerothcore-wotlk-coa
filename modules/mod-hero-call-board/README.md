@@ -8,6 +8,9 @@ The **Hero's Call Board** (Stormwind, `402000`) and the **Warchief's Command Boa
 - A category lists the quests in progress and the quests the character may take, filtered before the 32-entry menu
   limit, and sends their quest data ahead of the menu. Quests sorted by a zone, such as the Hero's Call and
   Warchief's Command orders, are listed under PvE.
+- Reaching a level offers the faction's zone orders unlocked at that level as a "Quest Discovered!" pop-up
+  (`SMSG 0x927`); accepting it takes the order without visiting a board. The client forgets its pop-ups on logout,
+  so logging in offers the open orders with the highest minimum level again (two by default).
 - Accepting (including **Accept All**), refusing, turning in or abandoning a board quest re-sends the open category
   instead of closing the window. Every quest still passes the core's own checks.
 - Dailies that need a server event are credited here: five duel victories (`80651`), a battleground win (`81260`),
@@ -22,4 +25,5 @@ The board rewards are the quests' own Runes of Ascension. The Callboard Cache is
 
 ## Configuration
 
-`conf/hero_call_board.conf.dist`: `HeroCallBoard.Enable` (default `1`).
+`conf/hero_call_board.conf.dist`: `HeroCallBoard.Enable` (default `1`), `HeroCallBoard.AutoOffer` (default `1`)
+and `HeroCallBoard.AutoOffer.LoginLimit` (default `2`).

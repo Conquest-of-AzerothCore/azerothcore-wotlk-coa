@@ -16,6 +16,7 @@
 #include "PlayerScript.h"
 #include "QuestDef.h"
 #include "ScriptedGossip.h"
+#include "ServerScript.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldScript.h"
@@ -26,6 +27,7 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <limits>
 #include <optional>
 #include <vector>
 
@@ -60,7 +62,14 @@ namespace
     constexpr std::array<uint32, 16> FinalRaidBosses = { 10184, 11502, 11583, 14834, 15339, 15727, 15990, 110184,
         111502, 111583, 114834, 115339, 115727, 115990, 210184, 211502 };
 
+    constexpr uint16 SmsgAutoQuestUpdate = 0x0927;
+    constexpr uint32 AutoQuestOffer = 0;
+    constexpr uint32 HeroCallBoard = 402000;
+    constexpr uint32 WarchiefCommandBoard = 402001;
+
     std::atomic<bool> enabled{true};
+    std::atomic<bool> autoOffer{true};
+    std::atomic<uint32> loginOfferLimit{2};
 
     bool IsCallBoard(uint32 entry)
     {
@@ -94,6 +103,60 @@ namespace
     {
         std::optional<uint32> const questCategory = CategoryOf(quest);
         return questCategory && *questCategory == category;
+    }
+
+    uint32 FactionBoard(Player const* player)
+    {
+        return player->GetTeamId() == TEAM_ALLIANCE ? HeroCallBoard : WarchiefCommandBoard;
+    }
+
+    bool IsZoneOrder(Quest const* quest)
+    {
+        return quest->GetZoneOrSort() > 0;
+    }
+
+    Quest const* FactionZoneOrder(Player const* player, uint32 questId)
+    {
+        auto const starters = sObjectMgr->GetGOQuestRelationBounds(FactionBoard(player));
+        for (auto itr = starters.first; itr != starters.second; ++itr)
+            if (itr->second == questId)
+                if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId); quest && IsZoneOrder(quest))
+                    return quest;
+
+        return nullptr;
+    }
+
+    void OfferZoneOrders(Player* player, uint32 previousLevel, std::size_t limit)
+    {
+        std::vector<Quest const*> orders;
+        auto const starters = sObjectMgr->GetGOQuestRelationBounds(FactionBoard(player));
+        for (auto itr = starters.first; itr != starters.second; ++itr)
+        {
+            Quest const* quest = sObjectMgr->GetQuestTemplate(itr->second);
+            if (quest && IsZoneOrder(quest) && quest->GetMinLevel() > previousLevel
+                && quest->GetMinLevel() <= player->GetLevel() && player->CanSeeStartQuest(quest)
+                && player->CanTakeQuest(quest, false))
+                orders.push_back(quest);
+        }
+
+        std::sort(orders.begin(), orders.end(), [](Quest const* left, Quest const* right)
+        {
+            return left->GetMinLevel() != right->GetMinLevel() ? left->GetMinLevel() > right->GetMinLevel()
+                : left->GetQuestId() < right->GetQuestId();
+        });
+        orders.resize(std::min(orders.size(), limit));
+
+        for (Quest const* quest : orders)
+        {
+            WorldPacket offer(SmsgAutoQuestUpdate, 2 * sizeof(uint32));
+            offer << quest->GetQuestId() << AutoQuestOffer;
+            player->SendDirectMessage(&offer);
+        }
+    }
+
+    bool OffersZoneOrders(Player const* player)
+    {
+        return enabled.load() && autoOffer.load() && !player->GetSession()->IsBot();
     }
 
     void SendBoardMenu(Player* player, GameObject* board)
@@ -240,7 +303,20 @@ class HeroCallBoardPlayers final : public PlayerScript
 public:
     HeroCallBoardPlayers() : PlayerScript("HeroCallBoardPlayers",
         { PLAYERHOOK_ON_REFRESH_QUEST_GIVER, PLAYERHOOK_ON_QUEST_ABANDON, PLAYERHOOK_ON_DUEL_END,
-            PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET }) { }
+            PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_LEVEL_CHANGED,
+            PLAYERHOOK_ON_LOGIN }) { }
+
+    void OnPlayerLogin(Player* player) override
+    {
+        if (OffersZoneOrders(player))
+            OfferZoneOrders(player, 0, loginOfferLimit.load());
+    }
+
+    void OnPlayerLevelChanged(Player* player, uint8 oldLevel) override
+    {
+        if (OffersZoneOrders(player) && player->GetLevel() > oldLevel)
+            OfferZoneOrders(player, oldLevel, std::numeric_limits<std::size_t>::max());
+    }
 
     void OnPlayerCreatureKill(Player* killer, Creature* killed) override { CreditRaidLeader(killer, killed); }
 
@@ -367,6 +443,29 @@ private:
     }
 };
 
+class HeroCallBoardAutoAccept final : public ServerScript
+{
+public:
+    HeroCallBoardAutoAccept() : ServerScript("HeroCallBoardAutoAccept", { SERVERHOOK_CAN_PACKET_RECEIVE }) { }
+
+    bool CanPacketReceive(WorldSession* session, WorldPacket const& packet) override
+    {
+        if (packet.GetOpcode() != CMSG_QUESTGIVER_ACCEPT_QUEST || packet.size() != 16 || packet.read<uint64>(0) != 0
+            || !enabled.load() || !autoOffer.load() || !session)
+            return true;
+
+        Player* player = session->GetPlayer();
+        Quest const* quest = player ? FactionZoneOrder(player, packet.read<uint32>(8)) : nullptr;
+        if (!quest)
+            return true;
+
+        if (player->CanTakeQuest(quest, true) && player->CanAddQuest(quest, true))
+            player->AddQuestAndCheckCompletion(quest, nullptr);
+
+        return false;
+    }
+};
+
 class HeroCallBoardWorld final : public WorldScript
 {
 public:
@@ -375,6 +474,8 @@ public:
     void OnAfterConfigLoad(bool /*reload*/) override
     {
         enabled.store(sConfigMgr->GetOption<bool>("HeroCallBoard.Enable", true));
+        autoOffer.store(sConfigMgr->GetOption<bool>("HeroCallBoard.AutoOffer", true));
+        loginOfferLimit.store(sConfigMgr->GetOption<uint32>("HeroCallBoard.AutoOffer.LoginLimit", 2));
     }
 };
 
@@ -384,5 +485,6 @@ void AddHeroCallBoardScripts()
     new HeroCallBoardPlayers();
     new HeroCallBoardBattlegrounds();
     new HeroCallBoardDungeons();
+    new HeroCallBoardAutoAccept();
     new HeroCallBoardWorld();
 }
