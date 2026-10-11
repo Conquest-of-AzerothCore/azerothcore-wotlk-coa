@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Reclamation stays castable while Spirit Volley Ready is up",
+  "contract": [
+    "Spirit Volley Ready (505158) still publishes the action-bar alias Reclamation -> Spirit Volley (504582), and Spirit",
+    "Volley still needs the buff, but a cast of the original Reclamation must neither be refused nor silently rewritten",
+    "into Spirit Volley: the player chooses which of the two to use (#6972, #4091). While the buff is up a client cast of",
+    "Reclamation 572345 dispatches Reclamation itself, and casting Spirit Volley consumes the buff as before."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy0",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "distance": 10,
+      "health": 200000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 4000 },
+    { "action": "learn", "actor": "caster", "spell": 572345 },
+    { "action": "learn", "actor": "caster", "spell": 503712 },
+    { "action": "learn", "actor": "caster", "spell": 504582 },
+    {
+      "action": "assert", "label": "SETUP: Reclamation is known",
+      "actor": "caster", "metric": "knows_spell", "spell": 572345, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Spirit Volley is known",
+      "actor": "caster", "metric": "knows_spell", "spell": 504582, "equals": 1
+    },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_aura", "actor": "caster", "spell": 505158, "stacks": 1 },
+    {
+      "action": "assert", "label": "Spirit Volley Ready publishes the action-bar alias",
+      "actor": "caster", "metric": "temporary_spell_replacement", "spell": 572345, "equals": 504582,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 572345,
+      "save_as": "reclamation_before"
+    },
+    { "action": "cast", "actor": "caster", "spell": 572345, "target": "enemy0" },
+    {
+      "action": "assert", "label": "A cast of the original Reclamation is not refused while the buff is up",
+      "actor": "caster", "metric": "cast_failure", "spell": 572345, "equals": 0, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "The original Reclamation cast fires instead of being rewritten into Spirit Volley",
+      "actor": "caster", "metric": "spell_go_count", "spell": 572345, "relative_to": "reclamation_before",
+      "equals": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let the cast and any proc settle", "ms": 2500 },
+    { "action": "set_aura", "actor": "caster", "spell": 505158, "stacks": 1 },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 504582,
+      "save_as": "volley_before"
+    },
+    { "action": "cast", "actor": "caster", "spell": 504582, "target": "enemy0" },
+    {
+      "action": "assert", "label": "Spirit Volley is still castable while the buff is up",
+      "actor": "caster", "metric": "cast_failure", "spell": 504582, "equals": 0, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "Spirit Volley dispatches",
+      "actor": "caster", "metric": "spell_go_count", "spell": 504582, "relative_to": "volley_before",
+      "equals": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "Spirit Volley consumes the buff",
+      "actor": "caster", "metric": "aura", "spell": 505158, "equals": 0, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let the Volley finish", "ms": 2500 },
+    { "action": "set_aura", "actor": "caster", "spell": 505158, "stacks": 0 },
+    { "action": "cast", "actor": "caster", "spell": 504582, "target": "enemy0" },
+    {
+      "action": "assert", "label": "Spirit Volley is still refused without the buff",
+      "actor": "caster", "metric": "cast_failure", "spell": 504582, "equals": 22, "within_ms": 4000
+    }
+  ]
+}

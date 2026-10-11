@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "Personal Bank split deposits respect stack limits (#7018)",
+  "contract": "Linen Cloth stacks to 20. Depositing a split of five into a bank stack of eighteen transfers only the two that fit, preserving the three untransferred items. Depositing into a full stack changes neither side. An empty bank slot accepts the requested split. Native packet transfers preserve the total of twenty-eight items.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "banker",
+      "race": 1,
+      "class": 22,
+      "level": 26
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "banker",
+      "item": 134985
+    },
+    {
+      "action": "use_item",
+      "actor": "banker",
+      "item": 134985,
+      "spell": 100702
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "personal_bank_open",
+      "actor": "banker",
+      "entry": 475001
+    },
+    {
+      "action": "add_item",
+      "actor": "banker",
+      "item": 2589,
+      "count": 20
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "deposit",
+      "item": 2589,
+      "count": 18
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 2,
+      "label": "A split deposit leaves the unselected two items in inventory"
+    },
+    {
+      "action": "add_item",
+      "actor": "banker",
+      "item": 2589,
+      "count": 8
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 10,
+      "label": "Ten items are available for the next split"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "deposit",
+      "item": 2589,
+      "count": 5
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 8,
+      "label": "Only two of the requested five fit into the bank stack of eighteen"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "deposit",
+      "item": 2589,
+      "count": 3
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 8,
+      "label": "A split into a full bank stack preserves the inventory"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "withdraw"
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 28,
+      "label": "Withdrawing the capped stack preserves all twenty-eight items"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "deposit",
+      "item": 2589,
+      "count": 5,
+      "slot": 1
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 23,
+      "label": "A split into an empty bank slot still moves the requested count"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "withdraw",
+      "slot": 1
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 28,
+      "label": "The final withdrawal preserves the total"
+    }
+  ]
+}

@@ -1,0 +1,355 @@
+{
+  "schema": 1,
+  "name": "Bloodmage Eternal abilities scale with attack power and spell power (#7176)",
+  "contract": [
+    "Every rank's client tooltip advertises its coefficient as a description token, with EffectBonusMultiplier 0:",
+    "Ravenous Strike ${$m1+0+$AP*0.2+$SP*.2}, Claw Sweep ${$m1+0+$AP*.2+$SP*0.2},",
+    "Bloodfang Bite ${$m1+0+$AP*0.265+$SP*.265}, Rotclaw ${$m1+$AP*0.11} and a bleed of ($m2+$AP*0.04) per tick.",
+    "The coefficients reach Unit::SpellDamageBonusDone only through spell_bonus_data, looked up by the first rank,",
+    "so the level-60 ranks tested here also prove the rank fallback.",
+    "spell_damage_done uses a fixed base of 1000, so the gain after a pure +1000 attack power aura (10031) and",
+    "after a +2000 all-school spell damage aura (44505) divided by the stat gain is the coefficient. The level-58",
+    "and level-60 ranks at level 60 carry no level penalty. Rotclaw has no spell power term."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 501679
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 500444
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 572551
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 503484
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 501679,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "ravenous_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 500444,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "sweep_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 572551,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "bite_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 503484,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "rotclaw_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 503484,
+      "effect": 1,
+      "target": "dummy",
+      "periodic": true,
+      "save_as": "rotclaw_bleed_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "attack_power",
+      "save_as": "ap_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_before_ap"
+    },
+    {
+      "action": "set_aura",
+      "label": "QA Test +1000 Melee and Ranged AP",
+      "actor": "bloodmage",
+      "spell": 10031,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "attack_power",
+      "save_as": "ap_gain",
+      "relative_to": "ap_before"
+    },
+    {
+      "action": "assert",
+      "label": "The fixture adds 1000 melee attack power",
+      "actor": "bloodmage",
+      "metric": "attack_power",
+      "relative_to": "ap_before",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The attack power fixture leaves spell power unchanged",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_before_ap",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous Strike rank 10 gains 0.2 x attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 501679,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "ravenous_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.195,
+      "max": 0.205
+    },
+    {
+      "action": "assert",
+      "label": "Claw Sweep rank 8 gains 0.2 x attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 500444,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "sweep_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.195,
+      "max": 0.205
+    },
+    {
+      "action": "assert",
+      "label": "Bloodfang Bite rank 10 gains 0.265 x attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 572551,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "bite_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.26,
+      "max": 0.27
+    },
+    {
+      "action": "assert",
+      "label": "Rotclaw rank 10 hit gains 0.11 x attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 503484,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "rotclaw_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.105,
+      "max": 0.115
+    },
+    {
+      "action": "assert",
+      "label": "Rotclaw rank 10 bleed tick gains 0.04 x attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 503484,
+      "effect": 1,
+      "target": "dummy",
+      "periodic": true,
+      "relative_to": "rotclaw_bleed_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.035,
+      "max": 0.045
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 501679,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "ravenous_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 500444,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "sweep_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 572551,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "bite_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 503484,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "rotclaw_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 503484,
+      "effect": 1,
+      "target": "dummy",
+      "periodic": true,
+      "save_as": "rotclaw_bleed_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Drink Fel Infusion: +2000 spell damage to all schools",
+      "actor": "bloodmage",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_gain",
+      "relative_to": "sp_before"
+    },
+    {
+      "action": "assert",
+      "label": "The fixture adds 2000 spell power",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_before",
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous Strike rank 10 gains 0.2 x spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 501679,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "ravenous_before_sp",
+      "ratio_to": "sp_gain",
+      "min": 0.195,
+      "max": 0.205
+    },
+    {
+      "action": "assert",
+      "label": "Claw Sweep rank 8 gains 0.2 x spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 500444,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "sweep_before_sp",
+      "ratio_to": "sp_gain",
+      "min": 0.195,
+      "max": 0.205
+    },
+    {
+      "action": "assert",
+      "label": "Bloodfang Bite rank 10 gains 0.265 x spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 572551,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "bite_before_sp",
+      "ratio_to": "sp_gain",
+      "min": 0.26,
+      "max": 0.27
+    },
+    {
+      "action": "assert",
+      "label": "Rotclaw rank 10 hit has no spell power term",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 503484,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "rotclaw_before_sp",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rotclaw rank 10 bleed tick has no spell power term",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 503484,
+      "effect": 1,
+      "target": "dummy",
+      "periodic": true,
+      "relative_to": "rotclaw_bleed_before_sp",
+      "equals": 0
+    }
+  ]
+}

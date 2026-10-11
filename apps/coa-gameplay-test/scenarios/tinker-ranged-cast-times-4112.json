@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Tinker shots use their recorded cast times without an extra ranged windup (#4112)",
+  "contract": "Scrap Shot 500549 uses SpellCastTimes 19 (2500 ms); Rocket Launcher 500235 uses SpellCastTimes 14 (3000 ms), matching the reported tooltips. Both have USES_RANGED_SLOT, which otherwise adds 500 ms in CalcCastTime before haste and spell modifiers. Native players without talent purchases must read those recorded times at level 6 and for the highest ranks at level 60. The ordinary Hunter Steady Shot 34120 must retain its 2000 + 500 ms calculation, and the zero-cast-time Gatling Gun channel 500213 must still start immediately. These are native cast-time observations, not rendered client cast bars; the unnamed Starcaller attacks in the follow-up report are outside this selection.",
+  "timeout_ms": 30000,
+  "players": [
+    {"id": "young", "race": 1, "class": 28, "level": 6},
+    {"id": "veteran", "race": 1, "class": 28, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "Stock ranged windup remains intact", "actor": "young", "metric": "spell_cast_time_ms", "spell": 34120, "equals": 2500},
+    {"action": "assert", "label": "Gatling Gun remains an immediate channel", "actor": "young", "metric": "spell_cast_time_ms", "spell": 500213, "equals": 0},
+    {"action": "assert", "label": "Level-6 Scrap Shot takes 2.5 seconds", "actor": "young", "metric": "spell_cast_time_ms", "spell": 500549, "equals": 2500},
+    {"action": "assert", "label": "Rocket Launcher takes 3 seconds", "actor": "young", "metric": "spell_cast_time_ms", "spell": 500235, "equals": 3000},
+    {"action": "assert", "label": "The highest Scrap Shot rank has the same timing", "actor": "veteran", "metric": "spell_cast_time_ms", "spell": 500561, "equals": 2500},
+    {"action": "assert", "label": "The highest Rocket Launcher rank has the same timing", "actor": "veteran", "metric": "spell_cast_time_ms", "spell": 573268, "equals": 3000}
+  ]
+}

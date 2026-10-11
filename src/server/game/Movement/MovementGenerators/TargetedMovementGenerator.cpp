@@ -705,7 +705,9 @@ bool FollowMovementGenerator<T>::DoUpdate(T* owner, uint32 time_diff)
         Movement::MoveSplineInit init(owner);
         init.MovebyPath(i_path->GetPath());
         if (_inheritWalkState)
-            init.SetWalk(target->IsWalking());
+            init.SetWalk(target->IsCreature() && !target->movespline->Finalized()
+                ? target->movespline->IsWalking()
+                : target->IsWalking());
 
         if (_inheritSpeed)
             if (Optional<float> velocity = GetVelocity(owner, target, i_path->GetActualEndPosition(), owner->IsGuardian()))

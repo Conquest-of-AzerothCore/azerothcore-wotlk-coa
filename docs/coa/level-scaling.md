@@ -261,7 +261,10 @@ exception: it is dispatched to every registered unit script.
 Not scaled, deliberately, and matching the reference implementation: the creature's **resistance values**
 (template-based and level-independent there too; only the level terms above follow the view) and **loot
 tables**, which are one corpse shared by everyone who tagged it. Scaling gear on that corpse takes the level
-of whoever loots it or wins the roll, a master looter's pick the receiver's.
+of whoever loots it or wins the roll, a master looter's pick the receiver's. Scaling gear from loot or a
+quest reward scales only for a character whose scaling is on, by the same answer the creature view asks
+(their choice, or their leader's in a group, and no challenge or open-world ruleset holding them to the
+authored world); everyone else receives the authored item, and their corpse and roll frame preview none.
 
 With `CoA.ItemScaling.Native.LevelKeys` the stored level is the client's own item key for that level
 (level + 2 up to 20, + 3 up to 30, + 4 up to 50, + 5 up to 60, the client's table above 60), and a quest

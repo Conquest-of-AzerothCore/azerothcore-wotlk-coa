@@ -1,0 +1,575 @@
+{
+  "schema": 1,
+  "name": "Lonely Artisan rewards completed non-gray crafts once, even without a skill increase (#5264)",
+  "contract": "Ironman - Lonely Artisan 167 must use ordinary completed-action profession XP. At level20 next-level XP is23200; Alchemy rate3 with base0.02, profession0.4 and global0.9295 gives floor(floor(23200*0.02*0.4*3*0.95)*0.9295)=490 for green and floor(floor(23200*0.02*0.4*3*1.05)*0.9295)=542 for orange. Minor Healing Potion2330 consumes2447,765,3371 and creates118; SkillLineAbility8053 is yellow55, gray95. Skill75/75 is capped but green, skill1/75 guarantees an orange skill increase, and skill95 is gray. Both the ordinary control and the trial must receive the exact same single award; gray and reagent-rejected casts award none. Actual native crafting produces items and skill changes; no XP or craft outcomes are injected.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ordinary",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "artisan",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "artisan",
+      "challenge": 167,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "artisan",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "artisan",
+      "value": 20
+    },
+    {
+      "action": "command",
+      "actor": "ordinary",
+      "command": ".xp 1"
+    },
+    {
+      "action": "learn",
+      "actor": "ordinary",
+      "spell": 2330
+    },
+    {
+      "action": "assert",
+      "actor": "ordinary",
+      "metric": "next_level_xp",
+      "equals": 23200
+    },
+    {
+      "action": "set_skill",
+      "actor": "ordinary",
+      "skill": 171,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "ordinary",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "ordinary",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "ordinary",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ordinary",
+      "metric": "xp",
+      "save_as": "ordinary_green_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ordinary",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "ordinary_green_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "ordinary",
+      "spell": 2330,
+      "target": "ordinary"
+    },
+    {
+      "action": "assert",
+      "label": "ordinary produces the green recipe's potion",
+      "actor": "ordinary",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "ordinary_green_potions",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "ordinary has the expected green skill outcome",
+      "actor": "ordinary",
+      "metric": "skill_value",
+      "skill": 171,
+      "equals": 75
+    },
+    {
+      "action": "assert",
+      "label": "ordinary receives 490 XP once for the green craft",
+      "actor": "ordinary",
+      "metric": "xp",
+      "relative_to": "ordinary_green_xp",
+      "equals": 490
+    },
+    {
+      "action": "set_skill",
+      "actor": "ordinary",
+      "skill": 171,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "ordinary",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "ordinary",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "ordinary",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ordinary",
+      "metric": "xp",
+      "save_as": "ordinary_orange_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ordinary",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "ordinary_orange_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "ordinary",
+      "spell": 2330,
+      "target": "ordinary"
+    },
+    {
+      "action": "assert",
+      "label": "ordinary produces the orange recipe's potion",
+      "actor": "ordinary",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "ordinary_orange_potions",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "ordinary has the expected orange skill outcome",
+      "actor": "ordinary",
+      "metric": "skill_value",
+      "skill": 171,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "ordinary receives 542 XP once for the orange craft",
+      "actor": "ordinary",
+      "metric": "xp",
+      "relative_to": "ordinary_orange_xp",
+      "equals": 542
+    },
+    {
+      "action": "set_skill",
+      "actor": "ordinary",
+      "skill": 171,
+      "value": 95,
+      "maximum": 150
+    },
+    {
+      "action": "add_item",
+      "actor": "ordinary",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "ordinary",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "ordinary",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ordinary",
+      "metric": "xp",
+      "save_as": "ordinary_gray_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ordinary",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "ordinary_gray_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "ordinary",
+      "spell": 2330,
+      "target": "ordinary"
+    },
+    {
+      "action": "assert",
+      "label": "ordinary produces the gray recipe's potion",
+      "actor": "ordinary",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "ordinary_gray_potions",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "ordinary has the expected gray skill outcome",
+      "actor": "ordinary",
+      "metric": "skill_value",
+      "skill": 171,
+      "equals": 95
+    },
+    {
+      "action": "assert",
+      "label": "ordinary receives 0 XP once for the gray craft",
+      "actor": "ordinary",
+      "metric": "xp",
+      "relative_to": "ordinary_gray_xp",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "ordinary",
+      "metric": "xp",
+      "save_as": "ordinary_failed_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ordinary",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "ordinary_failed_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "ordinary",
+      "spell": 2330,
+      "target": "ordinary"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A reagent-rejected craft produces no potion",
+      "actor": "ordinary",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "ordinary_failed_potions",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A reagent-rejected craft grants no XP",
+      "actor": "ordinary",
+      "metric": "xp",
+      "relative_to": "ordinary_failed_xp",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "actor": "artisan",
+      "command": ".xp 1"
+    },
+    {
+      "action": "learn",
+      "actor": "artisan",
+      "spell": 2330
+    },
+    {
+      "action": "assert",
+      "actor": "artisan",
+      "metric": "next_level_xp",
+      "equals": 23200
+    },
+    {
+      "action": "set_skill",
+      "actor": "artisan",
+      "skill": 171,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "artisan",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "artisan",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "artisan",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "artisan",
+      "metric": "xp",
+      "save_as": "artisan_green_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "artisan",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "artisan_green_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "artisan",
+      "spell": 2330,
+      "target": "artisan"
+    },
+    {
+      "action": "assert",
+      "label": "artisan produces the green recipe's potion",
+      "actor": "artisan",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "artisan_green_potions",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "artisan has the expected green skill outcome",
+      "actor": "artisan",
+      "metric": "skill_value",
+      "skill": 171,
+      "equals": 75
+    },
+    {
+      "action": "assert",
+      "label": "artisan receives 490 XP once for the green craft",
+      "actor": "artisan",
+      "metric": "xp",
+      "relative_to": "artisan_green_xp",
+      "equals": 490
+    },
+    {
+      "action": "set_skill",
+      "actor": "artisan",
+      "skill": 171,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "artisan",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "artisan",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "artisan",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "artisan",
+      "metric": "xp",
+      "save_as": "artisan_orange_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "artisan",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "artisan_orange_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "artisan",
+      "spell": 2330,
+      "target": "artisan"
+    },
+    {
+      "action": "assert",
+      "label": "artisan produces the orange recipe's potion",
+      "actor": "artisan",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "artisan_orange_potions",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "artisan has the expected orange skill outcome",
+      "actor": "artisan",
+      "metric": "skill_value",
+      "skill": 171,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "artisan receives 542 XP once for the orange craft",
+      "actor": "artisan",
+      "metric": "xp",
+      "relative_to": "artisan_orange_xp",
+      "equals": 542
+    },
+    {
+      "action": "set_skill",
+      "actor": "artisan",
+      "skill": 171,
+      "value": 95,
+      "maximum": 150
+    },
+    {
+      "action": "add_item",
+      "actor": "artisan",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "artisan",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "artisan",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "artisan",
+      "metric": "xp",
+      "save_as": "artisan_gray_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "artisan",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "artisan_gray_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "artisan",
+      "spell": 2330,
+      "target": "artisan"
+    },
+    {
+      "action": "assert",
+      "label": "artisan produces the gray recipe's potion",
+      "actor": "artisan",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "artisan_gray_potions",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "artisan has the expected gray skill outcome",
+      "actor": "artisan",
+      "metric": "skill_value",
+      "skill": 171,
+      "equals": 95
+    },
+    {
+      "action": "assert",
+      "label": "artisan receives 0 XP once for the gray craft",
+      "actor": "artisan",
+      "metric": "xp",
+      "relative_to": "artisan_gray_xp",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "artisan",
+      "metric": "xp",
+      "save_as": "artisan_failed_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "artisan",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "artisan_failed_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "artisan",
+      "spell": 2330,
+      "target": "artisan"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A reagent-rejected craft produces no potion",
+      "actor": "artisan",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "artisan_failed_potions",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A reagent-rejected craft grants no XP",
+      "actor": "artisan",
+      "metric": "xp",
+      "relative_to": "artisan_failed_xp",
+      "equals": 0
+    }
+  ]
+}

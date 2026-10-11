@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "Wildcard Cat Form preserves an already active energy pool (#6926)",
+  "contract": [
+    "Wildcard Heroes expose energy through OnPlayerHasActivePowerType before and after shapeshifting.",
+    "Cat Form 768 changes the displayed primary power to energy; entering it must not reset that existing pool.",
+    "An already active Wildcard energy pool must survive entering and leaving the form.",
+    "An ordinary Druid must still start a new energy pool at zero when entering Cat Form without Furor.",
+    "The fixture stores 60 and then 85 energy, uses normal casts, and disables regeneration."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "name": "Wildclaw",
+      "race": 1,
+      "class": 10,
+      "level": 20,
+      "allow_regeneration": false
+    },
+    {
+      "id": "druid",
+      "race": 4,
+      "class": 11,
+      "level": 20,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "druid",
+      "spell": 768
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 768
+    },
+    {
+      "action": "set_power",
+      "actor": "druid",
+      "power": 3,
+      "value": 60
+    },
+    {
+      "action": "cast",
+      "actor": "druid",
+      "spell": 768
+    },
+    {
+      "action": "assert",
+      "actor": "druid",
+      "metric": "aura",
+      "spell": 768,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Ordinary Druid still initializes its new energy pool",
+      "actor": "druid",
+      "metric": "power",
+      "power": 3,
+      "equals": 0
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildclaw"
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 60
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "power",
+      "power": 3,
+      "equals": 60
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 768
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 768,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Entering Cat Form preserves the already active Wildcard energy pool",
+      "actor": "wild",
+      "metric": "power",
+      "power": 3,
+      "equals": 60
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "wild",
+      "spell": 768
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 768,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Cat Form retains the same energy",
+      "actor": "wild",
+      "metric": "power",
+      "power": 3,
+      "equals": 60
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 85
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 768
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 768,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A later entry also preserves a different energy value",
+      "actor": "wild",
+      "metric": "power",
+      "power": 3,
+      "equals": 85
+    }
+  ]
+}

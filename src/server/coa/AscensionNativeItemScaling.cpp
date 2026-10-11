@@ -255,9 +255,16 @@ uint32 DropBase(Player const* looter)
     return ItemLadder::DropBase(looter->GetLevel(), lootLevelOffset.load(std::memory_order_relaxed));
 }
 
+bool ScalingChosenBy(Player const* player)
+{
+    return LocalLevelScaling::ScalingChoiceEnabled(player) &&
+        !(LocalLevelScaling::ScalingBlocksFor(player) & LocalLevelScaling::ChallengeBlocksCreatureScaling);
+}
+
 void AssignLevel(Player* owner, Item* item, uint32 key)
 {
-    if (!enabled.load(std::memory_order_relaxed) || !owner || !item || item->IsEquipped())
+    if (!enabled.load(std::memory_order_relaxed) || !owner || !item || item->IsEquipped() ||
+        !ScalingChosenBy(owner))
         return;
 
     ItemTemplate const* proto = item->GetTemplate();
@@ -303,7 +310,7 @@ void QuestRewardStored(Player* player, Item* item, Quest const* quest)
 
 uint32 RollLevel(Player* roller)
 {
-    if (IsBot(roller))
+    if (IsBot(roller) || !ScalingChosenBy(roller))
         return 0;
 
     uint32 const base = DropBase(roller);
@@ -315,7 +322,7 @@ uint32 RollLevel(Player* roller)
 uint32 CorpseLevel(Player* viewer, Creature const* corpse)
 {
     if (IsBot(viewer) || corpse->IsAlive() || !corpse->HasDynamicFlag(UNIT_DYNFLAG_LOOTABLE) ||
-        !viewer->isAllowedToLoot(corpse))
+        !viewer->isAllowedToLoot(corpse) || !ScalingChosenBy(viewer))
         return 0;
     return std::min<uint32>(DropBase(viewer), 255);
 }

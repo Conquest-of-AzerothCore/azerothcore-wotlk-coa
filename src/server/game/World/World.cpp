@@ -409,13 +409,15 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Spell Cooldown Overrides...");
     sSpellMgr->LoadSpellCooldownOverrides();
 
+    sSpellMgr->LoadSpellTwins(false);
+
     LOG_INFO("server.loading", "Loading SpellInfo Data Corrections...");
     sSpellMgr->LoadSpellInfoCorrections();
 
     LOG_INFO("server.loading", "Loading Spell Rank Data...");
     sSpellMgr->LoadSpellRanks();
     sSpellMgr->LoadAddedSpellRanks();
-    sSpellMgr->LoadSpellTwins();
+    sSpellMgr->LoadSpellTwins(true);
 
     LOG_INFO("server.loading", "Loading Spell Specific And Aura State...");
     sSpellMgr->LoadSpellSpecificAndAuraState();

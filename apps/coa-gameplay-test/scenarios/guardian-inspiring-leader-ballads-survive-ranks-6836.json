@@ -1,0 +1,512 @@
+{
+  "schema": 1,
+  "name": "guardian-inspiring-leader-ballads-survive-ranks-6836",
+  "contract": [
+    "Inspiring Leader 505344 (Inspiration specialization 20) transforms the Guardian's Pulverize and Broad Sweep",
+    "into the Ballads. Broad Sweep ranks 805150, 504177-504182 and Pulverize ranks 800311, 802439-802443 are",
+    "trained rank by rank, and the level-appropriate Ballad of the Dragonslayer (801772, 501066, 501067, ...) or",
+    "Ballad of the Conqueror (801776, 501068, 501069, ...) has to stand in for every rank the character holds.",
+    "#6836: buying a higher rank of Broad Sweep or Pulverize must keep that Ballad on the ability, instead of",
+    "reverting it to the plain rank. The core deactivates the plain rank below when a higher one is learned and",
+    "cues the client with SMSG_SUPERCEDED_SPELL(lower rank, higher rank); the client swaps every action button",
+    "that held the lower rank onto the higher one. The handler then points the higher rank at the Ballad, and",
+    "drops the now-dead entry of the deactivated lower rank. Dropping it while announcing",
+    "SMSG_SUPERCEDED_SPELL(Ballad, deactivated plain rank) is what the client acts on: it swaps the button that",
+    "shows the Ballad back onto the plain rank, which is the reported reversal. So no cue may ever name a plain",
+    "Broad Sweep or Pulverize rank as the spell another spell is superseded by, while exactly one cue per",
+    "purchase must point the new plain rank at the level-appropriate Ballad. At level 25 those are 504178 ->",
+    "501067 (Broad Sweep rank 3 -> Ballad of the Dragonslayer rank 3) and 802441 -> 501069 (Pulverize rank 4 ->",
+    "Ballad of the Conqueror rank 3)."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 18,
+      "level": 25
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "b",
+      "id": 20
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 505344,
+      "equals": 1,
+      "label": "Inspiration grants Inspiring Leader"
+    },
+    {
+      "action": "money",
+      "actor": "b",
+      "copper": 2000000,
+      "label": "fixture: a purse for the rank purchases"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 805150,
+      "label": "fixture: Broad Sweep rank 1"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 800311,
+      "label": "fixture: Pulverize rank 1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "temporary_spell_replacement",
+      "spell": 805150,
+      "equals": 501067,
+      "label": "Broad Sweep rank 1 is replaced by the level-appropriate Ballad of the Dragonslayer"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "temporary_spell_replacement",
+      "spell": 800311,
+      "equals": 501069,
+      "label": "Pulverize rank 1 is replaced by the level-appropriate Ballad of the Conqueror"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "client_knows_spell",
+      "spell": 501067,
+      "equals": 1,
+      "label": "the client is told about the Ballad of the Dragonslayer"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "client_knows_spell",
+      "spell": 501069,
+      "equals": 1,
+      "label": "the client is told about the Ballad of the Conqueror"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 97930,
+      "label": "fixture: the class spellbook"
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 97930,
+      "label": "summon the Book of Ascension"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "b"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_offers_spell",
+      "spell": 504177,
+      "equals": 1,
+      "label": "the book offers Broad Sweep rank 2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 501067,
+      "save_as": "dragonslayer_cues_before_rank2"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "b",
+      "spell": 504177,
+      "label": "buy Broad Sweep rank 2"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 504177,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_active",
+      "spell": 504177,
+      "equals": 1,
+      "label": "the bought rank is the active one"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "temporary_spell_replacement",
+      "spell": 504177,
+      "equals": 501067,
+      "label": "Broad Sweep rank 2 is replaced by the Ballad of the Dragonslayer"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "client_knows_spell",
+      "spell": 501067,
+      "equals": 1,
+      "label": "the Ballad of the Dragonslayer stays on the client"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 501067,
+      "relative_to": "dragonslayer_cues_before_rank2",
+      "equals": 1,
+      "label": "the new Broad Sweep rank is cued at the Ballad of the Dragonslayer"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 805150,
+      "equals": 0,
+      "label": "the deactivated rank 1 is never named as what another spell is superseded by"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 504177,
+      "save_as": "plain_rank2_cues"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_offers_spell",
+      "spell": 504178,
+      "equals": 1,
+      "label": "the book offers Broad Sweep rank 3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 501067,
+      "save_as": "dragonslayer_cues_before_rank3"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "b",
+      "spell": 504178,
+      "label": "buy Broad Sweep rank 3, the rank-up of the report"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 504178,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_active",
+      "spell": 504178,
+      "equals": 1,
+      "label": "the higher rank is the active one"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "temporary_spell_replacement",
+      "spell": 504178,
+      "equals": 501067,
+      "label": "the higher Broad Sweep rank is replaced by the Ballad of the Dragonslayer"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 501067,
+      "equals": 1,
+      "label": "the Ballad of the Dragonslayer stays known"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "client_knows_spell",
+      "spell": 501067,
+      "equals": 1,
+      "label": "the Ballad of the Dragonslayer stays on the client"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 501067,
+      "relative_to": "dragonslayer_cues_before_rank3",
+      "equals": 1,
+      "label": "the higher Broad Sweep rank is cued at the Ballad of the Dragonslayer"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 504177,
+      "relative_to": "plain_rank2_cues",
+      "equals": 0,
+      "label": "the deactivated rank 2 is never named as what another spell is superseded by"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_offers_spell",
+      "spell": 802439,
+      "equals": 1,
+      "label": "the book offers Pulverize rank 2"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "b",
+      "spell": 802439,
+      "label": "buy Pulverize rank 2"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 802439,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "temporary_spell_replacement",
+      "spell": 802439,
+      "equals": 501069,
+      "label": "Pulverize rank 2 is replaced by the Ballad of the Conqueror"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "client_knows_spell",
+      "spell": 501069,
+      "equals": 1,
+      "label": "the Ballad of the Conqueror stays on the client"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 800311,
+      "equals": 0,
+      "label": "the deactivated Pulverize rank 1 is never named as what another spell is superseded by"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 802439,
+      "save_as": "plain_pulverize_rank2_cues"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 501069,
+      "save_as": "conqueror_cues_before_rank3"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_offers_spell",
+      "spell": 802440,
+      "equals": 1,
+      "label": "the book offers Pulverize rank 3"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "b",
+      "spell": 802440,
+      "label": "buy Pulverize rank 3"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 802440,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "temporary_spell_replacement",
+      "spell": 802440,
+      "equals": 501069,
+      "label": "Pulverize rank 3 is replaced by the Ballad of the Conqueror"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "client_knows_spell",
+      "spell": 501069,
+      "equals": 1,
+      "label": "the Ballad of the Conqueror stays on the client"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 501069,
+      "relative_to": "conqueror_cues_before_rank3",
+      "equals": 1,
+      "label": "the new Pulverize rank is cued at the Ballad of the Conqueror"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 802439,
+      "relative_to": "plain_pulverize_rank2_cues",
+      "equals": 0,
+      "label": "the deactivated Pulverize rank 2 is never named as what another spell is superseded by"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 802440,
+      "save_as": "plain_pulverize_rank3_cues"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 501069,
+      "save_as": "conqueror_cues_before_rank4"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_offers_spell",
+      "spell": 802441,
+      "equals": 1,
+      "label": "the book offers Pulverize rank 4"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "b",
+      "spell": 802441,
+      "label": "buy Pulverize rank 4, the rank-up of the report"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 802441,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_active",
+      "spell": 802441,
+      "equals": 1,
+      "label": "the higher Pulverize rank is the active one"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "temporary_spell_replacement",
+      "spell": 802441,
+      "equals": 501069,
+      "label": "the higher Pulverize rank is replaced by the Ballad of the Conqueror"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 501069,
+      "equals": 1,
+      "label": "the Ballad of the Conqueror stays known"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "client_knows_spell",
+      "spell": 501069,
+      "equals": 1,
+      "label": "the Ballad of the Conqueror stays on the client"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 501069,
+      "relative_to": "conqueror_cues_before_rank4",
+      "equals": 1,
+      "label": "the higher Pulverize rank is cued at the Ballad of the Conqueror"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spellbook_superseded_for",
+      "spell": 802440,
+      "relative_to": "plain_pulverize_rank3_cues",
+      "equals": 0,
+      "label": "the deactivated Pulverize rank 3 is never named as what another spell is superseded by"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  }
+}

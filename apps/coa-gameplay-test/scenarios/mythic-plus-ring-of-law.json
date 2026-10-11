@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Mythic+ Blackrock Depths: a Ring of Law arena boss clears Ring of Law",
-  "contract": "In a Blackrock Depths Prison keystone run, killing Hedrum the Creeper (one of the six arena bosses) sends the Ring of Law encounter 2230 in the progress packet; the arena bosses' own encounters are dropped by the core because Ring of Law is the final one.",
+  "contract": "In a Blackrock Depths Prison keystone run, killing Hedrum the Creeper (one of the six arena bosses) sends that boss's own encounter 2986 in the progress packet, as the client lists each arena boss with its own final encounter (DungeonEncounterExtra.dbc 2981-2986 for lfg 2030) and its tracker expects.",
   "timeout_ms": 90000,
   "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
   "players": [
@@ -25,6 +25,6 @@
     { "action": "attack_nearby", "actor": "hero", "entry": 9032, "kill": true },
     { "action": "wait", "ms": 500 },
     { "action": "assert", "label": "progress: one encounter", "actor": "hero", "metric": "server_packet_u32", "opcode": 2313, "index": 0, "equals": 1 },
-    { "action": "assert", "label": "progress: it is Ring of Law", "actor": "hero", "metric": "server_packet_u32", "opcode": 2313, "index": 1, "equals": 2230 }
+    { "action": "assert", "label": "progress: it is Hedrum the Creeper", "actor": "hero", "metric": "server_packet_u32", "opcode": 2313, "index": 1, "equals": 2986 }
   ]
 }

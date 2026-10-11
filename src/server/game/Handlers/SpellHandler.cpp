@@ -407,7 +407,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     if (mover == _player)
     {
-        uint32 replacement = _player->GetTemporarySpellReplacement(spellId);
+        uint32 replacement = _player->GetCastReplacement(spellId);
         if (replacement != spellId)
         {
             spellInfo = sSpellMgr->GetSpellInfo(replacement);

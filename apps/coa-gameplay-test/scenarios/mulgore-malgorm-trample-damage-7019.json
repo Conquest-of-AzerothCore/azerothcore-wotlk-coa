@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Malgorm Charge uses the authored damage roll (#7019)",
+  "contract": [
+    "Charge 256745 has SCHOOL_DAMAGE base 155 plus 1..25 and ALWAYS_HIT in the supplied CoA Spell.dbc. At its authored spell level 20, native creature-level scaling is one. A single physical hit is at most 180 before mitigation, or 360 if critical. The level-20 target has 1000 fixture health so a normal or critical charge must deal positive damage and leave it alive. This checks the real damage path and rejects the removed one-million-damage override; it does not estimate original-realm percentage-of-health balance."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 1,
+    "x": -2712.6,
+    "y": 19.0,
+    "z": 14.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "reaper",
+      "race": 6,
+      "class": 30,
+      "level": 20,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "malgorm",
+      "owner": "reaper",
+      "entry": 161816,
+      "faction": 16,
+      "level": 20,
+      "health": 100000,
+      "reaction": 0,
+      "distance": 1,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "reaper",
+      "maximum": 1000,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "malgorm",
+      "target": "reaper",
+      "spell": 256745
+    },
+    {
+      "action": "assert",
+      "label": "The charge is dispatched",
+      "actor": "reaper",
+      "metric": "spell_go_count",
+      "spell": 256745,
+      "entry": 161816,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A single charge deals positive authored damage",
+      "actor": "reaper",
+      "metric": "health",
+      "min": 640,
+      "max": 999,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Reaper survives ordinary charge damage",
+      "actor": "reaper",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

@@ -487,7 +487,7 @@ class spell_pal_avenging_wrath : public AuraScript
     {
         Unit* target = GetTarget();
 
-        if (AuraEffect const* sanctifiedWrathAurEff = target->GetAuraEffectOfRankedSpell(SPELL_PALADIN_SANCTIFIED_WRATH_TALENT_R1, EFFECT_2))
+        if (AuraEffect const* sanctifiedWrathAurEff = target->GetAuraEffectOfRankedSpellOrTwin(SPELL_PALADIN_SANCTIFIED_WRATH_TALENT_R1, EFFECT_2))
         {
             int32 basepoints = sanctifiedWrathAurEff->GetAmount();
             target->CastCustomSpell(target, SPELL_PALADIN_SANCTIFIED_WRATH, &basepoints, &basepoints, nullptr, true, nullptr, sanctifiedWrathAurEff);
@@ -1891,7 +1891,8 @@ class spell_pal_sacred_shield_dummy : public AuraScript
             cooldown = std::chrono::seconds(bonus->GetAmount());
 
         _cooldownEnd = now + cooldown;
-        caster->CastSpell(GetTarget(), SPELL_PALADIN_SACRED_SHIELD_TRIGGER, true, nullptr, aurEff);
+        uint32 const trigger = aurEff->GetSpellInfo()->Effects[EFFECT_0].TriggerSpell;
+        caster->CastSpell(GetTarget(), trigger ? trigger : uint32(SPELL_PALADIN_SACRED_SHIELD_TRIGGER), true, nullptr, aurEff);
     }
 
     void Register() override

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Releasing in a dungeon wing revives the player at the wing's start",
+  "contract": "A player who releases in a dungeon with wings is revived at the start of the wing they are in, not at the dungeon's front door. On Mythic, Shadowfang Keep has two wings: Arugal's Rise starts in the courtyard (its Dungeon Finder start, lfg_dungeon_template 3321: -294.299, 2305.1) and Halls of the Damned at the entrance (-229.135, 2109.18). A Mythic player who dies in the courtyard and releases is revived on map 33 at the Arugal's Rise start, about 220 yards from the entrance.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 2 },
+    { "action": "wait", "ms": 300 },
+    { "action": "teleport", "actor": "hero", "map": 33, "x": -278.912, "y": 2323.63, "z": 95.8664 },
+    { "action": "assert", "actor": "hero", "metric": "map_id", "equals": 33, "within_ms": 15000, "label": "the player is in Shadowfang Keep" },
+    { "action": "assert", "actor": "hero", "metric": "map_difficulty", "equals": 2, "label": "the instance is Mythic" },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "die", "actor": "hero" },
+    { "action": "assert", "actor": "hero", "metric": "alive", "equals": 0, "label": "the player dies in the courtyard" },
+    { "action": "release_spirit", "actor": "hero", "label": "release the spirit inside the dungeon" },
+    { "action": "assert", "actor": "hero", "metric": "map_id", "equals": 33, "within_ms": 5000, "label": "the player stays in Shadowfang Keep" },
+    { "action": "assert", "actor": "hero", "metric": "alive", "equals": 1, "label": "the player is revived" },
+    { "action": "assert", "actor": "hero", "metric": "point_distance_2d", "x": -294.299, "y": 2305.1, "max": 3, "label": "the player stands at the Arugal's Rise start" }
+  ]
+}

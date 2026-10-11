@@ -163,12 +163,31 @@ UnitCheck UnitRules(Player const* player)
     };
 }
 
+std::vector<uint32> LearnEffectSpells(uint32 spellId)
+{
+    std::vector<uint32> spells;
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo)
+        return spells;
+    for (SpellEffectInfo const& effect : spellInfo->Effects)
+        if (effect.Effect == SPELL_EFFECT_LEARN_SPELL && effect.TriggerSpell &&
+            !sSpellMgr->IsAdditionalTalentSpell(effect.TriggerSpell))
+            spells.push_back(effect.TriggerSpell);
+    return spells;
+}
+
+std::vector<uint32> RankSpells(uint32 spellId)
+{
+    return TaughtSpells(spellId, &LearnEffectSpells);
+}
+
 std::unordered_set<uint32> GrantedSpells(std::vector<Entry> const& entries)
 {
     std::unordered_set<uint32> spells;
     for (Entry const& entry : entries)
         if (Row const* row = Loaded.Find(entry.EntryId); row && entry.Rank && entry.Rank <= row->MaxRank())
-            spells.insert(row->Spells[entry.Rank - 1]);
+            for (uint32 spellId : RankSpells(row->Spells[entry.Rank - 1]))
+                spells.insert(spellId);
     return spells;
 }
 
@@ -202,13 +221,13 @@ void SyncSpells(Player* player, std::vector<Entry> const& before, std::vector<En
     for (Entry const& entry : before)
         if (Row const* row = Loaded.Find(entry.EntryId))
             for (std::uint32_t rank = row->MaxRank(); rank > 0; --rank)
-            {
-                uint32 const spellId = row->Spells[rank - 1];
-                if (granted.contains(spellId) || !player->HasSpell(spellId))
-                    continue;
-                player->removeSpell(spellId, SPEC_MASK_ALL, false);
-                removed.insert(spellId);
-            }
+                for (uint32 spellId : RankSpells(row->Spells[rank - 1]))
+                {
+                    if (granted.contains(spellId) || !player->HasSpell(spellId))
+                        continue;
+                    player->removeSpell(spellId, SPEC_MASK_ALL, false);
+                    removed.insert(spellId);
+                }
     for (uint32 spellId : granted)
         if (!player->HasSpell(spellId))
             player->learnSpell(spellId);

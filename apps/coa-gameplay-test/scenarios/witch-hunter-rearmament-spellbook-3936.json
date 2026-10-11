@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Rearmament is assigned to the Houndmaster spellbook category (#3936)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "CharacterAdvancement 7422 grants Rearmament 805738 in the Darkness tab, Houndmaster specialization 11.",
+    "SkillLine 59 is Houndmaster; 58 is Boltslinger. The original SkillLineAbility row 89485 incorrectly uses 58.",
+    "The client's On934 handler replaces a 14-word SkillLineAbility row and refreshes the spellbook mapping.",
+    "Login and relog must send row 89485 with category 59 and preserve its other fields.",
+    "Tormentor 800162, row 86256, is a Boltslinger ability and must not receive a category patch.",
+    "This checks native talent acquisition and socketless packet construction, not rendered client UI."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 60}
+  ],
+  "steps": [
+    {"action": "specialization", "actor": "hunter", "id": 11},
+    {"action": "advancement_rank", "actor": "hunter", "entry": 7422, "rank": 1},
+    {
+      "action": "assert", "label": "The Houndmaster talent grants Rearmament", "actor": "hunter",
+      "metric": "knows_spell", "spell": 805738, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Login sends Rearmament's spellbook row once", "actor": "hunter",
+      "metric": "server_packets", "opcode": 2356, "row": 89485, "equals": 1, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "Rearmament belongs to Houndmaster", "actor": "hunter",
+      "metric": "server_packet_u32", "opcode": 2356, "row": 89485, "index": 1, "equals": 59
+    },
+    {
+      "action": "assert", "label": "The row still describes Rearmament", "actor": "hunter",
+      "metric": "server_packet_u32", "opcode": 2356, "row": 89485, "index": 2, "equals": 805738
+    },
+    {
+      "action": "assert", "label": "Race eligibility is preserved", "actor": "hunter",
+      "metric": "server_packet_u32", "opcode": 2356, "row": 89485, "index": 3, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Class eligibility is preserved", "actor": "hunter",
+      "metric": "server_packet_u32", "opcode": 2356, "row": 89485, "index": 4, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The required skill rank is preserved", "actor": "hunter",
+      "metric": "server_packet_u32", "opcode": 2356, "row": 89485, "index": 7, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The acquire method is preserved", "actor": "hunter",
+      "metric": "server_packet_u32", "opcode": 2356, "row": 89485, "index": 9, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The complete row includes its final character-points field", "actor": "hunter",
+      "metric": "server_packet_u32", "opcode": 2356, "row": 89485, "index": 13, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Tormentor keeps its original Boltslinger mapping", "actor": "hunter",
+      "metric": "server_packets", "opcode": 2356, "row": 86256, "equals": 0
+    },
+    {"action": "relog", "actor": "hunter"},
+    {
+      "action": "assert", "label": "The purchased talent survives relog", "actor": "hunter",
+      "metric": "knows_spell", "spell": 805738, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Relog sends the category correction again", "actor": "hunter",
+      "metric": "server_packets", "opcode": 2356, "row": 89485, "equals": 2, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "Rearmament remains in Houndmaster after relog", "actor": "hunter",
+      "metric": "server_packet_u32", "opcode": 2356, "row": 89485, "index": 1, "equals": 59
+    },
+    {
+      "action": "assert", "label": "Relog also leaves Tormentor unchanged", "actor": "hunter",
+      "metric": "server_packets", "opcode": 2356, "row": 86256, "equals": 0
+    }
+  ]
+}

@@ -465,6 +465,9 @@ void DepositToBank(Player* player, OpenBank& bank, uint8 bag, uint8 slot, uint8 
 
     if (split)
     {
+        if (CanMergeInto(dest, source))
+            split = std::min(split, dest->GetMaxStackCount() - dest->GetCount());
+
         Item* moved = source->CloneItem(split, player);
         if (!moved)
         {
@@ -568,12 +571,13 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
     if (split == 0 || split >= source->GetCount())
         split = 0;
 
+    uint32 const movedAmount = split ? split : sourceCount;
     ItemPosCountVec destPos;
-    InventoryResult msg = player->CanStoreItem(bag, slot, destPos, source, false);
+    InventoryResult msg = player->CanStoreItem(bag, slot, destPos, sourceEntry, movedAmount, source, false);
     if (autoStore || msg != EQUIP_ERR_OK)
     {
         destPos.clear();
-        msg = player->CanStoreItem(NULL_BAG, NULL_SLOT, destPos, source, false);
+        msg = player->CanStoreItem(NULL_BAG, NULL_SLOT, destPos, sourceEntry, movedAmount, source, false);
     }
 
     if (msg != EQUIP_ERR_OK)
@@ -584,7 +588,6 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
-    uint32 const movedAmount = split ? split : sourceCount;
     auto finish = [&]()
     {
         CharacterDatabase.CommitTransaction(trans);

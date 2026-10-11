@@ -42,7 +42,7 @@ METRICS = {
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
     'view_level', 'sent_level', 'sent_max_health', 'creature_query_rank', 'quest_level', 'quest_xp',
-    'quest_log_sent_level', 'quest_log_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
+    'quest_log_sent_level', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
     'health', 'health_pct', 'max_health', 'creature_type', 'respawn_remaining', 'power', 'max_power', 'alive', 'combat', 'victim', 'casting', 'level',
     'aura', 'aura_stacks', 'aura_charges', 'aura_duration_ms', 'aura_amount', 'aura_positive', 'aura_visible',
     'knows_spell', 'spell_active', 'has_talent', 'talent_points', 'cooldown_ms', 'global_cooldown_ms', 'spell_charges',
@@ -60,7 +60,7 @@ METRICS = {
     'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count', 'stable_result', 'pet_rows', 'instance_binds_listed', 'pet_entry', 'pet_aura_stacks', 'pet_aura_duration_ms', 'pet_is_banker', 'pet_display',
     'pet_native_display', 'race', 'pet_scale', 'pet_knows_spell', 'pet_distance', 'pet_casting', 'pet_loading',
     'pet_spell_bar_count',
-    'owned_creature_count', 'owned_creature_weapon_damage_min',
+    'owned_creature_count', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
     'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim',
     'charm_entry', 'charm_aura_stacks', 'controls_self', 'viewpoint_entry', 'seer_entry', 'private_instance',
     'dynamic_object', 'dynamic_object_duration_ms', 'gossip_options', 'gossip_option_text',
@@ -95,9 +95,9 @@ METRICS = {
     'stat', 'attack_power', 'ranged_attack_power', 'armor', 'weapon_damage_min', 'resistance',
     'attack_time_ms', 'pet_attack_time_ms', 'run_speed_rate', 'display_id', 'mount_display_id',
     'aura_amplitude_ms', 'melee_crit_chance', 'dodge_chance', 'parry_chance', 'expertise', 'combat_rating',
-    'spell_modifier', 'spell_cast_time_ms', 'spell_max_range', 'spell_max_stacks', 'spell_healing_done',
+    'spell_modifier', 'spell_cast_time_ms', 'client_cast_time_ms', 'client_attributes', 'spell_max_range', 'spell_max_stacks', 'spell_healing_done',
     'aura_crit_chance', 'aura_script_value', 'melee_hit_chance', 'spell_hit_chance', 'spell_power',
-    'spell_done_crit_chance', 'spell_taken_crit_chance', 'spell_done_crit_chance_scripted',
+    'spell_done_crit_chance', 'spell_taken_crit_chance', 'spell_done_crit_chance_scripted', 'ranged_taken_crit_chance',
     'melee_spell_damage_done', 'script_melee_damage_taken',
     'script_spell_damage_taken', 'script_periodic_damage_taken', 'script_heal_received', 'spell_effect_value',
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
@@ -110,7 +110,7 @@ METRICS = {
     'distance', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
     'spell_family_flags',
     'creature_loot_quality_rate', 'equipped_gear_loot_rate',
-    'quest_menu_items', 'quest_menu_has', 'player_setting', 'server_packets', 'server_packet_u32',
+    'quest_menu_items', 'quest_menu_has', 'player_setting', 'server_packets', 'server_packet_u8', 'server_packet_u32',
     'server_packet_float', 'server_packet_contains',
     'known_entry_rank',
     'pet_autocast_enabled', 'combo_points', 'game_mode_mask', 'owned_creature_spell_proc_count',
@@ -127,7 +127,7 @@ PLAYER_STAT_METRICS = {
     'melee_damage_total',
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
     'melee_crit_chance', 'dodge_chance', 'parry_chance', 'expertise', 'combat_rating',
-    'spell_modifier', 'spell_cast_time_ms', 'spell_max_range', 'spell_max_stacks', 'spell_healing_done',
+    'spell_modifier', 'spell_cast_time_ms', 'client_cast_time_ms', 'client_attributes', 'spell_max_range', 'spell_max_stacks', 'spell_healing_done',
     'spell_family_flags',
     'melee_hit_chance', 'spell_power', 'spell_done_crit_chance',
     'spell_taken_crit_chance', 'spell_done_crit_chance_scripted', 'melee_spell_damage_done',
@@ -197,7 +197,8 @@ ACTIONS = {
     'gossip_hello': ({'actor'}, {'actor', 'target'}),
     'banker_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
     'personal_bank_open': ({'actor', 'entry'}, {'actor', 'entry'}),
-    'personal_bank_swap': ({'actor', 'entry', 'direction'}, {'actor', 'entry', 'direction', 'item', 'slot'}),
+    'personal_bank_swap': ({'actor', 'entry', 'direction'},
+                           {'actor', 'entry', 'direction', 'item', 'slot', 'count', 'inventory_slot'}),
     'binder_activate': ({'actor', 'target'}, {'actor', 'target'}),
     'destroy_item': ({'actor', 'item'}, {'actor', 'item'}),
     'start_challenge': ({'actor', 'challenge', 'level'}, {'actor', 'challenge', 'level'}),
@@ -225,11 +226,11 @@ ACTIONS = {
     'restore_quest_spells': ({'actor'}, {'actor'}),
     'login_hooks': ({'actor'}, {'actor'}),
     'relog': ({'actor'}, {'actor', 'race'}),
-    'talent': ({'actor', 'talent', 'rank'}, {'actor', 'talent', 'rank'}),
+    'talent': ({'actor', 'talent', 'rank'}, {'actor', 'talent', 'rank', 'command'}),
     'reset_talents': ({'actor'}, {'actor'}),
     'add_item': ({'actor', 'item'}, {'actor', 'item', 'count'}),
     'fill_bags': ({'actor'}, {'actor', 'slots'}),
-    'equip': ({'actor', 'item', 'slot'}, {'actor', 'item', 'slot'}),
+    'equip': ({'actor', 'item', 'slot'}, {'actor', 'item', 'slot', 'rejected'}),
     'use_item': ({'actor', 'item', 'spell'}, {'actor', 'item', 'spell', 'target', 'target_item', 'destination'}),
     'use_gameobject': ({'actor', 'entry'}, {'actor', 'entry'}),
     'summon_gameobject': ({'actor', 'entry'}, {'actor', 'entry', 'distance', 'duration_s'}),
@@ -303,10 +304,13 @@ def validate(scenario):
         keys(player, {'id', 'race', 'class'},
              {'id', 'race', 'class', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
-              'expertise_rating', 'allow_regeneration', 'name', 'expansion', 'ascension_client'}, 'player')
+              'expertise_rating', 'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of'}, 'player')
         identity = player['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid player id')
         require(identity not in actor_ids, 'Duplicate actor id')
+        if 'account_of' in player:
+            require(isinstance(player['account_of'], str) and player['account_of'] in player_ids,
+                    'account_of must reference an earlier player')
         actor_ids.add(identity)
         player_ids.add(identity)
         if 'name' in player:
@@ -435,6 +439,8 @@ def validate(scenario):
             require(type(step['enabled']) is bool, f'{where}: enabled must be boolean')
         if 'all_specs' in step:
             require(type(step['all_specs']) is bool, f'{where}: all_specs must be boolean')
+        if action == 'talent' and 'command' in step:
+            require(type(step['command']) is bool, f'{where}: command must be boolean')
         for key in ('race_mask', 'class_mask'):
             if key in step:
                 number(step[key], f'{where}.{key}', 0, 2**32 - 1, True)
@@ -515,6 +521,15 @@ def validate(scenario):
         if action == 'mapless_loot_hook':
             require(step['actor'] in player_ids, f'{where}: mapless loot needs a player')
             require(step.get('store') in {'mail', 'gameobject'}, f'{where}: unsupported mapless loot store')
+        if action == 'personal_bank_swap':
+            require(step['direction'] in {'deposit', 'withdraw'}, f'{where}: invalid bank direction')
+            number(step.get('slot', 0), f'{where}.slot', 0, 97, True)
+            number(step.get('count', 0), f'{where}.count', 0, 2**31 - 1, True)
+            if step['direction'] == 'deposit':
+                number(step.get('item'), f'{where}.item', 1, 2**32 - 1, True)
+            if 'inventory_slot' in step:
+                require(step['direction'] == 'withdraw', f'{where}: inventory_slot needs withdrawal')
+                number(step['inventory_slot'], f'{where}.inventory_slot', 23, 38, True)
         if action in {'summon_gameobject', 'loot_gameobject'}:
             require(step['actor'] in player_ids, f'{where}: {action} needs a player')
             number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
@@ -539,14 +554,14 @@ def validate(scenario):
                 require(isinstance(field, dict) and len(field) == 1, f'{where}.fields[{index}]: expected one typed value')
                 (kind, value), = field.items()
                 require(kind in {'u8', 'u32', 'u64', 'string', 'buyback_guid', 'actor_guid', 'packed_actor_guid',
-                                 'pet_guid', 'stabled_pet',
+                                 'pet_guid', 'stabled_pet', 'duel_arbiter',
                                  'wildcard_entry', 'wildcard_pending_cards', 'wildcard_lowest_card'},
                         f'{where}.fields[{index}]: unknown field type')
                 if kind == 'string':
                     require(isinstance(value, str), f'{where}.fields[{index}]: expected a string')
                 elif kind in {'actor_guid', 'packed_actor_guid'}:
                     require(value in actor_ids, f'{where}.fields[{index}]: expected a player or creature id')
-                elif kind == 'pet_guid':
+                elif kind in {'pet_guid', 'duel_arbiter'}:
                     require(value in player_ids, f'{where}.fields[{index}]: expected a player id')
                 else:
                     maximum = {'u8': 255, 'u32': 2**32 - 1, 'u64': 2**64 - 1, 'buyback_guid': 2**31 - 1,
@@ -604,7 +619,8 @@ def validate(scenario):
                 require(step['actor'] in player_ids, f'{where}: LFG state metric needs a player')
             if metric == 'lfg_dungeon_disabled':
                 number(step.get('dungeon'), f'{where}.dungeon', 1, 2**24 - 1, True)
-            if metric in {'quest_level', 'quest_xp', 'quest_log_sent_level', 'quest_log_sent_xp', 'quest_query_scaled',
+            if metric in {'quest_level', 'quest_xp', 'quest_log_sent_level', 'quest_log_sent_xp',
+                          'quest_offer_sent_xp', 'quest_query_scaled',
                           'quest_query_reward_choice'}:
                 require(step['actor'] in player_ids and 'quest' in step,
                         f'{where}: quest metric needs a player and quest')
@@ -615,6 +631,7 @@ def validate(scenario):
                     'dynamic_object', 'dynamic_object_duration_ms', 'spell_power_cost',
                     'spell_damage_done', 'spell_damage_taken', 'spell_healing_taken', 'spell_hit_bonus_taken',
                     'spell_cast_count', 'spell_go_count', 'spell_modifier', 'spell_cast_time_ms',
+                    'client_cast_time_ms', 'client_attributes',
                     'spell_max_range', 'spell_max_stacks', 'spell_healing_done', 'spell_done_crit_chance',
                     'spell_family_flags',
                     'spell_taken_crit_chance',
@@ -743,7 +760,7 @@ def validate(scenario):
                 if 'ranged_weapon_subclass' in step:
                     number(step['ranged_weapon_subclass'], f'{where}.ranged_weapon_subclass', 0, 20, True)
             if metric in {'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display',
-                          'owned_creature_weapon_damage_min',
+                          'owned_creature_spacing', 'owned_creature_weapon_damage_min',
                           'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
             if metric == 'owned_creature_attackable':
@@ -783,11 +800,12 @@ def validate(scenario):
                 require(isinstance(step.get('source'), str) and step['source'].strip() and 'index' in step,
                         f'{where}: metric needs a setting source and index')
                 number(step['index'], f'{where}.index', 0, 2**16 - 1, True)
-            if metric in {'server_packets', 'server_packet_u32', 'server_packet_float', 'server_packet_contains'}:
+            if metric in {'server_packets', 'server_packet_u8', 'server_packet_u32',
+                          'server_packet_float', 'server_packet_contains'}:
                 number(step.get('opcode'), f'{where}.opcode', 1, 0xFFFF, True)
             if metric == 'action_button_packed':
                 number(step.get('button'), f'{where}.button', 0, 143, True)
-            if metric in {'server_packet_u32', 'server_packet_float'}:
+            if metric in {'server_packet_u8', 'server_packet_u32', 'server_packet_float'}:
                 number(step.get('index', 0), f'{where}.index', 0, 2**16 - 1, True)
                 number(step.get('offset', 0), f'{where}.offset', 0, 2**16 - 1, True)
                 number(step.get('skip_strings', 0), f'{where}.skip_strings', 0, 32, True)
@@ -797,7 +815,7 @@ def validate(scenario):
                 require(not step['from_end'] or (not step.get('offset', 0) and not step.get('skip_strings', 0)),
                         f'{where}: from_end cannot combine with offset or skip_strings')
             if 'row' in step:
-                require(metric in {'server_packets', 'server_packet_u32', 'server_packet_float',
+                require(metric in {'server_packets', 'server_packet_u8', 'server_packet_u32', 'server_packet_float',
                                    'server_packet_contains'},
                         f'{where}: row applies only to captured packet counts, values or text')
                 number(step['row'], f'{where}.row', 0, 2**32 - 1, True)
@@ -824,7 +842,7 @@ def validate(scenario):
                           'owned_creature_attackable', 'owned_creature_victim',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_casting', 'pet_loading',
-                          'owned_creature_count', 'charm_entry',
+                          'owned_creature_count', 'owned_creature_spacing', 'charm_entry',
                           'charm_aura_stacks', 'controls_self', 'private_instance',
                           'dynamic_object', 'dynamic_object_duration_ms', 'gossip_options', 'gossip_option_text',
                           'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
@@ -860,9 +878,9 @@ def validate(scenario):
                           'ball_carried_count', 'ball_carried_quest',
                           'ball_turn_in_count', 'ball_turn_in_quest',
                           'temporary_spell_replacement', 'quest_menu_items', 'quest_menu_has',
-                          'player_setting', 'server_packets', 'server_packet_u32', 'server_packet_float',
+                          'player_setting', 'server_packets', 'server_packet_u8', 'server_packet_u32', 'server_packet_float',
                           'server_packet_contains',
-                          'quest_log_sent_level', 'quest_log_sent_xp',
+                          'quest_log_sent_level', 'quest_log_sent_xp', 'quest_offer_sent_xp',
                           'player_class', 'cached_class', 'at_login_flag',
                           'wildcard_starter_spells_known', 'action_bar_unknown_spells',
                           'wildcard_spells_known', 'wildcard_cards_pending',

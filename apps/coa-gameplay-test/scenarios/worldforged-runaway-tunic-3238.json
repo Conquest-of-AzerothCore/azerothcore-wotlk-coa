@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Runaway Tunic can be collected beside Hermit Ortell (#3238)",
+  "contract": "Issue #3238 locates Runaway Tunic beside Hermit Ortell in his cave at map 1 (-7574.46,196.347,11.1919). Hermit Ortell spawn 42919 independently stands nearby at (-7578.72,196.914,11.5488). The pickup spawn 6942106, entry 1345118, instead had surface Z 27.4579 and native Opening returned SPELL_FAILED_OUT_OF_RANGE (97) from the reported cave floor. Move only this pickup to the reported standing position. A normal phase-1 player must open the actual object from that position, receive item 410050, retain it after relog, and be refused a second pickup. No fixture gameobject or privileged loot grant is used; client rendering is outside this native regression.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -7574.46,
+    "y": 196.347,
+    "z": 11.1919,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 55,
+      "ascension_client": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_phase",
+      "actor": "hunter",
+      "value": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "ground_height",
+      "save_as": "terrain_height"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "nearby_gameobject_count",
+      "entry": 1345118,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 410050,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 3365
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 3365,
+      "target_gameobject": 1345118
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "loot_entry",
+      "item": 410050,
+      "equals": 410050,
+      "within_ms": 5000
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hunter",
+      "item": 410050
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 410050,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "hunter"
+    },
+    {
+      "action": "relog",
+      "actor": "hunter"
+    },
+    {
+      "action": "set_phase",
+      "actor": "hunter",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 410050,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 3365
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 3365,
+      "target_gameobject": 1345118
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 410050,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "hunter"
+    }
+  ]
+}

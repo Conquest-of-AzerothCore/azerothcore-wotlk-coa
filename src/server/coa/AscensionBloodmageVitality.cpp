@@ -17,6 +17,7 @@ using namespace AscensionBloodmage;
 constexpr uint32 VitalityCost = 10;
 constexpr uint32 Hemopulse = 524906;
 constexpr uint32 DarkfallenLamentLeech = 630874;
+constexpr uint32 DarkLiturgy = 800781;
 
 bool IsBloodmage(Player const* player)
 {
@@ -116,6 +117,8 @@ public:
         else if (GetEmpowerment(info->Id) == Heartbreak)
             bonus = std::max(0, const_cast<Unit*>(caster)->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)) * 0.5 +
                 caster->GetStat(STAT_SPIRIT);
+        else if (GetEmpowerment(info->Id) == Mend || sSpellMgr->GetFirstSpellInChain(info->Id) == DarkLiturgy)
+            bonus = caster->GetStat(STAT_SPIRIT) * 0.25;
         else if (info->Id == DarkfallenLamentLeech &&
             info->Effects[EFFECT_0].Effect == SPELL_EFFECT_HEALTH_LEECH &&
             info->Effects[EFFECT_0].BonusMultiplier == 0)

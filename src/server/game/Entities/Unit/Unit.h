@@ -1508,6 +1508,11 @@ public:
     }
 
     [[nodiscard]] bool HasAura(uint32 spellId, ObjectGuid casterGUID = ObjectGuid::Empty, ObjectGuid itemCasterGUID = ObjectGuid::Empty, uint8 reqEffMask = 0) const;
+    /// aura lookups that also match a stock spell's twins and namesakes (SpellMgr::GetSpellAndRelatives)
+    [[nodiscard]] bool HasAuraOrTwin(uint32 spellId, ObjectGuid casterGUID = ObjectGuid::Empty) const;
+    [[nodiscard]] Aura* GetAuraOfRankedSpellOrTwin(uint32 spellId, ObjectGuid casterGUID = ObjectGuid::Empty) const;
+    void RemoveAurasDueToSpellOrTwin(uint32 spellId);
+    [[nodiscard]] AuraEffect* GetAuraEffectOfRankedSpellOrTwin(uint32 spellId, uint8 effIndex, ObjectGuid casterGUID = ObjectGuid::Empty) const;
     [[nodiscard]] bool HasAuraType(AuraType auraType) const;
     [[nodiscard]] bool HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const;
     [[nodiscard]] bool HasAuraTypeWithMiscvalue(AuraType auratype, int32 miscvalue) const;

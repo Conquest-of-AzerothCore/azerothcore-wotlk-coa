@@ -1,0 +1,5 @@
+## Interface: 30300
+## Title: Crow's Cache
+## Notes: Crow's Cache locations on the world map.
+## Version: 0.2.0
+CoACrowsCache.lua

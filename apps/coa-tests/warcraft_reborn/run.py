@@ -268,6 +268,47 @@ int main(int, char** argv)
     Check(!twinned(133, 1100133) && !twinned(172, 1100172) && !twinned(633, 1100633),
         "a Reborn spell with other effects than its stock namesake (Fireball, Corruption, Lay on Hands) takes nothing");
     Check(twins.size() > 7000, "the Reborn spell table is twinned with its stock spells");
+    std::vector<std::pair<std::uint32_t, std::uint32_t>> const namesakes = SpellNamesakes(spellCount,
+        [&layouts](std::uint32_t spellId) -> std::optional<SpellLayout>
+        {
+            auto const itr = layouts.find(spellId);
+            return itr != layouts.end() ? std::optional<SpellLayout>(itr->second) : std::nullopt;
+        });
+    auto const namesake = [&namesakes](std::uint32_t stock, std::uint32_t spell)
+    {
+        return std::find(namesakes.begin(), namesakes.end(), std::make_pair(stock, spell)) != namesakes.end();
+    };
+    Check(namesake(50880, 1150880) && namesake(133, 1100133) && !namesake(1454, 1101454) && !namesake(160, 1100160),
+        "a differently built Reborn spell of the same name (Icy Talons, Fireball) is a namesake, a twin or an unrelated spell is not");
+
+    std::unordered_map<std::uint32_t, std::uint32_t> const stockSlam = { { 1464, 1464 }, { 8820, 1464 }, { 11604, 1464 },
+        { 11605, 1464 }, { 25241, 1464 }, { 25242, 1464 }, { 47474, 1464 }, { 47475, 1464 } };
+    std::vector<std::pair<std::uint32_t, std::uint32_t>> const ranked = RankTwins(twins,
+        [&data](std::uint32_t spellId)
+        {
+            std::vector<std::uint32_t> later;
+            if (std::vector<std::uint32_t> const* ladder = data.LadderOf(spellId); ladder && ladder->front() == spellId)
+                later.assign(ladder->begin() + 1, ladder->end());
+            return later;
+        },
+        [&data, &stockSlam](std::uint32_t spellId)
+        {
+            if (auto const itr = stockSlam.find(spellId); itr != stockSlam.end())
+                return itr->second;
+            std::vector<std::uint32_t> const* ladder = data.LadderOf(spellId);
+            return ladder ? ladder->front() : spellId;
+        },
+        [&layouts](std::uint32_t spellId) -> std::optional<SpellLayout>
+        {
+            auto const itr = layouts.find(spellId);
+            return itr != layouts.end() ? std::optional<SpellLayout>(itr->second) : std::nullopt;
+        });
+    auto const rankTwinned = [&ranked](std::uint32_t source, std::uint32_t twin)
+    {
+        return std::find(ranked.begin(), ranked.end(), std::make_pair(source, twin)) != ranked.end();
+    };
+    Check(twinned(1464, 1101464) && rankTwinned(1464, 1101465) && rankTwinned(1464, 1101466) && rankTwinned(1464, 1101467),
+        "Reborn Slam ranks 2-4 take stock Slam's chain (1464), not the unranked old Slam spells at their own ids");
 
     return failures ? 1 : 0;
 }
@@ -302,7 +343,8 @@ TWIN_COPIES = {
         "twinLinks", "mSpellTargetPositions[{ twin, SpellEffIndex(i) }]", "mSpellPetAuraMap.emplace((twin << 8) + i",
         "databaseAttributes.contains(twin)"],
     "src/server/game/Globals/ObjectMgr.cpp": ["sSpellMgr->GetSpellTwins()"],
-    "src/server/game/World/World.cpp": ["sSpellMgr->LoadSpellTwins();"],
+    "src/server/game/World/World.cpp": ["sSpellMgr->LoadSpellTwins(false);", "sSpellMgr->LoadSpellTwins(true);"],
+    "src/server/game/Spells/SpellInfoCorrections.cpp": ["SameSpellTuning(spellInfo, twin)"],
     "src/server/coa/AscensionWarcraftReborn.cpp": ["sSpellMgr->SetSpellTwins(&AscensionWarcraftReborn::LoadTwins);"],
     "src/server/scripts/Spells/spell_warlock.cpp": ["bonus ? bonus->direct_damage : 0.5f"],
 }
@@ -331,6 +373,30 @@ def check_reborn_coefficients(dbc):
                               float(attack_power.group(1)) if attack_power else 0.0)
     ok = len(expected) == 9 and rows == expected
     print(f"{'PASS' if ok else 'FAIL'}: Reborn Life Tap and Counterattack use the coefficients their own tooltips give")
+    return ok
+
+
+CLASS_SPELLS = sorted((ROOT / "data/sql/updates/pending_db_world").glob("rev_*_coa_reborn_*_spells.sql"))
+
+
+def check_class_spell_bindings(dbc):
+    data = (dbc / "Spell.dbc").read_bytes()
+    count, fields, size, strings = struct.unpack_from("<4I", data, 4)
+    spells = {struct.unpack_from("<I", data, 20 + row * size)[0] for row in range(count)}
+    sources = "\n".join(path.read_text(encoding="utf-8", errors="replace")
+                        for path in (ROOT / "src/server").rglob("*.cpp"))
+    problems = []
+    for path in CLASS_SPELLS:
+        for spell, script in re.findall(r"\((-?\d+), '(\w+)'\)", path.read_text(encoding="utf-8")):
+            if abs(int(spell)) not in spells:
+                problems.append(f"{path.name}: spell {spell} is not in Spell.dbc")
+            if not re.search(r"(RegisterSpellScript\w*|RegisterSpellAndAuraScriptPair)\(\s*(\w+::)*" + script + r"\b", sources):
+                problems.append(f"{path.name}: script {script} is not registered")
+    ok = bool(CLASS_SPELLS) and not problems
+    print(f"{'PASS' if ok else 'FAIL'}: every Reborn class spell binding names a registered script and a client spell "
+          f"({len(CLASS_SPELLS)} files)")
+    for line in problems:
+        print("  ", line)
     return ok
 
 
@@ -373,7 +439,8 @@ def main():
             raise SystemExit("Warcraft Reborn rules harness did not compile:\n" + build.stdout + build.stderr)
         result = subprocess.run([str(executable), str(args.dbc_dir.resolve())], text=True)
         bindings_ok = check_form_only_bindings(args.dbc_dir.resolve())
-        twins_ok = check_twin_copies() and check_reborn_coefficients(args.dbc_dir.resolve())
+        twins_ok = (check_twin_copies() & check_reborn_coefficients(args.dbc_dir.resolve()) &
+                    check_class_spell_bindings(args.dbc_dir.resolve()))
         raise SystemExit(result.returncode or (0 if bindings_ok and twins_ok else 1))
 
 

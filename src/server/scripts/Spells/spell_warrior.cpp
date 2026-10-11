@@ -159,7 +159,8 @@ class spell_warr_improved_spell_reflection : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
-        return eventInfo.GetSpellInfo() && eventInfo.GetActor() && eventInfo.GetSpellInfo()->Id == SPELL_WARRIOR_SPELL_REFLECTION;
+        return eventInfo.GetSpellInfo() && eventInfo.GetActor() &&
+            sSpellMgr->GetSpellTwinSource(eventInfo.GetSpellInfo()->Id) == SPELL_WARRIOR_SPELL_REFLECTION;
     }
 
     void OnProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
@@ -189,7 +190,7 @@ class spell_warr_improved_spell_reflection_trigger : public SpellScript
 
     void FilterTargets(std::list<WorldObject*>& unitList)
     {
-        GetCaster()->RemoveAurasDueToSpell(SPELL_WARRIOR_SPELL_REFLECTION);
+        GetCaster()->RemoveAurasDueToSpellOrTwin(SPELL_WARRIOR_SPELL_REFLECTION);
         unitList.sort(Acore::ObjectDistanceOrderPred(GetCaster()));
         while (unitList.size() > GetSpellValue()->MaxAffectedTargets)
             unitList.pop_back();
@@ -529,9 +530,9 @@ class spell_warr_overpower : public SpellScript
     void HandleEffect(SpellEffIndex /*effIndex*/)
     {
         uint32 spellId = 0;
-        if (GetCaster()->HasAura(SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_1))
+        if (GetCaster()->HasAuraOrTwin(SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_1))
             spellId = SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_1;
-        else if (GetCaster()->HasAura(SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_2))
+        else if (GetCaster()->HasAuraOrTwin(SPELL_WARRIOR_UNRELENTING_ASSAULT_RANK_2))
             spellId = SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_2;
 
         if (!spellId)
@@ -653,7 +654,7 @@ class spell_warr_sweeping_strikes : public AuraScript
 
         if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
         {
-            switch (spellInfo->Id)
+            switch (sSpellMgr->GetSpellTwinSource(spellInfo->Id))
             {
                 case SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1:
                 case SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2:
@@ -689,7 +690,7 @@ class spell_warr_sweeping_strikes : public AuraScript
         if (DamageInfo* damageInfo = eventInfo.GetDamageInfo())
         {
             SpellInfo const* spellInfo = damageInfo->GetSpellInfo();
-            if (spellInfo && spellInfo->Id == SPELL_WARRIOR_EXECUTE
+            if (spellInfo && sSpellMgr->GetSpellTwinSource(spellInfo->Id) == SPELL_WARRIOR_EXECUTE
                 && !procTarget->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
             {
                 // If triggered by Execute (while target is not under 20% hp) deals normalized weapon damage
@@ -697,7 +698,7 @@ class spell_warr_sweeping_strikes : public AuraScript
             }
             else
             {
-                if (spellInfo && spellInfo->Id == SPELL_WARRIOR_WHIRLWIND_MAIN)
+                if (spellInfo && sSpellMgr->GetSpellTwinSource(spellInfo->Id) == SPELL_WARRIOR_WHIRLWIND_MAIN)
                     eventInfo.GetActor()->AddSpellCooldown(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1, 0, 500);
 
                 auto damage = static_cast<int32>(damageInfo->GetUnmitigatedDamage());
@@ -1051,7 +1052,7 @@ class spell_warr_second_wind : public AuraScript
         PreventDefaultAction();
 
         uint32 triggeredSpellId = 0;
-        switch (GetId())
+        switch (sSpellMgr->GetSpellTwinSource(GetId()))
         {
             case 29838: triggeredSpellId = SPELL_WARRIOR_SECOND_WIND_HEAL_R2; break;
             case 29834: triggeredSpellId = SPELL_WARRIOR_SECOND_WIND_HEAL_R1; break;

@@ -1820,8 +1820,11 @@ public:
     [[nodiscard]] PlayerSpellMap const& GetSpellMap() const { return m_spells; }
     PlayerSpellMap&       GetSpellMap()       { return m_spells; }
     // Transient action replacements; never written to character spell ownership.
-    void SetTemporarySpellReplacement(uint32 original, uint32 replacement);
+    void SetTemporarySpellReplacement(uint32 original, uint32 replacement, bool redirect = true);
     [[nodiscard]] uint32 GetTemporarySpellReplacement(uint32 original) const;
+    // Replacement the server casts in place of a client request. Aliases published with `redirect = false`
+    // keep the client-side swap but leave a request for the original spell alone (#6972).
+    [[nodiscard]] uint32 GetCastReplacement(uint32 original) const;
     [[nodiscard]] uint32 GetSavedActionButtonSpell(uint32 action);
     [[nodiscard]] bool IsTemporarySpellReplacementStandIn(uint32 spellId) const;
     [[nodiscard]] bool CanUseTwoHandWithShield(ItemTemplate const* main, ItemTemplate const* off) const;
@@ -2968,6 +2971,7 @@ protected:
     PlayerSpellMap m_spells;
     std::map<uint32, uint32> m_temporarySpellReplacements;
     std::map<uint32, uint32> m_temporarySpellReplacementOrigins;
+    std::map<uint32, uint8> m_temporarySpellReplacementKeepsCast; // aliases whose cast stays the original
     PlayerTalentMap m_talents;
     uint32 m_lastPotionId;                              // last used health/mana potion in combat, that block next potion use
 

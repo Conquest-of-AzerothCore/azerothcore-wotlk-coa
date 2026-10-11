@@ -31,8 +31,10 @@ enum Aura : std::int32_t
     AURA_NONE = 0,
     AURA_DUMMY = 4,
     AURA_MOD_CHARM = 6,
+    AURA_PERIODIC_HEAL = 8,
     AURA_MOD_THREAT = 10,
     AURA_MOD_STUN = 12,
+    AURA_OBS_MOD_HEALTH = 20,
     AURA_PERIODIC_TRIGGER_SPELL = 23,
     AURA_MOD_DECREASE_SPEED = 33,
     AURA_MOD_INCREASE_HEALTH = 34,
@@ -106,6 +108,11 @@ constexpr Restore PartyBuff(std::uint32_t spellId, std::uint8_t index)
 {
     return { spellId, index, { EFFECT_APPLY_AURA, ANY, TARGET_UNIT_CASTER },
         { KEEP, KEEP, TARGET_UNIT_CASTER_AREA_PARTY } };
+}
+
+constexpr Restore MaxHealthPercentHeal(std::uint32_t spellId, std::uint8_t index)
+{
+    return { spellId, index, { EFFECT_APPLY_AURA, AURA_PERIODIC_HEAL, ANY }, { KEEP, AURA_OBS_MOD_HEALTH } };
 }
 
 constexpr Restore Targets(std::uint32_t spellId, std::uint8_t index, std::int32_t targetA, std::int32_t targetB,
@@ -200,6 +207,9 @@ constexpr Restore DEAD_CATALOG_SLOTS[] = {
     { 760100, 0, { EFFECT_DUMMY, ANY, ANY }, { EFFECT_TRIGGER_SPELL, KEEP, KEEP, KEEP, KEEP, KEEP, KEEP, KEEP, KEEP,
         KEEP, 760101 } },
     { 57340, 0, { EFFECT_APPLY_AURA, AURA_DUMMY, ANY }, { KEEP, AURA_MOD_THREAT } },
+    MaxHealthPercentHeal(28176, 1), MaxHealthPercentHeal(28189, 1), MaxHealthPercentHeal(47892, 1),
+    MaxHealthPercentHeal(47893, 1), MaxHealthPercentHeal(355621, 1), MaxHealthPercentHeal(1128176, 1),
+    MaxHealthPercentHeal(1128189, 1), MaxHealthPercentHeal(1147892, 1), MaxHealthPercentHeal(1147893, 1),
 };
 
 constexpr bool Matches(Shape const& broken, std::int32_t effect, std::int32_t aura, std::int32_t targetA)

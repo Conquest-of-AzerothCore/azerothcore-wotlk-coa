@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Rescue the Survivors!: a Draenei Hero's Gift of the Naaru saves a survivor like a custom class's does (#6235)",
+  "contract": [
+    "Report #6235: 'Rescue the Survivors!' (9283) does not complete for a Hero even after the survivor is healed to full.",
+    "The quest text says 'Use your Gift of the Naaru ability on one of the Draenei Survivors', and the Draenei Survivor (16483) credits the quest through npc_draenei_survivor when a Gift of the Naaru hits it.",
+    "SkillLineAbility teaches every Draenei Hero (class 10, ClassMask 512) spell 59542 under skill 760; its Spell.dbc row has no SpellFamilyFlags, unlike the stock variants the script matches by family flags.",
+    "A custom class learns 814280, 814281 or 814282, which the script names, and is credited.",
+    "Casting the Hero's own Gift on a survivor must credit the quest exactly as the custom class's Gift does."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "hero", "race": 11, "class": 10, "level": 2 },
+    { "id": "witch_doctor", "race": 11, "class": 13, "level": 2 }
+  ],
+  "location": { "map": 530, "x": -4058.67, "y": -13669.1, "z": 70.57, "o": 0 },
+  "creatures": [
+    { "id": "hero_survivor", "owner": "hero", "entry": 16483, "level": 1, "distance": 3, "faction": 1638 },
+    { "id": "witch_doctor_survivor", "owner": "witch_doctor", "entry": 16483, "level": 1, "distance": 4, "faction": 1638 },
+    { "id": "zalduun", "owner": "hero", "entry": 16502, "level": 6, "distance": 6, "faction": 1638 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: Hero has finished the prerequisite quest", "actor": "hero", "quest": 9409 },
+    { "action": "reward_quest", "label": "Fixture: rewarded", "actor": "hero", "quest": 9409 },
+    { "action": "prepare_quest", "label": "Fixture: Witch Doctor has finished the prerequisite quest", "actor": "witch_doctor", "quest": 9409 },
+    { "action": "reward_quest", "label": "Fixture: rewarded", "actor": "witch_doctor", "quest": 9409 },
+    { "action": "quest_accept", "label": "Hero takes Rescue the Survivors! from Zalduun", "actor": "hero", "quest": 9283, "entry": 16502 },
+    { "action": "quest_accept", "label": "Control: the Witch Doctor takes it too", "actor": "witch_doctor", "quest": 9283, "entry": 16502 },
+    { "action": "assert", "label": "Hero has the quest", "actor": "hero", "metric": "quest_status", "quest": 9283, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "Control has the quest", "actor": "witch_doctor", "metric": "quest_status", "quest": 9283, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "The Draenei Hero knows Gift of the Naaru 59542", "actor": "hero", "metric": "knows_spell", "spell": 59542, "equals": 1 },
+    { "action": "assert", "label": "The Witch Doctor knows its own Gift, 814280", "actor": "witch_doctor", "metric": "knows_spell", "spell": 814280, "equals": 1 },
+    { "action": "cast", "label": "Control: the Witch Doctor heals a survivor with its Gift", "actor": "witch_doctor", "spell": 814280, "target": "witch_doctor_survivor" },
+    { "action": "wait", "label": "Let the survivor thank the healer", "ms": 9000 },
+    { "action": "assert", "label": "Control: the Witch Doctor is credited", "actor": "witch_doctor", "metric": "quest_objective_count", "quest": 9283, "index": 0, "equals": 1 },
+    { "action": "assert", "label": "The Hero has not been credited before healing", "actor": "hero", "metric": "quest_objective_count", "quest": 9283, "index": 0, "equals": 0 },
+    { "action": "cast", "label": "The Hero heals a survivor with its Gift", "actor": "hero", "spell": 59542, "target": "hero_survivor" },
+    { "action": "wait", "label": "Let the survivor thank the healer", "ms": 9000 },
+    { "action": "assert", "label": "The Hero is credited", "actor": "hero", "metric": "quest_objective_count", "quest": 9283, "index": 0, "equals": 1 },
+    { "action": "assert", "label": "The Hero's quest is complete", "actor": "hero", "metric": "quest_status", "quest": 9283, "equals": 1 }
+  ]
+}

@@ -63,6 +63,8 @@ Follow this sequence within the task's authorized scope:
 - While iterating, pair `--stages` with a focus filter (`--scenario`/`--spell`/`--quest`/`--query`, `--harness`)
   and include `build` whenever sources changed. Before a PR, or when full verification is requested, run every
   stage with the PR base: `python -B tools/verify_all.py --base origin/main`.
+- Leave `--jobs` unset: the default is the CPU count, and fewer jobs only slow the build (a measured replay of
+  1,416 compiles took 700 s at `--jobs 6` against 549 s at 10 or 14).
 - The `codestyle-cpp.py`/`codestyle-sql.py --files` linters are separate; still run them on changed C++ and SQL.
 - Report the final `VERIFY ALL: PASSED|FAILED|INCOMPLETE` line with its `report.json`, the stages that ran,
   unavailable or blocked scope with reasons, and any `batch_sensitive` scenarios. Only `PASSED` is a pass, and

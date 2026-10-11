@@ -662,7 +662,7 @@ class spell_sha_earthbind_totem : public AuraScript
         if (!owner)
             return;
         // Storm, Earth and Fire
-        if (AuraEffect* aurEff = owner->GetAuraEffectOfRankedSpell(SPELL_SHAMAN_STORM_EARTH_AND_FIRE, EFFECT_1))
+        if (AuraEffect* aurEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_STORM_EARTH_AND_FIRE, EFFECT_1))
         {
             if (roll_chance_i(aurEff->GetAmount()))
                 GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_TOTEM_EARTHBIND_EARTHGRAB, false);
@@ -736,7 +736,7 @@ class spell_sha_earthliving_weapon : public AuraScript
             }
         }
 
-        if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpell(SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1, EFFECT_1, caster->GetGUID()))
+        if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_SHAMAN_BLESSING_OF_THE_ETERNALS_R1, EFFECT_1, caster->GetGUID()))
         {
             if (eventInfo.GetProcTarget()->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
             {
@@ -822,8 +822,11 @@ class spell_sha_flame_shock : public AuraScript
             if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, SHAMAN_ICON_ID_SHAMAN_LAVA_FLOW, EFFECT_0))
             {
                 if (SpellInfo const* firstRankSpellInfo = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_LAVA_FLOWS_R1))
-                    if (!aurEff->GetSpellInfo()->IsRankOf(firstRankSpellInfo))
+                {
+                    SpellInfo const* stockRank = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(aurEff->GetId()));
+                    if (!aurEff->GetSpellInfo()->IsRankOf(firstRankSpellInfo) && !(stockRank && stockRank->IsRankOf(firstRankSpellInfo)))
                         return;
+                }
 
                 uint8 rank = aurEff->GetSpellInfo()->GetRank();
                 caster->CastSpell(caster, sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_LAVA_FLOWS_TRIGGERED_R1, rank), true);

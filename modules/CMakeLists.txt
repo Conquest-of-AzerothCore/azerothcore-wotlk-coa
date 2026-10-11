@@ -326,6 +326,10 @@ set_target_properties(modules
     FOLDER
       "modules")
 
+if (USE_COREPCH AND CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT MSVC)
+  set_target_properties(modules PROPERTIES PRECOMPILE_HEADERS_REUSE_FROM game)
+endif()
+
 # Generate precompiled header
 # if (USE_SCRIPTPCH)
 #   list(APPEND ALL_SCRIPT_PROJECTS modules ${DYNAMIC_SCRIPT_MODULE_PROJECTS})

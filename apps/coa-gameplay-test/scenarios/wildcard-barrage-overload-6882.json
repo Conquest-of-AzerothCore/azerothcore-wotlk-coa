@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "name": "Wildcard Barrage Overload stacks on Missile Barrage and Arcane Barrage unleashes a bolt per stack (#6882)",
+  "contract": [
+    "Barrage Overload 277540 reads 'When Missile Barrage is consumed, you gain Barrage Overload', and 277541 'Your next Arcane Barrage unleashes 1 arcane bolt per stack. Stacks up to 6 times.'",
+    "277540 has no ProcFlags, so no stack was ever granted.",
+    "Barrage Unleashed 277542 is a 100 ms periodic aura with a 500 ms period triggering 277543, and each 277541 stack adds 500 ms (its effect 0), so N stacks give N bolts.",
+    "Two Missile Barrage charges consumed by Arcane Missiles give two stacks; Arcane Barrage then takes the stacks and two Barrage Unleashed bolts hit."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "race": 1,
+      "class": 10,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "name": "Wildbarrage"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "wild",
+      "entry": 1601,
+      "level": 80,
+      "health": 10000000,
+      "distance": 12,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildbarrage"
+    },
+    {
+      "action": "assert",
+      "label": "The Hero plays Wildcard",
+      "actor": "wild",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 277540
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 42846
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 44425
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Barrage Overload is up",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 277540,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "wild",
+      "spell": 44401,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 42846
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 42846,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "42846 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 42846,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Missile Barrage was consumed",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 44401,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "One Barrage Overload stack",
+      "actor": "wild",
+      "metric": "aura_stacks",
+      "spell": 277541,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "wild",
+      "spell": 44401,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 42846
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 42846,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "42846 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 42846,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Two Barrage Overload stacks",
+      "actor": "wild",
+      "metric": "aura_stacks",
+      "spell": 277541,
+      "equals": 2
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 44425
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 44425,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "44425 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 44425,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Arcane Barrage took the stacks",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 277541,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Two Barrage Unleashed bolts hit",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 277543,
+      "target": "e",
+      "equals": 2
+    }
+  ]
+}

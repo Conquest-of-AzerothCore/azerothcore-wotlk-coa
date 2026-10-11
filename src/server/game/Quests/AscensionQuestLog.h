@@ -7,6 +7,7 @@
 #include "WorldPacket.h"
 
 class Player;
+class Quest;
 
 namespace AscensionQuestLog
 {
@@ -15,6 +16,7 @@ constexpr uint32 RewardXPField = 36;
 constexpr uint32 LevelField = 61;
 constexpr uint32 ScaledQuestFlag = 0x01000000;
 
+[[nodiscard]] uint32 RewardXPForDisplay(Player* player, Quest const* quest);
 [[nodiscard]] WorldPacket BuildRewardXP(ObjectGuid guid, uint16 slot, uint32 rewardXP);
 [[nodiscard]] WorldPacket BuildLevel(ObjectGuid guid, uint16 slot, uint32 level);
 void SendSlot(Player* player, uint16 slot);

@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "name": "The neutral Stockade retreat stone can be learned by both factions (#5284)",
+  "contract": "Spell.dbc 777030 says Returns you to Stockade in Stormwind and warns Hostile Zone for Horde. The real item 777030 describes a neutral Stone of Retreat usable by both factions, unlike the Stormwind capital stone. With TeleportActionBar.Enable, EnforceFaction and CastFromItem all enabled, the item must teach and teleport both factions to spell_target_position map 0 (-8779.9,834.349,97.9556). Foreign capital stones remain refused before learning: Horde cannot learn Stormwind 777003 from item 134997, and Alliance cannot learn Orgrimmar 777000 from item 134996. The token items are fixture setup; learning and gating use native item-use handlers, followed by ordinary casts of the learned teleport. No teleport outcome or learned spell is injected. This observes native positions and spell ownership, not client map icons.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "horde",
+      "item": 134997
+    },
+    {
+      "action": "use_item",
+      "actor": "horde",
+      "item": 134997,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "knows_spell",
+      "spell": 777003,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "item_count",
+      "item": 134997,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "alliance",
+      "item": 134996
+    },
+    {
+      "action": "use_item",
+      "actor": "alliance",
+      "item": 134996,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "knows_spell",
+      "spell": 777000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "item_count",
+      "item": 134996,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "horde",
+      "item": 777030
+    },
+    {
+      "action": "use_item",
+      "actor": "horde",
+      "item": 777030,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "knows_spell",
+      "spell": 777030,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "horde",
+      "spell": 777030,
+      "target": "horde"
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "position_x",
+      "min": -8781.9,
+      "max": -8777.9,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "position_y",
+      "min": 832.349,
+      "max": 836.349
+    },
+    {
+      "action": "add_item",
+      "actor": "alliance",
+      "item": 777030
+    },
+    {
+      "action": "use_item",
+      "actor": "alliance",
+      "item": 777030,
+      "spell": 55884
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "knows_spell",
+      "spell": 777030,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "alliance",
+      "spell": 777030,
+      "target": "alliance"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "position_x",
+      "min": -8781.9,
+      "max": -8777.9,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "position_y",
+      "min": 832.349,
+      "max": 836.349
+    }
+  ]
+}

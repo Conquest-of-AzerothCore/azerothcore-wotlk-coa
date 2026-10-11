@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn Dark Apotheosis applies its health, threat and damage passives (#6246)",
+  "contract": [
+    "Warcraft Reborn Dark Apotheosis 1154321 reads 'increasing your health by 15%, armor contribution from cloth items by 666% and significantly increasing your threat ... damage dealt by you and your pets is reduced by 32%'. The passives that carry the health, threat and damage parts (1154322: threat +260%, damage -32%; 1154323: health +15%) were never applied, so only the cloth armor worked.",
+    "While transformed both passives are up, maximum health is higher, and minimum weapon damage is lower (physical damage done applies to weapon damage); cancelling the form removes both passives."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "x",
+      "race": 1,
+      "class": 9,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "x",
+      "entry": 1601,
+      "level": 80,
+      "health": 10000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "x",
+      "item": 504
+    },
+    {
+      "action": "equip",
+      "actor": "x",
+      "item": 504,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "x",
+      "spell": 1154321
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "snapshot",
+      "label": "Maximum health before",
+      "actor": "x",
+      "metric": "max_health",
+      "save_as": "health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Minimum weapon damage before",
+      "actor": "x",
+      "metric": "weapon_damage_min",
+      "save_as": "damage"
+    },
+    {
+      "action": "cast",
+      "actor": "x",
+      "spell": 1154321
+    },
+    {
+      "action": "assert",
+      "label": "Dark Apotheosis is up after its 10 second cast",
+      "actor": "x",
+      "metric": "aura",
+      "spell": 1154321,
+      "equals": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "Threat and damage passive 1154322 is up",
+      "actor": "x",
+      "metric": "aura",
+      "spell": 1154322,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Health passive 1154323 is up",
+      "actor": "x",
+      "metric": "aura",
+      "spell": 1154323,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Its threat is increased by 260%",
+      "actor": "x",
+      "metric": "aura_amount",
+      "spell": 1154322,
+      "effect": 2,
+      "equals": 260
+    },
+    {
+      "action": "assert",
+      "label": "Maximum health is higher",
+      "actor": "x",
+      "metric": "max_health",
+      "relative_to": "health",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Weapon damage is lower",
+      "actor": "x",
+      "metric": "weapon_damage_min",
+      "relative_to": "damage",
+      "max": -1
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "x",
+      "spell": 1154321
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the form removes 1154322",
+      "actor": "x",
+      "metric": "aura",
+      "spell": 1154322,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "and 1154323",
+      "actor": "x",
+      "metric": "aura",
+      "spell": 1154323,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "name": "Wildcard Unstable Evocation blasts nearby enemies when the channel completes (#6269)",
+  "contract": [
+    "Unstable Evocation 284298 reads 'After completing Unstable Evocation, nearby enemies are blasted with Arcane damage and knocked back.' The blast is 284295 (Arcane damage and a knockback within 10 yards).",
+    "Nothing cast 284295, so the channel only restored mana.",
+    "A completed 4 second channel hits a dummy 5 yards away once; a channel cancelled early does not."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "race": 1,
+      "class": 10,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "name": "Wildevoke"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "wild",
+      "entry": 1601,
+      "level": 80,
+      "health": 10000000,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildevoke"
+    },
+    {
+      "action": "assert",
+      "label": "The Hero plays Wildcard",
+      "actor": "wild",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 284298
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 284298
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 284298
+    },
+    {
+      "action": "assert",
+      "label": "284298 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 284298,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Channelling",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 284298,
+      "equals": 1
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "wild",
+      "spell": 284298
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A cancelled channel does not blast",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 284295,
+      "target": "e",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 284298
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 284298
+    },
+    {
+      "action": "assert",
+      "label": "284298 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 284298,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The channel completed",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 284298,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The completed channel blasts the enemy once",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 284295,
+      "target": "e",
+      "equals": 1
+    }
+  ]
+}

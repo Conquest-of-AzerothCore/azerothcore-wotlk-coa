@@ -498,7 +498,15 @@ def configure_arguments(context):
         generator = []
     prefix = (context.root / 'env/dist').as_posix()
     return [*generator, '-DCMAKE_BUILD_TYPE=RelWithDebInfo', '-DAPPS_BUILD=world-only', '-DSCRIPTS=static',
-            '-DMODULES=static', '-DBUILD_TESTING=ON', f'-DCMAKE_INSTALL_PREFIX={prefix}', *readline_arguments()]
+            '-DMODULES=static', '-DBUILD_TESTING=ON', f'-DCMAKE_INSTALL_PREFIX={prefix}', *readline_arguments(),
+            *line_table_debug_arguments()]
+
+
+def line_table_debug_arguments(platform=sys.platform):
+    if platform != 'darwin':
+        return []
+    flags = '-O2 -g1 -DNDEBUG'
+    return [f'-DCMAKE_C_FLAGS_RELWITHDEBINFO={flags}', f'-DCMAKE_CXX_FLAGS_RELWITHDEBINFO={flags}']
 
 
 def readline_arguments(platform=sys.platform, candidates=HOMEBREW_READLINE_DIRECTORIES):

@@ -1,0 +1,216 @@
+{
+  "schema": 1,
+  "name": "Eye of Kimbul adds one percent ranged auto-attack crit per stack on its affected target and reads correctly on the debuff (#6979)",
+  "contract": [
+    "Eye of Kimbul debuff 802707 (effect 0 aura 271 MOD_DAMAGE_FROM_CASTER, MiscValue 127; effect 1 aura 308",
+    "SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, 1% per stack, StackAmount 5, Spell.dbc DurationIndex 8) must raise the Witch",
+    "Doctor's critical chance for ranged auto-attacks against that target by exactly the stack count, and nothing else.",
+    "The reporter saw 100% crit on ranged auto-attacks with five stacks; the expected value is the baseline plus five.",
+    "The assertions here bound the absolute chance as well as the delta, so a baseline that is already wrong - which a",
+    "delta-only test cannot see - fails the scenario instead of passing it.",
+    "The report also names the numbers the client shows: the debuff's own aura text (Spell.dbc ToolTip, column 187)",
+    "carried the damage-scaled ${$wN} placeholder for both percent auras, so five stacks rendered a three-digit figure",
+    "instead of the five the mechanic grants. Nothing published that row before, so the client rendered its own DBC",
+    "text; the corrected aura text is published through coa_client_spell_description and arrives as the tooltip",
+    "string of the spell's streamed row, so the scenario reads that stream at login and holds both the fix and the",
+    "already-working mechanic in one place.",
+    "Confirmed unrelated: the Pain rows 706643 and 706664 carry a 100% aura 308 and are applied by nothing in the core."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "ranged_crit_rating": 0
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "CONTROL: the login patch stream captures the shared description table at all (Runeshroud's own row)"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 802707,
+      "text": "Increases your damage dealt and critical strike chance against this target by",
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "THE FIX: Eye of Kimbul 802707 now has a published row in the login patch stream"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 802707,
+      "text": "The Shadowhunter deals 1% increased damage to you per stack and has a 1% increased chance to critically strike you per stack.",
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "THE FIX: the debuff's own aura text states the one percent per stack the auras carry"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 802707,
+      "text": "${$w1}",
+      "equals": 0,
+      "label": "THE FIX: the damage-scaled placeholder that rendered a three-digit figure is gone"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 802707,
+      "text": "${$w2}",
+      "equals": 0,
+      "label": "THE FIX: the second damage-scaled placeholder is gone"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 802707,
+      "text": "Stacks $u times. Cannot stealth or turn invisible.",
+      "equals": 1,
+      "label": "CONTROL: the aura text keeps its stack clause and its stealth clause"
+    },
+    { "action": "snapshot", "actor": "w", "metric": "ranged_taken_crit_chance", "target": "target", "save_as": "crit" },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "ranged_taken_crit_chance",
+      "target": "target",
+      "max": 30,
+      "label": "The unbuffed ranged crit chance is a normal value, nowhere near 100"
+    },
+    { "action": "learn", "actor": "w", "spell": 503714 },
+    { "action": "learn", "actor": "w", "spell": 802707 },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "ranged_taken_crit_chance",
+      "target": "target",
+      "relative_to": "crit",
+      "equals": 0,
+      "label": "Learning the Eye of Kimbul passive alone adds no ranged crit"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "ranged_taken_crit_chance",
+      "target": "target",
+      "max": 30,
+      "label": "Learning the Eye of Kimbul passive leaves the absolute ranged crit chance sane"
+    },
+    { "action": "cast", "actor": "w", "spell": 802707, "target": "target" },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 802707,
+      "caster": "w",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "ranged_taken_crit_chance",
+      "target": "target",
+      "relative_to": "crit",
+      "equals": 1,
+      "label": "One stack adds one percent ranged crit against the affected target"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "ranged_taken_crit_chance",
+      "target": "target",
+      "max": 30,
+      "label": "One stack leaves the absolute ranged crit chance sane"
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "w", "spell": 802707, "target": "target" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "w", "spell": 802707, "target": "target" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "w", "spell": 802707, "target": "target" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "w", "spell": 802707, "target": "target" },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 802707,
+      "caster": "w",
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "ranged_taken_crit_chance",
+      "target": "target",
+      "relative_to": "crit",
+      "min": 4.9,
+      "max": 5.1,
+      "label": "Five stacks add five percent ranged crit (crit pipeline residual is ~0.0003), not 100"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "ranged_taken_crit_chance",
+      "target": "target",
+      "max": 30,
+      "label": "Five stacks leave the absolute ranged crit chance sane, not 100"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "ranged_taken_crit_chance",
+      "target": "other",
+      "relative_to": "crit",
+      "equals": 0,
+      "label": "The debuff adds nothing against another enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "ranged_taken_crit_chance",
+      "target": "other",
+      "max": 30,
+      "label": "An enemy without the debuff sees no ranged crit leak"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_taken_crit_chance",
+      "spell": 133,
+      "target": "target",
+      "max": 30,
+      "label": "The spell crit path sees no leak either"
+    }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "w", "entry": 36, "level": 60, "health": 1000000, "distance": 5 },
+    { "id": "other", "owner": "w", "entry": 36, "level": 60, "health": 1000000, "distance": 10 }
+  ]
+}

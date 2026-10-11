@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "name": "Tinker scalingbp spells scale by the level curve once",
+  "contract": "Each tooltip applies $<scalingbp> once: Sentry Shot 706689 ($706689m1*$<scalingbp>+$AP*0.07, shown by Build: Sentry Turret 500239), Firepot 500601 ($500601m1*$<scalingbp>+$RAP*.175+$spfi*.45), Overcharge: Shield Beacon 560709 ($560709m1*$<scalingbp>+$bh*1.5, plus stamina outside the effect base), Turret Upgrade Z-15 706700 ($706700m1*$<scalingbp>+$AP*.2), Restorative Beacon 706829 ($706829m1*$<scalingbp>+$SP*0.12) and Self-Destruct 802176 (curve-scaled base plus spell and attack power). ScalingBase(L) = 0.0267291844060354 + 0.0048541098014737*L + 0.0001859597762293*L^2 is 0.0318 at level 1 and 1.6052 at level 80. The effect 0 base points are 100, 182, 815-826, 47, 125-126 and 884-889. A Tinker without gear has 25-35 attack power, 10-20 ranged attack power and no spell power at level 1, and 380-420 and 310-350 at level 80. Each bound is base*curve plus the coefficient terms over those stat ranges, truncated to an integer. Applying the curve twice gives 2, 2, 0, 0 and 30 at level 1 (Turret Upgrade cannot be told apart there) and 285, 527, 2107, 201, 322 and 2688 at level 80, all outside the bounds.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker_1",
+      "race": 1,
+      "class": 28,
+      "level": 1
+    },
+    {
+      "id": "tinker_80",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Level 1 fixture attack power stays within the contract range",
+      "actor": "tinker_1",
+      "metric": "attack_power",
+      "min": 25,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "Level 1 fixture ranged attack power stays within the contract range",
+      "actor": "tinker_1",
+      "metric": "ranged_attack_power",
+      "min": 10,
+      "max": 20
+    },
+    {
+      "action": "assert",
+      "label": "Level 1 fixture spell power for school 2 stays within the contract range",
+      "actor": "tinker_1",
+      "metric": "spell_power",
+      "school": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Level 1 fixture spell power for school 6 stays within the contract range",
+      "actor": "tinker_1",
+      "metric": "spell_power",
+      "school": 6,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Level 1 Sentry Shot 706689 scales its base by the level curve once",
+      "actor": "tinker_1",
+      "metric": "spell_effect_value",
+      "spell": 706689,
+      "effect": 0,
+      "min": 4,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "Level 1 Firepot 500601 scales its base by the level curve once",
+      "actor": "tinker_1",
+      "metric": "spell_effect_value",
+      "spell": 500601,
+      "effect": 0,
+      "min": 7,
+      "max": 9
+    },
+    {
+      "action": "assert",
+      "label": "Level 1 Overcharge: Shield Beacon 560709 scales its base by the level curve once",
+      "actor": "tinker_1",
+      "metric": "spell_effect_value",
+      "spell": 560709,
+      "effect": 0,
+      "min": 25,
+      "max": 26
+    },
+    {
+      "action": "assert",
+      "label": "Level 1 Restorative Beacon 706829 scales its base by the level curve once",
+      "actor": "tinker_1",
+      "metric": "spell_effect_value",
+      "spell": 706829,
+      "effect": 0,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "Level 1 Self-Destruct 802176 scales its base by the level curve once",
+      "actor": "tinker_1",
+      "metric": "spell_effect_value",
+      "spell": 802176,
+      "effect": 0,
+      "min": 53,
+      "max": 63
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 fixture attack power stays within the contract range",
+      "actor": "tinker_80",
+      "metric": "attack_power",
+      "min": 380,
+      "max": 420
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 fixture ranged attack power stays within the contract range",
+      "actor": "tinker_80",
+      "metric": "ranged_attack_power",
+      "min": 310,
+      "max": 350
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 fixture spell power for school 2 stays within the contract range",
+      "actor": "tinker_80",
+      "metric": "spell_power",
+      "school": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 fixture spell power for school 6 stays within the contract range",
+      "actor": "tinker_80",
+      "metric": "spell_power",
+      "school": 6,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Sentry Shot 706689 scales its base by the level curve once",
+      "actor": "tinker_80",
+      "metric": "spell_effect_value",
+      "spell": 706689,
+      "effect": 0,
+      "min": 187,
+      "max": 189
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Firepot 500601 scales its base by the level curve once",
+      "actor": "tinker_80",
+      "metric": "spell_effect_value",
+      "spell": 500601,
+      "effect": 0,
+      "min": 346,
+      "max": 353
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Overcharge: Shield Beacon 560709 scales its base by the level curve once",
+      "actor": "tinker_80",
+      "metric": "spell_effect_value",
+      "spell": 560709,
+      "effect": 0,
+      "min": 1308,
+      "max": 1325
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Turret Upgrade Z-15 706700 scales its base by the level curve once",
+      "actor": "tinker_80",
+      "metric": "spell_effect_value",
+      "spell": 706700,
+      "effect": 0,
+      "min": 151,
+      "max": 159
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Restorative Beacon 706829 scales its base by the level curve once",
+      "actor": "tinker_80",
+      "metric": "spell_effect_value",
+      "spell": 706829,
+      "effect": 0,
+      "min": 200,
+      "max": 202
+    },
+    {
+      "action": "assert",
+      "label": "Level 80 Self-Destruct 802176 scales its base by the level curve once",
+      "actor": "tinker_80",
+      "metric": "spell_effect_value",
+      "spell": 802176,
+      "effect": 0,
+      "min": 1799,
+      "max": 1847
+    }
+  ]
+}

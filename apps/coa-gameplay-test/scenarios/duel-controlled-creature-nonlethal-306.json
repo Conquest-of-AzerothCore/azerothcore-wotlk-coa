@@ -1,0 +1,358 @@
+{
+  "schema": 1,
+  "name": "Duel opponents and their charmed creatures leave the loser alive (#306)",
+  "contract": [
+    "A duel ends at one health when the opponent or a creature they control delivers the finishing blow.",
+    "At the reported Guardian level of 21, a normal melee attack is the control. A Felsworn starts a second duel,",
+    "then uses its level-20 Enslave Elemental spell 954534 on a Dust Devil and commands its normal melee attack",
+    "through CMSG_PET_ACTION. The creature has a charmer but no player owner and must still end the duel without",
+    "killing the Guardian. After each win the loser remains alive at one health and leaves combat.",
+    "A third duel ends in a real death when the Guardian takes lethal self damage; duel protection must not",
+    "prevent damage unrelated to the opponent. Duel requests, acceptance, attacks and completion use native",
+    "session handlers. This checks a controlled-creature reproduction of the report, not its unspecified spell."
+  ],
+  "location": {
+    "map": 0,
+    "x": -9451.3,
+    "y": 62.8,
+    "z": 55.9,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "challenger",
+      "race": 1,
+      "class": 14,
+      "level": 21,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 21,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "elemental",
+      "owner": "challenger",
+      "entry": 832,
+      "level": 19,
+      "health": 100000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "guardian",
+      "map": 0,
+      "x": -9449.3,
+      "y": 62.8,
+      "z": 55.9,
+      "o": 3.14159
+    },
+    {
+      "action": "learn",
+      "actor": "challenger",
+      "spell": 7266
+    },
+    {
+      "action": "cast",
+      "actor": "challenger",
+      "spell": 7266,
+      "target": "guardian"
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 359,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "actor": "guardian",
+      "opcode": 364,
+      "consumed": false,
+      "fields": [
+        {
+          "duel_arbiter": "guardian"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 695,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "guardian",
+      "value": 2
+    },
+    {
+      "action": "attack",
+      "actor": "challenger",
+      "target": "guardian"
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 362,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "health",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "health",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "challenger",
+      "spell": 7266,
+      "target": "guardian"
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 359,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "actor": "guardian",
+      "opcode": 364,
+      "consumed": false,
+      "fields": [
+        {
+          "duel_arbiter": "guardian"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 695,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "challenger",
+      "spell": 954534
+    },
+    {
+      "action": "cast",
+      "actor": "challenger",
+      "spell": 954534,
+      "target": "elemental"
+    },
+    {
+      "action": "assert",
+      "actor": "challenger",
+      "metric": "charm_entry",
+      "equals": 832,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "guardian",
+      "value": 2
+    },
+    {
+      "action": "client_packet",
+      "actor": "challenger",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "elemental"
+        },
+        {
+          "u32": 117440514
+        },
+        {
+          "actor_guid": "guardian"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 362,
+      "equals": 2,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "health",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "health",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "challenger",
+      "spell": 7266,
+      "target": "guardian"
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 359,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "actor": "guardian",
+      "opcode": 364,
+      "consumed": false,
+      "fields": [
+        {
+          "duel_arbiter": "guardian"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 695,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "guardian",
+      "value": 2
+    },
+    {
+      "action": "die",
+      "actor": "guardian"
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 362,
+      "equals": 3
+    },
+    {
+      "action": "client_packet",
+      "actor": "challenger",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "elemental"
+        },
+        {
+          "u32": 117440515
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "challenger",
+      "metric": "charm_entry",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

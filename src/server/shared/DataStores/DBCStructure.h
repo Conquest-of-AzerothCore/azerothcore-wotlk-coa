@@ -2275,9 +2275,9 @@ struct MapDifficulty
 struct TalentSpellPos
 {
     TalentSpellPos()  = default;
-    TalentSpellPos(uint16 _talent_id, uint8 _rank) : talent_id(_talent_id), rank(_rank) {}
+    TalentSpellPos(uint32 _talent_id, uint8 _rank) : talent_id(_talent_id), rank(_rank) {}
 
-    uint16 talent_id{0};
+    uint32 talent_id{0};
     uint8  rank{0};
 };
 

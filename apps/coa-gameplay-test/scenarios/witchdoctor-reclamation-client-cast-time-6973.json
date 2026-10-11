@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: the client's cast time for the ranged-slot abilities includes the server's 500 ms ranged preparation (#6973)",
+  "contract": [
+    "SpellInfo::CalcCastTime adds 500 ms to every ranged-slot spell that is not an auto repeat, so Reclamation and",
+    "Spirit Volley cast in 2300 ms before haste. The client's own SpellCastTimes table holds 1800 ms for their",
+    "CastingTimeIndex, and the client's tooltip and cast bar use that table, so the client showed 500 ms less than",
+    "the server cast. CoA's own client data compensates for this by storing base + 500 in the client's table (the",
+    "Moon Arrow ranks 803919-803925 carry 2500 ms where the server's data carries 2000 ms), which is only possible",
+    "for rows the server does not overwrite. The server therefore streams a Spell.dbc row for the affected",
+    "abilities whose CastingTimeIndex points at the 2300 ms row (31), so the client's tooltip and cast bar agree",
+    "with the server. The server's own cast time is unchanged."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and the client patch stream settle", "ms": 4000 },
+    { "action": "learn", "actor": "w", "spell": 572345 },
+    { "action": "learn", "actor": "w", "spell": 572343 },
+    { "action": "learn", "actor": "w", "spell": 504582 },
+    { "action": "learn", "actor": "w", "spell": 562719 },
+    {
+      "action": "assert",
+      "label": "The client receives 2300 ms for Reclamation rank 8",
+      "actor": "w",
+      "metric": "client_cast_time_ms",
+      "spell": 572345,
+      "equals": 2300,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The client receives 2300 ms for Reclamation rank 5",
+      "actor": "w",
+      "metric": "client_cast_time_ms",
+      "spell": 572343,
+      "equals": 2300
+    },
+    {
+      "action": "assert",
+      "label": "The client receives 2300 ms for Spirit Volley",
+      "actor": "w",
+      "metric": "client_cast_time_ms",
+      "spell": 504582,
+      "equals": 2300
+    },
+    {
+      "action": "assert",
+      "label": "The server still casts Reclamation rank 8 in 2300 ms",
+      "actor": "w",
+      "metric": "spell_cast_time_ms",
+      "spell": 572345,
+      "equals": 2300
+    },
+    {
+      "action": "assert",
+      "label": "The streamed row carries the Reclamation attributes at their known offset",
+      "actor": "w",
+      "metric": "client_attributes",
+      "spell": 572345,
+      "equals": 327698
+    },
+    {
+      "action": "assert",
+      "label": "Spirit Glaive is not a ranged-prepared spell, so the server streams no cast time for it",
+      "actor": "w",
+      "metric": "client_cast_time_ms",
+      "spell": 562719,
+      "equals": -1
+    }
+  ]
+}

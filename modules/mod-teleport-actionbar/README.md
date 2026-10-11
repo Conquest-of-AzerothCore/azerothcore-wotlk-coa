@@ -39,6 +39,9 @@ the module's own item-triggered teleport. A refusal shows the client's own cast 
 plus a line naming the hub and its side. Disable with
 `TeleportActionBar.EnforceFaction = 0`.
 
+The Stockade dungeon stone is shared. Its Horde warning identifies a hostile landing;
+the separate Stormwind capital stone remains Alliance-only.
+
 The side of each hub is a generated table, `src/StoneFactionData.h`: every destination
 was classified from the `FactionTemplate` of the NPCs standing at it (Alliance / Horde /
 neither), then reviewed, with shared sites and a few camps whose only nearby NPCs are

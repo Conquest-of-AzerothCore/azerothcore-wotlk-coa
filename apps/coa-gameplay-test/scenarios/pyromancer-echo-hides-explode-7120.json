@@ -1,0 +1,571 @@
+{
+  "schema": 1,
+  "name": "Echo of Nozdormu hides every Explode rank from the Book of Ascension (#7120)",
+  "contract": [
+    "A level26 Draconic Pyromancer holding the Echo of Nozdormu conversion (aura520937) converts Explode800792 into Echo rank3803408. While the conversion is active the Book lists no Explode rank at all: neither the known rank1 as a used row nor its upgrades as trainable rows, and a direct purchase of the next rank is refused without taking money or teaching anything.",
+    "Returning to Incineration38 drops the conversion and restores ordinary Explode, so the rows come back. Buying the remaining Explode ranks there and returning to Draconic39 hides all five known ranks and converts each of them to the same Echo rank."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 26
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "money",
+      "actor": "pyro",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "pyro",
+      "id": 38
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "pyro",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "pyro"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_rows",
+      "min": 1,
+      "label": "The normal class book publishes its rows"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 800792,
+      "min": 0,
+      "label": "Incineration offers ordinary Explode"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "pyro",
+      "spell": 800792,
+      "label": "Buy Explode rank 1 before its conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 800792,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Normal acquisition owns Explode before its conversion"
+    },
+    {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 21,
+      "spell": 800792
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 800792,
+      "label": "The bar holds ordinary Explode before the conversion"
+    },
+    {
+      "action": "specialization",
+      "actor": "pyro",
+      "id": 39
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 520937,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Draconic applies the Echo conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 803408,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Draconic grants the level26 Echo rank normally"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "client_knows_spell",
+      "spell": 803408,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The client learns the converted rank without a relog"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "client_spellbook_copies",
+      "spell": 803408,
+      "equals": 2,
+      "within_ms": 2000,
+      "label": "The client is told the Echo rank once by learning it and once by the conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 803408,
+      "within_ms": 2000,
+      "label": "The converted rank takes the Explode button on the bar"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 800792,
+      "equals": 803408,
+      "within_ms": 2000,
+      "label": "The ordinary Explode button converts to the appropriate Echo rank"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "pyro"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 800792,
+      "equals": -1,
+      "label": "Draconic hides known Explode rank 1"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 502057,
+      "equals": -1,
+      "label": "Draconic hides Explode rank 2 instead of offering it"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 502058,
+      "equals": -1,
+      "label": "Draconic hides Explode rank 3"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 502059,
+      "equals": -1,
+      "label": "Draconic hides Explode rank 4"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 502060,
+      "equals": -1,
+      "label": "Draconic hides Explode rank 5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "carried_money",
+      "save_as": "money_before"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "pyro",
+      "spell": 502057,
+      "label": "Request the replaced rank through the Book"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "spellbook_buy_failed",
+      "spell": 502057,
+      "equals": 1,
+      "label": "The Book refuses the replaced rank"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "carried_money",
+      "relative_to": "money_before",
+      "equals": 0,
+      "label": "The refused purchase preserves money"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 502057,
+      "equals": 0,
+      "label": "The refused purchase teaches nothing"
+    },
+    {
+      "action": "specialization",
+      "actor": "pyro",
+      "id": 38
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 520937,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "Incineration removes the Draconic conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 800792,
+      "equals": 800792,
+      "label": "Incineration restores ordinary Explode"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 800792,
+      "label": "The bar returns to ordinary Explode without the conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 803408,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "Incineration takes the Echo rank back"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "pyro"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 800792,
+      "equals": 2,
+      "label": "Explode returns as a used row without the conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 502057,
+      "equals": 0,
+      "label": "The next Explode rank returns as trainable"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "pyro",
+      "spell": 502057,
+      "label": "Buy Explode rank 2"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 502057,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "pyro",
+      "spell": 502058,
+      "label": "Buy Explode rank 3"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 502058,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "pyro",
+      "spell": 502059,
+      "label": "Buy Explode rank 4"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 502059,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "pyro",
+      "spell": 502060,
+      "label": "Buy Explode rank 5"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 502060,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 22,
+      "spell": 502057
+    },
+    {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 23,
+      "spell": 502058
+    },
+    {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 24,
+      "spell": 502059
+    },
+    {
+      "action": "set_action_button",
+      "actor": "pyro",
+      "button": 25,
+      "spell": 502060
+    },
+    {
+      "action": "specialization",
+      "actor": "pyro",
+      "id": 39
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 520937,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 800792,
+      "equals": 803408,
+      "within_ms": 2000,
+      "label": "Every known Explode rank converts to the same Echo rank"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 502057,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 502058,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 502059,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 502060,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "pyro"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 800792,
+      "equals": -1,
+      "label": "Draconic hides every known Explode rank"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 502057,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 502058,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 502059,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 502060,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 803408,
+      "within_ms": 2000,
+      "label": "Every known Explode button on the bar shows the converted Echo rank"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 22,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 23,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 24,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 25,
+      "equals": 803408,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "client_knows_spell",
+      "spell": 803408,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The client knows the converted rank live"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "client_spellbook_copies",
+      "spell": 803408,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The re-conversion nets a single Echo copy while five ranks convert into it"
+    },
+    {
+      "action": "relog",
+      "actor": "pyro"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 21,
+      "equals": 803408,
+      "within_ms": 8000,
+      "label": "The converted bar survives a relog"
+    },
+    {
+      "action": "client_packet",
+      "actor": "pyro",
+      "opcode": 296,
+      "early": true,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 26
+        },
+        {
+          "u32": 803408
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "action_button",
+      "button": 26,
+      "equals": 803408,
+      "within_ms": 2000,
+      "label": "The converted rank can be placed on the bar like a dragged book row"
+    }
+  ]
+}

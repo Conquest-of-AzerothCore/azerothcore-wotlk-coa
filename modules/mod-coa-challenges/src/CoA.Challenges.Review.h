@@ -369,7 +369,8 @@ char const* ChallengeResponseString(uint32 code);
     void ReapplyActiveSpells(Player* player, std::vector<ActiveChallengeRow> const& rows);
     void StripOrphanChallengeAuras(Player* player);
     std::vector<RewardDef> GetChallengeRewards(uint32 challengeID, uint32 level);
-    void GrantChallengeRewards(Player* player, uint32 challengeID, uint32 level, bool firstTime);
+    void GrantChallengeRewards(Player* player, uint32 challengeID, uint32 level, bool firstItemReward,
+        bool firstAchievement);
 uint32 HungerFoodSpell();
 uint32 HungerDrinkSpell();
 void SetMeterAura(Player* player, uint32 spell, int32 value);

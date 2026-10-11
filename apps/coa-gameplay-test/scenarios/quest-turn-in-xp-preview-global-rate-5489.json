@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "name": "The quest turn-in window includes the global XP rate (#5489)",
+  "contract": "An ordinary level-20 player at XP rate 1 requests and chooses the native reward for scaled Kobold Camp Cleanup at its actual giver template, Marshal McBride. The XP delivered in SMSG_QUESTGIVER_OFFER_REWARD must equal the native XP delta after CMSG_QUESTGIVER_CHOOSE_REWARD. Quest objectives are fixture setup; no reward or preview value is injected.",
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "giver",
+      "owner": "hero",
+      "entry": 197,
+      "faction": 35,
+      "level": 20,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".xp 1"
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 7
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 396,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "giver"
+        },
+        {
+          "u32": 7
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "quest_offer_sent_xp",
+      "quest": 7,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "quest_offer_sent_xp",
+      "quest": 7,
+      "save_as": "shown_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "xp",
+      "save_as": "xp_before"
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 398,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "giver"
+        },
+        {
+          "u32": 7
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "quest_rewarded",
+      "quest": 7,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "xp",
+      "relative_to": "xp_before",
+      "ratio_to": "shown_xp",
+      "equals": 1,
+      "label": "Actual quest XP equals the turn-in preview"
+    }
+  ]
+}

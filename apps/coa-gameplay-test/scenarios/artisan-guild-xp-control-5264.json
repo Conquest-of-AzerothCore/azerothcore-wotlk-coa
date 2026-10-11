@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "name": "Lonely Artisan's XP fix preserves Artisan's Guild skill rewards and party sharing (#5264)",
+  "contract": "Hardcore - Artisan's Guild56 has profession-only XP and party sharing but no NO_GROUP rule. It retains the existing skill-increase reward rather than the ordinary attempt award. Both members start the trial and reach level20, then group. A capped green Minor Healing Potion2330 craft makes an item but awards neither member XP. At Alchemy1 an orange craft increases skill1->2 and the potion's quality1 gives rarity multiplier2: floor((23200/50)*2*0.9295)=862 XP to each member exactly once. Real completed crafts and native party handlers exercise the untouched group path.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "crafter",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "crafter",
+      "challenge": 56,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "crafter",
+      "value": 20
+    },
+    {
+      "action": "command",
+      "actor": "crafter",
+      "command": ".xp 1"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "next_level_xp",
+      "equals": 23200
+    },
+    {
+      "action": "start_challenge",
+      "actor": "mate",
+      "challenge": 56,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mate",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "mate",
+      "value": 20
+    },
+    {
+      "action": "command",
+      "actor": "mate",
+      "command": ".xp 1"
+    },
+    {
+      "action": "assert",
+      "actor": "mate",
+      "metric": "next_level_xp",
+      "equals": 23200
+    },
+    {
+      "action": "group",
+      "actor": "crafter",
+      "target": "mate"
+    },
+    {
+      "action": "learn",
+      "actor": "crafter",
+      "spell": 2330
+    },
+    {
+      "action": "set_skill",
+      "actor": "crafter",
+      "skill": 171,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "crafter",
+      "metric": "xp",
+      "save_as": "crafter_capped_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mate",
+      "metric": "xp",
+      "save_as": "mate_capped_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "capped_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "crafter",
+      "spell": 2330,
+      "target": "crafter"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "capped_potions",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "skill_value",
+      "skill": 171,
+      "equals": 75
+    },
+    {
+      "action": "assert",
+      "label": "Artisan's Guild keeps the capped award for crafter",
+      "actor": "crafter",
+      "metric": "xp",
+      "relative_to": "crafter_capped_xp",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Artisan's Guild keeps the capped award for mate",
+      "actor": "mate",
+      "metric": "xp",
+      "relative_to": "mate_capped_xp",
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "crafter",
+      "skill": 171,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "crafter",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "crafter",
+      "metric": "xp",
+      "save_as": "crafter_skill_up_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mate",
+      "metric": "xp",
+      "save_as": "mate_skill_up_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "skill_up_potions"
+    },
+    {
+      "action": "cast",
+      "actor": "crafter",
+      "spell": 2330,
+      "target": "crafter"
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "skill_up_potions",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "crafter",
+      "metric": "skill_value",
+      "skill": 171,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Artisan's Guild keeps the skill_up award for crafter",
+      "actor": "crafter",
+      "metric": "xp",
+      "relative_to": "crafter_skill_up_xp",
+      "equals": 862
+    },
+    {
+      "action": "assert",
+      "label": "Artisan's Guild keeps the skill_up award for mate",
+      "actor": "mate",
+      "metric": "xp",
+      "relative_to": "mate_skill_up_xp",
+      "equals": 862
+    }
+  ]
+}

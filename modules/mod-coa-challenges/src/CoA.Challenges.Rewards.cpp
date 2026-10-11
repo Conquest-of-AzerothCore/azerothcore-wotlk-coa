@@ -164,12 +164,10 @@ namespace CoAChallenges
         return {};
     }
 
-    // Grant the rewards for one completion (always by mail, per the project
-    // decision). isFirst entries are skipped when the character already
-    // completed that level (only relevant when re-completion is allowed).
     // isSpecial is client-display metadata (echoed by `.coa reward`); it does
     // NOT gate delivery today - only isFirst does.
-    void GrantChallengeRewards(Player* player, uint32 challengeID, uint32 level, bool firstTime)
+    void GrantChallengeRewards(Player* player, uint32 challengeID, uint32 level, bool firstItemReward,
+        bool firstAchievement)
     {
         if (!player)
             return;
@@ -192,10 +190,7 @@ namespace CoAChallenges
 
         for (RewardDef const& r : rewards)
         {
-            if (r.isFirst && !firstTime)
-                continue;
-
-            if (r.achievement)
+            if (r.achievement && (!r.isFirst || firstAchievement))
             {
                 // Ascension achievements are per class; resolve the variant for
                 // the completing character (e.g. grant "[Warrior] Ironman"
@@ -222,7 +217,7 @@ namespace CoAChallenges
                 }
             }
 
-            if (r.itemId)
+            if (r.itemId && (!r.isFirst || firstItemReward))
             {
                 ItemTemplate const* proto = sObjectMgr->GetItemTemplate(r.itemId);
                 if (!proto)

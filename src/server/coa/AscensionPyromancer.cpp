@@ -124,6 +124,38 @@ uint32 Highest(Player* player, uint32 root)
             result = pair.first;
     return result;
 }
+void SyncActionBars(Player* player)
+{
+    bool changed = false;
+    bool const converted = player->HasAura(520937);
+    uint32 const echo = converted ? Highest(player, 802174) : 0;
+    uint32 fallback = 0;
+    if (!converted)
+        for (auto const& pair : player->GetSpellMap())
+            if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800792) &&
+                (!fallback ||
+                    sSpellMgr->GetSpellInfo(pair.first)->SpellLevel < sSpellMgr->GetSpellInfo(fallback)->SpellLevel))
+                fallback = pair.first;
+    for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+    {
+        ActionButton const* action = player->GetActionButton(button);
+        if (!action || action->GetType() != ACTION_BUTTON_SPELL)
+            continue;
+        uint32 const current = action->GetAction();
+        uint32 desired = current;
+        if (converted && player->HasSpell(current) && Named(sSpellMgr->GetSpellInfo(current), 800792))
+            desired = echo;
+        else if (!converted && fallback &&
+            std::find(std::begin(PyromancerEchoRanks), std::end(PyromancerEchoRanks), current) !=
+                std::end(PyromancerEchoRanks))
+            desired = fallback;
+        if (desired != current && desired && player->HasSpell(desired) &&
+            player->addActionButton(button, desired, ACTION_BUTTON_SPELL))
+            changed = true;
+    }
+    if (changed)
+        player->SendActionButtons(1);
+}
 void Flames(Player* player, uint32 count)
 {
     Aura* old = player->GetAura(FlamecastingAura);
@@ -370,13 +402,14 @@ void Refresh(Player* player)
     if (player->HasAura(520937))
         for (uint32 id : PyromancerEchoRanks)
             if (sSpellMgr->GetSpellInfo(id)->SpellLevel <= player->GetLevel() && !player->HasSpell(id))
-                player->learnSpell(id, true);
+                player->learnSpell(id);
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800792))
             player->SetTemporarySpellReplacement(pair.first, player->HasAura(520937) ? Highest(player, 802174) : 0);
     if (!player->HasAura(520937))
         for (uint32 id : PyromancerEchoRanks)
-            player->removeSpell(id, SPEC_MASK_ALL, true);
+            player->removeSpell(id, SPEC_MASK_ALL, false);
+    SyncActionBars(player);
     if (player->HasAura(300751) && Count(player, EmberAura))
     {
         if (!player->HasAura(807542))

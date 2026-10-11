@@ -320,6 +320,13 @@ class aura_ascension_tinker_tracer : public AuraScript
             caster->CastSpell(GetTarget(), SPELL_TRACER_REVEAL, true, nullptr, effect);
     }
 
+    void ExplodeAtExpiry(AuraEffect const*, bool& isPeriodic, int32& amplitude)
+    {
+        int32 const extension = GetMaxDuration() - GetSpellInfo()->GetMaxDuration();
+        if (isPeriodic && extension > 0)
+            amplitude += extension;
+    }
+
     void OneExplosion(AuraEffect const*)
     {
         if (_exploded)
@@ -331,6 +338,8 @@ class aura_ascension_tinker_tracer : public AuraScript
     {
         AfterEffectApply += AuraEffectApplyFn(aura_ascension_tinker_tracer::Reveal,
             EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(aura_ascension_tinker_tracer::ExplodeAtExpiry,
+            EFFECT_2, SPELL_AURA_PERIODIC_DAMAGE);
         OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_tinker_tracer::OneExplosion,
             EFFECT_2, SPELL_AURA_PERIODIC_DAMAGE);
     }

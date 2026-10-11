@@ -167,6 +167,7 @@ namespace Movement
         vertical_acceleration = 0.f;
         effect_start_time = 0;
         velocity = args.velocity;
+        walking = !args.flags.done && args.walk;
 
         // Check if its a stop spline
         if (args.flags.done)

@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: ranged-slot cast times and their haste path",
+  "contract": [
+    "Reclamation ranks, Spirit Volley and the Spirit Glaive ladder are ranged-slot spells (SPELL_ATTR0_USES_RANGED_SLOT,",
+    "Attributes 0x00050012 / 0x00050010) whose own SpellCastTimes entry is 1800 ms (Reclamation, Spirit Volley) and",
+    "2000 ms (Spirit Glaive). The 3.3.5 client's cast-time routine adds 500 ms for a ranged-slot spell and then scales",
+    "the result by the ranged attack-time ratio (see starcaller-ranged-shot-cast-time, which pins that routine from",
+    "Ascension.exe); SpellInfo::CalcCastTime and Unit::ModSpellCastTime do the same on the server, so Reclamation casts",
+    "in 2300 ms before haste, and Darkspear Traditionalist's 10% ranged haste takes it and Spirit Volley to 2090 ms",
+    "(2300 / 1.1, measured below). Spirit Glaive additionally carries the Witch Doctor agility clause in",
+    "Unit::ModSpellCastTime (family 19, flags 0x02000000), so it lands below 2500 ms at any agility. Nothing in the",
+    "shipped data or in either cast-time path is 500 ms short of the client, which is what #6973 has to be answered",
+    "with. Spells that carry no cast-time entry at all keep returning 0 and are unaffected."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 4000 },
+    { "action": "learn", "actor": "caster", "spell": 572345 },
+    { "action": "learn", "actor": "caster", "spell": 680904 },
+    { "action": "learn", "actor": "caster", "spell": 504582 },
+    { "action": "learn", "actor": "caster", "spell": 562719 },
+    {
+      "action": "assert", "label": "Reclamation rank 8 is its 1800 ms entry plus the client's 500 ms ranged preparation",
+      "actor": "caster", "metric": "spell_cast_time_ms", "spell": 572345, "equals": 2300
+    },
+    {
+      "action": "assert", "label": "Reclamation rank 4 matches",
+      "actor": "caster", "metric": "spell_cast_time_ms", "spell": 680904, "equals": 2300
+    },
+    {
+      "action": "assert", "label": "Spirit Volley matches",
+      "actor": "caster", "metric": "spell_cast_time_ms", "spell": 504582, "equals": 2300
+    },
+    {
+      "action": "assert", "label": "Spirit Glaive is its 2000 ms entry plus 500 ms, minus the Witch Doctor agility clause",
+      "actor": "caster", "metric": "spell_cast_time_ms", "spell": 562719, "min": 1500, "max": 2500
+    },
+    {
+      "action": "assert", "label": "Voodoo Arrow is its own 500 ms entry plus 500 ms",
+      "actor": "caster", "metric": "spell_cast_time_ms", "spell": 503715, "equals": 1000
+    },
+
+    { "action": "learn", "actor": "caster", "spell": 503707 },
+    { "action": "set_aura", "actor": "caster", "spell": 503707, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: Darkspear Traditionalist is up",
+      "actor": "caster", "metric": "aura", "spell": 503707, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Darkspear's ranged haste lowers the Reclamation cast (2300 / 1.1)",
+      "actor": "caster", "metric": "spell_cast_time_ms", "spell": 572345, "min": 1900, "max": 2150,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The same haste lowers Spirit Volley",
+      "actor": "caster", "metric": "spell_cast_time_ms", "spell": 504582, "min": 1900, "max": 2150,
+      "within_ms": 3000
+    }
+  ]
+}

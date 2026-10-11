@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "name": "Wildcard Seal of Fervor adds Fire damage to main hand auto attacks (#6283)",
+  "contract": [
+    "Seal of Fervor 272087 reads 'Fills you with fiery spirit, granting each main hand auto attack and Paladin melee ability 1 + MWS * (0.0085 * AP + 0.072 * SP) additional Fire damage.'",
+    "It copies Seal of Righteousness 21084 (ProcFlags 0x14, judgement spell in its effect 2 dummy) but had no spell_proc row or script, so it dealt no damage.",
+    "With the seal up, three landed main hand swings each add one Seal of Fervor 272085 hit; with it cancelled, further swings add none."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "name": "Wildfervor",
+      "race": 1,
+      "class": 10,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "wild",
+      "entry": 1601,
+      "level": 80,
+      "health": 10000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildfervor"
+    },
+    {
+      "action": "assert",
+      "label": "The Hero plays Wildcard",
+      "actor": "wild",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "add_item",
+      "actor": "wild",
+      "item": 506
+    },
+    {
+      "action": "equip",
+      "actor": "wild",
+      "item": 506,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 272087
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 272087
+    },
+    {
+      "action": "assert",
+      "label": "Seal of Fervor is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 272087,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Seal of Fervor is up",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 272087,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "wild",
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "Three swings land",
+      "actor": "wild",
+      "metric": "melee_damage_count",
+      "target": "e",
+      "min": 3,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Each adds Seal of Fervor Fire damage",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 272085,
+      "target": "e",
+      "min": 3
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "wild",
+      "spell": 272087
+    },
+    {
+      "action": "snapshot",
+      "label": "Seal hits when the seal is cancelled",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 272085,
+      "target": "e",
+      "save_as": "seal"
+    },
+    {
+      "action": "snapshot",
+      "label": "Swings when the seal is cancelled",
+      "actor": "wild",
+      "metric": "melee_damage_count",
+      "target": "e",
+      "save_as": "swings"
+    },
+    {
+      "action": "assert",
+      "label": "Two more swings land",
+      "actor": "wild",
+      "metric": "melee_damage_count",
+      "target": "e",
+      "relative_to": "swings",
+      "min": 2,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "without the seal they add no Fire damage",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 272085,
+      "target": "e",
+      "relative_to": "seal",
+      "equals": 0
+    }
+  ]
+}

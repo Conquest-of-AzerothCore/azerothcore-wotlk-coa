@@ -93,6 +93,7 @@ struct Entry
     std::uint32_t Group = 0;
     std::vector<std::uint32_t> RankSpells;
     bool Glyph = false;
+    std::uint32_t AbilityCost = ABILITY_ROLL_COST;
 };
 
 struct Essence
@@ -186,6 +187,7 @@ struct Tables
     std::unordered_map<std::uint32_t, std::string> TagNames;
     std::unordered_map<std::uint32_t, std::vector<std::uint32_t>> RankLadders;
     std::unordered_map<std::uint32_t, std::uint32_t> RankRoots;
+    std::unordered_map<std::uint32_t, std::uint32_t> AbilityCosts;
 };
 
 struct PendingCard

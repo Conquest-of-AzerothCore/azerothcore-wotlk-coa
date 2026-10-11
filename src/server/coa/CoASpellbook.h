@@ -9,6 +9,8 @@ class Player;
 namespace CoASpellbook
 {
     constexpr std::uint16_t SMSG_PATCH_SPELL_CUSTOM_ATTR = 0x05F4;
+    constexpr std::uint16_t SMSG_PATCH_SPELL = 0x092A;
+    constexpr std::size_t SMSG_PATCH_SPELL_CAST_TIME_INDEX_DWORD = 28;
 
     struct Provider
     {

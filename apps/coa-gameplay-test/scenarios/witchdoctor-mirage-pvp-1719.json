@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Mirage follows changes to the owner PvP flag (#1719)",
+  "contract": "Mirage 501136 leaves an Uncanny Likeness (840000) owned by the Witch Doctor. The copy must follow its owner's PvP state after creation, just like the doctor's wards, while remaining friendly to opposite-faction party members. This entry is also used by the Reaper's Haunt. The test observes native attackability without changing the summon faction or flags. Client rendering and external playerbot behavior are outside this test.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "doctor",
+      "race": 2,
+      "class": 13,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "doctor",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "tinker",
+      "map": 0,
+      "x": -9616.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "outsider",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "tinker",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "outsider",
+      "enabled": true
+    },
+    {
+      "action": "group",
+      "actor": "tinker",
+      "target": "doctor"
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 501136
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 501136,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "owned_creature_count",
+      "entry": 840000,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "An opposite-faction party member cannot attack Mirage",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 840000,
+      "target": "tinker",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "An unflagged owner does not expose the copy to outsider attacks",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 840000,
+      "target": "outsider",
+      "equals": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "doctor",
+      "enabled": true
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "label": "The existing copy follows the owner's PvP flag",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 840000,
+      "target": "outsider",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Flagging the owner does not expose the copy to party attacks",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 840000,
+      "target": "tinker",
+      "equals": 0
+    },
+    {
+      "action": "leave_group",
+      "actor": "tinker"
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the party restores ordinary hostility",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 840000,
+      "target": "tinker",
+      "equals": 1
+    },
+    {
+      "action": "group",
+      "actor": "tinker",
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "label": "Rejoining the party makes the same copy friendly again",
+      "actor": "doctor",
+      "metric": "owned_creature_attackable",
+      "entry": 840000,
+      "target": "tinker",
+      "equals": 0
+    }
+  ]
+}

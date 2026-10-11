@@ -1,0 +1,279 @@
+{
+  "schema": 1,
+  "name": "Ordinary players can add and retain cross-faction friends (#5456)",
+  "contract": "CMSG_ADD_FRIEND accepts an opposite-faction player for ordinary accounts, rejects self-adds, reports duplicates and preserves the friendship across relog; a same-faction request exercises the same handler first.",
+  "players": [
+    {
+      "id": "alliance",
+      "name": "Coafrienda",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "ally",
+      "name": "Coafriendb",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "horde",
+      "name": "Coafriendh",
+      "race": 2,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "save_as": "responses1"
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 105,
+      "consumed": false,
+      "fields": [
+        {
+          "string": "Coafriendb"
+        },
+        {
+          "string": "CoA native friend check"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "relative_to": "responses1",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u8",
+      "opcode": 104,
+      "index": 0,
+      "equals": 6,
+      "label": "Same-faction online friend control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "save_as": "responses2"
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 105,
+      "consumed": false,
+      "fields": [
+        {
+          "string": "Coafrienda"
+        },
+        {
+          "string": "CoA native friend check"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "relative_to": "responses2",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u8",
+      "opcode": 104,
+      "index": 0,
+      "equals": 9,
+      "label": "Self-add control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "save_as": "responses3"
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 105,
+      "consumed": false,
+      "fields": [
+        {
+          "string": "Coafriendh"
+        },
+        {
+          "string": "CoA native friend check"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "relative_to": "responses3",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u8",
+      "opcode": 104,
+      "index": 0,
+      "equals": 6,
+      "label": "Alliance adds a Horde friend"
+    },
+    {
+      "action": "snapshot",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "save_as": "responses4"
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 105,
+      "consumed": false,
+      "fields": [
+        {
+          "string": "Coafriendh"
+        },
+        {
+          "string": "CoA native friend check"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "relative_to": "responses4",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u8",
+      "opcode": 104,
+      "index": 0,
+      "equals": 8,
+      "label": "Duplicate cross-faction add"
+    },
+    {
+      "action": "snapshot",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 104,
+      "save_as": "responses5"
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 105,
+      "consumed": false,
+      "fields": [
+        {
+          "string": "Coafrienda"
+        },
+        {
+          "string": "CoA native friend check"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "server_packets",
+      "opcode": 104,
+      "relative_to": "responses5",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "server_packet_u8",
+      "opcode": 104,
+      "index": 0,
+      "equals": 6,
+      "label": "Horde adds an Alliance friend"
+    },
+    {
+      "action": "relog",
+      "actor": "alliance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "save_as": "responses6"
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 105,
+      "consumed": false,
+      "fields": [
+        {
+          "string": "Coafriendh"
+        },
+        {
+          "string": "CoA native friend check"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 104,
+      "relative_to": "responses6",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "server_packet_u8",
+      "opcode": 104,
+      "index": 0,
+      "equals": 8,
+      "label": "Cross-faction friendship survives relog"
+    }
+  ]
+}

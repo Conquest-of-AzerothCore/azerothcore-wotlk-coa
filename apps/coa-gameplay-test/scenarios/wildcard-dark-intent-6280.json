@@ -1,0 +1,348 @@
+{
+  "schema": 1,
+  "name": "Wildcard Dark Intent adds Shadow damage to Sinister Strike, critical when the strike is (#6280)",
+  "contract": [
+    "Dark Intent 275493 reads 'Dealing damage with Sinister Strike, Eviscerate, Garrote, Rupture, Crimson Tempest, Shiv, Ambush and Gloomblade now deals additional Shadow damage. If the ability critically strikes, the additional Shadow damage is also a critical hit.'",
+    "Spell.dbc gives it only PROC_FLAG_DONE_PERIODIC, so Sinister Strike never procced it.",
+    "Five Sinister Strikes add Dark Intent non-crit 275503; a strike made critical by Cold Blood 14177 adds exactly one Dark Intent crit 275496 and no non-crit hit."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "name": "Wildintent",
+      "race": 1,
+      "class": 10,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "wild",
+      "entry": 1601,
+      "level": 80,
+      "health": 10000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildintent"
+    },
+    {
+      "action": "assert",
+      "label": "The Hero plays Wildcard",
+      "actor": "wild",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "add_item",
+      "actor": "wild",
+      "item": 506
+    },
+    {
+      "action": "equip",
+      "actor": "wild",
+      "item": 506,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 275493
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 14177
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 1752,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "1752 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 1752,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 1752,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "1752 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 1752,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 1752,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "1752 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 1752,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 1752,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "1752 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 1752,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 1752,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "1752 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 1752,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Five Sinister Strikes landed",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "e",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Dark Intent added non-crit Shadow damage",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 275503,
+      "target": "e",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Crit Shadow hits so far",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 275496,
+      "target": "e",
+      "save_as": "crit"
+    },
+    {
+      "action": "snapshot",
+      "label": "Non-crit Shadow hits so far",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 275503,
+      "target": "e",
+      "save_as": "noncrit"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 14177
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 14177
+    },
+    {
+      "action": "assert",
+      "label": "14177 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 14177,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 1752,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "1752 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 1752,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The Cold Blood strike adds Dark Intent crit",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 275496,
+      "target": "e",
+      "relative_to": "crit",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and no non-crit hit",
+      "actor": "wild",
+      "metric": "spell_damage_count",
+      "spell": 275503,
+      "target": "e",
+      "relative_to": "noncrit",
+      "equals": 0
+    }
+  ]
+}

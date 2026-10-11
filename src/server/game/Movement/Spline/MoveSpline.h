@@ -65,6 +65,7 @@ namespace Movement
         float           vertical_acceleration;
         float           initialOrientation;
         float           velocity;
+        bool            walking{false};
         int32           effect_start_time;
         int32           point_Idx;
         int32           point_Idx_offset;
@@ -116,6 +117,7 @@ namespace Movement
 
         [[nodiscard]] uint32 GetId() const { return m_Id; }
         [[nodiscard]] bool Finalized() const { return splineflags.done; }
+        [[nodiscard]] bool IsWalking() const { return walking; }
         [[nodiscard]] bool isCyclic() const { return splineflags.cyclic; }
         [[nodiscard]] bool isFalling() const { return splineflags.falling; }
         [[nodiscard]] bool isBoarding() const { return splineflags.transportEnter || splineflags.transportExit; }

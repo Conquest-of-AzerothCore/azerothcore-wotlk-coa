@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Communion Banquet: Elydna Wingstroke's scaled level and health reach the client when she turns hostile (#7187)",
+  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, offset=4 and map 1 in DestinyWeaver.Scaling.WorldMaps. Elydna Wingstroke (161784, level 7, faction 35) is friendly, so a level-20 hunter sees her authored version; she arrives in a create block, which sent_level does not observe. The Sacred Bowl (2300513) with quest 1660016 in progress makes her walk to it, kneel and after 5 s switch to faction 14 and attack. From then on the hunter's view is level 16 (20 - 4) and the client must be sent level 16 and a maximum health of her real maximum x basehp(16)/basehp(7) = 356/137 (creature_classlevelstats class 1, expansion 0). The faction change alone sends only the faction field, so without a resend no level or maximum health reaches the client and the client keeps level 7 and the authored maximum while HEALTH is patched to the viewed scale, so the bar stays full: the reported infinite health. The wait after the scaling packet lets the login and choice refresh windows (5 s) close before the faction changes.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": 10826,
+    "y": 446,
+    "z": 1387,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hunter",
+      "race": 4,
+      "class": 3,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "level_scaling_packet",
+      "actor": "hunter",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hunter",
+      "quest": 1660016,
+      "complete": false
+    },
+    {
+      "action": "summon",
+      "actor": "hunter",
+      "entry": 161784,
+      "as": "elydna",
+      "distance": 3
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "hunter",
+      "entry": 2300513,
+      "distance": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "elydna",
+      "metric": "max_health",
+      "save_as": "authored_max"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "hunter",
+      "entry": 2300513
+    },
+    {
+      "action": "assert",
+      "label": "the offering credits the quest",
+      "actor": "hunter",
+      "metric": "quest_objective_count",
+      "quest": 1660016,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Elydna turns hostile and engages",
+      "actor": "elydna",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "the hunter's view of hostile Elydna is level 16",
+      "actor": "hunter",
+      "metric": "view_level",
+      "target": "elydna",
+      "equals": 16,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the client is sent the viewed level",
+      "actor": "hunter",
+      "metric": "sent_level",
+      "target": "elydna",
+      "equals": 16,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the client is sent the viewed maximum health (356/137 of the authored one)",
+      "actor": "hunter",
+      "metric": "sent_max_health",
+      "target": "elydna",
+      "ratio_to": "authored_max",
+      "min": 2.59,
+      "max": 2.61,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -29,6 +29,11 @@ bool Select(uint32 id, SpellInfo const* info)
         default: return false;
     }
 }
+bool TrainingDummy(Unit const* unit)
+{
+    Creature const* creature = unit->ToCreature();
+    return creature && creature->GetScriptName() == "npc_training_dummy";
+}
 void Snapshot(Player* player, Spell* spell)
 {
     if (spell->IsTriggered())
@@ -193,9 +198,12 @@ public:
             for (Creature* device : Devices(player))
                 if (device->GetEntry() == 467073)
                 {
-                    Position position = device->GetPosition();
                     for (uint8 n = 0; n < 3; ++n)
+                    {
+                        Position position = device->GetPosition();
+                        device->MovePositionToFirstCollision(position,1.5f,n * 2 * float(M_PI) / 3);
                         Summon(player,target,500535,&position);
+                    }
                     break;
                 }
         if (id == 802052 && player->HasAura(300636))
@@ -238,7 +246,7 @@ public:
             return;
         if (target->IsPlayer())
             target->RemoveAurasDueToSpell(560711);
-        if (damage && Named(info,801005) && player->HasAura(805314))
+        if ((damage || TrainingDummy(target)) && Named(info,801005) && player->HasAura(805314))
             if (Aura* tracer = target->GetAura(653247,player->GetGUID()); tracer && tracer->GetStackAmount() >= 10)
                 Cast(player,target,803438);
         if (Nanobots(player,target) && player->HasAura(560734) &&

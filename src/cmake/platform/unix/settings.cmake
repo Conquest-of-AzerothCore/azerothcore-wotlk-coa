@@ -44,6 +44,17 @@ add_custom_target(uninstall
 )
 message(STATUS "UNIX: Created uninstall target")
 
+if(APPLE AND CMAKE_GENERATOR MATCHES "Ninja|Makefiles" AND EXISTS "/usr/bin/libtool")
+  foreach(ARCHIVE_LANGUAGE C CXX)
+    if(NOT DEFINED CACHE{CMAKE_${ARCHIVE_LANGUAGE}_CREATE_STATIC_LIBRARY})
+      set(CMAKE_${ARCHIVE_LANGUAGE}_CREATE_STATIC_LIBRARY
+        "<CMAKE_COMMAND> -E rm -f <TARGET>"
+        "/usr/bin/libtool -static -no_warning_for_no_symbols -o <TARGET> <LINK_FLAGS> <OBJECTS>")
+    endif()
+  endforeach()
+  message(STATUS "UNIX: Creating static libraries with libtool")
+endif()
+
 message(STATUS "UNIX: Detected compiler: ${CMAKE_C_COMPILER}")
 if(CMAKE_C_COMPILER MATCHES "gcc" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
   include(${CMAKE_SOURCE_DIR}/src/cmake/compiler/gcc/settings.cmake)

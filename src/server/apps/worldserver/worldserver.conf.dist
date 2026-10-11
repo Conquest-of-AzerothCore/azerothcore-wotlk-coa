@@ -4684,6 +4684,14 @@ AllowTwoSide.Interaction.Arena = 0
 AllowTwoSide.Interaction.Auction = 0
 
 #
+#    AllowTwoSide.WhoList
+#        Description: Show characters of both factions in the who list and the friends list.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+AllowTwoSide.WhoList = 1
+
+#
 #    TalentsInspecting
 #        Description: Allow inspecting characters from the opposing faction.
 #                     Doesn't affect characters in gamemaster mode.

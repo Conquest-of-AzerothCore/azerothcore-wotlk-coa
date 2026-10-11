@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "name": "Wildcard Tools of War and Martial Crescendo stack on unique Physical abilities (#7059, #7060)",
+  "contract": [
+    "Tools of War 271020 and Martial Crescendo 271051 read 'Each unique direct damage Physical ability now grants you' their buffs 271021 (+2% Physical damage) and 271052 (+5% attack speed): 'Stacks up to 5 times and lasts for 8 sec. Dealing magic damage resets all stacks. The duration cannot be refreshed.'",
+    "Both have no ProcFlags in Spell.dbc, so neither buff was ever granted.",
+    "Sinister Strike grants one stack, a second Sinister Strike none, Hemorrhage a second stack without refreshing the duration, and a Frostbolt removes both buffs."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wild",
+      "name": "Wildtools",
+      "race": 1,
+      "class": 10,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "wild",
+      "entry": 1601,
+      "level": 80,
+      "health": 10000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildtools"
+    },
+    {
+      "action": "assert",
+      "label": "The Hero plays Wildcard",
+      "actor": "wild",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "add_item",
+      "actor": "wild",
+      "item": 506
+    },
+    {
+      "action": "equip",
+      "actor": "wild",
+      "item": 506,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 271020
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 271051
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 16511
+    },
+    {
+      "action": "learn",
+      "actor": "wild",
+      "spell": 116
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 1752,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "1752 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 1752,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Tools of War: one stack from Sinister Strike",
+      "actor": "wild",
+      "metric": "aura_stacks",
+      "spell": 271021,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Martial Crescendo: one stack from Sinister Strike",
+      "actor": "wild",
+      "metric": "aura_stacks",
+      "spell": 271052,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Tools of War duration after the first stack",
+      "actor": "wild",
+      "metric": "aura_duration_ms",
+      "spell": 271021,
+      "save_as": "first"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 1752
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 1752,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "1752 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 1752,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Tools of War: a second Sinister Strike adds nothing",
+      "actor": "wild",
+      "metric": "aura_stacks",
+      "spell": 271021,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Martial Crescendo: a second Sinister Strike adds nothing",
+      "actor": "wild",
+      "metric": "aura_stacks",
+      "spell": 271052,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 16511
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 16511,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "16511 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 16511,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Tools of War: Hemorrhage adds a second stack",
+      "actor": "wild",
+      "metric": "aura_stacks",
+      "spell": 271021,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Martial Crescendo: Hemorrhage adds a second stack",
+      "actor": "wild",
+      "metric": "aura_stacks",
+      "spell": 271052,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Tools of War: the new stack did not refresh the duration",
+      "actor": "wild",
+      "metric": "aura_duration_ms",
+      "spell": 271021,
+      "relative_to": "first",
+      "max": -1500
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wild",
+      "spell": 116
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "wild",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wild",
+      "spell": 116,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "116 is accepted",
+      "actor": "wild",
+      "metric": "cast_failure",
+      "spell": 116,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Tools of War: magic damage resets the stacks",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 271021,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Martial Crescendo: magic damage resets the stacks",
+      "actor": "wild",
+      "metric": "aura",
+      "spell": 271052,
+      "equals": 0
+    }
+  ]
+}

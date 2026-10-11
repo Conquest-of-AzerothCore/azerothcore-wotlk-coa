@@ -66,7 +66,7 @@ class aura_ascension_venomancer_event : public AuraScript
         Unit* target = event.GetActionTarget();
         switch (id)
         {
-            case 92142: return damage && !periodic && Chance(player,id);
+            case 92142: return damage && !periodic && !Any(info,{504543,503925}) && Chance(player,id);
             case 503812: return damage && Any(info,{803196,803208});
             case 503851: return damage && periodic && Chance(player,id);
             case 503854: return damage && Any(info,{800880,504705});
