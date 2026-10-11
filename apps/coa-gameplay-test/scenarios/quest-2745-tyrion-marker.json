@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "Infiltrating the Castle: the map marks Tyrion in the keep garden (#7005)",
+  "contract": "Quest 2745 'Infiltrating the Castle' has one POI (id 0, ObjectiveIndex -1) with a single point. CoA moved Tyrion 7766 to the keep roof garden (-8330, 279.5) in rev_20260923_03_coa_stormwind.sql but the marker still points at the stock spot (-8408, 451), ~188 yd away outside the walls. This case asks the server for 2745's points with the CMSG_QUEST_POI_QUERY a real client sends and reads SMSG_QUEST_POI_QUERY_RESPONSE itself. The answer must hold one POI whose single point is Tyrion's garden spot (-8330, 280).",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8330.0,
+    "y": 279.5,
+    "z": 156.833,
+    "o": 5.864
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 26
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 2745 'Infiltrating the Castle' unfinished, the way the reporter did",
+      "actor": "c",
+      "quest": 2745,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 2745, exactly what the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 2745
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 2745's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 2745,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the map gets one POI for 2745",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The POI is id 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "with ObjectiveIndex -1, the turn-in marker",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on the Elwynn Forest map, WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on Tyrion in the keep roof garden: x -8330",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294958966,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "y 280, not the stale stock spot 188 yd away outside the walls",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 280,
+      "within_ms": 4000
+    }
+  ]
+}
