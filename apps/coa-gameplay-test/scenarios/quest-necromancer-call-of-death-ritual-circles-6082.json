@@ -3,7 +3,8 @@
   "name": "Necromancer 'Call of Death': each race's ritual circle credits the quest and takes it in (#6082)",
   "contract": [
     "Report #6082: the Necromancer class quest 'Call of Death' has no ritual circle to complete it; the report was filed from map 1, 10393.9, 989.5, 1327.5.",
-    "Call of Death exists once per start zone: 200040 (Halbert the Scoundrel, Northshire), 200043 (Ophana Gloom, Coldridge Valley), 200046 (Baarelam of the Auchenai, Shadowglen) and 200049 (Kragar the Reanimator, Valley of Trials). Each requires 'Find the Ritual Circle' (685121) and ends at a Ritual Circle gameobject: 9301100, 9301152, 9301356 and 9301200.",
+    "Four start zones offer Call of Death with a usable circle: 200040 (Halbert the Scoundrel, Northshire), 200043 (Ophana Gloom, Coldridge Valley), 200046 (Baarelam of the Auchenai, Shadowglen) and 200049 (Kragar the Reanimator, Valley of Trials). Each requires 'Find the Ritual Circle' (685121) and ends at a Ritual Circle gameobject: 9301100, 9301152, 9301356 and 9301200.",
+    "Deathknell's Call of Death 200052 and its circle 9301250 are not covered: rev_20261002_22_coa_deathknell_cut_class_quests removed the quest's starter, ender and POI rows, the circle's spawn 7912400 and its SmartAI script, and rev_20261002_24 cleared the object's AI name, so that start zone has no circle to use.",
     "gameobject spawn 7912600 puts 9301356 at 10395, 991, 1327.49, 1.9 yards from the report position; the other three circles are spawned at their own start zones.",
     "Every circle's SmartAI credits 685121 on use, which must complete its quest, and the circle must take the quest in."
   ],
