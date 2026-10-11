@@ -1,4 +1,6 @@
--- Give custom weapons and armour the disenchant bracket of the closest stock item at or below their item level.
+-- Give custom weapons and armour (entry 60000 and above) the disenchant bracket of the closest stock item at or
+-- below their item level. Items a vendor sells for gold stay non-disenchantable so they cannot be bought and
+-- disenchanted for materials without limit.
 -- Donors are disenchantable stock entries below 60000 with the same class, slot and quality, preferring the
 -- same sub class at an equal donor level; the most common bracket wins, then the lowest DisenchantID and skill.
 -- The authored RequiredDisenchantSkill is kept; level-lifted copies re-bracket at runtime with the same rule.
@@ -73,9 +75,17 @@ DELETE FROM `_coa_disenchant_targets_v1`;
 INSERT INTO `_coa_disenchant_targets_v1` (`entry`, `class`, `subclass`, `slot`, `Quality`, `ItemLevel`)
 SELECT `entry`, `class`, `subclass`, IF(`InventoryType` = 20, 5, `InventoryType`), `Quality`, `ItemLevel`
 FROM `item_template`
-WHERE `entry` > 200000 AND `DisenchantID` = 0 AND `RequiredDisenchantSkill` >= 0
+WHERE `entry` >= 60000 AND `DisenchantID` = 0 AND `RequiredDisenchantSkill` >= 0
     AND `class` IN (2, 4) AND `Quality` BETWEEN 2 AND 4 AND `InventoryType` NOT IN (0, 4, 19) AND `ItemLevel` > 0
     AND `ScalingStatDistribution` = 0 AND `startquest` = 0;
+
+DELETE `target`
+FROM `_coa_disenchant_targets_v1` AS `target`
+INNER JOIN (
+    SELECT `item` FROM `npc_vendor` WHERE `ExtendedCost` = 0
+    UNION
+    SELECT `item` FROM `game_event_npc_vendor` WHERE `ExtendedCost` = 0
+) AS `goldVendor` ON `goldVendor`.`item` = `target`.`entry`;
 
 UPDATE `_coa_disenchant_targets_v1` AS `target`
 SET `target`.`subclassLevel` = (
