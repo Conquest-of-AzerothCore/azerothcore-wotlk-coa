@@ -355,6 +355,10 @@ namespace
     constexpr uint32 MANASTORM_MAP_DIRE_MAUL = 429;
     constexpr uint32 NPC_LORD_HELNURATH = 14506;
     constexpr uint32 NPC_IMMOLTHAR = 11496;
+    constexpr uint32 NPC_CAPTAIN_KROMCRUSH = 14325;
+    constexpr uint32 NPC_KING_GORDOK = 11501;
+    constexpr uint32 SEGMENT_KING_GORDOK_NORMAL = 148;
+    constexpr uint32 SEGMENT_KING_GORDOK_ENDGAME = 279;
     constexpr uint32 SEGMENT_HELNURATH_NORMAL = 687;
     constexpr uint32 SEGMENT_HELNURATH_ENDGAME = 688;
 
@@ -5908,6 +5912,35 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
              segment.SegmentId == SEGMENT_HELNURATH_ENDGAME))
         {
             creature->DespawnOrUnsummon(0ms, 24h);
+            return;
+        }
+    }
+
+    // Captain Kromcrush stands on King Gordok's Manastorm arrival route.
+    // Remove him only in the private King Gordok stage, even if his native
+    // DB spawn enters the loaded grid after the initial player arrival.
+    // Never count him as trash or trigger his death/tribute progression.
+    if (creature->GetEntry() == NPC_CAPTAIN_KROMCRUSH &&
+        map->GetId() == MANASTORM_MAP_DIRE_MAUL &&
+        map->IsScriptedPrivateInstance() &&
+        run->GetInstanceId() == map->GetInstanceId() &&
+        (run->GetState() == ManastormRunState::Preparing ||
+         run->GetState() == ManastormRunState::Active))
+    {
+        ManastormSegment const& segment = run->GetSegment();
+        if (segment.MapId == MANASTORM_MAP_DIRE_MAUL &&
+            segment.ObjectiveCreatureEntry == NPC_KING_GORDOK &&
+            (segment.SegmentId == SEGMENT_KING_GORDOK_NORMAL ||
+             segment.SegmentId == SEGMENT_KING_GORDOK_ENDGAME))
+        {
+            ObjectGuid::LowType const spawnId = creature->GetSpawnId();
+            creature->DespawnOrUnsummon(0ms, 24h);
+
+            LOG_INFO(LOG_FILTER,
+                "Suppressed Captain Kromcrush on private King Gordok stage: "
+                "run={} segment={} instance={} spawn={}.",
+                run->GetRunId(), segment.SegmentId,
+                run->GetInstanceId(), spawnId);
             return;
         }
     }
