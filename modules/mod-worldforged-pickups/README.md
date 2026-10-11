@@ -1487,11 +1487,12 @@ page plots them.
 * **Spent, for one character's current prestige cycle**: a pickup this character already looted stays visible
   (as on the realm) but is given `GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE`, so it cannot be
   opened again. Every other character still sees it sparkling and lootable.
-* **Prestige**: the successful prestige save transaction deletes only this character's
-  ledger rows, the in-memory ledger is cleared, and nearby pickup flags are refreshed.
-  Pickup awards and the prestige save commit synchronously so earlier claims finish before
-  the reset, and the reset finishes before a new claim. Relogging preserves the new cycle;
-  ordinary level changes leave spent pickups locked.
+* **Prestige**: the prestige save transaction carries the deletion of only this character's
+  ledger rows. Once that transaction has committed, the in-memory ledger is cleared and nearby
+  pickup flags are refreshed; if the character database rolls the save back, the ledger stays
+  spent in memory and in the database. Pickup awards and the prestige save commit synchronously
+  so earlier claims finish before the reset, and the reset finishes before a new claim.
+  Relogging preserves the new cycle; ordinary level changes leave spent pickups locked.
 * **Recording**: `OnPlayerLootItem` fires the moment a base item leaves the pickup, so
   clicked, auto-stored and group-window loot are all covered. The item and the ledger row are
   written in one character-database transaction, so a crash cannot mark a pickup spent

@@ -142,10 +142,11 @@ public:
         _looted.erase(characterGuid);
     }
 
-    void Reset(uint32 characterGuid, CharacterDatabaseTransaction trans)
+    void QueueReset(uint32 characterGuid, CharacterDatabaseTransaction trans)
     {
-        trans->Append("DELETE FROM `{}` WHERE `guid` = {}", WorldforgedLootTable, characterGuid);
-        Unload(characterGuid);
+        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_WORLDFORGED_LOOT);
+        stmt->SetData(0, characterGuid);
+        trans->Append(stmt);
     }
 
     // The item and the fact that this pickup is now spent for this character are written
@@ -324,7 +325,7 @@ class worldforged_pickup_lifecycle : public PlayerScript
 public:
     worldforged_pickup_lifecycle() : PlayerScript("worldforged_pickup_lifecycle",
         {PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_LOOT_ITEM,
-            PLAYERHOOK_ON_COA_PRESTIGE}) { }
+            PLAYERHOOK_ON_COA_PRESTIGE, PLAYERHOOK_ON_COA_PRESTIGE_SAVED}) { }
 
     // Early enough that no gameobject has been sent to this client yet.
     void OnPlayerLoadFromDB(Player* player) override
@@ -339,10 +340,16 @@ public:
 
     void OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction trans) override
     {
-        if (!player || !trans)
+        if (player && trans)
+            WorldforgedLootStore::Instance().QueueReset(player->GetGUID().GetCounter(), trans);
+    }
+
+    void OnPlayerCoAPrestigeSaved(Player* player) override
+    {
+        if (!player)
             return;
 
-        WorldforgedLootStore::Instance().Reset(player->GetGUID().GetCounter(), trans);
+        WorldforgedLootStore::Instance().Unload(player->GetGUID().GetCounter());
         if (!player->IsInWorld())
             return;
 

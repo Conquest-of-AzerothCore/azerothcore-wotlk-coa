@@ -256,6 +256,7 @@ enum PlayerHook
     PLAYERHOOK_ON_GET_GAME_MODE_MASK,
     PLAYERHOOK_ON_AFTER_APPLY_ITEM_MODS,
     PLAYERHOOK_ON_COA_PRESTIGE,
+    PLAYERHOOK_ON_COA_PRESTIGE_SAVED,
     PLAYERHOOK_END
 };
 
@@ -1095,7 +1096,20 @@ public:
      */
     virtual void OnPlayerCoAProgress(Player* /*player*/, CoAProgressEvent /*event*/, uint32 /*value*/) { }
 
-    virtual void OnPlayerCoAPrestige(Player*, CharacterDatabaseTransaction) { }
+    /**
+     * @brief This hook is called while the Chromie prestige save transaction is built.
+     *
+     * @param player Contains information about the Player
+     * @param trans The transaction that commits with the prestige; append database changes only
+     */
+    virtual void OnPlayerCoAPrestige(Player* /*player*/, CharacterDatabaseTransaction /*trans*/) { }
+
+    /**
+     * @brief This hook is called after the Chromie prestige save transaction has committed.
+     *
+     * @param player Contains information about the Player
+     */
+    virtual void OnPlayerCoAPrestigeSaved(Player* /*player*/) { }
 
     /**
      * @brief This hook is called to resolve a character's Conquest of Azeroth game mode mask.

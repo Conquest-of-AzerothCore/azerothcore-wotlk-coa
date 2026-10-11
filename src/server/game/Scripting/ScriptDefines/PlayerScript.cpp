@@ -1128,6 +1128,11 @@ void ScriptMgr::OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_COA_PRESTIGE, script->OnPlayerCoAPrestige(player, trans));
 }
 
+void ScriptMgr::OnPlayerCoAPrestigeSaved(Player* player)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_COA_PRESTIGE_SAVED, script->OnPlayerCoAPrestigeSaved(player));
+}
+
 std::optional<uint32> ScriptMgr::OnPlayerGetGameModeMask(Player const* player)
 {
     uint32 mask = 0;

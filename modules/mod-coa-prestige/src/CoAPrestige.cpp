@@ -550,7 +550,15 @@ namespace
         MailItems(player, mailed, trans);
         player->SaveToDB(trans, false, false);
         sScriptMgr->OnPlayerCoAPrestige(player, trans);
-        CharacterDatabase.AsyncCommitTransaction(trans).m_future.get();
+        if (!CharacterDatabase.AsyncCommitTransaction(trans).m_future.get())
+        {
+            LOG_ERROR("module.coa_prestige", "The prestige save of {} ({}) was rolled back by the character database.",
+                player->GetName(), player->GetGUID().ToString());
+            chat.SendSysMessage("Chromie's magic faltered and your prestige could not be saved. "
+                "Contact a game master.");
+            return false;
+        }
+        sScriptMgr->OnPlayerCoAPrestigeSaved(player);
 
         SendPrestigeLevels(player);
         chat.PSendSysMessage("Chromie winds back time. Prestige {}: reach level {} again to unlock your "
