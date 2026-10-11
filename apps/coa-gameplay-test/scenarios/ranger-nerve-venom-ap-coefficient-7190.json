@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Ranger Nerve Venom scales with 5% melee attack power (#7190)",
+  "contract": "Nerve Venom coating 808065 promises auto attacks a 30% chance to deal ${$570244m1+$570244ppl1+$AP*0.05} Nature damage through proc 570244 (effect 0 SPELL_EFFECT_SCHOOL_DAMAGE, Nature, DBC base 2 + DieSides 1 with 0.33 per level, zero EffectBonusMultiplier, no spell_bonus_data row), so procs dealt only base plus level scaling: 24 on dummies against a 63 tooltip. $AP is melee attack power: Skullpiercer writes $RAP*0.25+$AP*.1 and implements 0.25 * ranged + 0.10 * melee. The proc is DmgClass RANGED with a ranged weapon mask, so native ap_bonus would select ranged attack power (wrong stat); the fix is a guarded script adding 0.05 * melee attack power on effect 0. Two direct casts with +1000 melee and ranged attack power (aura 10031) must deal 60-200 non-critical damage total (about 24 + 50 per cast); expected before the fix: about 24 per cast. A ranged-only control (Aspect of the Hawk 13165) must not move the native spell_damage_done query, rejecting a ranged-based SQL shortcut and guarding against a future SQL row double-dipping with the script.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "ranger", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "label": "Fixture: learn Nerve Venom proc for direct cast", "actor": "ranger", "spell": 570244 },
+    { "action": "snapshot", "label": "Baseline melee attack power", "actor": "ranger", "metric": "attack_power", "save_as": "ap_start" },
+    { "action": "snapshot", "label": "Baseline ranged attack power", "actor": "ranger", "metric": "ranged_attack_power", "save_as": "rap_start" },
+    { "action": "snapshot", "label": "Native query without bonus attack power", "actor": "ranger", "metric": "spell_damage_done", "spell": 570244, "effect": 0, "target": "dummy", "save_as": "query_start" },
+    { "action": "set_aura", "label": "Aspect of the Hawk adds ranged attack power only", "actor": "ranger", "spell": 13165, "stacks": 1 },
+    { "action": "assert", "label": "The control adds ranged attack power", "actor": "ranger", "metric": "ranged_attack_power", "relative_to": "rap_start", "min": 1 },
+    { "action": "assert", "label": "The control adds no melee attack power", "actor": "ranger", "metric": "attack_power", "relative_to": "ap_start", "equals": 0 },
+    { "action": "assert", "label": "Ranged attack power does not feed Nerve Venom (#7190)", "actor": "ranger", "metric": "spell_damage_done", "spell": 570244, "effect": 0, "target": "dummy", "relative_to": "query_start", "equals": 0 },
+    { "action": "set_aura", "label": "Remove the control", "actor": "ranger", "spell": 13165, "stacks": 0 },
+    { "action": "snapshot", "label": "Damage total before the proc casts", "actor": "ranger", "metric": "spell_damage_total", "spell": 570244, "target": "dummy", "critical": false, "save_as": "total_start" },
+    { "action": "set_aura", "label": "QA Test +1000 Melee and Ranged AP", "actor": "ranger", "spell": 10031, "stacks": 1 },
+    { "action": "assert", "label": "The fixture adds 1000 melee attack power", "actor": "ranger", "metric": "attack_power", "relative_to": "ap_start", "equals": 1000 },
+    { "action": "cast", "label": "First Nerve Venom proc cast", "actor": "ranger", "spell": 570244, "target": "dummy" },
+    { "action": "wait", "label": "Let the first cast land", "ms": 2000 },
+    { "action": "cast", "label": "Second Nerve Venom proc cast", "actor": "ranger", "spell": 570244, "target": "dummy" },
+    { "action": "wait", "label": "Let the second cast land", "ms": 2000 },
+    { "action": "assert", "label": "Both casts succeeded", "actor": "ranger", "metric": "cast_failure", "spell": 570244, "equals": 0 },
+    { "action": "assert", "label": "Both casts dealt spell damage", "actor": "ranger", "metric": "spell_damage_count", "spell": 570244, "target": "dummy", "equals": 2 },
+    { "action": "assert", "label": "At least one cast was not critical", "actor": "ranger", "metric": "spell_damage_count", "spell": 570244, "target": "dummy", "critical": false, "min": 1 },
+    { "action": "assert", "label": "Nerve Venom gains 0.05 per melee attack power (#7190)", "actor": "ranger", "metric": "spell_damage_total", "spell": 570244, "target": "dummy", "critical": false, "relative_to": "total_start", "min": 60, "max": 200 },
+    { "action": "assert", "actor": "ranger", "metric": "alive", "equals": 1 }
+  ]
+}
