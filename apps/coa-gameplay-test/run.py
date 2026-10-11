@@ -1069,7 +1069,7 @@ class Databases:
             raise ValueError(f'MySQL operation failed for {role}: {detail or result.returncode}')
         return result.stdout.strip()
 
-    def copy(self, role, schema_only=False, tables=()):
+    def copy(self, role, schema_only=False, tables=(), where=None):
         connection = self.connections[role]
         arguments = [self.dump, f'--defaults-extra-file={self.option_files[role]}',
                      '--single-transaction', '--skip-lock-tables', '--no-tablespaces', '--skip-add-locks',
@@ -1078,6 +1078,8 @@ class Databases:
             arguments.append('--no-data')
         elif tables:
             arguments.append('--no-create-info')
+        if where:
+            arguments.append(f'--where={where}')
         arguments.extend([connection.database, *tables])
         with tempfile.TemporaryFile() as errors:
             source = subprocess.Popen(arguments, stdout=subprocess.PIPE, stderr=errors, creationflags=CREATE_FLAGS)
@@ -1113,6 +1115,8 @@ class Databases:
                 else:
                     tables += ['active_arena_season']
                 self.copy(role, tables=tables)
+                if role == 'characters':
+                    self.copy(role, tables=SEEDED_BUILD_TABLES, where=SEEDED_BUILDS)
 
     def cleanup(self):
         failures = []
@@ -1134,6 +1138,9 @@ def unused_port():
         return listener.getsockname()[1]
 
 
+SEEDED_BUILD_TABLES = ('coa_build_creator', 'coa_build_creator_spell', 'coa_build_creator_enchant',
+                       'coa_build_creator_item_type')
+SEEDED_BUILDS = 'entry IN (SELECT entry FROM coa_build_creator WHERE owner_account = 0)'
 DATABASE_SETTINGS = {'auth': 'LoginDatabaseInfo', 'characters': 'CharacterDatabaseInfo', 'world': 'WorldDatabaseInfo'}
 RUN_SETTINGS = ('DataDir', 'SourceDirectory', 'LogsDir', 'TempDir', 'WorldServerPort', 'CoAGameplayTest.RunId',
                 'CoAGameplayTest.WorldDatabaseId')

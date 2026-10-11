@@ -2,6 +2,7 @@
 
 #include "AscensionBuildCreatorRules.h"
 #include "AscensionCompatOpcodes.h"
+#include "AscensionFreepick.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
 #include "Log.h"
@@ -23,6 +24,10 @@ namespace AscensionBuildCreator
 {
 namespace
 {
+constexpr uint16 CMSG_ACTIVATE_BUILD = 0x05C2;
+constexpr uint16 SMSG_ACTIVATE_BUILD_RESULT = 0x05C3;
+constexpr uint16 CMSG_DEACTIVATE_BUILD = 0x05C4;
+constexpr uint16 SMSG_DEACTIVATE_BUILD_RESULT = 0x05C5;
 constexpr uint16 CMSG_CREATE_BUILD = 0x0626;
 constexpr uint16 SMSG_CREATE_BUILD_RESULT = 0x0627;
 constexpr uint16 CMSG_SAVE_BUILD = 0x0628;
@@ -36,10 +41,12 @@ constexpr uint16 SMSG_REQUEST_BUILD_DATAS_RESULT = 0x062F;
 constexpr uint16 CMSG_REQUEST_BUILD_DATA = 0x0630;
 constexpr uint16 SMSG_REQUEST_BUILD_DATA_RESULT = 0x0631;
 constexpr uint16 SMSG_OWNED_BUILDS = 0x0634;
+constexpr uint16 SMSG_ACTIVE_BUILD = 0x0632;
+constexpr uint16 SMSG_ACTIVE_BUILDS = 0x0633;
 constexpr uint16 SMSG_UPVOTED_BUILDS = 0x0635;
 
-constexpr std::array<uint16, 6> CLIENT_OPCODES = { CMSG_CREATE_BUILD, CMSG_SAVE_BUILD, CMSG_RATE_BUILD,
-    CMSG_DELETE_BUILD, CMSG_REQUEST_BUILD_DATAS, CMSG_REQUEST_BUILD_DATA };
+constexpr std::array<uint16, 8> CLIENT_OPCODES = { CMSG_ACTIVATE_BUILD, CMSG_DEACTIVATE_BUILD, CMSG_CREATE_BUILD,
+    CMSG_SAVE_BUILD, CMSG_RATE_BUILD, CMSG_DELETE_BUILD, CMSG_REQUEST_BUILD_DATAS, CMSG_REQUEST_BUILD_DATA };
 constexpr std::size_t MAX_QUEUED_REQUESTS = 16;
 
 std::mutex CatalogLock;
@@ -47,6 +54,9 @@ std::map<uint32, Build> Builds;
 std::unordered_map<std::string, uint32> Entries;
 std::unordered_map<uint32, std::unordered_set<uint32>> Votes;
 uint32 NextEntry = 1;
+
+std::mutex ActiveLock;
+std::unordered_map<ObjectGuid, ActiveBuilds> Active;
 
 std::mutex PendingLock;
 std::unordered_map<WorldSession const*, std::deque<WorldPacket>> PendingRequests;
@@ -329,6 +339,131 @@ void SendAccountLists(Player* player)
     SendIds(player, SMSG_UPVOTED_BUILDS, upvoted);
 }
 
+void SendActiveBuilds(Player* player, ActiveBuilds const& active)
+{
+    WorldPacket packet(SMSG_ACTIVE_BUILDS, 4 + active.size() * (ID_LENGTH + 3));
+    packet << uint32(active.size());
+    for (ActiveBuild const& build : active)
+        WriteActiveBuild(packet, build);
+    Send(player, packet);
+}
+
+void SendActiveBuild(Player* player, uint32 spec, ActiveBuild const& active)
+{
+    WorldPacket packet(SMSG_ACTIVE_BUILD, 4 + ID_LENGTH + 3);
+    packet << spec;
+    WriteActiveBuild(packet, active);
+    Send(player, packet);
+}
+
+void LoadActiveBuilds(Player* player)
+{
+    CharacterDatabasePreparedStatement* statement =
+        CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_BUILD_CREATOR_ACTIVE);
+    statement->SetData(0, player->GetGUID().GetCounter());
+    WorldSession* session = player->GetSession();
+    ObjectGuid const guid = player->GetGUID();
+    session->GetQueryProcessor().AddCallback(CharacterDatabase.AsyncQuery(statement)
+        .WithPreparedCallback([session, guid](PreparedQueryResult result)
+        {
+            Player* owner = session->GetPlayer();
+            if (!owner || owner->GetGUID() != guid)
+                return;
+            ActiveBuilds active;
+            if (result)
+            {
+                do
+                {
+                    Field* fields = result->Fetch();
+                    uint8 const spec = fields[0].Get<uint8>();
+                    if (spec >= active.size())
+                        continue;
+                    active[spec].Id = fields[1].Get<std::string>();
+                    active[spec].Flags = { fields[2].Get<uint8>(), fields[3].Get<uint8>() };
+                } while (result->NextRow());
+            }
+            {
+                std::lock_guard<std::mutex> lock(ActiveLock);
+                Active[guid] = active;
+            }
+            SendActiveBuilds(owner, active);
+        }));
+}
+
+void StoreActiveBuild(Player* player, uint32 spec, ActiveBuild const& active)
+{
+    CharacterDatabasePreparedStatement* statement = nullptr;
+    if (active.Id.empty())
+    {
+        statement = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE);
+        statement->SetData(0, player->GetGUID().GetCounter());
+        statement->SetData(1, uint8(spec));
+    }
+    else
+    {
+        statement = CharacterDatabase.GetPreparedStatement(CHAR_REP_COA_BUILD_CREATOR_ACTIVE);
+        statement->SetData(0, player->GetGUID().GetCounter());
+        statement->SetData(1, uint8(spec));
+        statement->SetData(2, active.Id);
+        statement->SetData(3, active.Flags[0]);
+        statement->SetData(4, active.Flags[1]);
+    }
+    CharacterDatabase.Execute(statement);
+}
+
+void HandleActivate(Player* player, WorldPacket& packet)
+{
+    std::string id;
+    uint8 first = 0;
+    uint8 second = 0;
+    packet >> id >> first >> second;
+    uint32 const spec = AscensionFreepick::ActiveSpecialization(player);
+    ActiveBuild const next = { id, { first, second } };
+    uint32 result = ACTIVATE_FAILED;
+    {
+        std::lock_guard<std::mutex> activeLock(ActiveLock);
+        ActiveBuild& current = Active[player->GetGUID()][spec];
+        {
+            std::lock_guard<std::mutex> catalogLock(CatalogLock);
+            result = Activate(Find(id), player->getClass(), current.Id);
+        }
+        if (result == ACTIVATE_OK)
+            current = next;
+    }
+    if (result == ACTIVATE_OK)
+    {
+        StoreActiveBuild(player, spec, next);
+        SendActiveBuild(player, spec, next);
+    }
+    SendText(player, SMSG_ACTIVATE_BUILD_RESULT, ACTIVATE_RESULTS[result]);
+}
+
+void HandleDeactivate(Player* player, WorldPacket& packet)
+{
+    std::string id;
+    packet >> id;
+    uint32 const spec = AscensionFreepick::ActiveSpecialization(player);
+    bool exists = false;
+    {
+        std::lock_guard<std::mutex> lock(CatalogLock);
+        exists = Find(id) != nullptr;
+    }
+    uint32 result = DEACTIVATE_FAILED;
+    {
+        std::lock_guard<std::mutex> lock(ActiveLock);
+        ActiveBuild& current = Active[player->GetGUID()][spec];
+        result = Deactivate(exists, id, current.Id);
+        if (result == DEACTIVATE_OK)
+            current = {};
+    }
+    if (result == DEACTIVATE_OK)
+    {
+        StoreActiveBuild(player, spec, {});
+        SendActiveBuild(player, spec, {});
+    }
+    SendText(player, SMSG_DEACTIVATE_BUILD_RESULT, DEACTIVATE_RESULTS[result]);
+}
+
 void HandleQueryCategory(Player* player, WorldPacket& packet)
 {
     std::string name;
@@ -502,6 +637,8 @@ void Handle(Player* player, WorldPacket& packet)
     packet.rpos(0);
     switch (packet.GetOpcode())
     {
+        case CMSG_ACTIVATE_BUILD: HandleActivate(player, packet); break;
+        case CMSG_DEACTIVATE_BUILD: HandleDeactivate(player, packet); break;
         case CMSG_REQUEST_BUILD_DATAS: HandleQueryCategory(player, packet); break;
         case CMSG_REQUEST_BUILD_DATA: HandleQueryBuild(player, packet); break;
         case CMSG_CREATE_BUILD: HandleCreate(player, packet); break;
@@ -528,15 +665,28 @@ class AscensionBuildCreatorPlayer final : public PlayerScript
 {
 public:
     AscensionBuildCreatorPlayer() : PlayerScript("AscensionBuildCreatorPlayer", { PLAYERHOOK_ON_LOGIN,
-        PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE }) { }
+        PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_DELETE_FROM_DB }) { }
 
     void OnPlayerLogin(Player* player) override
     {
         SendAccountLists(player);
+        LoadActiveBuilds(player);
+    }
+
+    void OnPlayerDeleteFromDB(CharacterDatabaseTransaction transaction, uint32 guid) override
+    {
+        CharacterDatabasePreparedStatement* statement =
+            CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE_ALL);
+        statement->SetData(0, guid);
+        transaction->Append(statement);
     }
 
     void OnPlayerLogout(Player* player) override
     {
+        {
+            std::lock_guard<std::mutex> lock(ActiveLock);
+            Active.erase(player->GetGUID());
+        }
         std::lock_guard<std::mutex> lock(PendingLock);
         PendingRequests.erase(player->GetSession());
         AnyPending = !PendingRequests.empty();

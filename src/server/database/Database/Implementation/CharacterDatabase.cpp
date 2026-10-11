@@ -155,6 +155,15 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_COA_BUILD_CREATOR_UPVOTES, "UPDATE coa_build_creator SET upvotes = ? WHERE entry = ?",
         CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_COA_BUILD_CREATOR_ACTIVE,
+        "SELECT spec, build_id, flag_1, flag_2 FROM coa_build_creator_active WHERE guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_COA_BUILD_CREATOR_ACTIVE,
+        "REPLACE INTO coa_build_creator_active (guid, spec, build_id, flag_1, flag_2) VALUES (?, ?, ?, ?, ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE,
+        "DELETE FROM coa_build_creator_active WHERE guid = ? AND spec = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE_ALL, "DELETE FROM coa_build_creator_active WHERE guid = ?",
+        CONNECTION_ASYNC);
 
     // Read-only safety gate for the unregistered, never-saved Create probe.
     PrepareStatement(CHAR_SEL_FRESH_CHECK_GUID_COUNT, "SELECT COUNT(*) FROM characters WHERE guid BETWEEN ? AND ?", CONNECTION_SYNCH);
