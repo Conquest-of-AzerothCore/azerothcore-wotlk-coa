@@ -1,6 +1,7 @@
 -- Give custom weapons and armour (entry 60000 and above) the disenchant bracket of the closest stock item at or
 -- below their item level. Items a vendor sells for gold stay non-disenchantable so they cannot be bought and
--- disenchanted for materials without limit.
+-- disenchanted for materials without limit. Vanity collection items (the entries of VanityCollection.dbc that
+-- pass the filter below) stay non-disenchantable too.
 -- Donors are disenchantable stock entries below 60000 with the same class, slot and quality, preferring the
 -- same sub class at an equal donor level; the most common bracket wins, then the lowest DisenchantID and skill.
 -- The authored RequiredDisenchantSkill is kept; level-lifted copies re-bracket at runtime with the same rule.
@@ -86,6 +87,10 @@ INNER JOIN (
     UNION
     SELECT `item` FROM `game_event_npc_vendor` WHERE `ExtendedCost` = 0
 ) AS `goldVendor` ON `goldVendor`.`item` = `target`.`entry`;
+
+DELETE FROM `_coa_disenchant_targets_v1`
+WHERE `entry` IN (80011, 100498, 558544, 558549, 558550, 558551, 558552, 558553, 558554, 558555, 558556, 558557,
+    558558, 558559, 558564, 558791, 558792, 558793, 558795, 558796, 559536);
 
 UPDATE `_coa_disenchant_targets_v1` AS `target`
 SET `target`.`subclassLevel` = (
