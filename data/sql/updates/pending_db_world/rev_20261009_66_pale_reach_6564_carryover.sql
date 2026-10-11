@@ -40,7 +40,7 @@ INSERT INTO `conditions` (
     22, 3, 164001, 0, 0, 47, 0, 175001, 8, 0, 0, 0, 0, '', 'Council replay - The House of Nobles incomplete'
 );
 
-DELETE FROM `creature` WHERE `guid` BETWEEN 9999100 AND 9999113;
+DELETE FROM `creature` WHERE `guid` BETWEEN 9999100 AND 9999111;
 INSERT INTO `creature` (
     `guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`,
     `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`, `Comment`
@@ -85,14 +85,6 @@ INSERT INTO `creature` (
 (
     9999111, 620, 0, 0, 0, 1, 1, -7775.0034, 541.4566, 137.53401, 5.147166, 120, 3, 1,
     'Chicken, Dunshire (captured in game)'
-),
-(
-    9999112, 620, 0, 0, 0, 1, 1, -7815.6263, 545.4382, 136.3579, 1.2, 120, 0, 0,
-    'Chicken, in the chicken box (captured in game)'
-),
-(
-    9999113, 620, 0, 0, 0, 1, 1, -7815.6389, 546.4396, 136.3574, 4.1, 120, 0, 0,
-    'Chicken, in the chicken box (captured in game)'
 );
 
 DELETE FROM `creature_addon` WHERE `guid` = 9999104;
