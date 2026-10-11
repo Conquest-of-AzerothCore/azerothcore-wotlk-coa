@@ -12937,7 +12937,8 @@ bool Player::InBattlegroundQueue(bool ignoreArena) const
         if (_BgBattlegroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_NONE &&
             (!ignoreArena || (_BgBattlegroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_2v2 &&
                 _BgBattlegroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_3v3 &&
-                _BgBattlegroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_5v5)))
+                _BgBattlegroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_5v5 &&
+                _BgBattlegroundQueueID[i].bgQueueTypeId != BATTLEGROUND_QUEUE_1v1)))
             return true;
     return false;
 }
