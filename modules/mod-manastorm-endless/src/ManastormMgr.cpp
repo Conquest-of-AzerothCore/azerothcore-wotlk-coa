@@ -350,6 +350,21 @@ namespace
              1.47f
     };
 
+    // Lord Hel'nurath is summoned during the Warlock Dreadsteed ritual,
+    // not loaded from a permanent dungeon creature spawn.
+    constexpr uint32 MANASTORM_MAP_DIRE_MAUL = 429;
+    constexpr uint32 NPC_LORD_HELNURATH = 14506;
+    constexpr uint32 NPC_IMMOLTHAR = 11496;
+    constexpr uint32 SEGMENT_HELNURATH_NORMAL = 687;
+    constexpr uint32 SEGMENT_HELNURATH_ENDGAME = 688;
+
+    // Native Dreadsteed ritual pedestal (Dire Maul West).
+    // This is a Manastorm-only boss location, not a claimed DB spawn.
+    Position const HELNURATH_RITUAL_POSITION =
+    {
+        -37.9392f, 812.805f, -29.4525f, 4.81711f
+    };
+
     constexpr uint32 MANASTORM_MAP_SUNKEN_TEMPLE = 109;
     constexpr uint32 NPC_SHADE_OF_ERANIKUS = 5709;
     constexpr uint32 NPC_JAMMALAN_THE_PROPHET = 5710;
@@ -1234,6 +1249,73 @@ namespace
         return true;
     }
 
+    bool BootstrapDireMaulHelnurathEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_DIRE_MAUL ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            segment.MapId != MANASTORM_MAP_DIRE_MAUL ||
+            segment.ObjectiveCreatureEntry != NPC_LORD_HELNURATH ||
+            (segment.SegmentId != SEGMENT_HELNURATH_NORMAL &&
+             segment.SegmentId != SEGMENT_HELNURATH_ENDGAME))
+        {
+            error = "Hel'nurath bootstrap received a nonmatching private Manastorm stage.";
+            return false;
+        }
+
+        // Load the actual ritual arena, not the entire dungeon. Immol'thar
+        // normally occupies it; suppress his native DB spawn in this copy.
+        map->LoadGrid(
+            HELNURATH_RITUAL_POSITION.GetPositionX(),
+            HELNURATH_RITUAL_POSITION.GetPositionY());
+
+        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        {
+            Creature* creature = spawn.second;
+            if (creature && creature->IsInWorld() &&
+                creature->GetEntry() == NPC_IMMOLTHAR)
+            {
+                creature->DespawnOrUnsummon(0ms, 24h);
+            }
+        }
+
+        TempSummon* helnurath = map->SummonCreature(
+            NPC_LORD_HELNURATH,
+            HELNURATH_RITUAL_POSITION);
+        if (!helnurath)
+        {
+            error = "Could not summon Lord Hel'nurath (14506) in the Dire Maul ritual arena.";
+            return false;
+        }
+
+        helnurath->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
+
+        // SummonCreature usually dispatches this already; explicit registration
+        // checks that the real summoned GUID became the exact run objective.
+        ManastormMgr::Instance().OnCreatureAddWorld(helnurath);
+        if (run.GetObjectiveCreatureGuid() != helnurath->GetGUID())
+        {
+            helnurath->DespawnOrUnsummon();
+            error = "Lord Hel'nurath was summoned but did not register as the Manastorm objective.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER,
+            "Bootstrapped private Dire Maul Hel'nurath objective: "
+            "run={} segment={} instance={} guid={}.",
+            run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+            helnurath->GetGUID().GetRawValue());
+
+        return true;
+    }
+
     bool BootstrapSpecialEncounter(
         Map* map,
         ManastormRun& run,
@@ -1241,6 +1323,13 @@ namespace
     {
         switch (run.GetSegment().SegmentId)
         {
+        case SEGMENT_HELNURATH_NORMAL:
+        case SEGMENT_HELNURATH_ENDGAME:
+            return BootstrapDireMaulHelnurathEncounter(
+                map,
+                run,
+                error);
+
         case SEGMENT_RAZELIKH_NORMAL:
         case SEGMENT_RAZELIKH_ENDGAME:
             return BootstrapRazelikhEncounter(
@@ -5802,6 +5891,26 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
 
     if (!run)
         return;
+
+    // This private stage replaces Immol'thar with the original ritual boss.
+    // Guard later grid loads as well as the initial encounter bootstrap.
+    if (creature->GetEntry() == NPC_IMMOLTHAR &&
+        map->GetId() == MANASTORM_MAP_DIRE_MAUL &&
+        map->IsScriptedPrivateInstance() &&
+        run->GetInstanceId() == map->GetInstanceId() &&
+        (run->GetState() == ManastormRunState::Preparing ||
+         run->GetState() == ManastormRunState::Active))
+    {
+        ManastormSegment const& segment = run->GetSegment();
+        if (segment.MapId == MANASTORM_MAP_DIRE_MAUL &&
+            segment.ObjectiveCreatureEntry == NPC_LORD_HELNURATH &&
+            (segment.SegmentId == SEGMENT_HELNURATH_NORMAL ||
+             segment.SegmentId == SEGMENT_HELNURATH_ENDGAME))
+        {
+            creature->DespawnOrUnsummon(0ms, 24h);
+            return;
+        }
+    }
 
     //
     // Manastorm Heart pickup anchor.
