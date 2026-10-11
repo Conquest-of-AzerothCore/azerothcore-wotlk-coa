@@ -5939,14 +5939,16 @@ public:
       return false;
 
     std::size_t appearancesBefore = state->CollectedAppearances.size();
-    for (auto const &[itemId, appearanceId] : _itemAppearances) {
-      if (_appearances.contains(appearanceId) &&
-          state->CollectedAppearances.insert(appearanceId).second) {
-        CharacterDatabase.Execute(
-            "INSERT IGNORE INTO `account_appearance_collection` "
-            "(`account_id`, `appearance_id`, `source_item`) VALUES ({}, {}, {})",
-            state->AccountId, appearanceId, itemId);
-      }
+    for (uint32 appearanceId : _allAppearanceIds) {
+      auto appearanceItr = _appearances.find(appearanceId);
+      if (appearanceItr == _appearances.end() ||
+          !state->CollectedAppearances.insert(appearanceId).second)
+        continue;
+
+      CharacterDatabase.Execute(
+          "INSERT IGNORE INTO `account_appearance_collection` "
+          "(`account_id`, `appearance_id`, `source_item`) VALUES ({}, {}, {})",
+          state->AccountId, appearanceId, appearanceItr->second.SourceItem);
     }
 
     BeginAppearanceCollectionSync(player, *state);
