@@ -400,6 +400,15 @@ Ascension.CallboardCache.GoldMax = 15
 
 CoA.DungeonTuning.Enable = 1
 
+#
+#    CoA.TestZoneBonus.AnnounceIntervalMinutes
+#        Description: How often every player is told which test zones are active and what they earn
+#                     there. The zones themselves live in coa_test_zone_bonus and are managed with
+#                     .testzone; making a zone a test zone is always announced. 0 turns the reminder off.
+#        Default:     15
+
+CoA.TestZoneBonus.AnnounceIntervalMinutes = 15
+
 CrowsCache.Enable = 0
 CrowsCache.IntervalSeconds = 10800
 CrowsCache.WarningSeconds = 1800
