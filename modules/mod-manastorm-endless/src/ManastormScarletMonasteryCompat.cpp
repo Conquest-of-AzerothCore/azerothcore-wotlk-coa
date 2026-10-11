@@ -34,8 +34,8 @@ namespace
     class manastorm_scarlet_monastery_private_doors : public AllMapScript
     {
     public:
-        manastorm_scarlet_monastery_herod_door()
-            : AllMapScript("manastorm_scarlet_monastery_herod_door")
+        manastorm_scarlet_monastery_private_doors()
+            : AllMapScript("manastorm_scarlet_monastery_private_doors")
         {
         }
 
@@ -133,5 +133,5 @@ namespace
 
 void AddSC_manastorm_scarlet_monastery_compat()
 {
-    new manastorm_scarlet_monastery_herod_door();
+    new manastorm_scarlet_monastery_private_doors();
 }
