@@ -293,7 +293,7 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'native-fixture-descendant-cleanup-producer', 'native-fixture-descendant-cleanup-consumer',
                      'vanilla-dungeons-normal', 'vanilla-dungeons-heroic', 'vanilla-dungeons-mythic',
                      'vanilla-dungeons-health', 'mythic-plus-keystone-run', 'mythic-plus-client-data-at-login',
-                     'test-zone-bonus-command'}
+                     'test-zone-bonus-command', 'test-zone-bonus-westfall'}
 UTC_EVENING = datetime(2026, 9, 24, 22, 40, tzinfo=timezone.utc)
 
 

@@ -10,14 +10,6 @@ CREATE TABLE IF NOT EXISTS `coa_test_zone_bonus` (
     PRIMARY KEY (`zone_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Duskwood, The Barrens, Westfall, Redridge Mountains
-INSERT IGNORE INTO `coa_test_zone_bonus` (`zone_id`, `experience_percent`, `rune_percent`, `bazaar_token_percent`)
-VALUES
-(10, 200, 200, 200),
-(17, 200, 200, 200),
-(40, 200, 200, 200),
-(44, 200, 200, 200);
-
 DELETE FROM `command`
 WHERE `name` IN ('testzone', 'testzone list', 'testzone add', 'testzone xp', 'testzone runes',
     'testzone tokens', 'testzone duration', 'testzone remove', 'testzone reload');
