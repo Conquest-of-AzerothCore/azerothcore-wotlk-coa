@@ -168,6 +168,12 @@ std::unique_ptr<Curves> BuildCurves()
     return curves;
 }
 
+Curves const& SampleCurves()
+{
+    static std::unique_ptr<Curves> const curves = BuildCurves();
+    return *curves;
+}
+
 double SetRatio(CurveSet const& set, CurveKey const& key, uint32 fromLevel, uint32 toLevel, double fallback)
 {
     auto const curve = set.find(key);
@@ -180,14 +186,14 @@ DisenchantBracket BracketAtOrBelow(Curves const& curves, CurveKey const& key, ui
     return ladder == curves.disenchantLadders.end() ? DisenchantBracket{} : ladder->second.AtOrBelow(itemLevel);
 }
 
-void RebracketDisenchant(ItemTemplate& proto, ItemTemplate const& base, Curves const& curves)
+void RebracketDisenchant(ItemTemplate& proto, ItemTemplate const& base, uint32 itemLevel, Curves const& curves)
 {
     if (!Disenchantable(base.DisenchantID, base.RequiredDisenchantSkill))
         return;
 
     DisenchantBracket const bracket = NearestDisenchantBracket(
-        BracketAtOrBelow(curves, KeyOf(base), proto.ItemLevel),
-        BracketAtOrBelow(curves, SlotKeyOf(base), proto.ItemLevel));
+        BracketAtOrBelow(curves, KeyOf(base), itemLevel),
+        BracketAtOrBelow(curves, SlotKeyOf(base), itemLevel));
     if (!bracket.disenchantId)
         return;
 
@@ -201,7 +207,7 @@ std::unique_ptr<ItemTemplate> BuildTemplate(uint32 entry, ItemTemplate const& ba
     uint32 const itemLevel = base.ItemLevel + lift;
     proto->ItemId = entry;
     proto->ItemLevel = itemLevel;
-    RebracketDisenchant(*proto, base, curves);
+    RebracketDisenchant(*proto, base, itemLevel, curves);
     if (CapturedStats::Record const* record = capturedStats.Find(base.ItemId, itemLevel))
     {
         record->Apply(*proto);
@@ -319,9 +325,7 @@ public:
             ItemTemplate const* base = sObjectMgr->GetItemTemplate(record->second.baseEntry);
             if (!base)
                 return nullptr;
-            if (!_curves)
-                _curves = BuildCurves();
-            record->second.proto = BuildTemplate(entry, *base, record->second.lift, *_curves);
+            record->second.proto = BuildTemplate(entry, *base, record->second.lift, SampleCurves());
         }
         return record->second.proto.get();
     }
@@ -398,7 +402,6 @@ private:
     std::shared_mutex _mutex;
     std::map<uint32, Record> _records;
     std::map<std::pair<uint32, uint32>, uint32> _entries;
-    std::unique_ptr<Curves> _curves;
     uint32 _nextEntry = FirstScaledEntry;
 };
 
@@ -560,6 +563,11 @@ std::optional<ClientItemRow> ClientRow(uint32 entry)
     if (ItemTemplate const* proto = Registry::Instance().Template(entry))
         return RowOf(*proto);
     return std::nullopt;
+}
+
+void RebracketDisenchant(ItemTemplate& scaled, ItemTemplate const& base, uint32 itemLevel)
+{
+    RebracketDisenchant(scaled, base, itemLevel, SampleCurves());
 }
 
 bool LiftableEntry(uint32 entry)
