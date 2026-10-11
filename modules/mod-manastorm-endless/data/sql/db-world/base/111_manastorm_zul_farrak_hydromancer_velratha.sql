@@ -86,7 +86,7 @@ WHERE ss.`segment_id` = 198
   AND dst.`map_id` = 209
   AND dst.`objective_creature_entry` = 7795
 ON DUPLICATE KEY UPDATE
-    `flags` = (`flags` | VALUES(`flags`)),
+    `flags` = (`manastorm_segment_spawn`.`flags` | VALUES(`flags`)),
     `enabled` = 1;
 
 INSERT INTO `manastorm_segment_spawn`
@@ -104,7 +104,7 @@ WHERE ss.`segment_id` = 392
   AND dst.`map_id` = 209
   AND dst.`objective_creature_entry` = 7795
 ON DUPLICATE KEY UPDATE
-    `flags` = (`flags` | VALUES(`flags`)),
+    `flags` = (`manastorm_segment_spawn`.`flags` | VALUES(`flags`)),
     `enabled` = 1;
 
 -- Copy actual boss Link requirements AFTER copying candidates.
