@@ -454,6 +454,30 @@ namespace
         double Value = 0.0;
     };
 
+    constexpr char SEEN_FACTION_KEY[] = "DestinyWeaver.SeenFaction";
+
+    struct SeenFaction : DataMap::Base
+    {
+        uint32 Value = 0;
+    };
+
+    /// Whether the creature's faction moved since its last update. A faction change decides whether a
+    /// character is looking at their own version at all (`ViewableBy`), but the values block it causes
+    /// carries only the faction, so the level and pool the client was told stay the old ones: a
+    /// friendly creature that turns hostile keeps its authored level and a full bar. The first look
+    /// only records the faction.
+    bool FactionChanged(Creature* creature)
+    {
+        auto* seen = creature->CustomData.GetDefault<SeenFaction>(SEEN_FACTION_KEY);
+        uint32 const faction = creature->GetFaction();
+        if (seen->Value == faction)
+            return false;
+
+        bool const changed = seen->Value != 0;
+        seen->Value = faction;
+        return changed;
+    }
+
     /// A client whose view stopped being true, until it has been re-sent.
     ///
     /// The *rules* never need this: the choice is read live, so the next question already answers
@@ -902,6 +926,7 @@ public:
     void OnCreatureRemoveWorld(Creature* creature) override
     {
         creature->CustomData.Erase(DAMAGE_REMAINDER_KEY);
+        creature->CustomData.Erase(SEEN_FACTION_KEY);
     }
 
     void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
@@ -914,6 +939,9 @@ public:
 
         if (creature->IsAlive())
             MarkScalable(creature);
+
+        if (creature->HasDynamicFlag(UNIT_DYNFLAG_LEVEL_SCALING) && FactionChanged(creature))
+            ForceViewFields(creature);
 
         // Nothing pending: the whole world pays one relaxed atomic read per creature update.
         if (!g_viewRefreshCount.load(std::memory_order_relaxed))

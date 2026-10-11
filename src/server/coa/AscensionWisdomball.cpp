@@ -40,7 +40,7 @@ constexpr float InteractionRange = 30.0f;
 
 constexpr uint32 StatusCheckIntervalMs = 2000;
 
-constexpr uint32 QuestsCompletedWithoutPlayerAction[] = { 5722, 5724 };
+constexpr uint32 QuestsCompletedWithoutPlayerAction[] = { 3801, 3981, 3982, 4001, 4002, 4004, 4122, 4128, 4133, 4264, 4324, 4341, 4342, 4361, 4363, 5722, 5724, 7498, 7499, 7500, 7501, 7502, 7503, 7504, 7505, 7506, 7507, 7508, 8619, 8948, 11454, 11486, 11487, 12062 };
 
 constexpr uint32 RazorfenKraulMapId = 47;
 constexpr uint32 RazorfenKraulOverworldQuestSortAreaId = 1717;
@@ -280,7 +280,8 @@ std::vector<uint32> CarriedDungeonQuests(Player* player)
         if (!Contains(dungeons, status.first))
             continue;
 
-        if (IsPlaceholder(sObjectMgr->GetQuestTemplate(status.first)))
+        Quest const* quest = sObjectMgr->GetQuestTemplate(status.first);
+        if (IsPlaceholder(quest) || quest->IsRepeatable())
             continue;
 
         carried.push_back(status.first);
@@ -297,6 +298,9 @@ bool CanOffer(Player* player, uint32 questId)
         return false;
 
     if (CompletesWithoutPlayerAction(questId))
+        return false;
+
+    if (quest->IsRepeatable())
         return false;
 
     if (player->GetQuestStatus(questId) != QUEST_STATUS_NONE)

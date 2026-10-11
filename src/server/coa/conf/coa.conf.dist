@@ -399,3 +399,25 @@ Ascension.CallboardCache.GoldMax = 15
 #        Default:     1
 
 CoA.DungeonTuning.Enable = 1
+
+CrowsCache.Enable = 0
+CrowsCache.IntervalSeconds = 10800
+CrowsCache.WarningSeconds = 1800
+CrowsCache.X = -7831
+CrowsCache.Y = -3465
+CrowsCache.Z = 56.87
+
+CrowsCache.RandomLocation = 1
+CrowsCache.Silithus.X = -7203.1616
+CrowsCache.Silithus.Y = 372.38562
+CrowsCache.Silithus.Z = 25.355282
+CrowsCache.Silithus.O = 4.4326873
+
+CrowsCache.Needles.X = -5805.1646
+CrowsCache.Needles.Y = -3899.4047
+CrowsCache.Needles.Z = -95.3205
+CrowsCache.Needles.O = 3.215081
+CrowsCache.Barrens.X = -763.6296
+CrowsCache.Barrens.Y = -3191.6892
+CrowsCache.Barrens.Z = 91.666626
+CrowsCache.Barrens.O = 2.3004022

@@ -142,7 +142,7 @@ void ApplyContracts(SpellInfo* info)
         info->TargetAuraState = info->CasterAuraState = 0;
     if (id == 802006)
         info->Effects[EFFECT_2].TriggerSpell = 680386;
-    if (Dusk(info))
+    if (Dusk(info) || id == 680230)
         info->AttributesEx3 &= ~SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON;
     if (Heartseeking(info))
         info->Effects[EFFECT_2].TriggerSpell = 807316;

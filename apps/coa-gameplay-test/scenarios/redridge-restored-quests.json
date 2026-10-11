@@ -1,0 +1,353 @@
+{
+  "schema": 1,
+  "name": "Redridge quests restored from Ascension can be taken, progressed and rewarded",
+  "contract": "The Ascension questcache.wdb captures (2026-09-07..08) list six Lakeshire quests the server lacked, with their givers from the client QuestSuperTrack data: Alternative Allies 255111 from Lady Idelia Solomon 255206 to Ley-Tracker Hestlor 991477, then Old Mistakes 255112 back to her; Food Fit for Gnolls 255113 at Luca Tyndall 255204 needs eight Gnoll Food Supplies 355199 from Gnoll Food Barrels 255062; Blessings of the Light 255114 at Father Norice 255207 needs the Chalice of Tyrenel 355200 from its object 255063; Reclaiming Alther's Mill 255116 is covered by redridge-althers-mill-quest.json; Pefectly Good Planks 255117 at Magistrate Solomon 341 needs six Wood Planks 355201 from Alther's Mill Planks 255064. Each object yields its item only to a player on the quest. One barrel and one plank are looted; the remaining stacks are fixture items.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9480.0,
+    "y": -2120.0,
+    "z": 87.66,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    }
+  ],
+  "creatures": [
+    {
+      "id": "idelia",
+      "owner": "p",
+      "entry": 255206,
+      "distance": 4,
+      "faction": 12,
+      "level": 30
+    },
+    {
+      "id": "hestlor",
+      "owner": "p",
+      "entry": 991477,
+      "distance": 4,
+      "faction": 12,
+      "level": 30
+    },
+    {
+      "id": "luca",
+      "owner": "p",
+      "entry": 255204,
+      "distance": 4,
+      "faction": 12,
+      "level": 30
+    },
+    {
+      "id": "norice",
+      "owner": "p",
+      "entry": 255207,
+      "distance": 4,
+      "faction": 12,
+      "level": 30
+    },
+    {
+      "id": "solomon",
+      "owner": "p",
+      "entry": 341,
+      "distance": 4,
+      "faction": 12,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "label": "take quest 255111 from its giver",
+      "action": "quest_accept",
+      "actor": "p",
+      "quest": 255111,
+      "entry": 255206
+    },
+    {
+      "label": "quest 255111 is complete",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255111,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "hand quest 255111 in at its ender",
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255111,
+      "entry": 991477
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255111,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "take quest 255112 from its giver",
+      "action": "quest_accept",
+      "actor": "p",
+      "quest": 255112,
+      "entry": 991477
+    },
+    {
+      "label": "quest 255112 is complete",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255112,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "hand quest 255112 in at its ender",
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255112,
+      "entry": 255206
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255112,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "take quest 255113 from its giver",
+      "action": "quest_accept",
+      "actor": "p",
+      "quest": 255113,
+      "entry": 255204
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255113,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "p",
+      "entry": 255062
+    },
+    {
+      "action": "wait",
+      "label": "let the object become ready",
+      "ms": 1000
+    },
+    {
+      "action": "loot_gameobject",
+      "actor": "p",
+      "entry": 255062
+    },
+    {
+      "action": "loot_slot",
+      "actor": "p",
+      "item": 355199
+    },
+    {
+      "action": "close_loot",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 355199,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 355199,
+      "count": 7
+    },
+    {
+      "label": "quest 255113 is complete",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255113,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "hand quest 255113 in at its ender",
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255113,
+      "entry": 255204
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255113,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "take quest 255114 from its giver",
+      "action": "quest_accept",
+      "actor": "p",
+      "quest": 255114,
+      "entry": 255207
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255114,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "p",
+      "entry": 255063
+    },
+    {
+      "action": "wait",
+      "label": "let the object become ready",
+      "ms": 1000
+    },
+    {
+      "action": "loot_gameobject",
+      "actor": "p",
+      "entry": 255063
+    },
+    {
+      "action": "loot_slot",
+      "actor": "p",
+      "item": 355200
+    },
+    {
+      "action": "close_loot",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 355200,
+      "equals": 1
+    },
+    {
+      "label": "quest 255114 is complete",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255114,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "hand quest 255114 in at its ender",
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255114,
+      "entry": 255207
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255114,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "take quest 255117 from its giver",
+      "action": "quest_accept",
+      "actor": "p",
+      "quest": 255117,
+      "entry": 341
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255117,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "p",
+      "entry": 255064
+    },
+    {
+      "action": "wait",
+      "label": "let the object become ready",
+      "ms": 1000
+    },
+    {
+      "action": "loot_gameobject",
+      "actor": "p",
+      "entry": 255064
+    },
+    {
+      "action": "loot_slot",
+      "actor": "p",
+      "item": 355201
+    },
+    {
+      "action": "close_loot",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 355201,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 355201,
+      "count": 5
+    },
+    {
+      "label": "quest 255117 is complete",
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255117,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "hand quest 255117 in at its ender",
+      "action": "quest_turn_in",
+      "actor": "p",
+      "quest": 255117,
+      "entry": 341
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255117,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

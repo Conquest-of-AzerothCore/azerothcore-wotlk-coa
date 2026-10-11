@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "name": "Torek's Raiders follow his forced walking escort before combat (#5431)",
+  "contract": [
+    "Torek's Assault 6544 starts SmartAI path 12858 with forced movement 1 (WALK). Before combat, his three",
+    "Splintertree Raiders must follow at walking speed, consistent with that independently authored path",
+    "instruction. The raiders start behind Torek, matching the relative positions of their database spawns."
+  ],
+  "location": {
+    "map": 1,
+    "x": 1774.18,
+    "y": -2241.09,
+    "z": 107.942,
+    "o": 0.314159
+  },
+  "players": [
+    {
+      "id": "escort",
+      "race": 2,
+      "class": 1,
+      "level": 25
+    }
+  ],
+  "creatures": [
+    {
+      "id": "torek",
+      "entry": 12858,
+      "owner": "escort",
+      "distance": 4.5,
+      "faction": 113,
+      "level": 23,
+      "reaction": 2
+    },
+    {
+      "id": "raider",
+      "entry": 12859,
+      "owner": "escort",
+      "distance": 0.87,
+      "faction": 113,
+      "level": 21,
+      "reaction": 2
+    },
+    {
+      "id": "raider2",
+      "entry": 12859,
+      "owner": "escort",
+      "distance": 2.32,
+      "faction": 113,
+      "level": 21,
+      "reaction": 2
+    },
+    {
+      "id": "raider3",
+      "entry": 12859,
+      "owner": "escort",
+      "distance": 0.93,
+      "faction": 113,
+      "level": 21,
+      "reaction": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "quest_accept",
+      "actor": "escort",
+      "entry": 12858,
+      "quest": 6544
+    },
+    {
+      "action": "assert",
+      "actor": "escort",
+      "metric": "quest_status",
+      "quest": 6544,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "torek is out of combat before the first pull",
+      "actor": "torek",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "raider is out of combat before the first pull",
+      "actor": "raider",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "raider2 is out of combat before the first pull",
+      "actor": "raider2",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "raider3 is out of combat before the first pull",
+      "actor": "raider3",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Torek follows the authored walking path",
+      "actor": "torek",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6
+    },
+    {
+      "action": "assert",
+      "label": "The raider follows at walking speed before the first pull",
+      "actor": "raider",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6
+    },
+    {
+      "action": "assert",
+      "label": "raider2 follows at walking speed before the first pull",
+      "actor": "raider2",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6
+    },
+    {
+      "action": "assert",
+      "label": "raider3 follows at walking speed before the first pull",
+      "actor": "raider3",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "torek remains out of combat",
+      "actor": "torek",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "torek remains at walking speed",
+      "actor": "torek",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6
+    },
+    {
+      "action": "assert",
+      "label": "torek advances along the escort",
+      "actor": "torek",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "raider remains out of combat",
+      "actor": "raider",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "raider remains at walking speed",
+      "actor": "raider",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6
+    },
+    {
+      "action": "assert",
+      "label": "raider advances along the escort",
+      "actor": "raider",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "raider2 remains out of combat",
+      "actor": "raider2",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "raider2 remains at walking speed",
+      "actor": "raider2",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6
+    },
+    {
+      "action": "assert",
+      "label": "raider2 advances along the escort",
+      "actor": "raider2",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "raider3 remains out of combat",
+      "actor": "raider3",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "raider3 remains at walking speed",
+      "actor": "raider3",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6
+    },
+    {
+      "action": "assert",
+      "label": "raider3 advances along the escort",
+      "actor": "raider3",
+      "metric": "moving",
+      "equals": 1
+    }
+  ]
+}

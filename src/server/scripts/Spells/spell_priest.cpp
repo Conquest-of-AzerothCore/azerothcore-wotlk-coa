@@ -694,7 +694,7 @@ class spell_pri_power_word_shield_aura : public AuraScript
             return;
 
         if (Unit* owner = GetUnitOwner())
-            if (AuraEffect* talentAurEff = owner->GetAuraEffectOfRankedSpell(SPELL_PRIEST_REFLECTIVE_SHIELD_R1, EFFECT_0))
+            if (AuraEffect* talentAurEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_PRIEST_REFLECTIVE_SHIELD_R1, EFFECT_0))
             {
                 int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
                 // xinef: prevents infinite loop!

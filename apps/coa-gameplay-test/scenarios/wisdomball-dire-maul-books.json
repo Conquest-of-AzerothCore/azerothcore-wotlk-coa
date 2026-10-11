@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "The Wondrous Wisdomball withholds other classes' Dire Maul book quests and the books that complete on accept",
+  "contract": "AscensionWisdomball.cpp lists a dungeon's quests by map alone and accepted them through Player::CanAddQuest, skipping Player::SatisfyQuestClass, so a Starcaller standing in Dire Maul was offered every class book (7498 Garona for Rogues through 7506 Emerald Dream for Druids). Those nine books plus 7507 Foror's Compendium and 7508 The Forging of Quel'Serrar carry their completion item as StartItem with no kill, item-fetch or player-kill objective, so AddQuestAndCheckCompletion marks them complete the moment the ball grants them and the ball then pays them straight back out. Until a real per-quest fix exists the ball must stop offering exactly these eleven quest IDs, the same treatment 5722 and 5724 already have. Quest 7463 Arcane Refreshment is Mage-only with a real fetch objective (obtain 18299, no StartItem) and stays offered to a Mage as a control that the class check does not over-block.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "scholar", "race": 10, "class": 8, "level": 60 }
+  ],
+  "location": {
+    "map": 429,
+    "x": 550.38,
+    "y": 533.725,
+    "z": -24.3185,
+    "o": 1.0,
+    "ignore_access": true
+  },
+  "steps": [
+    { "action": "wait", "label": "Let Dire Maul settle", "ms": 8000 },
+    { "action": "add_item", "label": "Obtain the companion, as a purchase would", "actor": "scholar", "item": 101169, "count": 1 },
+    { "action": "use_item", "label": "Using the item teaches its summon", "actor": "scholar", "item": 101169, "spell": 55884 },
+    {
+      "action": "assert",
+      "label": "The summon is learned",
+      "actor": "scholar", "metric": "knows_spell", "spell": 83050, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Summon the ball in Dire Maul", "actor": "scholar", "spell": 83050 },
+    { "action": "wait", "label": "Let the summon land", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "The cast produced a creature this Blood Elf owns",
+      "actor": "scholar", "metric": "owned_creature_count", "entry": 79025, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A Mage is never offered the Rogue book",
+      "actor": "scholar", "metric": "ball_offers_quest", "quest": 7498, "equals": 0, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Nor the Hunter book",
+      "actor": "scholar", "metric": "ball_offers_quest", "quest": 7503, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nor the Druid book",
+      "actor": "scholar", "metric": "ball_offers_quest", "quest": 7506, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Mage's own book is withheld too - it completes the moment the ball grants it",
+      "actor": "scholar", "metric": "ball_offers_quest", "quest": 7500, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "So is the class-free book that completes on accept",
+      "actor": "scholar", "metric": "ball_offers_quest", "quest": 7507, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Anthion's Old Friend completes on accept the same way and is withheld too",
+      "actor": "scholar", "metric": "ball_offers_quest", "quest": 8948, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A Mage-only Dire Maul quest with a real fetch objective is still offered",
+      "actor": "scholar", "metric": "ball_offers_quest", "quest": 7463, "equals": 1
+    },
+    { "action": "quest_accept", "label": "Try to take the Rogue book anyway, as a hostile client would", "actor": "scholar", "quest": 7498, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "The ball refuses it outright - it never enters the log",
+      "actor": "scholar", "metric": "quest_status", "quest": 7498, "equals": 0
+    },
+    { "action": "quest_accept", "label": "Try the Mage book too", "actor": "scholar", "quest": 7500, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "It is refused as well",
+      "actor": "scholar", "metric": "quest_status", "quest": 7500, "equals": 0
+    }
+  ]
+}

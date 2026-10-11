@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "A Wildcard Hero trains the ranks of the spells a form brings with it (#6923)",
+  "contract": "Cat Form 768 brings Claw 1082 with it (the Wildcard entry spells). Claw is not an ability of its own, so the Hero rank trainer built no ladder for it and no trainer or Book of Ascension sold its higher ranks. The client's SpellRank.dbc ladder for Claw is 1082, 1083 (level 8), 1084 (level 18), 3029 (level 28). A level 12 Wildcard Hero with Cat Form buys Claw rank 2 from a Book of Ascension, is refused rank 3 below its level, and unlearning Cat Form takes rank 2 with Claw.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "wild", "name": "Wildclaw", "race": 1, "class": 10, "level": 12}
+  ],
+  "creatures": [
+    {"id": "book", "owner": "wild", "entry": 75115, "distance": 2, "faction": 35}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Wildclaw"},
+    {"action": "assert", "actor": "wild", "metric": "game_mode_mask", "min": 64},
+    {"action": "set_money", "actor": "wild", "value": 1000000},
+
+    {"action": "learn", "label": "A rolled Cat Form", "actor": "wild", "spell": 768},
+    {"action": "assert", "label": "Claw comes with it", "actor": "wild", "metric": "knows_spell", "spell": 1082, "equals": 1, "within_ms": 1000},
+    {"action": "trainer_buy", "label": "Buy Claw rank 2 from a Book of Ascension", "actor": "wild", "target": "book", "spell": 1083},
+    {"action": "assert", "label": "The book taught Claw rank 2", "actor": "wild", "metric": "knows_spell", "spell": 1083, "equals": 1, "within_ms": 1000},
+    {"action": "trainer_buy", "label": "Ask for Claw rank 3 below its level", "actor": "wild", "target": "book", "spell": 1084},
+    {"action": "assert", "label": "Below level 18 rank 3 is refused", "actor": "wild", "metric": "knows_spell", "spell": 1084, "equals": 0},
+    {"action": "unlearn", "label": "Unlearn Cat Form", "actor": "wild", "spell": 768},
+    {"action": "assert", "label": "Claw goes with it", "actor": "wild", "metric": "knows_spell", "spell": 1082, "equals": 0},
+    {"action": "assert", "label": "and its rank 2", "actor": "wild", "metric": "knows_spell", "spell": 1083, "equals": 0}
+  ]
+}

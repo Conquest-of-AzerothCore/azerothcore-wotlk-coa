@@ -251,4 +251,42 @@ std::vector<std::pair<std::uint32_t, std::uint32_t>> SpellTwins(std::uint32_t sp
     }
     return twins;
 }
+
+std::vector<std::pair<std::uint32_t, std::uint32_t>> SpellNamesakes(std::uint32_t spellCount, SpellLayoutOf const& layout)
+{
+    std::vector<std::pair<std::uint32_t, std::uint32_t>> namesakes;
+    for (std::uint32_t spellId = 1; spellId < REBORN_SPELL_OFFSET && spellId + REBORN_SPELL_OFFSET < spellCount; ++spellId)
+    {
+        std::optional<SpellLayout> const stock = layout(spellId);
+        std::optional<SpellLayout> const reborn = stock ? layout(spellId + REBORN_SPELL_OFFSET) : std::nullopt;
+        if (reborn && reborn->Name == stock->Name && *reborn != *stock)
+            namesakes.emplace_back(spellId, spellId + REBORN_SPELL_OFFSET);
+    }
+    return namesakes;
+}
+
+std::vector<std::pair<std::uint32_t, std::uint32_t>> RankTwins(std::vector<std::pair<std::uint32_t, std::uint32_t>> const& twins,
+    LaterRanks const& laterRanks, FirstRank const& firstRank, SpellLayoutOf const& layout)
+{
+    std::unordered_map<std::uint32_t, std::uint32_t> sources;
+    for (auto const& [source, twin] : twins)
+        sources[twin] = source;
+
+    std::vector<std::pair<std::uint32_t, std::uint32_t>> ranked;
+    for (auto const& [source, twin] : twins)
+    {
+        if (firstRank(source) != source || firstRank(twin) != twin)
+            continue;
+        std::optional<SpellLayout> const head = layout(twin);
+        for (std::uint32_t rank : laterRanks(twin))
+        {
+            auto const known = sources.find(rank);
+            if (known != sources.end() && firstRank(known->second) == source)
+                continue;
+            if (layout(rank) == head)
+                ranked.emplace_back(source, rank);
+        }
+    }
+    return ranked;
+}
 }

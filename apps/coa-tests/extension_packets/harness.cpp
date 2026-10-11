@@ -157,6 +157,13 @@ enum InventoryResult
 constexpr uint8 NULL_BAG = 0;
 constexpr uint8 NULL_SLOT = 255;
 
+struct ObjectGuid
+{
+    explicit ObjectGuid(uint64 raw) : Raw(raw) { }
+    uint32 GetCounter() const { return Raw; }
+    uint64 Raw;
+};
+
 struct Player
 {
     WorldSession* Session = nullptr;
@@ -170,6 +177,7 @@ struct Player
     uint32 NewItemNotices = 0;
 
     WorldSession* GetSession() const { return Session; }
+    ObjectGuid GetGUID() const { return ObjectGuid(1); }
     std::string GetName() const { return "Tester"; }
     bool IsInWorld() const { return true; }
     void SendDirectMessage(WorldPacket const* packet) { Session->SendPacket(packet); }
@@ -351,12 +359,6 @@ struct VanityInfo
     uint32 LearnedSpell = 0;
 };
 
-struct ObjectGuid
-{
-    explicit ObjectGuid(uint64 raw) : Raw(raw) { }
-    uint64 Raw;
-};
-
 struct AscensionClassService
 {
     static AscensionClassService& Instance()
@@ -436,6 +438,7 @@ public:
     // ACTUAL_QUEUE_CLIENT_PACKET
     // ACTUAL_REJECT_CLIENT_PACKET
     // ACTUAL_TAKE_CLIENT_PACKETS
+    // ACTUAL_PENDING_OUTFIT
     // ACTUAL_ON_PLAYER_UPDATE
     // ACTUAL_HANDLE_CLIENT_PACKET
     // ACTUAL_POINT_SPEND
@@ -446,6 +449,8 @@ public:
     std::shared_ptr<PlayerCollectionState> State;
     std::unordered_map<uint32, VanityInfo> _vanityItems;
     std::mutex _packetMutex;
+    std::mutex _outfitMutex;
+    std::unordered_set<uint32> _pendingOutfitCommits;
     std::unordered_map<uint32, std::deque<WorldPacket>> _pendingPackets;
     std::mutex _rejectedPacketMutex;
     std::unordered_map<uint32, uint32> _rejectedPackets;
@@ -758,6 +763,12 @@ void TestWorldEntryResend()
     WorldPacket remove(0x06A0, 8);
     remove << std::string("Plate");
     bool const outfitsConsumed = !Receive(session, save) && !Receive(session, remove);
+    service.OnPlayerUpdate(&player, 1);
+    Check(outfitsConsumed && service.AppearancePackets ==
+            std::vector<uint16>{0x0697, 0x06A3, 0x0697, 0x069E},
+        "a queued outfit save leaves the following delete for a later update");
+    Check(service.TakeClientPackets(session.GetAccountId(), true).empty(),
+        "a pending outfit commit leaves the next outfit request queued");
     service.OnPlayerUpdate(&player, 1);
     Check(outfitsConsumed && service.AppearancePackets ==
             std::vector<uint16>{0x0697, 0x06A3, 0x0697, 0x069E, 0x06A0},

@@ -445,7 +445,7 @@ public:
     {
         Unit* target = GetTarget();
 
-        if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_INCANTERS_ABSORBTION_R1, EFFECT_0))
+        if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpellOrTwin(SPELL_MAGE_INCANTERS_ABSORBTION_R1, EFFECT_0))
         {
             int32 bp = CalculatePct(absorbAmount, talentAurEff->GetAmount());
             if (AuraEffect* currentAura = target->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_DONE, SPELLFAMILY_MAGE, 2941, EFFECT_0))
@@ -547,7 +547,7 @@ class spell_mage_fire_frost_ward : public spell_mage_incanters_absorbtion_base_A
     void Absorb(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
     {
         Unit* target = GetTarget();
-        if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpell(SPELL_MAGE_FROST_WARDING_R1, EFFECT_0))
+        if (AuraEffect* talentAurEff = target->GetAuraEffectOfRankedSpellOrTwin(SPELL_MAGE_FROST_WARDING_R1, EFFECT_0))
         {
             int32 chance = talentAurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue(); // SPELL_EFFECT_DUMMY with NO_TARGET
 

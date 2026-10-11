@@ -27,6 +27,7 @@ MAIN = r"""
 #include "DBCStores.h"
 #include <cstdio>
 #include <string>
+#include <unordered_map>
 
 using namespace AscensionFreepick;
 
@@ -46,6 +47,9 @@ constexpr std::uint32_t TAME_BEAST_ABILITIES = 40308;
 constexpr std::uint32_t DOMINATE_UNDEAD = 41916;
 constexpr std::uint32_t PATH_OF_STRENGTH = 1149;
 constexpr std::uint32_t PATH_OF_AGILITY = 1150;
+constexpr std::uint32_t BLOOD_GORGED_RANK_5 = 61158;
+constexpr std::uint32_t WILL_OF_THE_NECROPOLIS_RANK_3 = 50150;
+constexpr std::uint32_t PURIFY_SPELL = 1152;
 
 bool Holds(std::vector<Entry> const& entries, std::uint32_t id, std::uint32_t rank)
 {
@@ -172,6 +176,19 @@ int main(int, char** argv)
     applied = CheckApply(Build(catalog, realm, 10, { { PURIFY, 1 } }), {}, nullptr, {});
     Check(applied.Result == UPDATE_OK && !applied.Money && !applied.Marks, "unlearning is free up to level 10");
 
+    std::unordered_map<std::uint32_t, std::vector<std::uint32_t>> const learnEffects = { LEARN_EFFECTS };
+    LearnedSpells const learned = [&learnEffects](std::uint32_t spellId)
+    {
+        auto const itr = learnEffects.find(spellId);
+        return itr == learnEffects.end() ? std::vector<std::uint32_t>() : itr->second;
+    };
+    Check(TaughtSpells(BLOOD_GORGED_RANK_5, learned) == std::vector<std::uint32_t>({ 50111, 61278 }),
+        "a rank that only teaches spells grants the spells it teaches");
+    Check(TaughtSpells(WILL_OF_THE_NECROPOLIS_RANK_3, learned) == std::vector<std::uint32_t>({ 52286 }),
+        "a rank with a learn effect beside other effects grants only the taught spell");
+    Check(TaughtSpells(PURIFY_SPELL, learned) == std::vector<std::uint32_t>({ PURIFY_SPELL }),
+        "a rank with no learn effect grants itself");
+
     return failures ? 1 : 0;
 }
 """
@@ -209,6 +226,25 @@ def check_path_passives(dbc):
     return ok
 
 
+LEARN_SPELL_EFFECT = 36
+SPELL_EFFECT, SPELL_TRIGGER = 71, 116
+
+
+def learn_effects(directory):
+    raw = (directory / "Spell.dbc").read_bytes()
+    count, fields, size = struct.unpack_from("<III", raw, 4)
+    rows = {row[0]: row for row in struct.iter_unpack(f"<{fields}I", raw[20:20 + count * size])}
+    entries = []
+    for spell in (61158, 50150, 1152):
+        row = rows[spell]
+        taught = [row[SPELL_TRIGGER + i] for i in range(3) if row[SPELL_EFFECT + i] == LEARN_SPELL_EFFECT]
+        if taught:
+            entries.append("{ %d, { %s } }" % (spell, ", ".join(map(str, taught))))
+    source = (ROOT / "src/server/coa/AscensionFreepick.cpp").read_text(encoding="utf-8")
+    assert source.count("RankSpells(row->Spells[") == 2, "free-pick grants and removals both expand rank spells"
+    return ", ".join(entries)
+
+
 def main():
     parser = argparse.ArgumentParser(description=CLI_DESCRIPTION)
     parser.add_argument("--dbc-dir", type=Path)
@@ -221,7 +257,8 @@ def main():
         out = Path(directory)
         for name, text in STUBS.items():
             (out / name).write_text(text, encoding="utf-8")
-        (out / "main.cpp").write_text(MAIN, encoding="utf-8")
+        (out / "main.cpp").write_text(MAIN.replace("LEARN_EFFECTS", learn_effects(args.dbc_dir.resolve())),
+                                      encoding="utf-8")
         includes = [out, ROOT / "src/server/coa", ROOT / "src/server/shared/DataStores", ROOT / "src/common"]
         sources = [out / "main.cpp", ROOT / "src/server/coa/AscensionFreepickRules.cpp",
                    ROOT / "src/server/shared/DataStores/ClientDBC.cpp"]

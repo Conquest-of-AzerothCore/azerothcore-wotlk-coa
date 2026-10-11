@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "name": "A Tamed Beast whistle from the wardrobe replaces the current pet with its creature (#6417, #6924)",
+  "contract": [
+    "The wardrobe's Tamed Beast category (AppearanceCategories 33, APPEARANCE_TYPE_COSMETIC_PET) lists Beast Master whistles; each Appearances.dbc row names a creature entry at field 8 (appearance 48864 = Forest Spider 30, 48122 = Black Ravager 628).",
+    "The client validates the selection, shows CONFIRM_APPLY_COSMETIC_PET ('lose your current pet') and only then sends CMSG_APPLY_APPEARANCES 0x697 (Extensions.dll FUN_100c1b40). The server only saved the selection, so the pet never changed.",
+    "A confirmed whistle now abandons the current pet, summoned or dismissed, and gives the player a tamed pet of the whistle's creature. It is refused in combat and for a player without Call Pet."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "tamer",
+      "name": "Whistler",
+      "race": 1,
+      "class": 10,
+      "level": 20
+    },
+    {
+      "id": "plain",
+      "name": "Nowhistle",
+      "race": 1,
+      "class": 10,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "tamer",
+      "entry": 299,
+      "level": 1,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Whistler"
+    },
+    {
+      "action": "learn",
+      "label": "Tame Beast Abilities",
+      "actor": "tamer",
+      "spell": 965200
+    },
+    {
+      "action": "assert",
+      "label": "Call Pet known",
+      "actor": "tamer",
+      "metric": "knows_spell",
+      "spell": 883,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Tame the Young Wolf",
+      "actor": "tamer",
+      "spell": 1515,
+      "target": "wolf"
+    },
+    {
+      "action": "wait",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "The wolf is the pet",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 299
+    },
+    {
+      "action": "assert",
+      "label": "One pet row",
+      "actor": "tamer",
+      "metric": "pet_rows",
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Use the Forest Spider whistle",
+      "actor": "tamer",
+      "selection": {
+        "33": 48864
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The Forest Spider replaces the wolf",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 30,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The wolf was abandoned, not stabled",
+      "actor": "tamer",
+      "metric": "pet_rows",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Dismiss the spider",
+      "actor": "tamer",
+      "spell": 2641
+    },
+    {
+      "action": "assert",
+      "label": "No pet out",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Use the Black Ravager whistle with the pet dismissed",
+      "actor": "tamer",
+      "selection": {
+        "33": 48122
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The Black Ravager is the pet",
+      "actor": "tamer",
+      "metric": "pet_entry",
+      "equals": 628,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Still one pet row",
+      "actor": "tamer",
+      "metric": "pet_rows",
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
+      "label": "A Hero without Call Pet uses a whistle",
+      "actor": "plain",
+      "selection": {
+        "33": 48864
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "It gets no pet",
+      "actor": "plain",
+      "metric": "pet_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and no pet row",
+      "actor": "plain",
+      "metric": "pet_rows",
+      "equals": 0
+    }
+  ]
+}

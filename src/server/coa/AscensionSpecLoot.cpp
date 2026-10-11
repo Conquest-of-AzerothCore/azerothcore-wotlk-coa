@@ -63,14 +63,23 @@ std::optional<Role> RoleOf(uint32 stat)
     }
 }
 
+uint32 MainAttribute(PrimaryStats const& stats)
+{
+    for (uint32 stat : stats)
+        if (IsAttribute(stat))
+            return stat;
+    return 0;
+}
+
 bool SpecTakesRole(PrimaryStats const& stats, Role role)
 {
+    uint32 const mainAttribute = MainAttribute(stats);
     switch (role)
     {
         case ROLE_CASTER:
-            return Lists(stats, ITEM_MOD_INTELLECT) || Lists(stats, ITEM_MOD_SPIRIT);
+            return mainAttribute == ITEM_MOD_INTELLECT || mainAttribute == ITEM_MOD_SPIRIT;
         case ROLE_PHYSICAL:
-            return Lists(stats, ITEM_MOD_STRENGTH) || Lists(stats, ITEM_MOD_AGILITY);
+            return mainAttribute == ITEM_MOD_STRENGTH || mainAttribute == ITEM_MOD_AGILITY;
         case ROLE_TANK:
             return Lists(stats, ITEM_MOD_STAMINA);
         default:
@@ -116,16 +125,13 @@ Fit ItemFit(PrimaryStats const& stats, ItemTemplate const* item)
     int32 const strongestAttribute = *std::max_element(attributes.begin(), attributes.end());
     if (strongestAttribute > 0)
     {
-        bool shared = false;
+        uint32 const mainAttribute = MainAttribute(stats);
+        if (mainAttribute && attributes[mainAttribute] == strongestAttribute)
+            return Fit::Primary;
         for (uint32 attribute = 0; attribute < attributes.size(); ++attribute)
-        {
-            if (!attributes[attribute] || !Lists(stats, attribute))
-                continue;
-            if (attributes[attribute] == strongestAttribute)
-                return Fit::Primary;
-            shared = true;
-        }
-        return shared ? Fit::Shared : Fit::None;
+            if (attributes[attribute] && Lists(stats, attribute))
+                return Fit::Shared;
+        return Fit::None;
     }
 
     int32 const strongestRole = *std::max_element(roles.begin(), roles.end());

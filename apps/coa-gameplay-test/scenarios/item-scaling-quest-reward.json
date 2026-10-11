@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Item scaling: a laddered quest reward keeps its entry and scales to the character's level",
-  "contract": "Requires DestinyWeaver.Enable=1, CoA.QuestLevelScaling=1, CoA.ItemScaling=1, CoA.ItemScaling.Native=1 and CoA.ItemScaling.Native.QuestRewards=1 with ItemStat.dbc in the data directory. Wanted: Hogger 176 is a level 11 quest whose first choice reward is Footman Tunic 6085 (green, item level 13, required level 5). The tunic has an ItemStat.dbc ladder, so the quest names the authored tunic and the rewarded tunic keeps its entry and item level 13 while storing the character's level 30: its ladder row requires level 27 and carries 192 armor. The level follows the character, not the scaling choice, so a level 30 character with scaling off receives the same level-30 tunic while playing the quest at 11. The client caches the quest query response per quest id across characters, so accepting the quest must send this character's own response. Quest-giver dialogs and client rendering are not tested.",
+  "name": "Item scaling: a laddered quest reward keeps its entry and scales to the level of a character whose scaling is on",
+  "contract": "Requires DestinyWeaver.Enable=1, CoA.QuestLevelScaling=1, CoA.ItemScaling=1, CoA.ItemScaling.Native=1 and CoA.ItemScaling.Native.QuestRewards=1 with ItemStat.dbc in the data directory. Wanted: Hogger 176 is a level 11 quest whose first choice reward is Footman Tunic 6085 (green, item level 13, required level 5). The tunic has an ItemStat.dbc ladder, so the quest names the authored tunic and the rewarded tunic keeps its entry and item level 13 while storing the character's level 30: its ladder row requires level 27 and carries 192 armor. The level follows the scaling choice (issue #7178), so a level 30 character with scaling off plays the quest at 11 and receives the authored tunic with no scaling level, keeping required level 5. The client caches the quest query response per quest id across characters, so accepting the quest must send this character's own response. Quest-giver dialogs and client rendering are not tested.",
   "timeout_ms": 60000,
   "players": [
     { "id": "scaled", "race": 1, "class": 1, "level": 30 },
@@ -28,7 +28,8 @@
     { "action": "assert", "label": "Accepting the quest tells the unscaled client its own reward, replacing a scaled character's cached copy", "actor": "authored", "metric": "quest_query_reward_choice", "quest": 176, "equals": 6085 },
     { "action": "reward_quest", "actor": "authored", "quest": 176, "choice": 0 },
     { "action": "assert", "label": "The unscaled reward is the authored tunic", "actor": "authored", "metric": "item_count", "item": 6085, "equals": 1 },
-    { "action": "assert", "label": "The unscaled tunic also stores the character's level 30", "actor": "authored", "metric": "carried_item_scaling_level", "item": 6085, "equals": 30 },
+    { "action": "assert", "label": "The unscaled tunic gets no scaling level", "actor": "authored", "metric": "carried_item_scaling_level", "item": 6085, "equals": 0 },
+    { "action": "assert", "label": "The unscaled tunic keeps its authored required level 5", "actor": "authored", "metric": "carried_item_required_level", "item": 6085, "equals": 5 },
     { "action": "assert", "label": "The unscaled tunic keeps item level 13", "actor": "authored", "metric": "carried_item_level", "item": 6085, "equals": 13 }
   ]
 }

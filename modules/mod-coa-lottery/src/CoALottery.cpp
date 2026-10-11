@@ -15,6 +15,7 @@
 #include "MailMgr.h"
 #include "Map.h"
 #include "MapMgr.h"
+#include "CellImpl.h"
 #include "CreatureTextMgr.h"
 #include "TemporarySummon.h"
 #include "TaskScheduler.h"

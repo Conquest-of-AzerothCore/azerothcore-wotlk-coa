@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "witchdoctor-true-spirit-spirit-gain-6981",
+  "contract": [
+    "The True Spirit 802268 promises that summoning a Serpent Ward or Spirit increases the damage of the next",
+    "Spirit Glaive or Spirit Eclipse by 5% for 10 s, stacking 5 times, applied as The True God 681233.",
+    "A gained Spirit (GainSpirit, the path Reclamation and a Spirit reaching its owner both use) must grant that",
+    "buff; a Witch Doctor without the passive must gain nothing."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "w1",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "w2",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "w2",
+      "spell": 802268
+    },
+    {
+      "action": "assert",
+      "actor": "w2",
+      "metric": "aura",
+      "spell": 802268,
+      "equals": 1,
+      "label": "The carrier has The True Spirit"
+    },
+    {
+      "action": "learn",
+      "actor": "w1",
+      "spell": 501136
+    },
+    {
+      "action": "learn",
+      "actor": "w2",
+      "spell": 501136
+    },
+    {
+      "action": "cast",
+      "actor": "w1",
+      "spell": 501136
+    },
+    {
+      "action": "cast",
+      "actor": "w2",
+      "spell": 501136
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "w1",
+      "metric": "cast_failure",
+      "spell": 501136,
+      "equals": 0,
+      "label": "The control gains a Spirit"
+    },
+    {
+      "action": "assert",
+      "actor": "w2",
+      "metric": "cast_failure",
+      "spell": 501136,
+      "equals": 0,
+      "label": "The carrier gains a Spirit"
+    },
+    {
+      "action": "assert",
+      "actor": "w1",
+      "metric": "aura",
+      "spell": 681233,
+      "equals": 0,
+      "label": "Without the passive a gained Spirit grants nothing"
+    },
+    {
+      "action": "assert",
+      "actor": "w2",
+      "metric": "aura",
+      "spell": 681233,
+      "min": 1,
+      "label": "A gained Spirit grants The True God with the passive"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  }
+}

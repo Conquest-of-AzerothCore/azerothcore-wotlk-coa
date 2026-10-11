@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Item scaling: a character who turned level scaling off loots the authored item",
+  "contract": "Issue #7178. Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, CoA.ItemScaling=1 and CoA.ItemScaling.Native=1 with ItemStat.dbc in the data directory. The Rake 5807 is a level 10 creature that drops Lionfur Armor 17922 (green, item level 10, required level 5, 108 armor) at 100%, and Lionfur Armor has an ItemStat.dbc ladder. A level 60 character who turned scaling off at the Destiny Weaver sees The Rake at its authored level 10, and the armor they loot keeps no scaling level, so it keeps its authored required level 5 and 108 armor instead of the looter's level 60 ladder row. Client rendering of the item is not tested.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9465, "y": 64, "z": 56, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "authored_rake", "owner": "hero", "entry": 5807, "level": 10, "health": 1, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "level_scaling_packet", "actor": "hero", "value": 0 },
+    { "action": "assert", "label": "Scaling off shows The Rake at 10", "actor": "hero", "metric": "view_level", "target": "authored_rake", "equals": 10, "within_ms": 2000 },
+    { "action": "attack", "actor": "hero", "target": "authored_rake" },
+    { "action": "assert", "actor": "authored_rake", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "loot_creature", "actor": "hero", "target": "authored_rake" },
+    { "action": "assert", "label": "The corpse holds the authored Lionfur Armor", "actor": "hero", "metric": "loot_entry", "item": 17922, "equals": 17922 },
+    { "action": "loot_slot", "actor": "hero", "item": 17922 },
+    { "action": "assert", "label": "The looted armor is carried", "actor": "hero", "metric": "carried_item_level", "item": 17922, "equals": 10, "within_ms": 2000 },
+    { "action": "assert", "label": "The looted armor gets no scaling level", "actor": "hero", "metric": "carried_item_scaling_level", "item": 17922, "equals": 0 },
+    { "action": "assert", "label": "The looted armor keeps its authored required level 5", "actor": "hero", "metric": "carried_item_required_level", "item": 17922, "equals": 5 },
+    { "action": "assert", "label": "The looted armor keeps its authored 108 armor", "actor": "hero", "metric": "carried_item_armor", "item": 17922, "equals": 108 },
+    { "action": "close_loot", "actor": "hero" }
+  ]
+}
