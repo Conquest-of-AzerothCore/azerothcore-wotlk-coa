@@ -178,6 +178,12 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
   `visibilityDistanceType`, `auras`) VALUES
 (9950405, 0, 0, 5, 0, 0, 0, '');
 
+-- patch-WB1 moved the Lakeshire flagpole and banners from beside Deputy Feldon about 21 yards east and put the
+-- gryphon roosts where they stood. Feldon moves to his client SuperTrack point 528 (quests 244 and 246) next to
+-- the new flagpole; his facing is unchanged.
+UPDATE `creature` SET `position_x` = -9422.85, `position_y` = -2243.02, `position_z` = 68.49
+WHERE `guid` = 6713 AND `id` = 1070;
+
 -- Gnoll Food Barrel, Chalice of Tyrenel, Alther's Mill Plank, Codex of Secrets, Pristine Black Dragon Egg and the
 -- 254069 Gravestone (quest 254069, gossip 60071), the Eye of Ilgalar (gossip 60064) and the Red Mage Tower props
 -- 97379-97449: WDB gameobject cache 2026-09-04..08.
