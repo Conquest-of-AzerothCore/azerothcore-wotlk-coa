@@ -31,6 +31,7 @@ VALUES
 (751499, 0, 0, 0, 0, 0, 'Maxwell the Strong', 'Zemille Prospect', NULL, 0, 22, 22, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (751500, 0, 0, 0, 0, 0, 'Brutus the Stallion', 'Zemille Prospect', NULL, 0, 22, 22, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (751502, 0, 0, 0, 0, 0, 'Quill the Foolish', NULL, NULL, 0, 25, 25, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(100209, 0, 0, 0, 0, 0, 'Bandit Support', NULL, NULL, 0, 26, 26, 0, 17, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 8, 0, 2048, 0, 0, 7, 0, 100209, 0, 0, 0, 0, 21, 126, '', 0, 1, 1.064, 1, 1, 1, 0, 0, 1, 0, 0, '', 0),
 (255360, 0, 0, 0, 0, 0, 'Tranquil Gardens Cemetary Dummy', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 33554434, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 5.022, 1, 1, 1, 0, 0, 1, 0, 130, '', 0),
 (255361, 0, 0, 0, 0, 0, 'Raven Hill Dummy', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 33554434, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 5.022, 1, 1, 1, 0, 0, 1, 0, 130, '', 0),
 (255362, 0, 0, 0, 0, 0, 'Vul''Gol Ogre Mound Dummy', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 33554434, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 5.022, 1, 1, 1, 0, 0, 1, 0, 130, '', 0),
@@ -62,14 +63,17 @@ ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
 -- Stand-in displays: Ascension displays 750771, 750770, 254904, 255157, 256715 and 256815-256819 are not in the
 -- client's CreatureDisplayInfo.dbc. Their stand-ins are estimated, with the sex taken from the name: Oswin Drake 2389
 -- and Captain Aldric Vayne 2395 (Night Watch watchers), Julie Addle 1472, Ryton Altham 3324, Eleanor Zemille 5552,
--- the four Zemille Prospects 5551, 5550, 5074 and 3506, and Quill the Foolish 3484. The Nightbane Worgen (203) and the
--- scouting dummies (100003) keep their client displays.
+-- the four Zemille Prospects 5551, 5550, 5074 and 3506, and Quill the Foolish 3484. The Nightbane Worgen (203), the
+-- scouting dummies (100003) and Bandit Support (4281 and 4282) keep their client displays.
 -- Levels, factions and flags are estimated: the Night Watch follows Watcher Dodds (888), the townsfolk Barkeep Hann
 -- (274), and the caged worgen and the scouting dummies are friendly and cannot be attacked. Julie Addle 254905 is the
 -- captured credit entry of 254091 and Oswin Drake 764547 the captured second Oswin record; neither is spawned.
+-- Bandit Support 100209 is level 26 in the WDB creaturecache (db.exil.es dump 2026-10-04, creature) and has the Defias
+-- Enchanter's client displays (Creature.dbc); its faction, class, health, gold and drop follow the Defias Enchanter
+-- (910) as estimates. No capture spawns or summons it, so it is not spawned.
 -- The dummy name 'Vul'Gol Ogre Mound Dummy' was captured with a broken apostrophe and is written with a plain one.
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (255023,764547,764560,764561,254904,254905,254906,255157,
-  751496,751497,751498,751499,751500,751502,255360,255361,255362,255363);
+  751496,751497,751498,751499,751500,751502,255360,255361,255362,255363,100209);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
 (255023, 0, 2389, 1, 1, 0),
@@ -89,7 +93,9 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 (255360, 0, 100003, 1, 1, 0),
 (255361, 0, 100003, 1, 1, 0),
 (255362, 0, 100003, 1, 1, 0),
-(255363, 0, 100003, 1, 1, 0);
+(255363, 0, 100003, 1, 1, 0),
+(100209, 0, 4281, 1, 1, 0),
+(100209, 1, 4282, 1, 1, 0);
 
 -- Guids 9950500-9950515 are the new NPCs. The Night Watch camp at The Night's Watch (area 1816) holds Oswin Drake,
 -- Captain Aldric Vayne, the caged worgen and Julie Addle's second record, where quests 254086-254091 point; the camp
@@ -250,12 +256,13 @@ INSERT INTO `gameobject_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, 
 
 -- Quest item drops: db.exil.es dump 2026-10-04 (creature_loot) for the Wedding Ring, Enchanted Dust and Black Ravager
 -- Meat. The Valuable Gemstone drops from the creatures whose WDB creaturecache entries list it as a quest item
--- (captures up to 2026-09-05); its 65% chance is estimated. Creature 100209, which the dump also lists for the dust,
--- has no template here and is left out.
+-- (captures up to 2026-09-05); its 65% chance is estimated. Bandit Support 100209 drops the dust at 75% in the dump
+-- (creature_loot) and the Exiles DB export (2026-09-12).
 DELETE FROM `creature_loot_template` WHERE (`Entry` = 785 AND `Item` = 355112) OR
   (`Entry` = 787 AND `Item` = 355112) OR
   (`Entry` = 1110 AND `Item` = 355112) OR
   (`Entry` = 910 AND `Item` = 355114) OR
+  (`Entry` = 100209 AND `Item` = 355114) OR
   (`Entry` = 628 AND `Item` = 355115) OR
   (`Entry` = 923 AND `Item` = 355115) OR
   (`Entry` = 1258 AND `Item` = 355115) OR
@@ -270,6 +277,7 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (787, 355112, 0, 65, 1, 1, 0, 1, 1, 'Skeletal Healer - Wedding Ring'),
 (1110, 355112, 0, 65, 1, 1, 0, 1, 1, 'Skeletal Raider - Wedding Ring'),
 (910, 355114, 0, 75, 1, 1, 0, 1, 1, 'Defias Enchanter - Enchanted Dust'),
+(100209, 355114, 0, 75, 1, 1, 0, 1, 1, 'Bandit Support - Enchanted Dust'),
 (628, 355115, 0, 65, 1, 1, 0, 1, 1, 'Black Ravager - Black Ravager Meat'),
 (923, 355115, 0, 65, 1, 1, 0, 1, 1, 'Young Black Ravager - Black Ravager Meat'),
 (1258, 355115, 0, 65, 1, 1, 0, 1, 1, 'Black Ravager Mastiff - Black Ravager Meat'),
@@ -445,8 +453,9 @@ INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 UPDATE `creature_template` SET `npcflag` = `npcflag` | 2 WHERE `entry` = 3136;
 
 -- Credits. No capture describes the live scripts, so every trigger below is estimated; the credit entries are the
--- captured ones. Talking to the caged worgen credits 254086 and 254091; coming within 40 yards of each scouting point
--- credits 255072.
+-- captured ones. Talking to the caged worgen credits 254086 and casts the client's 'Arvis Reunion Credit' (355229),
+-- which gives every player within 30 yards, and their groups, the 254905 credit of 254091; coming within 40 yards of
+-- each scouting point credits 255072.
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (764561,255360,255361,255362,255363) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`,
   `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`,
@@ -454,7 +463,7 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
   `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`,
   `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (764561, 0, 0, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 764561, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Nightbane Worgen - On Gossip Hello - Quest Credit ''The Interrogation'''),
-(764561, 0, 1, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 33, 254905, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Nightbane Worgen - On Gossip Hello - Quest Credit ''May We Be Reunited'''),
+(764561, 0, 1, 0, 64, 0, 100, 0, 0, 0, 0, 0, 0, 0, 11, 355229, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Nightbane Worgen - On Gossip Hello - Cast ''Arvis Reunion Credit'''),
 (255360, 0, 0, 0, 10, 0, 100, 0, 2, 40, 5000, 5000, 1, 0, 33, 255360, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Tranquil Gardens Cemetary Dummy - On Player In Range - Quest Credit ''The Fool and the Foul'''),
 (255361, 0, 0, 0, 10, 0, 100, 0, 2, 40, 5000, 5000, 1, 0, 33, 255361, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Raven Hill Dummy - On Player In Range - Quest Credit ''The Fool and the Foul'''),
 (255362, 0, 0, 0, 10, 0, 100, 0, 2, 40, 5000, 5000, 1, 0, 33, 255362, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Vul''Gol Ogre Mound Dummy - On Player In Range - Quest Credit ''The Fool and the Foul'''),
