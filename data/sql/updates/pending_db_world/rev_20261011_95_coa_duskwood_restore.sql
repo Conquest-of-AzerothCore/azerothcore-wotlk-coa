@@ -111,9 +111,10 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 
 -- Guids 9950500-9950515 are the new NPCs. The Night Watch camp at The Night's Watch (area 1816) holds Oswin Drake,
 -- Captain Aldric Vayne, the caged worgen and Julie Addle's second record, where quests 254086-254091 point; the camp
--- layout is estimated around the Worldforged Bloodied Axe there, at terrain height, with the cage on open ground
--- clear of the farmhouse and prison tower patch-WB1 builds there. The Zemille Prospects inside Eleanor Zemille's
--- patch-WB1 house stand on its ground floor.
+-- layout is estimated around the tent and prisoner cages patch-WB1 builds next to the Worldforged Bloodied Axe there:
+-- the worgen stands in the western cage (map object 5504842), the others face it at terrain height. The Zemille
+-- Prospects stand in front of Eleanor Zemille on her floor of the patch-WB1 house, and Herble Baubbletump (guid 4246)
+-- moves from the old house's wall onto that floor; their spots come from the house's floor and wall geometry.
 -- Guids 9950516-9950613 are spawns the db.exil.es dump 2026-10-04 (creature_spawn, Duskwood) lists and this
 -- server lacks; their positions are the dump's, their facings and respawn times are estimated. Guid 9950614 is
 -- Quartermaster Fenrich.
@@ -122,22 +123,22 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
   `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`,
   `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`,
   `CreateObject`, `Comment`) VALUES
-(9950500, 254904, 0, 0, 0, 1, 1, 0, -10531.7, -1168.46, 35.83, 3.5, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Julie Addle (client SuperTrack, Scarlet Raven Tavern upper floor; facing estimated)'),
+(9950500, 254904, 0, 0, 0, 1, 1, 0, -10531.7, -1168.46, 34.96, 4.19, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Julie Addle (client SuperTrack, Scarlet Raven Tavern upper floor at the patch-WB1 floor height; facing the room estimated)'),
 (9950501, 751496, 0, 0, 0, 1, 1, 0, -10578.8, -1288.93, 41.35, 1.6, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Eleanor Zemille (client SuperTrack; facing estimated)'),
-(9950502, 751497, 0, 0, 0, 1, 1, 0, -10572.0, -1284.0, 36.55, 3.77, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Angus the Handsome (around Eleanor Zemille, facing her; spot estimated)'),
-(9950503, 751498, 0, 0, 0, 1, 1, 0, -10584.0, -1284.0, 36.28, 5.52, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Westly the Broad (around Eleanor Zemille, facing her; spot estimated)'),
-(9950504, 751499, 0, 0, 0, 1, 1, 0, -10576.0, -1278.0, 36.58, 4.46, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Maxwell the Strong (around Eleanor Zemille, facing her; spot estimated)'),
-(9950505, 751500, 0, 0, 0, 1, 1, 0, -10586.0, -1290.0, 36.38, 0.15, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Brutus the Stallion (around Eleanor Zemille, facing her; spot estimated)'),
+(9950502, 751497, 0, 0, 0, 1, 1, 0, -10575.8, -1288.9, 41.35, 3.15, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Angus the Handsome (in front of Eleanor Zemille on her patch-WB1 floor, facing her; spot estimated)'),
+(9950503, 751498, 0, 0, 0, 1, 1, 0, -10579.8, -1286.4, 41.35, 5.09, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Westly the Broad (in front of Eleanor Zemille on her patch-WB1 floor, facing her; spot estimated)'),
+(9950504, 751499, 0, 0, 0, 1, 1, 0, -10576.3, -1286.4, 41.35, 3.93, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Maxwell the Strong (in front of Eleanor Zemille on her patch-WB1 floor, facing her; spot estimated)'),
+(9950505, 751500, 0, 0, 0, 1, 1, 0, -10582.3, -1287.9, 41.35, 6.0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Brutus the Stallion (in front of Eleanor Zemille on her patch-WB1 floor, facing her; spot estimated)'),
 (9950506, 255157, 0, 0, 0, 1, 1, 0, -10466.1, -1200.19, 27.27, 3.1, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Ryton Altham (client SuperTrack; facing estimated)'),
 (9950507, 751502, 0, 0, 0, 1, 1, 0, -10445.8, -1447.77, 70.4, 2.4, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Quill the Foolish (client SuperTrack; facing estimated)'),
 (9950508, 255360, 0, 0, 0, 1, 1, 0, -10969.9, -1275.52, 52.67, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Scouting point for 255072 (client SuperTrack objective point)'),
 (9950509, 255361, 0, 0, 0, 1, 1, 0, -10754.7, 311.02, 38.35, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Scouting point for 255072 (client SuperTrack objective point)'),
 (9950510, 255362, 0, 0, 0, 1, 1, 0, -11119.4, -99.17, 12.71, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Scouting point for 255072 (client SuperTrack objective point)'),
 (9950511, 255363, 0, 0, 0, 1, 1, 0, -10450.0, -802.08, 51.72, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Scouting point for 255072 (client SuperTrack objective point)'),
-(9950512, 255023, 0, 0, 0, 1, 1, 0, -9986.0, -842.0, 21.89, 4.85, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Oswin Drake (Night Watch camp at The Night''s Watch, facing the cage; spot estimated)'),
-(9950513, 764560, 0, 0, 0, 1, 1, 0, -9982.0, -848.0, 21.72, 4.47, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Captain Aldric Vayne (Night Watch camp at The Night''s Watch, facing the cage; spot estimated)'),
-(9950514, 254906, 0, 0, 0, 1, 1, 0, -9988.0, -854.0, 21.86, 5.82, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Julie Addle (Night Watch camp at The Night''s Watch, facing the cage; spot estimated)'),
-(9950515, 764561, 0, 0, 0, 1, 1, 0, -9984.0, -856.0, 21.82, 0.5, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Nightbane Worgen (inside the Night Watch cage; spot and facing estimated)'),
+(9950512, 255023, 0, 0, 0, 1, 1, 0, -9991.0, -840.0, 22.1, 2.89, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Oswin Drake (Night Watch camp at The Night''s Watch, facing the cage; spot estimated)'),
+(9950513, 764560, 0, 0, 0, 1, 1, 0, -9996.47, -837.45, 21.99, 3.31, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Captain Aldric Vayne (Night Watch camp at The Night''s Watch, facing the cage; spot estimated)'),
+(9950514, 254906, 0, 0, 0, 1, 1, 0, -9996.6, -839.36, 21.92, 2.64, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Julie Addle (Night Watch camp at The Night''s Watch, facing the cage; spot estimated)'),
+(9950515, 764561, 0, 0, 0, 1, 1, 0, -9999.23, -837.92, 21.86, 0.17, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Nightbane Worgen (inside the patch-WB1 camp cage, facing the tent; facing estimated)'),
 (9950516, 569, 0, 0, 0, 1, 1, 0, -10967.8, 386.512, 39.4026, 5.45, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Green Recluse (db.exil.es creature_spawn 4241; facing estimated)'),
 (9950517, 210, 0, 0, 0, 1, 1, 0, -10208, 343.256, 8.85151, 1.85, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Bone Chewer (db.exil.es creature_spawn 4401; facing estimated)'),
 (9950518, 1110, 0, 0, 0, 1, 1, 0, -10321.2, 421.358, 15.8676, 0.29, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Skeletal Raider (db.exil.es creature_spawn 4889; facing estimated)'),
@@ -237,8 +238,11 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950612, 13321, 0, 0, 0, 1, 1, 0, -9945.57, -738.131, 21.4035, 5.19, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Frog (db.exil.es creature_spawn 146355; facing estimated)'),
 (9950613, 13321, 0, 0, 0, 1, 1, 0, -9917.64, -661.39, 21.5912, 1.5, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Frog (db.exil.es creature_spawn 146362; facing estimated)'),
 (9950614, 751501, 0, 0, 0, 1, 1, 0, -10570.0, -1232.1, 28.78, 3.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Quartermaster Fenrich (patch-WB1 farmhouse north of Eleanor Zemille; spot in the room and facing estimated)');
+UPDATE `creature` SET `position_x` = -10584, `position_y` = -1274, `position_z` = 41.34, `orientation` = 0.26
+  WHERE `guid` = 4246 AND `id` = 3133;
 
--- Discarded Junk (quest 254088) and the Cage Prop: WDB gameobject cache 2026-09-04..07.
+-- Discarded Junk (quest 254088) and the Cage Prop: WDB gameobject cache 2026-09-04..07. The Cage Prop is not spawned:
+-- the patch-WB1 camp already holds the cage.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`,
   `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`,
@@ -301,19 +305,18 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (1251, 355113, 0, 65, 1, 1, 0, 1, 1, 'Splinter Fist Firemonger - Valuable Gemstone'),
 (1487, 355113, 0, 65, 1, 1, 0, 1, 1, 'Splinter Fist Enslaver - Valuable Gemstone');
 
--- Object spawns. The cage stands in the Night Watch camp around the worgen and the junk piles lie among the Defias at
--- Addle's Stead, where quest 254088 sends the player; every spot, facing and respawn time is estimated.
+-- Object spawns. The junk piles lie among the Defias at Addle's Stead, where quest 254088 sends the player; every
+-- spot, facing and respawn time is estimated.
 DELETE FROM `gameobject` WHERE `guid` BETWEEN 9001400 AND 9001499;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
-(9001400, 523544, 0, 0, 0, 1, 1, -9984.0, -856.0, 21.82, 0.5, 0, 0, 0.247404, 0.968912, 120, 100, 1, '', 0, 'Cage Prop (Night Watch camp, holding the Nightbane Worgen; spot and facing estimated)'),
-(9001401, 254693, 0, 0, 0, 1, 1, -11008.0, 227.0, 27.01, 1.1, 0, 0, 0.522687, 0.852525, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
-(9001402, 254693, 0, 0, 0, 1, 1, -11033.0, 246.0, 26.98, 4.0, 0, 0, 0.909297, -0.416147, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
-(9001403, 254693, 0, 0, 0, 1, 1, -11027.0, 276.0, 26.55, 2.6, 0, 0, 0.963558, 0.267499, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
-(9001404, 254693, 0, 0, 0, 1, 1, -11014.0, 247.0, 27.01, 5.3, 0, 0, 0.472031, -0.881582, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
-(9001405, 254693, 0, 0, 0, 1, 1, -11041.0, 209.0, 27.33, 0.7, 0, 0, 0.342898, 0.939373, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
-(9001406, 254693, 0, 0, 0, 1, 1, -11015.0, 197.0, 27.65, 3.4, 0, 0, 0.991665, -0.128844, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)');
+(9001400, 254693, 0, 0, 0, 1, 1, -11008.0, 227.0, 27.01, 1.1, 0, 0, 0.522687, 0.852525, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
+(9001401, 254693, 0, 0, 0, 1, 1, -11033.0, 246.0, 26.98, 4.0, 0, 0, 0.909297, -0.416147, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
+(9001402, 254693, 0, 0, 0, 1, 1, -11027.0, 276.0, 26.55, 2.6, 0, 0, 0.963558, 0.267499, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
+(9001403, 254693, 0, 0, 0, 1, 1, -11014.0, 247.0, 27.01, 5.3, 0, 0, 0.472031, -0.881582, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
+(9001404, 254693, 0, 0, 0, 1, 1, -11041.0, 209.0, 27.33, 0.7, 0, 0, 0.342898, 0.939373, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)'),
+(9001405, 254693, 0, 0, 0, 1, 1, -11015.0, 197.0, 27.65, 3.4, 0, 0, 0.991665, -0.128844, 120, 100, 1, '', 0, 'Discarded Junk (Addle''s Stead among the Defias spawns; spot and facing estimated)');
 
 -- The objective text 'Vul'Gol Ogre Mound' was captured with a broken apostrophe and is written with a plain one.
 INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `QuestSortID`, `QuestInfoID`,
