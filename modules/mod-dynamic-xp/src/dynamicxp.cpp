@@ -5,8 +5,9 @@ Module Created by Micrah/Milestorme
 Original Script from AshmaneCore https://github.com/conan513 Single Player Project
 
 Local additions:
-  * ".xp" lets a player pick their own rate (1 or 3) or go back to the realm's rate. A game master sets the realm value with ".xp realm ...",
-    which stays the default for every character without a personal choice.
+  * ".xp <rate>" lets a player pick their own rate from the list in Dynamic.XP.Preset.Allowed, or go back to the
+    realm's rate. A game master sets the realm value with ".xp realm <rate>", which stays the default for every
+    character without a personal choice.
   * an optional reminder about ".xp", told to a player when they log in and broadcast to
     the realm every Dynamic.XP.Reminder.Interval minutes.
 */
@@ -16,11 +17,14 @@ Local additions:
 #include "Configuration/Config.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "StringConvert.h"
+#include "Tokenize.h"
 
 #include <atomic>
 #include <cmath>
 #include <fstream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 using namespace Acore::ChatCommands;
@@ -32,6 +36,10 @@ namespace
     constexpr char PRESET_CONFIG_KEY[] = "Dynamic.XP.Preset";
     constexpr char PRESET_CONFIG_FILE[] = "modules/dynamicxp.conf";
     constexpr char PLAYER_CHOICE_CONFIG_KEY[] = "Dynamic.XP.Preset.PlayerChoice";
+    constexpr char ALLOWED_CONFIG_KEY[] = "Dynamic.XP.Preset.Allowed";
+    constexpr char ALLOWED_DEFAULT[] = "1,2,3,4,5";
+    /// The highest rate the offered list can hold: g_allowedRates keeps one bit per rate.
+    constexpr uint32 PRESET_MAX = 31;
 
     /// A character's own choice, stored as preset + 1 so that zero means "no personal
     /// choice yet". A stored rate that is no longer offered falls back to the realm's.
@@ -46,23 +54,68 @@ namespace
     constexpr char REMINDER_INTERVAL_KEY[] = "Dynamic.XP.Reminder.Interval";
     constexpr char REMINDER_MESSAGE_KEY[] = "Dynamic.XP.Reminder.Message";
 
-    constexpr char DEFAULT_REMINDER[] =
-        "|cff4CFF00XP rate|r: pick your own with |cff4CFF00.xp 1|r or |cff4CFF00.xp 3|r, "
-        "or |cff4CFF00.xp default|r to follow the realm. |cff4CFF00.xp|r shows what you "
-        "are on.";
-
     /// -1 until the value has been read from the config. XP is granted on several map
     /// threads at once, so the realm value is cached in an atomic rather than re-read.
     std::atomic<int32> g_realmPresetCache{-1};
 
-    /// Set when a player logs in; the broadcast itself happens on the world thread.
+    /// Bit n is set when xn is offered; 0 until the list has been read from the config.
+    std::atomic<uint32> g_allowedRates{0};
 
     /// Milliseconds since the last periodic reminder. World thread only.
     uint32 g_sinceReminder = 0;
 
+    /// The realm default is always offered, so a fallback to it is always valid.
+    uint32 AllowedRatesFromConfig()
+    {
+        uint32 rates = 1u << PRESET_REALM_DEFAULT;
+        std::string const list = sConfigMgr->GetOption<std::string>(ALLOWED_CONFIG_KEY, ALLOWED_DEFAULT);
+        for (std::string_view token : Acore::Tokenize(list, ',', false))
+        {
+            size_t const first = token.find_first_not_of(" \t");
+            if (first == std::string_view::npos)
+                continue;
+
+            token = token.substr(first, token.find_last_not_of(" \t") - first + 1);
+            Optional<uint32> const rate = Acore::StringTo<uint32>(token);
+            if (rate && *rate >= 1 && *rate <= PRESET_MAX)
+                rates |= 1u << *rate;
+        }
+        return rates;
+    }
+
+    uint32 AllowedRates()
+    {
+        uint32 const cached = g_allowedRates.load(std::memory_order_relaxed);
+        if (cached)
+            return cached;
+
+        uint32 const rates = AllowedRatesFromConfig();
+        g_allowedRates.store(rates, std::memory_order_relaxed);
+        return rates;
+    }
+
     bool IsKnownPreset(uint32 preset)
     {
-        return preset == 1 || preset == 3;
+        return preset >= 1 && preset <= PRESET_MAX && (AllowedRates() & (1u << preset));
+    }
+
+    /// "|cff4CFF00.xp 1|r, |cff4CFF00.xp 2|r or |cff4CFF00.xp 3|r" for the offered rates.
+    std::string DescribeAllowed(std::string_view command)
+    {
+        std::vector<std::string> choices;
+        uint32 const rates = AllowedRates();
+        for (uint32 rate = 1; rate <= PRESET_MAX; ++rate)
+            if (rates & (1u << rate))
+                choices.push_back("|cff4CFF00" + std::string(command) + " " + std::to_string(rate) + "|r");
+
+        std::string text;
+        for (size_t i = 0; i < choices.size(); ++i)
+        {
+            if (i)
+                text += i + 1 == choices.size() ? " or " : ", ";
+            text += choices[i];
+        }
+        return text;
     }
 
     uint32 PresetFromConfig()
@@ -82,8 +135,9 @@ namespace
         return preset;
     }
 
-    void RefreshRealmPreset()
+    void RefreshFromConfig()
     {
+        g_allowedRates.store(AllowedRatesFromConfig(), std::memory_order_relaxed);
         g_realmPresetCache.store(int32(PresetFromConfig()), std::memory_order_relaxed);
     }
 
@@ -108,6 +162,18 @@ namespace
 
         preset = stored - 1;
         return IsKnownPreset(preset);
+    }
+
+    /// A stored rate that is no longer offered is dropped for good, so the character follows the realm even if
+    /// that rate is offered again later.
+    void DropWithdrawnPreset(Player *player)
+    {
+        PlayerSettingVector const *values = player->FindPlayerSettings(PLAYER_PRESET_SETTING);
+        if (!values || values->empty() || !(*values)[0].value)
+            return;
+
+        if (!IsKnownPreset((*values)[0].value - 1))
+            player->UpdatePlayerSetting(PLAYER_PRESET_SETTING, 0, 0);
     }
 
     void StorePersonalPreset(Player *player, uint32 preset)
@@ -143,8 +209,8 @@ namespace
     }
 
     /// Writes the realm value into this module's config so a restart keeps it. Only the
-    /// "Dynamic.XP.Preset" line is rewritten: the comments and the band rates stay as
-    /// the operator wrote them. The line is appended when the file does not have it.
+    /// "Dynamic.XP.Preset" line is rewritten: the rest of the file stays as the operator
+    /// wrote it. The line is appended when the file does not have it.
     /// Returns whether the file now holds the value; \p path always names the file.
     bool PersistRealmPreset(uint32 preset, std::string &path)
     {
@@ -197,7 +263,11 @@ namespace
     std::string ReminderText()
     {
         std::string text = sConfigMgr->GetOption<std::string>(REMINDER_MESSAGE_KEY, "");
-        return text.empty() ? std::string(DEFAULT_REMINDER) : text;
+        if (!text.empty())
+            return text;
+
+        return "|cff4CFF00XP rate|r: pick your own with " + DescribeAllowed(".xp") +
+               ", or |cff4CFF00.xp default|r to follow the realm. |cff4CFF00.xp|r shows what you are on.";
     }
 
     /// One announcement, to every player who is online and has not turned automatic
@@ -228,6 +298,8 @@ public:
 
     void OnPlayerLogin(Player* player) override
     {
+        DropWithdrawnPreset(player);
+
         // Told to the player who just arrived, not broadcast to the realm: a realm with bots logs
         // characters in and out constantly, and each login announced to everybody filled the chat.
         if (ReminderEnabled() && !player->GetSession()->IsBot())
@@ -256,7 +328,7 @@ public:
 
     void OnBeforeConfigLoad(bool /*reload*/) override
     {
-        RefreshRealmPreset();
+        RefreshFromConfig();
     }
 
     void OnUpdate(uint32 diff) override
@@ -281,20 +353,11 @@ public:
 
     ChatCommandTable GetCommands() const override
     {
-        static ChatCommandTable const realmTable =
-        {
-            { "1",       HandleRealmOne,     SEC_GAMEMASTER, Console::Yes },
-            { "3",       HandleRealmThree,   SEC_GAMEMASTER, Console::Yes },
-            { "",        HandleShowRealm,    SEC_GAMEMASTER, Console::Yes },
-        };
-
         static ChatCommandTable const xpCommandTable =
         {
-            { "1",       HandleMineOne,      SEC_PLAYER, Console::No },
-            { "3",       HandleMineThree,    SEC_PLAYER, Console::No },
-            { "default", HandleMineDefault,  SEC_PLAYER, Console::No },
-            { "realm",   realmTable },
-            { "",        HandleShowMine,     SEC_PLAYER, Console::No },
+            { "default", HandleMineDefault,  SEC_PLAYER,     Console::No },
+            { "realm",   HandleRealm,        SEC_GAMEMASTER, Console::Yes },
+            { "",        HandleMine,         SEC_PLAYER,     Console::No },
         };
 
         static ChatCommandTable const commandTable =
@@ -320,14 +383,23 @@ private:
             return true;
         }
 
+        if (!IsKnownPreset(preset))
+        {
+            handler->SendErrorMessage("{} is not offered on this realm. Pick {}.", DescribePreset(preset),
+                                      DescribeAllowed(".xp"));
+            return false;
+        }
+
         StorePersonalPreset(player, preset);
         handler->PSendSysMessage("Your XP rate is now |cff4CFF00{}|r, saved for this character.",
                                  DescribePreset(preset));
         return true;
     }
 
-    static bool HandleMineOne(ChatHandler* handler)     { return SetMine(handler, 1); }
-    static bool HandleMineThree(ChatHandler* handler)   { return SetMine(handler, 3); }
+    static bool HandleMine(ChatHandler* handler, Optional<uint32> rate)
+    {
+        return rate ? SetMine(handler, *rate) : ShowMine(handler);
+    }
 
     static bool HandleMineDefault(ChatHandler* handler)
     {
@@ -341,7 +413,7 @@ private:
         return true;
     }
 
-    static bool HandleShowMine(ChatHandler* handler)
+    static bool ShowMine(ChatHandler* handler)
     {
         Player* player = handler ? handler->GetPlayer() : nullptr;
         if (!player)
@@ -357,8 +429,7 @@ private:
             handler->PSendSysMessage("The realm rate is {}. |cff4CFF00.xp default|r "
                                      "follows it again.", DescribePreset(RealmPreset()));
         if (PlayersMayChoose())
-            handler->SendSysMessage(
-                "Pick yours with |cff4CFF00.xp 1|r or |cff4CFF00.xp 3|r.");
+            handler->PSendSysMessage("Pick yours with {}.", DescribeAllowed(".xp"));
         return true;
     }
 
@@ -368,6 +439,13 @@ private:
     {
         if (!handler)
             return false;
+
+        if (!IsKnownPreset(preset))
+        {
+            handler->SendErrorMessage("{} is not offered on this realm. Pick {}.", DescribePreset(preset),
+                                      DescribeAllowed(".xp realm"));
+            return false;
+        }
 
         std::string path;
         bool const persisted = PersistRealmPreset(preset, path);
@@ -391,10 +469,12 @@ private:
         return true;
     }
 
-    static bool HandleRealmOne(ChatHandler* handler)    { return SetRealm(handler, 1); }
-    static bool HandleRealmThree(ChatHandler* handler)  { return SetRealm(handler, 3); }
+    static bool HandleRealm(ChatHandler* handler, Optional<uint32> rate)
+    {
+        return rate ? SetRealm(handler, *rate) : ShowRealm(handler);
+    }
 
-    static bool HandleShowRealm(ChatHandler* handler)
+    static bool ShowRealm(ChatHandler* handler)
     {
         if (!handler)
             return false;
@@ -402,8 +482,7 @@ private:
         handler->PSendSysMessage("Realm XP rate: |cff4CFF00{}|r (the default for every "
                                  "character without its own choice).",
                                  DescribePreset(RealmPreset()));
-        handler->SendSysMessage(
-            "Change it with |cff4CFF00.xp realm 1|r or |cff4CFF00.xp realm 3|r.");
+        handler->PSendSysMessage("Change it with {}.", DescribeAllowed(".xp realm"));
         return true;
     }
 };
