@@ -31,7 +31,9 @@ namespace
 constexpr uint32 RUNE_OF_DESCENSION = 375250;
 constexpr uint32 DEFAULT_PERCENT = 200;
 constexpr uint32 EXPIRY_CHECK_MS = IN_MILLISECONDS;
-constexpr char ANNOUNCE_PREFIX[] = "|cff00ccff[Test Zones]|r ";
+constexpr char ANNOUNCE_PREFIX[] = "|cffff8000[Test Zones]|r |cffffff00";
+constexpr char ANNOUNCE_TEXT_COLOR[] = "|cffffff00";
+constexpr char ANNOUNCE_VALUE_COLOR[] = "|cff00ccff";
 
 struct Bonus
 {
@@ -111,10 +113,20 @@ std::string ZoneName(uint32 zoneId)
     return area ? area->area_name[LOCALE_enUS] : "unknown zone";
 }
 
+std::string AnnouncedValue(std::string_view value)
+{
+    return Acore::StringFormat("{}{}{}", ANNOUNCE_VALUE_COLOR, value, ANNOUNCE_TEXT_COLOR);
+}
+
+std::string AnnouncedPercent(uint32 percent)
+{
+    return AnnouncedValue(Acore::StringFormat("{}%", percent));
+}
+
 std::string DescribeRates(Bonus const& bonus)
 {
-    return Acore::StringFormat("{}% experience, {}% Runes of Descension and {}% Bazaar Tokens",
-        bonus.experience, bonus.runes, bonus.bazaarTokens);
+    return Acore::StringFormat("{} experience, {} Runes of Descension and {} Bazaar Tokens",
+        AnnouncedPercent(bonus.experience), AnnouncedPercent(bonus.runes), AnnouncedPercent(bonus.bazaarTokens));
 }
 
 std::string TimeLeft(uint32 expiresAt)
@@ -132,7 +144,7 @@ std::string DescribeEnd(Bonus const& bonus)
 void AnnounceActivated(uint32 zoneId, Bonus const& bonus)
 {
     std::string const ending = bonus.expiresAt
-        ? Acore::StringFormat(" Ends in {}.", TimeLeft(bonus.expiresAt)) : std::string();
+        ? Acore::StringFormat(" Ends in {}.", AnnouncedValue(TimeLeft(bonus.expiresAt))) : std::string();
     ChatHandler(nullptr).SendWorldText("{}{} is now a test zone: {}. Help us find bugs and report back feedback!{}",
         ANNOUNCE_PREFIX, ZoneName(zoneId), DescribeRates(bonus), ending);
 }
@@ -147,7 +159,7 @@ void AnnounceActiveZones()
     for (auto const& [zoneId, bonus] : *zones)
     {
         std::string const ending = bonus.expiresAt
-            ? Acore::StringFormat(" ({})", DescribeEnd(bonus)) : std::string();
+            ? Acore::StringFormat(" (ends in {})", AnnouncedValue(TimeLeft(bonus.expiresAt))) : std::string();
         text += Acore::StringFormat("\n{}{}: {}{}", ANNOUNCE_PREFIX, ZoneName(zoneId), DescribeRates(bonus), ending);
     }
     ChatHandler(nullptr).SendWorldText("{}", text);
