@@ -6,6 +6,7 @@
 #include "AllCreatureScript.h"
 #include "AllGameObjectScript.h"
 #include "AllSpellScript.h"
+#include "AscensionAverageItemLevel.h"
 #include "AuctionHouseMgr.h"
 #include "Battleground.h"
 #include "Config.h"
@@ -154,7 +155,7 @@ namespace PathToAscension
         {
             // Explicit equipped-average item level thresholds. Where the installed client carries two
             // conflicting values for a Vanilla prerequisite, the higher one satisfies both.
-            float const itemLevel = player->GetAverageItemLevel();
+            float const itemLevel = AscensionAverageItemLevel::Equipped(player);
             for (auto const [tutorialId, threshold] : {std::pair{10u, 40u}, {200u, 52u}, {201u, 58u}, {202u, 62u},
                 {203u, 62u}, {204u, 64u}, {205u, 69u}, {206u, 75u}, {207u, 80u}, {208u, 92u}, {209u, 95u},
                 {210u, 100u}, {211u, 108u}, {212u, 114u}, {213u, 116u}, {214u, 134u}, {215u, 134u},
