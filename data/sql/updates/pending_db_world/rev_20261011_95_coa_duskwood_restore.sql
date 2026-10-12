@@ -3,7 +3,8 @@
 -- gameobjectcache 2026-09-04..07), quest item drops and 98 creature spawns missing here (db.exil.es dump 2026-10-04),
 -- plus creature cache values that differ from the captures.
 -- Positions follow the client QuestSuperTrack/SuperTrack points where one exists; every other spot, every facing and
--- every level, faction and flag of the new NPCs is estimated, since the captures carry none.
+-- every level, faction, NPC and unit flag of the new NPCs is estimated, since the captures carry none. Their type
+-- flags, health modifiers and movement ids follow each NPC's creaturecache row.
 -- Quest levels follow the captures, except 255071, 255072 and 255074: one capture lists them at -1, the Dawnrise
 -- questcache 2026-09-01 at 26, 26 and 25 (25 for 255074 also in the db.exil.es dump 2026-10-04), which is used.
 -- 255074 drops the captured creature count of 12, which names no creature; its objective is the 10 Black Ravager
@@ -18,21 +19,21 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
   `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`,
   `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`)
 VALUES
-(255023, 0, 0, 0, 0, 0, 'Oswin Drake', 'The Night Watch', NULL, 9950203, 30, 30, 0, 53, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(764547, 0, 0, 0, 0, 0, 'Oswin Drake', 'The Night Watch', NULL, 0, 30, 30, 0, 53, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(764560, 0, 0, 0, 0, 0, 'Captain Aldric Vayne', 'The Night Watch', NULL, 0, 32, 32, 0, 53, 2, 1, 1.14286, 1, 1, 18, 1, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(764561, 0, 0, 0, 0, 0, 'Nightbane Worgen', NULL, NULL, 9950200, 24, 24, 0, 35, 1, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1.064, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(254904, 0, 0, 0, 0, 0, 'Julie Addle', NULL, NULL, 0, 20, 20, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.12, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(254905, 0, 0, 0, 0, 0, 'Julie Addle', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.12, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(254906, 0, 0, 0, 0, 0, 'Julie Addle', NULL, NULL, 0, 20, 20, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1.12, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(255157, 0, 0, 0, 0, 0, 'Ryton Altham', NULL, NULL, 9950204, 22, 22, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(751496, 0, 0, 0, 0, 0, 'Eleanor Zemille', 'The Widow', NULL, 9950205, 25, 25, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(751497, 0, 0, 0, 0, 0, 'Angus the Handsome', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(751498, 0, 0, 0, 0, 0, 'Westly the Broad', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(751499, 0, 0, 0, 0, 0, 'Maxwell the Strong', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(751500, 0, 0, 0, 0, 0, 'Brutus the Stallion', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(751501, 0, 0, 0, 0, 0, 'Quartermaster Fenrich', 'The Night Watch', NULL, 9950207, 30, 30, 0, 53, 131, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(751502, 0, 0, 0, 0, 0, 'Quill the Foolish', NULL, NULL, 9950206, 25, 25, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255023, 0, 0, 0, 0, 0, 'Oswin Drake', 'The Night Watch', NULL, 9950203, 30, 30, 0, 53, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(764547, 0, 0, 0, 0, 0, 'Oswin Drake', 'The Night Watch', NULL, 0, 30, 30, 0, 53, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(764560, 0, 0, 0, 0, 0, 'Captain Aldric Vayne', 'The Night Watch', NULL, 0, 32, 32, 0, 53, 2, 1, 1.14286, 1, 1, 18, 1, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(764561, 0, 0, 0, 0, 0, 'Nightbane Worgen', NULL, NULL, 9950200, 24, 24, 0, 35, 1, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1.064, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(254904, 0, 0, 0, 0, 0, 'Julie Addle', NULL, NULL, 0, 20, 20, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.12, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(254905, 0, 0, 0, 0, 0, 'Julie Addle', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.12, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(254906, 0, 0, 0, 0, 0, 'Julie Addle', NULL, NULL, 0, 20, 20, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1.12, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(255157, 0, 0, 0, 0, 0, 'Ryton Altham', NULL, NULL, 9950204, 22, 22, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(751496, 0, 0, 0, 0, 0, 'Eleanor Zemille', 'The Widow', NULL, 9950205, 25, 25, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(751497, 0, 0, 0, 0, 0, 'Angus the Handsome', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(751498, 0, 0, 0, 0, 0, 'Westly the Broad', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(751499, 0, 0, 0, 0, 0, 'Maxwell the Strong', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(751500, 0, 0, 0, 0, 0, 'Brutus the Stallion', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(751501, 0, 0, 0, 0, 0, 'Quartermaster Fenrich', 'The Night Watch', NULL, 9950207, 30, 30, 0, 53, 131, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 8, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(751502, 0, 0, 0, 0, 0, 'Quill the Foolish', NULL, NULL, 9950206, 25, 25, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
 (100209, 0, 0, 0, 0, 0, 'Bandit Support', NULL, NULL, 0, 26, 26, 0, 17, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 8, 0, 2048, 0, 0, 7, 0, 100209, 0, 0, 0, 0, 21, 126, '', 0, 1, 1.064, 1, 1, 1, 0, 0, 1, 0, 0, '', 0),
 (255360, 0, 0, 0, 0, 0, 'Tranquil Gardens Cemetary Dummy', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 33554434, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 5.022, 1, 1, 1, 0, 0, 1, 0, 130, '', 0),
 (255361, 0, 0, 0, 0, 0, 'Raven Hill Dummy', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 33554434, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 5.022, 1, 1, 1, 0, 0, 1, 0, 130, '', 0),
@@ -73,8 +74,10 @@ ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
 -- Dodds (888), the townsfolk Barkeep Hann (274), and the caged worgen and the scouting dummies are friendly and
 -- cannot be attacked. Julie Addle 254905 is the captured credit entry of 254091 and Oswin Drake 764547 the captured
 -- second Oswin record; neither is spawned.
--- Quartermaster Fenrich 751501 stands in a Darkshire doorway in the recording above (1:01:48) but is not spawned yet:
--- his spot will be placed in game.
+-- Quartermaster Fenrich 751501 stands inside a small Darkshire house in the recording above (1:01:48), about six
+-- seconds' run downhill from Eleanor Zemille's door past Finbus Geargrind's house: the patch-WB1 farmhouse (WMO uid
+-- 1157568) north of hers, which holds no other NPC. He stands on its floor (z 28.78 from the WMO), facing its south
+-- door; his spot in the room and his facing are estimated.
 -- Bandit Support 100209 is level 26 in the WDB creaturecache (db.exil.es dump 2026-10-04, creature) and has the Defias
 -- Enchanter's client displays (Creature.dbc); its faction, class, health, gold and drop follow the Defias Enchanter
 -- (910) as estimates. No capture spawns or summons it, so it is not spawned.
@@ -111,7 +114,8 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 -- clear of the farmhouse and prison tower patch-WB1 builds there. The Zemille Prospects inside Eleanor Zemille's
 -- patch-WB1 house stand on its ground floor.
 -- Guids 9950516-9950613 are spawns the db.exil.es dump 2026-10-04 (creature_spawn, Duskwood) lists and this
--- server lacks; their positions are the dump's, their facings and respawn times are estimated.
+-- server lacks; their positions are the dump's, their facings and respawn times are estimated. Guid 9950614 is
+-- Quartermaster Fenrich.
 DELETE FROM `creature` WHERE `guid` BETWEEN 9950500 AND 9950699;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`,
   `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`,
@@ -230,7 +234,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9950610, 13321, 0, 0, 0, 1, 1, 0, -9946.75, -731.445, 22.476, 4.45, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Frog (db.exil.es creature_spawn 146353; facing estimated)'),
 (9950611, 13321, 0, 0, 0, 1, 1, 0, -9945.91, -732.519, 22.1444, 4.82, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Frog (db.exil.es creature_spawn 146354; facing estimated)'),
 (9950612, 13321, 0, 0, 0, 1, 1, 0, -9945.57, -738.131, 21.4035, 5.19, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Frog (db.exil.es creature_spawn 146355; facing estimated)'),
-(9950613, 13321, 0, 0, 0, 1, 1, 0, -9917.64, -661.39, 21.5912, 1.5, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Frog (db.exil.es creature_spawn 146362; facing estimated)');
+(9950613, 13321, 0, 0, 0, 1, 1, 0, -9917.64, -661.39, 21.5912, 1.5, 300, 5, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Frog (db.exil.es creature_spawn 146362; facing estimated)'),
+(9950614, 751501, 0, 0, 0, 1, 1, 0, -10570.0, -1232.1, 28.78, 3.14, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Quartermaster Fenrich (patch-WB1 farmhouse north of Eleanor Zemille; spot in the room and facing estimated)');
 
 -- Discarded Junk (quest 254088) and the Cage Prop: WDB gameobject cache 2026-09-04..07.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
