@@ -15,16 +15,20 @@ enum AvoidingSummonEntry : uint32
     NPC_CRIMSON_CANNON       = 11199,
     NPC_TIMBERMAW_ANCESTOR   = 15720,
     NPC_FUNGARIAN            = 45896,
+    NPC_SHADOWHOUND          = 50124,
+    NPC_LESSER_SHADOWHOUND   = 50224,
     NPC_HONORED_ANCESTOR     = 51265,
     NPC_ANIMATED_ZOMBIE      = 503031,
 };
 
-constexpr std::array<uint32, 6> AvoidingSummonEntries =
+constexpr std::array<uint32, 8> AvoidingSummonEntries =
 {
     NPC_EMERALD_DRAGON_WHELP,
     NPC_CRIMSON_CANNON,
     NPC_TIMBERMAW_ANCESTOR,
     NPC_FUNGARIAN,
+    NPC_SHADOWHOUND,
+    NPC_LESSER_SHADOWHOUND,
     NPC_HONORED_ANCESTOR,
     NPC_ANIMATED_ZOMBIE,
 };
