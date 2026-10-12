@@ -32,7 +32,7 @@ VALUES
 (751498, 0, 0, 0, 0, 0, 'Westly the Broad', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
 (751499, 0, 0, 0, 0, 0, 'Maxwell the Strong', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
 (751500, 0, 0, 0, 0, 0, 'Brutus the Stallion', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
-(751501, 0, 0, 0, 0, 0, 'Quartermaster Fenrich', 'The Night Watch', NULL, 9950207, 30, 30, 0, 53, 131, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 8, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
+(751501, 0, 0, 0, 0, 0, 'Quartermaster Fenrich', 'The Night Watch', NULL, 9950207, 39, 39, 0, 12, 131, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 8, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
 (751502, 0, 0, 0, 0, 0, 'Quill the Foolish', NULL, NULL, 9950206, 25, 25, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 999, 1, 0, 2, '', 0),
 (100209, 0, 0, 0, 0, 0, 'Bandit Support', NULL, NULL, 0, 26, 26, 0, 17, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 8, 0, 2048, 0, 0, 7, 0, 100209, 0, 0, 0, 0, 21, 126, '', 0, 1, 1.064, 1, 1, 1, 0, 0, 1, 0, 0, '', 0),
 (255360, 0, 0, 0, 0, 0, 'Tranquil Gardens Cemetary Dummy', NULL, NULL, 0, 1, 1, 0, 35, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 33554434, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 5.022, 1, 1, 1, 0, 0, 1, 0, 130, '', 0),
@@ -77,7 +77,8 @@ ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
 -- Quartermaster Fenrich 751501 stands inside a small Darkshire house in the recording above (1:01:48), about six
 -- seconds' run downhill from Eleanor Zemille's door past Finbus Geargrind's house: the patch-WB1 farmhouse (WMO uid
 -- 1157568) north of hers, which holds no other NPC. He stands on its floor (z 28.78 from the WMO), facing its south
--- door; his spot in the room and his facing are estimated.
+-- door; his spot in the room and his facing are estimated. His tooltip there reads Level 39 and Stormwind, so he has
+-- level 39 and faction template 12 (Stormwind, as the Darkshire townsfolk).
 -- Bandit Support 100209 is level 26 in the WDB creaturecache (db.exil.es dump 2026-10-04, creature) and has the Defias
 -- Enchanter's client displays (Creature.dbc); its faction, class, health, gold and drop follow the Defias Enchanter
 -- (910) as estimates. No capture spawns or summons it, so it is not spawned.
