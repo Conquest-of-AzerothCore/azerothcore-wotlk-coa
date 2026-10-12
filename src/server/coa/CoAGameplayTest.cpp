@@ -4599,6 +4599,9 @@ private:
             player->SetPhaseMask(step.get<uint32>("value", _phase), true);
         else if (action == "set_money")
             player->SetMoney(step.get<uint32>("value"));
+        else if (action == "set_player_setting")
+            player->UpdatePlayerSetting(step.get<std::string>("source"), step.get<uint32>("index"),
+                step.get<uint32>("value"));
         else if (action == "use_nearby_gameobject")
         {
             ObjectGuid owner;

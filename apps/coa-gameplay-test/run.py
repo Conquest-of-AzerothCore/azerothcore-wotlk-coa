@@ -215,6 +215,7 @@ ACTIONS = {
     'collect_loot': ({'actor'}, {'actor'}),
     'close_loot': ({'actor'}, {'actor'}),
     'set_money': ({'actor', 'value'}, {'actor', 'value'}),
+    'set_player_setting': ({'actor', 'source', 'index', 'value'}, {'actor', 'source', 'index', 'value'}),
     'set_phase': ({'actor'}, {'actor', 'value'}),
     'use_nearby_gameobject': ({'actor', 'entry'}, {'actor', 'entry', 'owner'}),
     'attack_owned_creature': ({'actor', 'target', 'entry'}, {'actor', 'target', 'entry'}),
