@@ -481,7 +481,7 @@ void Spell::EffectAscensionModifyAuraDuration(SpellEffIndex effIndex)
     if (!target || !effect.MiscValue)
         return;
 
-    if (Aura* aura = target->GetAura(effect.MiscValue))
+    if (Aura* aura = target->GetAuraOfRankedSpell(effect.MiscValue))
     {
         int32 duration = aura->GetDuration() + damage;
         if (duration <= 0)
@@ -4856,7 +4856,7 @@ void Spell::EffectDisEnchant(SpellEffIndex /*effIndex*/)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-    if (!itemTarget || !itemTarget->GetTemplate()->DisenchantID)
+    if (!itemTarget || !LocalLevelScaling::InstanceTemplateFor(itemTarget, itemTarget->GetTemplate())->DisenchantID)
         return;
 
     if (Player* caster = m_caster->ToPlayer())

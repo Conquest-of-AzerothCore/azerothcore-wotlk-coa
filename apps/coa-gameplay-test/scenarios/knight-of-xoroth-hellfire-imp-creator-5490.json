@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Hellfire Imp creator metadata (#5490)",
+  "contract": [
+    "Spell 807699 summons Hellfire Imp 50301 with SummonProperties 61 (ally guardian).",
+    "Native guardian/minion initialization records the owner in UNIT_FIELD_CREATEDBY.",
+    "The custom Xoroth factory deliberately uses TempSummon and bypasses that initialization.",
+    "Keep its summon count, lifetime and control behavior while carrying the knight as creator.",
+    "Call and the native helper exercise the shared factory; bot marks the socketless native session.",
+    "A native Warlock Imp is the independent control. It observes metadata, not rendered nameplates or external bot AI."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 11,
+      "bot": false
+    },
+    {
+      "id": "warlock",
+      "race": 1,
+      "class": 9,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "warlock",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "actor": "warlock",
+      "spell": 688
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "owned_creature_count",
+      "entry": 416,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "owned_creature_count",
+      "entry": 416,
+      "equals": 1,
+      "label": "CONTROL: native Summon Imp carries its creator",
+      "creator_only": true
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 804883
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 804883
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Call summons exactly one Hellfire Imp"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "label": "Hellfire Imp creator is its knight",
+      "creator_only": true
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 807699
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 807699
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Native summon helper also creates one imp"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "label": "Helper uses the same creator metadata",
+      "creator_only": true
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "creator_only": true,
+      "equals": 0,
+      "label": "CONTROL: another player does not create the knight's imp"
+    },
+    {
+      "action": "assert",
+      "actor": "warlock",
+      "metric": "owned_creature_count",
+      "entry": 416,
+      "equals": 1,
+      "label": "CONTROL: ordinary minion remains unchanged",
+      "creator_only": true
+    }
+  ]
+}

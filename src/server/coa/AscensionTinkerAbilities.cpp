@@ -15,6 +15,7 @@
 namespace
 {
 using namespace AscensionTinker;
+constexpr uint32 SnapshotTaken = Scrap;
 bool Select(uint32 id, SpellInfo const* info)
 {
     switch (id)
@@ -36,8 +37,9 @@ bool TrainingDummy(Unit const* unit)
 }
 void Snapshot(Player* player, Spell* spell)
 {
-    if (spell->IsTriggered())
+    if (spell->IsTriggered() || spell->GetScriptValue(SnapshotTaken))
         return;
+    spell->SetScriptValue(SnapshotTaken,1);
     for (uint32 id : TinkerFinite)
         if (Select(id,spell->GetSpellInfo()))
             if (Aura* aura = player->GetAura(id))
@@ -74,7 +76,7 @@ class tinker_spells : public AllSpellScript
 {
 public:
     tinker_spells() : AllSpellScript("tinker_spells",
-        {ALLSPELLHOOK_ON_SPELL_CHECK_CAST,ALLSPELLHOOK_ON_BEFORE_EFFECTS,ALLSPELLHOOK_ON_CAST,
+        {ALLSPELLHOOK_ON_SPELL_CHECK_CAST,ALLSPELLHOOK_ON_PREPARE,ALLSPELLHOOK_ON_BEFORE_EFFECTS,ALLSPELLHOOK_ON_CAST,
          ALLSPELLHOOK_ON_CRIT_CHANCE,ALLSPELLHOOK_ON_HIT_RESULT}) { }
     void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
     {
@@ -92,6 +94,12 @@ public:
             result = SPELL_FAILED_NO_POWER;
         if (info->Id == 504594 && !player->HasAura(681245))
             result = SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+    }
+    void OnSpellPrepare(Spell* spell, Unit* caster, SpellInfo const* info) override
+    {
+        Player* player = Owner(caster);
+        if (player == caster && player && info->SpellFamilyName == 34 && spell->getState() == SPELL_STATE_PREPARING)
+            Snapshot(player,spell);
     }
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {

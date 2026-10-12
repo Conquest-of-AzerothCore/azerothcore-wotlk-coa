@@ -20,6 +20,8 @@ CASES = r"""
 struct Player : Unit {};
 struct Creature : Unit
 {
+    uint32 creator = 0;
+    void SetCreatorGUID(uint32 owner) { creator = owner; }
     struct Threat
     {
         void RegisterRedirectThreat(uint32 spell, uint32 owner, uint32 percent)
@@ -46,6 +48,7 @@ int main()
     imp.entry = 50301;
     assert(!imp.NativeAttackAdmission(&neutral));
     Initialize(&imp, &player);
+    assert(imp.creator == 1);
     assert(imp.m_ControlledByPlayer && imp.HasUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED));
     assert(imp.pvp == player.pvp);
     assert(imp.NativeAttackAdmission(&neutral));
@@ -61,6 +64,7 @@ int main()
         Creature other;
         other.entry = entry;
         Initialize(&other, &player);
+        assert(!other.creator);
         assert(!other.m_ControlledByPlayer && !other.flags && !other.pvp);
     }
 }
@@ -97,7 +101,7 @@ def main():
             flags = ["-std=c++20", "-Wall", "-Wextra", "-Werror", str(cpp), "-o", str(exe)]
         subprocess.run([compiler, *flags], cwd=out, check=True)
         subprocess.run([str(exe)], cwd=out, check=True)
-    print("PASS: Imp control flags, neutral-target admission, PC/NPC immunities, PvP state and other summons")
+    print("PASS: Imp creator, control flags, neutral-target admission, PC/NPC immunities, PvP state and other summons")
 
 
 if __name__ == "__main__":

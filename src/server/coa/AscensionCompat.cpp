@@ -392,6 +392,7 @@ constexpr uint32 APPEARANCE_ADD_INITIAL_DELAY_MS = 500;
 constexpr uint32 APPEARANCE_LOGIN_RESYNC_DELAY_MS = 3000;
 constexpr std::size_t MAX_QUEUED_EXTENSION_PACKETS = 64;
 constexpr uint32 VANITY_CATEGORY_MOUNTS = 0x04000000;
+constexpr uint32 SPELL_TALENT_LEARNING_CUE = 47292;
 constexpr uint32 VANITY_CATEGORY_COMPANIONS = 0x08000000;
 constexpr uint32 ITEM_WONDROUS_WISDOMBALL = 101169;
 constexpr uint32 ITEM_FIX_O_TRON_5000 = 97330;
@@ -401,6 +402,11 @@ constexpr uint32 COMPANION_SPELL_BATCH_INTERVAL_MS = 200;
 enum AscensionItems : uint32
 {
     ITEM_HEARTWOOD_KEY = 1041710
+};
+
+constexpr std::array<uint32, 9> BUSHCRAFT_CRAFTED_ITEMS =
+{
+    10521, 10522, 10523, 10524, 10525, 10526, 10527, 10528, 1041704
 };
 
 enum AscensionRidingSpells : uint32
@@ -2140,15 +2146,29 @@ public:
       refusal.Entry = applied.EntryId;
       refusal.Rank = applied.Rank;
     }
-    else if (!ApplyKnownEntriesUpload(player, upload, refusal))
-    {
-      LOG_INFO("coa", "Refused known-entries upload of {} record(s) from {}: {} {} {}",
-               upload.size(), player->GetName(), refusal.Result, refusal.Learn, refusal.Detail);
-      if (refusal.Announce)
-        ChatHandler(player->GetSession()).SendSysMessage(refusal.Detail);
-    }
     else
-      refusal.Result = "CA_UPDATE_ENTRIES_OK";
+    {
+      bool const learnsPaidRank = std::any_of(upload.begin(), upload.end(),
+          [player](AscensionCoATalentState::KnownEntry const& item)
+          {
+            AscensionCompatData::CoATalentEntry const* entry = FindTalentEntry(item.EntryId);
+            return entry && entry->ClassId == player->getClass() && (entry->AECost || entry->TECost) &&
+                item.Rank > KnownRank(player, *entry);
+          });
+      if (!ApplyKnownEntriesUpload(player, upload, refusal))
+      {
+        LOG_INFO("coa", "Refused known-entries upload of {} record(s) from {}: {} {} {}",
+                 upload.size(), player->GetName(), refusal.Result, refusal.Learn, refusal.Detail);
+        if (refusal.Announce)
+          ChatHandler(player->GetSession()).SendSysMessage(refusal.Detail);
+      }
+      else
+      {
+        refusal.Result = "CA_UPDATE_ENTRIES_OK";
+        if (learnsPaidRank)
+          player->CastSpell(player, SPELL_TALENT_LEARNING_CUE, true);
+      }
+    }
     SendCharacterAdvancementKnownEntries(player);
     WorldPacket result(SMSG_CHARACTER_ADVANCEMENT_UPDATE_ENTRIES_RESULT, 64);
     result << refusal.Result << refusal.Learn << refusal.Entry << refusal.Rank;
@@ -3702,6 +3722,15 @@ public:
         _onDemandItemRows[player->GetGUID().GetCounter()].Add(sent);
     }
 
+    void SendLearnedRecipeItemRows(Player* player, uint32 spellId)
+    {
+        if (!player->IsInWorld())
+            return;
+
+        for (uint32 itemId : RegisteredCraftedItemIds(spellId))
+            SendItemRowOnDemand(player, itemId);
+    }
+
     void SendSpellNoticeRow(Player* player, uint32 spellId, bool hidden)
     {
         if (!IsAscensionCustomClass(player) || !ReceivesPatchRows(player) || !player->IsInWorld())
@@ -3829,7 +3858,9 @@ public:
     }
 
     std::vector<ItemPatchRow> itemRows;
-    for (uint32 itemId : CollectOwnedItemIds(player))
+    std::unordered_set<uint32> itemIds = CollectOwnedItemIds(player);
+    itemIds.merge(CollectKnownRecipeItemIds(player));
+    for (uint32 itemId : itemIds)
         if (std::optional<ItemPatchRow> const row = FindItemRow(rows, itemId))
             itemRows.push_back(*row);
 
@@ -4229,6 +4260,27 @@ private:
     return itemIds;
   }
 
+    static std::vector<uint32> RegisteredCraftedItemIds(uint32 spellId)
+    {
+        std::vector<uint32> itemIds;
+        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
+            for (SpellEffectInfo const& effect : spellInfo->Effects)
+                if (effect.Effect == SPELL_EFFECT_CREATE_ITEM &&
+                    Ascension::ClientItemPatches::Instance().Contains(effect.ItemType))
+                    itemIds.push_back(effect.ItemType);
+        return itemIds;
+    }
+
+    static std::unordered_set<uint32> CollectKnownRecipeItemIds(Player* player)
+    {
+        std::unordered_set<uint32> itemIds;
+        for (auto const& [spellId, spell] : player->GetSpellMap())
+            if (spell->State != PLAYERSPELL_REMOVED)
+                for (uint32 itemId : RegisteredCraftedItemIds(spellId))
+                    itemIds.insert(itemId);
+        return itemIds;
+    }
+
     static std::optional<ItemPatchRow> FindItemRow(PreparedPatchRows const& rows, uint32 itemId)
     {
         if (rows.SqlItemIds.contains(itemId) && !Ascension::ClientItemPatches::Instance().Contains(itemId))
@@ -4596,6 +4648,8 @@ private:
   }
 
   static std::vector<CreatureModelPatchRow> BuildCreatureModelPatchRows() {
+    constexpr uint32 CORRUPTED_GRINNING_REAVER_MODEL = 100161;
+    constexpr uint32 GRINNING_REAVER_SOUND = 2112;
     std::vector<CreatureModelPatchRow> rows;
     ClientDBC clientModels;
     std::filesystem::path const clientDbc =
@@ -4605,14 +4659,17 @@ private:
 
     for (uint32 index = 0; index < clientModels.GetRecordCount(); ++index) {
       ClientDBC::Record const record = clientModels.GetRecord(index);
+      uint32 const modelId = record.GetUInt32(0);
       CreatureModelDataEntry const *entry =
-          sCreatureModelDataStore.LookupEntry(record.GetUInt32(0));
+          sCreatureModelDataStore.LookupEntry(modelId);
       if (!entry)
         continue;
 
-      std::array<std::pair<uint32, uint32>, 5> const serverFields = {{
+      std::array<std::pair<uint32, uint32>, 6> const serverFields = {{
           {1, entry->Flags},
           {4, std::bit_cast<uint32>(entry->Scale)},
+          {13, modelId == CORRUPTED_GRINNING_REAVER_MODEL
+                   ? GRINNING_REAVER_SOUND : record.GetUInt32(13)},
           {14, std::bit_cast<uint32>(entry->CollisionWidth)},
           {15, std::bit_cast<uint32>(entry->CollisionHeight)},
           {16, std::bit_cast<uint32>(entry->MountHeight)}}};
@@ -4760,12 +4817,20 @@ private:
   }
 
   static std::vector<SpellPatchRow> BuildSpellPatchRows() {
+    std::unordered_map<uint32, char const*> const blacksmithingTiers = {
+        {2018, "Apprentice"}, {3100, "Journeyman"}, {3538, "Expert"},
+        {9785, "Artisan"}, {29844, "Master"}, {51300, "Grand Master"}};
     std::unordered_map<uint32, ClientSpellText> descriptions =
         LoadClientSpellDescriptions();
     std::unordered_set<uint32> descriptionIds;
     for (uint32 const spellId : RANGED_PREPARATION_CLIENT_SPELLS)
       Ascension::ClientSpellPatches::Instance().Register(spellId);
     std::unordered_set<uint32> requested = Ascension::ClientSpellPatches::Instance().GetIds(true);
+    for (auto const& tier : blacksmithingTiers)
+    {
+      requested.insert(tier.first);
+      Ascension::ClientSpellPatches::Instance().Register(tier.first);
+    }
     for (auto const& [id, description] : descriptions)
     {
       requested.insert(id);
@@ -4873,7 +4938,11 @@ private:
       LOG_ERROR("coa", "Requested client Spell patch {} has no physical or SQL record", spellId);
 
     for (SpellPatchRow& row : rows)
+    {
+      if (auto const tier = blacksmithingTiers.find(row.Values[0]); tier != blacksmithingTiers.end())
+        row.Strings[SPELL_WIRE_RANK] = tier->second;
       row.RequiresRegistration = !descriptionIds.contains(row.Values[0]);
+    }
     return rows;
   }
 
@@ -7997,6 +8066,9 @@ public:
             AscensionCompatConfig::ENABLED) &&
         AscensionClassService::Instance().AffectsProficiencies(spellId))
       AscensionClassService::Instance().SynchronizeProficiencies(player);
+
+    if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+      AscensionDisplayPatchService::Instance().SendLearnedRecipeItemRows(player, spellId);
   }
 
     void OnPlayerLearnTrainerSpell(Player* player, Creature*, uint32 spellId) override
@@ -8478,7 +8550,7 @@ public:
 
   void OnAfterConfigLoad(bool reload) override {
     ReportRenamedConfiguration();
-    if (!reload || !ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+    if (!reload)
       return;
 
     for (auto const& [accountId, session] : sWorldSessionMgr->GetAllSessions())
@@ -9059,13 +9131,22 @@ class spell_ascension_wildcard_mount : public SpellScript
 
         std::vector<uint32> known;
         for (AscensionCollectibles::MountWrapper const& entry : AscensionCollectibles::MountWrappers)
-            if (player->HasSpell(entry.SpellId))
+            if (player->HasSpell(entry.SpellId) && (GetSpellInfo()->Id != 93539 ||
+                entry.Flying150 || entry.Flying280 || entry.Flying310))
                 known.push_back(entry.SpellId);
 
         if (known.empty())
             return;
 
-        player->CastSpell(player, known[urand(0, uint32(known.size()) - 1)], true);
+        uint32 const mount = known[urand(0, uint32(known.size()) - 1)];
+        ObjectGuid const owner = player->GetGUID();
+        player->m_Events.AddEventAtOffset([owner, mount]()
+        {
+            Player* player = ObjectAccessor::FindPlayer(owner);
+            if (player && player->IsAlive() && player->IsInWorld() && player->HasSpell(mount) &&
+                !player->IsNonMeleeSpellCast(false, false, true))
+                player->CastSpell(player, mount, false);
+        }, 1ms);
     }
 
     void Register() override
@@ -9431,8 +9512,12 @@ void AppendConfiguredClientConfigs(AscensionClientConfig& config) {
 
 void AddAscensionCompatScripts() {
   Ascension::ClientItemPatches::Instance().Register(ITEM_HEARTWOOD_KEY);
+  for (uint32 itemId : BUSHCRAFT_CRAFTED_ITEMS)
+    Ascension::ClientItemPatches::Instance().Register(itemId);
   RegisterAscensionClientConfig([](AscensionClientConfig& config) {
     config.Booleans.emplace_back("CONFIG_CHARACTER_ADVANCEMENT_BUILD_INSPECT_ENABLED", true);
+    config.Booleans.emplace_back("CONFIG_THROWN_WEAPON_APPEARANCES_ENABLED",
+        ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED));
   });
   RegisterAscensionClientConfig(AppendConfiguredClientConfigs);
   new npc_ascension_training_book();

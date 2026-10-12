@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "A database-loaded Moonstalker Matriarch has exactly two runts, not four (#4348)",
+  "contract": [
+    "A creature loaded from the creature table runs SMART_EVENT_RESPAWN twice before anyone touches it: once from SmartAI::InitializeAI while it enters the world and again from Creature::Update, which calls JustRespawned for every non-summon on its first update. A matriarch summoned by a player skips the second pass, so the fixture-based #4348 scenario cannot see it.",
+    "Darkshore Matriarch spawn 36967 (map 1, 7818.77, -982.033, 32.4169, phase 1) is the real spawn the other #4348 scenario copies. No wild Moonstalker Runt spawn is within 800 yards of it, so every runt near the observer belongs to this matriarch.",
+    "The observer enters the phase the spawn lives in and counts the level 16-17 runts the matriarch summoned. The reported behavior is two runts; four means each respawn pass summoned a pair. The count must stay at two after the creature has had time to run its first updates."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 7788.77, "y": -982.033, "z": 32.4169, "o": 0 },
+  "players": [
+    { "id": "observer", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the spawn AI settle", "ms": 3000 },
+    { "action": "set_phase", "label": "The observer joins the phase the database spawns live in", "actor": "observer", "value": 1 },
+    { "action": "assert", "label": "The database matriarch is within sight", "actor": "observer", "metric": "nearby_creature_count", "entry": 2071, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Exactly two runts stand around the database matriarch", "actor": "observer", "metric": "nearby_creature_count", "entry": 2070, "equals": 2, "within_ms": 5000 },
+    { "action": "wait", "label": "Let the matriarch run further updates", "ms": 6000 },
+    { "action": "assert", "label": "No late pair of runts appears", "actor": "observer", "metric": "nearby_creature_count", "entry": 2070, "equals": 2 },
+    { "action": "assert", "label": "Both runts have the reported level", "actor": "observer", "metric": "nearby_creature_count", "entry": 2070, "min_level": 16, "max_level": 17, "equals": 2 }
+  ]
+}

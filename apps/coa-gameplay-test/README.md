@@ -391,6 +391,8 @@ Characters are created and loaded through the existing character creation, enume
 handlers with ordinary player security. A player may set `account_of` to an earlier player id to share that
 fixture's disposable account; otherwise each player gets its own account. This supports account-wide state
 checks through separate socketless character sessions and does not test simultaneous client authentication.
+`client_packet` fields may use `item_guid` with a carried item entry, or `gameobject_guid` with an entry of
+exactly one owned fixture gameobject. Both write the native raw GUID and require the referenced object to exist.
 Optional `location` supplies `map`, `x`, `y`, `z`, `o` for a fixture
 teleport. `location.ignore_access` optionally bypasses entry requirements for a fixture (for example a solo
 raid test), without enabling GM mode during combat. Actors share their lane's phase (`1 << 30` with one lane) to
@@ -469,6 +471,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `fill_bags` | `actor`, optional `slots` (default 0): fill the bags with distinct non-stacking armor until that many free slots remain, so a scenario can prove what a full inventory does. Fails if the bags cannot be filled. |
 | `equip` | `actor`, `item`, `slot` (0..18 equipment, 19..22 bag slots): equip an owned item through the session handler. |
 | `use_item` | `actor`, `item`, `spell`, optional `target`, `target_item` (an owned item entry, sent as the item target instead of a unit) and `destination`: normal item-use handler. |
+| `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `use_gameobject` | `actor`, `entry`: native use request for the actor's single nearby owned gameobject. |
 | `summon_gameobject` | Player `actor`, `entry`, optional `distance` (yards in front, default 2) and `duration_s` (default 300): summon a gameobject the actor owns; fails if the actor already owns one of that entry. |
 | `loot_gameobject` | Player `actor`, `entry`: open the loot of the actor's single owned chest as a successful open-lock cast does, so chest loot is generated for that player. Lock, key and skill checks are not exercised. |
@@ -808,6 +811,8 @@ resource type, recipient and current pets. The total is the logged nominal gain 
 Player commands retain normal permission and gameplay checks; verify their effects with assertions.
 `owned_creature_count` requires a player and `entry`. It counts living creatures of that entry owned, created or summoned by
 the player, in the same phase and within 100 yards, including summons outside the guardian-pet slot.
+`creator_only: true` restricts that count to creatures whose native creator GUID is the player.
+This observes creator metadata; it does not establish a rendered owner title.
 An optional `spell` restricts the count to creatures with that aura; `caster` can select its aura owner. `min_distance` keeps creatures at least that many yards from the player (2D), and `owner_display: true` those wearing the player's display.
 `ranged_weapon_subclass` (0..20) restricts the count to creatures carrying a weapon of that item subclass
 in their ranged virtual equipment slot; subclass 2 means bows. This observes server equipment, not client rendering.
@@ -899,6 +904,10 @@ in-instance restrictions. `map_id` and `map_difficulty` observe the current map 
 selected difficulty template. `loot_gear_item_level` returns the first unlooted weapon/armor item's level in
 the current loot window (zero if absent). The three `vanilla-dungeons-*` scenarios use these to check
 all 19 map/mode pairs per tier and a real VanCleef killing blow, without a GM access bypass.
+`nearby_creature_count` requires a player and `entry`, and counts living creatures in the same phase within
+60 yards. Optional `min_level` and `max_level` filter their native levels; `min_home_distance` keeps creatures
+at least that many yards from their own home positions (2D). This can observe movement of native summons
+without creating or controlling them.
 `nearby_gameobject_state` takes `entry` and returns the state of the nearest such gameobject within 20 yards
 (0 open, 1 closed, 99 none).
 ## Evidence boundaries
@@ -936,11 +945,12 @@ change. Runner checks cover invalid scenarios, incorrect/partial results, owned-
 partial-clone cleanup, cache reuse/invalidation, ownership and exclusive leases, and the queue protocol with a
 fake server. They do not substitute for building and running the native scenario.
 
-`spell_go_count` counts the actor's native `SMSG_SPELL_GO` packets for `spell`; optional `pet: true`
-selects the current pet, and `entry` instead counts the packets the actor received from any creature of that
+`spell_go_count` counts the actor's native `SMSG_SPELL_GO` packets for `spell`; optional `caster` selects another
+scenario actor, `pet: true` selects the current pet, and `entry` counts packets received from any creature of that
 template, such as its own summoned wards, which are neither pets nor fixtures. Other lanes' creatures are in other
-phases, so `entry` counts only creatures the case's players can see. Invisible triggered spells may omit this
-packet. A cast count proves dispatch, so pair it with effect assertions. It does not test network delivery or
+phases, so `entry` counts only creatures the case's players can see. Select only one of `caster`, `pet`, or `entry`.
+Invisible triggered spells may omit this packet. A cast count proves dispatch, so pair it with effect assertions.
+It does not test network delivery or
 client rendering.
 `spell_hit_bonus_taken` reads the victim aura contribution to the native spell hit calculation for `spell`.
 `rooted` reads the unit's native root state. `spell_healing_taken` queries incoming healing from `target`

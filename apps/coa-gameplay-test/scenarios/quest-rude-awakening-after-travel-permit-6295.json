@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Rude Awakening is offered by Undertaker Mordo to a non-Undead Horde character who arrived by Travel Permit (#6295)",
+  "contract": [
+    "Report #6295: after using the Travel Permit to reach Tirisfal Glades, a non-Undead Horde character is not offered 'Rude Awakening' by Undertaker Mordo.",
+    "quest_template 363 'Rude Awakening' has AllowableRaces 690 (Orc, Undead, Tauren, Troll, Blood Elf), no previous quest, class limit or conditions, and Mordo (1568) is its starter.",
+    "The Travel Permit (src/server/coa/AscensionTravelPermit.cpp) only teleports the caster to the destination's start point; it changes no quest state.",
+    "So an Orc who travels by permit to Tirisfal Glades must be offered and able to take the quest from the spawned Mordo, and so must the other Horde races that can take it."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "orc", "race": 2, "class": 18, "level": 1 },
+    { "id": "tauren", "race": 6, "class": 1, "level": 1 },
+    { "id": "troll", "race": 8, "class": 1, "level": 1 },
+    { "id": "bloodelf", "race": 10, "class": 2, "level": 1 }
+  ],
+  "location": { "map": 1, "x": -618.518, "y": -4251.67, "z": 38.718, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "assert", "label": "The Orc starts in Durotar", "actor": "orc", "metric": "map_id", "equals": 1 },
+    { "action": "set_phase", "label": "The Orc joins the world phase Undertaker Mordo is spawned in before travelling", "actor": "orc", "value": 1 },
+    { "action": "add_item", "label": "The Orc receives a Travel Permit", "actor": "orc", "item": 977028, "count": 1 },
+    { "action": "use_item", "label": "The Orc uses the permit", "actor": "orc", "item": 977028, "spell": 1001088 },
+    { "action": "wait", "label": "Let the destination menu open", "ms": 2000 },
+    { "action": "assert", "label": "The first destination offered is Tirisfal Glades", "actor": "orc", "metric": "gossip_option_text", "index": 0, "text": "Tirisfal Glades", "equals": 1 },
+    { "action": "gossip_select", "label": "The Orc travels to Tirisfal Glades", "actor": "orc", "option": 0 },
+    { "action": "wait", "label": "Let the transfer finish", "ms": 5000 },
+    { "action": "assert", "label": "The Orc arrives in the Eastern Kingdoms", "actor": "orc", "metric": "map_id", "equals": 0, "within_ms": 10000 },
+    { "action": "assert", "label": "At the Shadow Grave start, x", "actor": "orc", "metric": "position_x", "min": 1670, "max": 1684 },
+    { "action": "wait", "label": "Let the grid load", "ms": 3000 },
+    { "action": "assert", "label": "Undertaker Mordo is within reach", "actor": "orc", "metric": "nearby_creature_count", "entry": 1568, "equals": 1 },
+    { "action": "assert", "label": "Mordo shows the available-quest marker to the Orc", "actor": "orc", "metric": "dialog_status", "entry": 1568, "equals": 8, "within_ms": 5000 },
+    { "action": "assert", "label": "Orc: Rude Awakening is available", "actor": "orc", "metric": "quest_takeable", "quest": 363, "equals": 1 },
+    { "action": "quest_accept", "label": "The Orc takes it from Mordo", "actor": "orc", "quest": 363, "entry": 1568 },
+    { "action": "assert", "label": "The Orc has the quest", "actor": "orc", "metric": "quest_status", "quest": 363, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "Tauren: Rude Awakening is available", "actor": "tauren", "metric": "quest_takeable", "quest": 363, "equals": 1 },
+    { "action": "assert", "label": "Troll: Rude Awakening is available", "actor": "troll", "metric": "quest_takeable", "quest": 363, "equals": 1 },
+    { "action": "assert", "label": "Blood Elf: Rude Awakening is available", "actor": "bloodelf", "metric": "quest_takeable", "quest": 363, "equals": 1 }
+  ]
+}

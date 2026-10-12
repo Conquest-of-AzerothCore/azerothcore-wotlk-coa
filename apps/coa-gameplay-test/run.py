@@ -145,12 +145,13 @@ PLAYER_STAT_METRICS = {
 METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item', 'entry', 'button',
                  'relative_to', 'ratio_to', 'target', 'quest', 'id', 'stat', 'school', 'hand', 'rating', 'op',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
-                 'min_distance', 'owner_display', 'ranged_weapon_subclass', 'skill', 'cache', 'table', 'exclude',
-                 'dungeon', 'source', 'opcode', 'from', 'slot', 'achievement', 'title',
+                 'min_distance', 'owner_display', 'creator_only', 'ranged_weapon_subclass', 'skill', 'cache',
+                 'table', 'exclude', 'dungeon', 'source', 'opcode', 'from', 'slot', 'achievement', 'title',
                  'type_mask', 'hit_mask', 'spell_type_mask',
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
-                 'flat_coefficient_modifier', 'dominant_stat', 'off_stat'}
+                 'flat_coefficient_modifier', 'dominant_stat', 'off_stat',
+                 'min_level', 'max_level', 'min_home_distance'}
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled'}),
@@ -213,7 +214,7 @@ ACTIONS = {
     'close_loot': ({'actor'}, {'actor'}),
     'set_money': ({'actor', 'value'}, {'actor', 'value'}),
     'set_phase': ({'actor'}, {'actor', 'value'}),
-    'use_nearby_gameobject': ({'actor', 'entry'}, {'actor', 'entry'}),
+    'use_nearby_gameobject': ({'actor', 'entry'}, {'actor', 'entry', 'owner'}),
     'attack_owned_creature': ({'actor', 'target', 'entry'}, {'actor', 'target', 'entry'}),
     'attack_nearby': ({'actor', 'entry'}, {'actor', 'entry', 'kill', 'damage_pct'}),
     'summon': ({'actor', 'as', 'entry'}, {'actor', 'as', 'entry', 'distance'}),
@@ -444,6 +445,8 @@ def validate(scenario):
         for key in ('race_mask', 'class_mask'):
             if key in step:
                 number(step[key], f'{where}.{key}', 0, 2**32 - 1, True)
+        if action == 'use_nearby_gameobject' and 'owner' in step:
+            require(step['owner'] in player_ids, f'{where}: nearby gameobject owner needs a player')
         if action == 'who' and 'target' in step:
             require(step['target'] in player_ids, f'{where}: Who name filter needs a player')
         if action == 'attack_owned_creature':
@@ -553,7 +556,8 @@ def validate(scenario):
             for index, field in enumerate(fields):
                 require(isinstance(field, dict) and len(field) == 1, f'{where}.fields[{index}]: expected one typed value')
                 (kind, value), = field.items()
-                require(kind in {'u8', 'u32', 'u64', 'string', 'buyback_guid', 'actor_guid', 'packed_actor_guid',
+                require(kind in {'u8', 'u32', 'u64', 'string', 'buyback_guid', 'item_guid', 'gameobject_guid',
+                                 'actor_guid', 'packed_actor_guid',
                                  'pet_guid', 'stabled_pet', 'duel_arbiter',
                                  'wildcard_entry', 'wildcard_pending_cards', 'wildcard_lowest_card'},
                         f'{where}.fields[{index}]: unknown field type')
@@ -565,6 +569,7 @@ def validate(scenario):
                     require(value in player_ids, f'{where}.fields[{index}]: expected a player id')
                 else:
                     maximum = {'u8': 255, 'u32': 2**32 - 1, 'u64': 2**64 - 1, 'buyback_guid': 2**31 - 1,
+                               'item_guid': 2**32 - 1, 'gameobject_guid': 2**32 - 1,
                                'stabled_pet': 3, 'wildcard_entry': 255, 'wildcard_pending_cards': 1000,
                                'wildcard_lowest_card': 7}[kind]
                     number(value, f'{where}.fields[{index}]', 0, maximum, True)
@@ -576,6 +581,9 @@ def validate(scenario):
             require(step['value'] <= step['maximum'], f'{where}: health exceeds fixture maximum')
         if action in {'snapshot', 'assert'}:
             metric = step['metric']
+            if 'creator_only' in step:
+                require(metric == 'owned_creature_count', f'{where}: creator_only needs owned_creature_count')
+                require(type(step['creator_only']) is bool, f'{where}: creator_only must be boolean')
             if metric == 'equipped_item':
                 require(step['actor'] in player_ids, f'{where}: equipment metric needs a player')
                 number(step.get('slot'), f'{where}.slot', 0, 18, True)
@@ -615,6 +623,20 @@ def validate(scenario):
                 require(step['actor'] in player_ids, f'{where}: dungeon/loot metric needs a player')
             if metric in {'nearby_creature_template', 'nearby_creature_max_health'}:
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
+            if metric == 'nearby_creature_count':
+                require(step['actor'] in player_ids, f'{where}: creature count needs a player')
+                number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
+            for field in ('min_level', 'max_level', 'min_home_distance'):
+                if field in step:
+                    require(metric == 'nearby_creature_count',
+                            f'{where}: {field} only applies to nearby creature counts')
+                    if field == 'min_home_distance':
+                        number(step[field], f'{where}.{field}', 0)
+                    else:
+                        number(step[field], f'{where}.{field}', 1, 255, True)
+            if metric == 'nearby_creature_count':
+                require(step.get('min_level', 1) <= step.get('max_level', 255),
+                        f'{where}: creature level bounds are reversed')
             if metric == 'lfg_state':
                 require(step['actor'] in player_ids, f'{where}: LFG state metric needs a player')
             if metric == 'lfg_dungeon_disabled':
@@ -661,6 +683,8 @@ def validate(scenario):
             if metric in {'spell_go_count', 'spell_damage_count', 'spell_damage_total'} and 'entry' in step:
                 number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
                 require('pet' not in step, f'{where}: spell combat query selects either pet or entry')
+            if metric == 'spell_go_count' and 'caster' in step:
+                require('pet' not in step and 'entry' not in step, f'{where}: cast query selects one caster source')
             if 'target_pet' in step:
                 require(metric in {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
                                    'spell_energize_count', 'spell_energize_total'}
