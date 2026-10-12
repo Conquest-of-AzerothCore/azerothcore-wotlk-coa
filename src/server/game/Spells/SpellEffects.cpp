@@ -698,7 +698,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     {
                         uint8 level = m_caster->GetLevel();
                         // xinef: shield block should increase the limit
-                        float limit = m_caster->HasAura(2565) ? 2.0f : 1.0f;
+                        float limit = m_caster->HasAuraOrTwin(2565) ? 2.0f : 1.0f;
                         uint32 block_value = m_caster->GetShieldBlockValue(uint32(float(level) * 24.5f * limit), uint32(float(level) * 34.5f * limit));
 
                         damage += int32(m_caster->ApplyEffectModifiers(m_spellInfo, effIndex, float(block_value)));
@@ -3797,9 +3797,10 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 // Devastate (player ones)
                 if (m_spellInfo->SpellFamilyFlags[1] & 0x40)
                 {
-                    m_caster->CastSpell(unitTarget, 58567, true);
+                    uint32 const sunderArmor = sSpellMgr->GetSpellTwinFor(58567, m_spellInfo->Id);
+                    m_caster->CastSpell(unitTarget, sunderArmor, true);
 
-                    if (Aura* aur = unitTarget->GetAura(58567))
+                    if (Aura* aur = unitTarget->GetAura(sunderArmor))
                     {
                         // 58388 - Glyph of Devastate dummy aura.
                         if (m_caster->HasAura(58388))

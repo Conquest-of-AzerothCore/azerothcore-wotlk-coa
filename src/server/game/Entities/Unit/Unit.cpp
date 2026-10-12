@@ -17265,7 +17265,7 @@ void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
         addRage = damage / rageconversion * 2.5f;
 
         // Berserker Rage effect
-        if (HasAura(18499))
+        if (HasAuraOrTwin(18499))
             addRage *= 3.0f;
     }
 
