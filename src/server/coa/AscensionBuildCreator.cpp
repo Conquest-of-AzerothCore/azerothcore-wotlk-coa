@@ -3,6 +3,7 @@
 #include "AscensionBuildCreatorRules.h"
 #include "AscensionCompatOpcodes.h"
 #include "AscensionFreepick.h"
+#include "AscensionMysticEnchant.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
 #include "Log.h"
@@ -418,6 +419,7 @@ void AutoLearn(Player* player, ActiveBuild const& active)
     if (!active.Flags[0] || !AscensionFreepick::HasFreepickBuild(player))
         return;
     std::vector<AscensionFreepick::GuideSpell> spells;
+    std::vector<AscensionMysticEnchant::GuideEnchant> enchants;
     uint32 primaryStat = 0;
     {
         std::lock_guard<std::mutex> lock(CatalogLock);
@@ -426,6 +428,8 @@ void AutoLearn(Player* player, ActiveBuild const& active)
             return;
         for (Spell const& spell : build->Spells)
             spells.push_back({ spell.SpellId, spell.Level });
+        for (Enchant const& enchant : build->Enchants)
+            enchants.push_back({ enchant.EnchantId, enchant.Stacks, enchant.Level });
         primaryStat = build->PrimaryStat;
     }
     AscensionFreepick::UploadResult const result = AscensionFreepick::ApplyGuide(player, spells, primaryStat);
@@ -436,8 +440,10 @@ void AutoLearn(Player* player, ActiveBuild const& active)
         DeferredAutoLearn.insert(player->GetGUID());
         AnyDeferred = true;
     }
-    LOG_INFO("coa", "Hero Architect auto-learn of {} for {} at level {}: {} {} entry {} rank {}", active.Id,
-        player->GetName(), player->GetLevel(), result.Result, result.Learn, result.EntryId, result.Rank);
+    bool const enchanted = AscensionMysticEnchant::ApplyGuide(player, enchants);
+    LOG_INFO("coa", "Hero Architect auto-learn of {} for {} at level {}: {} {} entry {} rank {}, enchants {}", active.Id,
+        player->GetName(), player->GetLevel(), result.Result, result.Learn, result.EntryId, result.Rank,
+        enchanted ? "changed" : "unchanged");
 }
 
 ActiveBuild CurrentActiveBuild(Player const* player)
