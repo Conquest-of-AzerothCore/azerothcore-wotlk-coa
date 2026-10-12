@@ -17,6 +17,8 @@
 #include "AscensionWildcardStarterData.h"
 #include "AsyncCallbackProcessor.h"
 #include "Bag.h"
+#include "BattlegroundMgr.h"
+#include "BattlegroundQueue.h"
 #include "CharacterCache.h"
 #include "CharmInfo.h"
 #include "Chat.h"
@@ -1878,6 +1880,25 @@ private:
         Require(stable && slot < stable->StabledPets.size() && stable->StabledPets[slot],
             "No stabled pet in stable slot " + std::to_string(slot));
         return stable->StabledPets[slot]->PetNumber;
+    }
+
+    static Battleground* InvitedBattleground(Player* player)
+    {
+        for (uint32 slot = 0; slot < PLAYER_MAX_BATTLEGROUND_QUEUES; ++slot)
+        {
+            BattlegroundQueueTypeId const queueType = player->GetBattlegroundQueueTypeId(slot);
+            if (queueType == BATTLEGROUND_QUEUE_NONE)
+                continue;
+
+            GroupQueueInfo info;
+            if (sBattlegroundMgr->GetBattlegroundQueue(queueType).GetPlayerGroupInfoData(player->GetGUID(), &info)
+                && info.IsInvitedToBGInstanceGUID)
+                if (Battleground* battleground =
+                    sBattlegroundMgr->GetBattleground(info.IsInvitedToBGInstanceGUID, BATTLEGROUND_TYPE_NONE))
+                    return battleground;
+        }
+
+        throw std::runtime_error("Packet invited battleground type requires a battleground invitation");
     }
 
     WorldObject* GetQuestGiver(Player* player, Tree const& step)
@@ -4047,6 +4068,9 @@ private:
                             Require(!arbiter.IsEmpty(), "Packet duel arbiter requires a pending duel");
                             request << arbiter.GetRawValue();
                         }
+                        else if (kind == "invited_battleground_type")
+                            request << uint32(InvitedBattleground(GetPlayer(value.get_value<std::string>()))
+                                ->GetBgTypeID());
                         else if (kind == "pet_guid")
                         {
                             Pet* pet = GetPlayer(value.get_value<std::string>())->GetPet();

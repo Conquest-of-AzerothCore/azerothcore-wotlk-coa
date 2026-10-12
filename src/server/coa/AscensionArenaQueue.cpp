@@ -17,14 +17,15 @@
 #include "LFGMgr.h"
 #include "Language.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "WorldSessionMgr.h"
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <bit>
 #include <mutex>
 #include <optional>
@@ -109,7 +110,9 @@ namespace
     };
 
     std::mutex StateLock;
-    std::unordered_map<uint32, ArenaRequest> PendingRequests;
+    std::unordered_map<WorldSession const*, ArenaRequest> PendingRequests;
+    std::atomic<bool> AnyPending = false;
+    std::unordered_map<ObjectGuid, ArenaRequest> ReadyRequests;
     std::unordered_map<ObjectGuid, bool> HealerByPlayer;
     std::unordered_map<uint32, SoloMatch> MatchByInstance;
     std::unordered_map<uint32, uint32> InstanceBySideTeam;
@@ -133,7 +136,8 @@ namespace
         }
 
         std::lock_guard<std::mutex> lock(StateLock);
-        PendingRequests[session->GetAccountId()] = request;
+        PendingRequests[session] = request;
+        AnyPending = true;
         return true;
     }
 
@@ -547,21 +551,17 @@ namespace
 
         void OnUpdate(uint32) override
         {
-            std::unordered_map<uint32, ArenaRequest> requests;
+            std::unordered_map<ObjectGuid, ArenaRequest> requests;
             {
                 std::lock_guard<std::mutex> lock(StateLock);
-                if (PendingRequests.empty())
+                if (ReadyRequests.empty())
                     return;
-                requests.swap(PendingRequests);
+                requests.swap(ReadyRequests);
             }
 
-            for (auto const& [accountId, request] : requests)
-            {
-                WorldSession* session = sWorldSessionMgr->FindSession(accountId);
-                Player* player = session ? session->GetPlayer() : nullptr;
-                if (player && player->IsInWorld())
+            for (auto const& [guid, request] : requests)
+                if (Player* player = ObjectAccessor::FindPlayer(guid))
                     JoinRatedSoloQueue(player, request);
-            }
         }
 
         void OnShutdown() override
@@ -576,13 +576,31 @@ namespace
     class AscensionArenaQueuePlayer final : public PlayerScript
     {
     public:
-        AscensionArenaQueuePlayer() : PlayerScript("AscensionArenaQueuePlayer", { PLAYERHOOK_ON_LOGOUT }) { }
+        AscensionArenaQueuePlayer()
+            : PlayerScript("AscensionArenaQueuePlayer", { PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE }) { }
 
         void OnPlayerLogout(Player* player) override
         {
             std::lock_guard<std::mutex> lock(StateLock);
-            PendingRequests.erase(player->GetSession()->GetAccountId());
+            PendingRequests.erase(player->GetSession());
+            AnyPending = !PendingRequests.empty();
+            ReadyRequests.erase(player->GetGUID());
             HealerByPlayer.erase(player->GetGUID());
+        }
+
+        void OnPlayerUpdate(Player* player, uint32) override
+        {
+            if (!AnyPending)
+                return;
+
+            std::lock_guard<std::mutex> lock(StateLock);
+            auto itr = PendingRequests.find(player->GetSession());
+            if (itr == PendingRequests.end())
+                return;
+
+            ReadyRequests[player->GetGUID()] = itr->second;
+            PendingRequests.erase(itr);
+            AnyPending = !PendingRequests.empty();
         }
     };
 
