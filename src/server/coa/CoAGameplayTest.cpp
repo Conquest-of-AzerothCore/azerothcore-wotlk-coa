@@ -129,6 +129,7 @@ constexpr uint16 UpdateEntriesResultOpcode = 0x072C;
 constexpr uint32 TalentRequestWindowMs = 2000;
 constexpr std::size_t QuestQueryFlagsOffset = 80;
 constexpr std::size_t QuestQueryFirstChoiceItemOffset = 136;
+constexpr uint32 AverageItemLevelAddonField = 5;
 
 void Require(bool condition, std::string const& message)
 {
@@ -1824,26 +1825,39 @@ private:
         throw std::runtime_error("No bought-back item of entry " + std::to_string(entry));
     }
 
+    std::vector<ByteBuffer> SentAddonFieldUpdates(Player const* player, Tree const& step, uint32 field) const
+    {
+        std::vector<ByteBuffer> matching;
+        auto const& payloads = _actors.at(step.get<std::string>("actor")).extensionPayloads;
+        auto const updates = payloads.find(AscensionQuestLog::UpdateObjectAddonOpcode);
+        if (updates == payloads.end())
+            return matching;
+
+        for (auto const& update : updates->second)
+        {
+            if (update.size() != 16)
+                continue;
+
+            ByteBuffer fields;
+            fields.append(reinterpret_cast<uint8 const*>(update.data()), update.size());
+            if (fields.read<uint64>() == player->GetGUID().GetRawValue() && fields.read<uint32>() == field)
+                matching.push_back(std::move(fields));
+        }
+        return matching;
+    }
+
+    template <typename Value>
+    double SentAddonField(Player const* player, Tree const& step, uint32 field) const
+    {
+        std::vector<ByteBuffer> updates = SentAddonFieldUpdates(player, step, field);
+        return updates.empty() ? -1 : updates.back().read<Value>();
+    }
+
     double SentQuestLogField(Player const* player, Tree const& step, uint32 firstField) const
     {
         uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
         Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
-        auto const& payloads = _actors.at(step.get<std::string>("actor")).extensionPayloads;
-        auto const updates = payloads.find(AscensionQuestLog::UpdateObjectAddonOpcode);
-        if (updates == payloads.end())
-            return -1;
-
-        for (auto update = updates->second.rbegin(); update != updates->second.rend(); ++update)
-        {
-            if (update->size() != 16)
-                continue;
-
-            ByteBuffer fields;
-            fields.append(reinterpret_cast<uint8 const*>(update->data()), update->size());
-            if (fields.read<uint64>() == player->GetGUID().GetRawValue() && fields.read<uint32>() == firstField + slot)
-                return fields.read<uint32>();
-        }
-        return -1;
+        return SentAddonField<uint32>(player, step, firstField + slot);
     }
 
     double ListedInstanceBinds(Tree const& step) const
@@ -3974,6 +3988,10 @@ private:
         if (metric == "quest_log_sent_level" || metric == "quest_log_sent_xp")
             return SentQuestLogField(player, step, metric == "quest_log_sent_level"
                 ? AscensionQuestLog::LevelField : AscensionQuestLog::RewardXPField);
+        if (metric == "sent_average_item_level")
+            return SentAddonField<float>(player, step, AverageItemLevelAddonField);
+        if (metric == "sent_average_item_level_count")
+            return double(SentAddonFieldUpdates(player, step, AverageItemLevelAddonField).size());
         if (metric == "server_packet_contains")
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));

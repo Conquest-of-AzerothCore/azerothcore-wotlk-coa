@@ -894,6 +894,10 @@ last creature query response delivered to that session, or -1 before one arrives
 and query the native quest level and XP calculations without awarding a reward.
 `quest_log_sent_level` and `quest_log_sent_xp` take the same arguments and return the last level or reward XP
 sent for that quest's log slot in `SMSG_UPDATE_OBJECT_ADDON` (fields 61 and 36 + slot), or -1 before one arrives.
+`sent_average_item_level` takes a player `actor` and returns the last average item level sent for that player in
+`SMSG_UPDATE_OBJECT_ADDON` (field 5), ignoring other fields and objects, or -1 before one arrives.
+`sent_average_item_level_count` counts those updates among the retained payloads; snapshot it before a teleport
+or other event to prove that the event resent the value.
 `quest_offer_sent_xp` reads the reward XP in the last native `SMSG_QUESTGIVER_OFFER_REWARD` for that quest,
 or -1 before the session receives a reward offer.
 `quest_query_scaled` takes the same arguments and returns 1 when the last quest query response for that quest
