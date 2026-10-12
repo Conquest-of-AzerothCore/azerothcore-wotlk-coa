@@ -499,17 +499,8 @@ class npc_ascension_witch_doctor : public ScriptedAI
             }
             _timer = 1500;
         }
-        if (entry == NpcBwonsamdi)
-        {
-            if (player->IsWithinDistInMap(me, 10.0f))
-            {
-                Field(player, BigVoodooField);
-                Cast(player, player, BigVoodooLock);
-            }
-            for (Unit* ally : Allies(player, me, 10.0f))
-                if (ally != player)
-                    Field(ally, VoodooProtectionSpell);
-        }
+        if (entry == NpcBwonsamdi && player->IsWithinDistInMap(me, 15.0f))
+            Field(player, BigVoodooField);
         if (entry == NpcMarionette)
         {
             if (++_marionetteTicks <= 4 && (player->HasAura(Marionette) || _age >= 8000))
