@@ -3981,8 +3981,9 @@ private:
   static constexpr uint32 SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD = 26;
   static constexpr uint32 SPELL_CAST_TIME_INDEX_FIELD = 28;
   static constexpr uint32 SPELL_FAMILY_NAME_FIELD = 208;
-  static constexpr std::array<uint32, 10> RANGED_PREPARATION_CLIENT_SPELLS = {
-      504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288};
+  static constexpr std::array<uint32, 18> RANGED_PREPARATION_CLIENT_SPELLS = {
+      504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
+      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
   struct ClientSpellText {
     std::string Description;

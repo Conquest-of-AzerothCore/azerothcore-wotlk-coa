@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Barbarian: the client's Throw Weapon cast time includes the server's 500 ms ranged preparation (COA-5836)",
+  "contract": [
+    "Throw Weapon (572614, 804136, 806876-806881) is a ranged-slot spell (Attributes 0x00010012,",
+    "SPELL_ATTR0_USES_RANGED_SLOT) with a thrown-weapon requirement and CastingTimeIndex 5 (2000 ms).",
+    "SpellInfo::CalcCastTime adds 500 ms to every ranged-slot spell that is not an auto repeat, so the server casts",
+    "it in 2500 ms while the client's tooltip and cast bar used the 2000 ms row: the client finished its cast bar",
+    "half a second before the server, which players saw as a slow cast that does not match its tooltip and as a",
+    "second global cooldown. As for the Witch Doctor ranged-slot abilities (#7167), the server now streams a",
+    "Spell.dbc row whose CastingTimeIndex points at the 2500 ms row, so both sides agree. The server's own",
+    "cast time is unchanged."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and the client patch stream settle", "ms": 4000 },
+    { "action": "learn", "actor": "b", "spell": 806877 },
+    { "action": "learn", "actor": "b", "spell": 572614 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client receives 2500 ms for Throw Weapon 806877",
+      "actor": "b", "metric": "client_cast_time_ms", "spell": 806877, "equals": 2500, "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client receives 2500 ms for Throw Weapon 572614",
+      "actor": "b", "metric": "client_cast_time_ms", "spell": 572614, "equals": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The server still casts Throw Weapon in 2500 ms",
+      "actor": "b", "metric": "spell_cast_time_ms", "spell": 806877, "equals": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The streamed row keeps the Throw Weapon attributes",
+      "actor": "b", "metric": "client_attributes", "spell": 806877, "equals": 65554
+    }
+  ]
+}
