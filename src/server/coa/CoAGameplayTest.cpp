@@ -5,6 +5,8 @@
 
 #include "AscensionReaperTalents.h"
 #include "AccountMgr.h"
+#include "ArenaTeam.h"
+#include "ArenaTeamMgr.h"
 #include "AscensionCoATalentState.h"
 #include "AscensionItemScaling.h"
 #include "AscensionNativeItemScaling.h"
@@ -2118,6 +2120,26 @@ private:
         {
             Require(unit->IsPlayer(), "LFG state needs a player");
             return double(sLFGMgr->GetState(unit->GetGUID()));
+        }
+        if (metric == "in_arena")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Arena metric needs a player");
+            return player->InArena() ? 1 : 0;
+        }
+        if (metric == "arena_team_members" || metric == "arena_team_season_games" || metric == "arena_team_season_wins")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Arena team metric needs a player");
+            uint32 slot = step.get<uint32>("slot");
+            Require(slot < MAX_ARENA_SLOT, "Arena team metric needs an arena slot");
+            ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(player->GetArenaTeamId(uint8(slot)));
+            if (!team)
+                return metric == "arena_team_members" ? 0 : -1;
+            if (metric == "arena_team_members")
+                return double(team->GetMembersSize());
+            ArenaTeamStats const& stats = team->GetStats();
+            return metric == "arena_team_season_games" ? stats.SeasonGames : stats.SeasonWins;
         }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);

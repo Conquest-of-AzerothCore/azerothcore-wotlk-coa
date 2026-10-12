@@ -884,6 +884,10 @@ force updates or inspect client rendering. `lfg_dungeon_disabled` takes an LFGDu
 returns 1 when the `disables` table locks that dungeon's map and difficulty out of Dungeon Finder, otherwise 0.
 `lfg_state` takes a player `actor` and returns its native Dungeon Finder state (0 none, 1 role check, 2 queued,
 3 proposal, 4 vote kick, 5 in dungeon, 6 finished dungeon, 7 raid browser).
+`in_arena` takes a player `actor` and returns 1 while that player is inside an arena match.
+`arena_team_members`, `arena_team_season_games` and `arena_team_season_wins` take a player `actor` and arena
+`slot` (0 2v2, 1 3v3, 2 5v5) and read the team in that slot: its member count (0 without a team), or its
+season games and wins (-1 without a team).
 `creature_query_rank` takes a player `actor` and creature `entry` and returns the rank of the
 last creature query response delivered to that session, or -1 before one arrives.
 `quest_level` and `quest_xp` take a player `actor` and `quest`
