@@ -25,7 +25,7 @@ VALUES
 (254904, 0, 0, 0, 0, 0, 'Julie Addle', NULL, NULL, 0, 20, 20, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.12, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (254905, 0, 0, 0, 0, 0, 'Julie Addle', NULL, NULL, 0, 20, 20, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.12, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (254906, 0, 0, 0, 0, 0, 'Julie Addle', NULL, NULL, 0, 20, 20, 0, 12, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1.12, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(255157, 0, 0, 0, 0, 0, 'Ryton Altham', NULL, NULL, 9950204, 22, 22, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
+(255157, 0, 0, 0, 0, 0, 'Ryton Altham', NULL, NULL, 9950204, 22, 22, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (751496, 0, 0, 0, 0, 0, 'Eleanor Zemille', 'The Widow', NULL, 9950205, 25, 25, 0, 12, 3, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (751497, 0, 0, 0, 0, 0, 'Angus the Handsome', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (751498, 0, 0, 0, 0, 0, 'Westly the Broad', 'Zemille Prospect', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.024, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
@@ -467,8 +467,12 @@ UPDATE `creature_template` SET `npcflag` = `npcflag` | 2 WHERE `entry` = 3136;
 -- (254089), the worgen and Julie hold their recorded talk and Julie then casts the client's 'Arvis Reunion Credit'
 -- (355229), which gives every player within 30 yards, and their groups, the 254905 credit of 254091; opening the
 -- worgen's gossip casts it too. Coming within 40 yards of each scouting point credits 255072.
-DELETE FROM `smart_scripts` WHERE (`entryorguid` IN (254906,764561,255360,255361,255362,255363) AND `source_type` = 0)
-  OR (`entryorguid` = 25490600 AND `source_type` = 9);
+-- Captain Aldric Vayne answers Julie's second line 2.5 seconds later, and Ryton Altham's second line follows his first
+-- by 12 seconds, as in jLBZUj7KUhw (2026-07-20, 1:51:51-1:51:54 and 1:53:17-1:53:29). Ryton speaks when a player comes
+-- within 15 yards; that trigger and its 2-3 minute repeat are estimated.
+DELETE FROM `smart_scripts`
+  WHERE (`entryorguid` IN (254906,764561,255157,255360,255361,255362,255363) AND `source_type` = 0)
+  OR (`entryorguid` IN (25490600, 25515700) AND `source_type` = 9);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`,
   `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`,
   `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`,
@@ -482,19 +486,23 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (25490600, 9, 1, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Julie Addle Says Line 0'),
 (25490600, 9, 2, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 19, 764561, 20, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Nightbane Worgen Says Line 1'),
 (25490600, 9, 3, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Julie Addle Says Line 1'),
-(25490600, 9, 4, 0, 0, 0, 100, 0, 7000, 7000, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 19, 764561, 20, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Nightbane Worgen Says Line 2'),
-(25490600, 9, 5, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Julie Addle Says Line 2'),
-(25490600, 9, 6, 0, 0, 0, 100, 0, 7000, 7000, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 19, 764561, 20, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Nightbane Worgen Says Line 3'),
-(25490600, 9, 7, 0, 0, 0, 100, 0, 7000, 7000, 0, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 19, 764561, 20, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Nightbane Worgen Says Line 4'),
-(25490600, 9, 8, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Julie Addle Says Line 3'),
-(25490600, 9, 9, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 0, 11, 355229, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Cast ''Arvis Reunion Credit'''),
+(25490600, 9, 4, 0, 0, 0, 100, 0, 2500, 2500, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 19, 764560, 20, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Captain Aldric Vayne Says Line 0'),
+(25490600, 9, 5, 0, 0, 0, 100, 0, 4500, 4500, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 19, 764561, 20, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Nightbane Worgen Says Line 2'),
+(25490600, 9, 6, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Julie Addle Says Line 2'),
+(25490600, 9, 7, 0, 0, 0, 100, 0, 7000, 7000, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 19, 764561, 20, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Nightbane Worgen Says Line 3'),
+(25490600, 9, 8, 0, 0, 0, 100, 0, 7000, 7000, 0, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 19, 764561, 20, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Nightbane Worgen Says Line 4'),
+(25490600, 9, 9, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Julie Addle Says Line 3'),
+(25490600, 9, 10, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 0, 11, 355229, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Julie Addle - Actionlist - Cast ''Arvis Reunion Credit'''),
+(255157, 0, 0, 0, 10, 0, 100, 0, 2, 15, 120000, 180000, 1, 0, 80, 25515700, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Ryton Altham - On Player In Range - Run Script'),
+(25515700, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Ryton Altham - Actionlist - Say Line 0'),
+(25515700, 9, 1, 0, 0, 0, 100, 0, 12000, 12000, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Ryton Altham - Actionlist - Say Line 1'),
 (255360, 0, 0, 0, 10, 0, 100, 0, 2, 40, 5000, 5000, 1, 0, 33, 255360, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Tranquil Gardens Cemetary Dummy - On Player In Range - Quest Credit ''The Fool and the Foul'''),
 (255361, 0, 0, 0, 10, 0, 100, 0, 2, 40, 5000, 5000, 1, 0, 33, 255361, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Raven Hill Dummy - On Player In Range - Quest Credit ''The Fool and the Foul'''),
 (255362, 0, 0, 0, 10, 0, 100, 0, 2, 40, 5000, 5000, 1, 0, 33, 255362, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Vul''Gol Ogre Mound Dummy - On Player In Range - Quest Credit ''The Fool and the Foul'''),
 (255363, 0, 0, 0, 10, 0, 100, 0, 2, 40, 5000, 5000, 1, 0, 33, 255363, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Brightwood Grove Dummy - On Player In Range - Quest Credit ''The Fool and the Foul''');
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceId` = 0
-  AND `SourceEntry` IN (254906,764561,255360,255361,255362,255363);
+  AND `SourceEntry` IN (254906,764561,255157,255360,255361,255362,255363);
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`,
   `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`,
   `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES

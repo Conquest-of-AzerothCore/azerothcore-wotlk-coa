@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Duskwood: Quartermaster Fenrich sells his recorded eight items",
+  "contract": [
+    "Quartermaster Fenrich 751501's vendor window in MatodanDLC's recording 6QNRME4U5pY (2026-07-19, 1:01:52) holds",
+    "eight items: Brown Leather Satchel 4498, Simple Wood 4470, Wicked Throwing Dagger 29010, Heavy Throwing Dagger",
+    "29009, Heavy Brown Bag 4497, Refreshing Spring Water 159, Strong Rope 914470 and Spice Bread 30816. Expected: his",
+    "shop opens with exactly those eight rows."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -10560.0, "y": -1150.0, "z": 28.0, "o": 0},
+  "players": [{"id": "hero", "race": 1, "class": 1, "level": 27}],
+  "creatures": [{"id": "fenrich", "owner": "hero", "entry": 751501, "faction": 35, "level": 30, "distance": 2}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Ask Fenrich for his wares", "actor": "hero", "opcode": 414,
+     "fields": [{"actor_guid": "fenrich"}], "consumed": false},
+    {"action": "assert", "label": "His shop opens", "actor": "hero", "metric": "vendor_list_packets", "equals": 1,
+     "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: he sells eight items", "actor": "hero", "metric": "vendor_items",
+     "equals": 8},
+    {"action": "assert", "label": "Brown Leather Satchel", "actor": "hero", "metric": "vendor_price", "item": 4498,
+     "min": 0},
+    {"action": "assert", "label": "Simple Wood", "actor": "hero", "metric": "vendor_price", "item": 4470, "min": 0},
+    {"action": "assert", "label": "Wicked Throwing Dagger", "actor": "hero", "metric": "vendor_price", "item": 29010,
+     "min": 0},
+    {"action": "assert", "label": "Heavy Throwing Dagger", "actor": "hero", "metric": "vendor_price", "item": 29009,
+     "min": 0},
+    {"action": "assert", "label": "Heavy Brown Bag", "actor": "hero", "metric": "vendor_price", "item": 4497, "min": 0},
+    {"action": "assert", "label": "Refreshing Spring Water", "actor": "hero", "metric": "vendor_price", "item": 159,
+     "min": 0},
+    {"action": "assert", "label": "Strong Rope", "actor": "hero", "metric": "vendor_price", "item": 914470, "min": 0},
+    {"action": "assert", "label": "Spice Bread", "actor": "hero", "metric": "vendor_price", "item": 30816, "min": 0}
+  ]
+}

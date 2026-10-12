@@ -1,18 +1,20 @@
 -- Duskwood restore dialogue from Ascension captures. Progress and reward texts and the Reunited talk are transcribed
 -- from MatodanDLC's recordings: jLBZUj7KUhw (2026-07-20) for 254086-254091 (0:03:08, 1:12:31, 1:40:05, 1:51:39 and
 -- 1:52:29) and the Reunited talk (1:51:37-1:52:24); Dqaoz1Ls6xk (2026-07-19) for 255074 (0:22:07), 255068 (0:32:17)
--- and 255069 (0:32:45); 7Klf_HWwngk (2026-08-16) for 255071 (0:01:31); JqXNTd-9MFA (2026-08-16) for 255073 (0:10:00)
--- and 255072 (0:10:38). Emotes are not visible and are left at 0.
-DELETE FROM `quest_request_items` WHERE `ID` IN (254088,254089,255068,255074);
+-- and 255069 (0:32:45); 6QNRME4U5pY (2026-07-19) for 255067 (1:35:21); 7Klf_HWwngk (2026-08-16, 0:01:31) and
+-- 6QNRME4U5pY (0:35:44) for 255071; JqXNTd-9MFA (2026-08-16) for 255073 (0:10:00) and 255072 (0:10:38). Emotes are
+-- not visible and are left at 0.
+DELETE FROM `quest_request_items` WHERE `ID` IN (254088,254089,255067,255068,255074);
 INSERT INTO `quest_request_items` (`ID`, `EmoteOnComplete`, `EmoteOnIncomplete`, `CompletionText`, `VerifiedBuild`)
   VALUES
 (254088, 0, 0, 'I don''t know if the bandits would have left anything valuable, but maybe there''s something he''ll recognize.', 0),
 (254089, 0, 0, 'He won''t say anything, but I''m certain it''s him. I''d thought maybe, before you have got here, he...\n\nI know. It''s rare that worgen retain even a trace of who they once were. It was just a selfish hope, nothing more.', 0),
+(255067, 0, 0, 'These rings, I''ve...seen them before...', 0),
 (255068, 0, 0, 'Did you find the gems? I won''t blame you if you didn''t, those ogres are quite frightening.', 0),
 (255074, 0, 0, 'Have something for me?', 0);
 
 DELETE FROM `quest_offer_reward`
-  WHERE `ID` IN (254086,254087,254088,254089,254091,255068,255069,255071,255072,255073,255074);
+  WHERE `ID` IN (254086,254087,254088,254089,254091,255067,255068,255069,255071,255072,255073,255074);
 INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, `EmoteDelay1`, `EmoteDelay2`,
   `EmoteDelay3`, `EmoteDelay4`, `RewardText`, `VerifiedBuild`) VALUES
 (254086, 0, 0, 0, 0, 0, 0, 0, 0, 'See what I mean now, might be talking a bit, but he ain''t saying anything useful.\n\nGot a name out of him you say? Julie? That''s more than we''ve got I reckon.\n\nNow where''ve I heard that name before...', 0),
@@ -20,6 +22,7 @@ INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, 
 (254088, 0, 0, 0, 0, 0, 0, 0, 0, 'That old book...so it survived then? Arvis was trying to write a book in whatever spare time he had after managing the farm...he had a whole series in mind actually...\n\n<Tears stream down the woman''s cheek.>\n\nI''m sure he''ll recognize it. He has to. If there''s anything still left of him, he has to.', 0),
 (254089, 0, 0, 0, 0, 0, 0, 0, 0, 'You brought the Nectar? Great, I suppose it''s about time we start.', 0),
 (254091, 0, 0, 0, 0, 0, 0, 0, 0, 'Looks like it went feral again. A shame, would''ve talked to it myself some, but I figured the wife had a better chance.\n\nWe''d been thinking the worgen here were just wild beasts that used to be men, but that one mentioned something about a "Wolf Cult", and a leader. Ain''t that something?\n\nSeems we might''ve been going about this all wrong. I''ll make sure word gets back to our people in Darkshire, if the worgen have an actual goal we''d better stay vigilant.', 0),
+(255067, 0, 0, 0, 0, 0, 0, 0, 0, 'These all belong to Eleanor''s past husbands, I forged them myself...\n\nShe wants me to melt these down for a new wedding ring doesn''t she?', 0),
 (255068, 0, 0, 0, 0, 0, 0, 0, 0, 'Those will work perfectly! I''m glad it wasn''t too much trouble for you.\n\nHmm...\n\n<She analyzes the jewels closely.>\n\nYes, I believe these shall suffice in measuring up to even Eleanor''s standards!', 0),
 (255069, 0, 0, 0, 0, 0, 0, 0, 0, 'Oh this ring is perfect for a woman of my stature! Seems I was right to trust in your capabilities.\n\nI look forward to the day I can wear this on my finger, it''s certainly my favorite of my collection so far.\n\nI''ll send for you when I need my next one. Now if you''ll excuse me, I have some prospects to tend to...', 0),
 (255071, 0, 0, 0, 0, 0, 0, 0, 0, 'Who am I? Why...I''m known as Quill!\n\nMaster thrill seeker of all things bathed in darkness and shadow!', 0),
@@ -78,8 +81,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
   `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (15, 9950200, 0, 0, 0, 9, 0, 254086, 0, 0, 0, 0, 0, '', 'Nightbane Worgen - show option only on ''The Interrogation''');
 
--- The Reunited talk after 'Addle's Stead' is turned in to Julie Addle, line by line as recorded.
-DELETE FROM `creature_text` WHERE `CreatureID` IN (764561, 254906);
+-- The Reunited talk after 'Addle's Stead' is turned in to Julie Addle, line by line as recorded, with Captain Aldric
+-- Vayne's line (jLBZUj7KUhw 1:51:53), and Ryton Altham's lines about his pumpkins (jLBZUj7KUhw 1:53:17 and 1:53:29).
+DELETE FROM `creature_text` WHERE `CreatureID` IN (764561, 254906, 764560, 255157);
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`,
   `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
 (764561, 0, 0, 'Ju..lie?', 12, 0, 100, 0, 0, 0, 0, 0, 'Nightbane Worgen - May We Be Reunited 0'),
@@ -90,10 +94,20 @@ INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Lan
 (254906, 0, 0, 'Arvis? You do recognize me! I knew you''re still there!', 12, 0, 100, 0, 0, 0, 0, 0, 'Julie Addle - May We Be Reunited 0'),
 (254906, 1, 0, 'Don''t worry about me! Just try to remember, your name is Arvis Addle...', 12, 0, 100, 0, 0, 0, 0, 0, 'Julie Addle - May We Be Reunited 1'),
 (254906, 2, 0, 'None of that matters now! We need to find a way to turn you back! No, if you can stay yourself it doesn''t matter if your form changes, I''ll tell the Night Watch to let you out!', 12, 0, 100, 0, 0, 0, 0, 0, 'Julie Addle - May We Be Reunited 2'),
-(254906, 3, 0, 'I''ll tell them! Just...try to hold on a bit longer, alright?', 12, 0, 100, 0, 0, 0, 0, 0, 'Julie Addle - May We Be Reunited 3');
+(254906, 3, 0, 'I''ll tell them! Just...try to hold on a bit longer, alright?', 12, 0, 100, 0, 0, 0, 0, 0, 'Julie Addle - May We Be Reunited 3'),
+(764560, 0, 0, 'Everything seems to be in order!', 12, 0, 100, 0, 0, 0, 0, 0, 'Captain Aldric Vayne - May We Be Reunited 0'),
+(255157, 0, 0, 'What the hells happened to my pumpkins?!', 12, 0, 100, 0, 0, 0, 0, 0, 'Ryton Altham - Ambient 0'),
+(255157, 1, 0, 'That''s what I get for using magic from the Defias...', 12, 0, 100, 0, 0, 0, 0, 0, 'Ryton Altham - Ambient 1');
 
--- Quartermaster Fenrich sells Strong Rope: db.exil.es dump 2026-10-04 (npc_vendor) and the Exiles DB export
--- (2026-09-12).
+-- Quartermaster Fenrich's shop in the order of his vendor window in 6QNRME4U5pY (2026-07-19, 1:01:52); Strong Rope is
+-- also in the db.exil.es dump 2026-10-04 (npc_vendor) and the Exiles DB export (2026-09-12).
 DELETE FROM `npc_vendor` WHERE `entry` = 751501;
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
-(751501, 0, 914470, 0, 0, 0, 0);
+(751501, 0, 4498, 0, 0, 0, 0),
+(751501, 1, 4470, 0, 0, 0, 0),
+(751501, 2, 29010, 0, 0, 0, 0),
+(751501, 3, 29009, 0, 0, 0, 0),
+(751501, 4, 4497, 0, 0, 0, 0),
+(751501, 5, 159, 0, 0, 0, 0),
+(751501, 6, 914470, 0, 0, 0, 0),
+(751501, 7, 30816, 0, 0, 0, 0);
