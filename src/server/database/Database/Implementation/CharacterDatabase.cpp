@@ -109,6 +109,49 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "DELETE FROM coa_lottery_entry WHERE round_id = ? AND guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_CANCEL_LOTTERY_ROUND,
         "UPDATE coa_lottery_round SET active = NULL WHERE id = ? AND active = 1", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_SCHEMA,
+        "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name IN "
+        "('grootcoin_award', 'grootcoin_award_mail', 'grootcoin_exchange', 'grootcoin_exchange_item')", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_RECIPIENT,
+        "SELECT account FROM characters WHERE guid = ? AND deleteDate IS NULL AND account <> 0", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_AWARD_BY_KEY,
+        "SELECT COUNT(*), MAX(award_id), MAX(recipient_character_guid), MAX(amount) FROM grootcoin_award "
+        "WHERE issue_number = ? AND recipient_account_id = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_AWARD,
+        "SELECT a.award_id, a.issue_number, a.recipient_account_id, a.recipient_character_guid, a.actor_account_id, "
+        "a.actor_character_guid, a.amount, a.reason, a.attribution_ref, CAST(a.created_at AS CHAR), m.mail_id, "
+        "m.coin_item_guid, (SELECT COUNT(*) FROM mail WHERE id = m.mail_id) FROM grootcoin_award a "
+        "LEFT JOIN grootcoin_award_mail m ON m.award_id = a.award_id WHERE a.award_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_AWARD_HISTORY,
+        "SELECT award_id, issue_number, amount, CAST(created_at AS CHAR), actor_account_id FROM grootcoin_award "
+        "WHERE recipient_character_guid = ? ORDER BY created_at DESC, award_id LIMIT ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_GROOTCOIN_AWARD,
+        "INSERT INTO grootcoin_award (award_id, issue_number, recipient_account_id, recipient_character_guid, "
+        "actor_account_id, actor_character_guid, amount, reason, attribution_ref) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_GROOTCOIN_AWARD_MAIL,
+        "INSERT INTO grootcoin_award_mail (award_id, mail_id, coin_item_guid, amount) VALUES (?, ?, ?, ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_EXCHANGE,
+        "SELECT exchange_id, account_id, character_guid, coins_spent, tokens_delivered, tokens_per_coin, source, "
+        "CAST(created_at AS CHAR) FROM grootcoin_exchange WHERE exchange_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_GROOTCOIN_EXCHANGE_COMMITTED,
+        "SELECT COUNT(*) FROM grootcoin_exchange WHERE exchange_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_GROOTCOIN_EXCHANGE,
+        "INSERT INTO grootcoin_exchange (exchange_id, account_id, character_guid, coin_entry, token_entry, coins_spent, "
+        "tokens_delivered, tokens_per_coin, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_GROOTCOIN_EXCHANGE_STACK,
+        "INSERT INTO grootcoin_exchange_item (exchange_id, item_guid, item_entry, expected_count, stored_count, "
+        "resulting_count, slot_conflicts) SELECT ?, ?, ?, ?, "
+        "COALESCE((SELECT count FROM item_instance WHERE guid = ? AND owner_guid = ? AND itemEntry = ?), -1), ?, "
+        "1 - (SELECT COUNT(*) FROM character_inventory WHERE item = ? AND guid = ? AND bag = ? AND slot = ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_GROOTCOIN_EXCHANGE_NEW_STACK,
+        "INSERT INTO grootcoin_exchange_item (exchange_id, item_guid, item_entry, expected_count, stored_count, "
+        "resulting_count, slot_conflicts) SELECT ?, ?, ?, -1, "
+        "COALESCE((SELECT count FROM item_instance WHERE guid = ?), -1), ?, "
+        "(SELECT COUNT(*) FROM character_inventory WHERE guid = ? AND bag = ? AND slot = ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_GROOTCOIN_STACK_COUNT, "UPDATE item_instance SET count = ? WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CROWS_CACHE, "SELECT id,phase,carrier,item_guid,map,x,y,z,o,deadline,announcements FROM coa_crows_cache", CONNECTION_SYNCH);
     PrepareStatement(CHAR_REP_CROWS_CACHE, "REPLACE INTO coa_crows_cache (id,phase,carrier,item_guid,map,x,y,z,o,deadline,announcements) VALUES (?,?,?,?,?,?,?,?,?,?,?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_CROWS_CACHE, "DELETE FROM coa_crows_cache WHERE id=?", CONNECTION_ASYNC);

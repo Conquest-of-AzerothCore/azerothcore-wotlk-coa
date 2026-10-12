@@ -1,0 +1,309 @@
+/*
+ * Groot Coin commands, the Tiraxis submenu and the world hooks.
+ */
+
+#include "GrootCoin.h"
+
+#include "AscensionClientSpellPatches.h"
+#include "CharacterCache.h"
+#include "Chat.h"
+#include "ChatCommand.h"
+#include "Creature.h"
+#include "Player.h"
+#include "RBAC.h"
+#include "ScriptMgr.h"
+#include "ScriptedGossip.h"
+#include "WorldSession.h"
+
+namespace GrootCoin::TiraxisMenu
+{
+    namespace
+    {
+        enum GrootGossip : uint32
+        {
+            GOSSIP_GROOT_FIRST = 9100,
+            GOSSIP_GROOT_MENU = 9100,
+            GOSSIP_GROOT_BALANCE = 9101,
+            GOSSIP_GROOT_BUNDLE_1 = 9111,
+            GOSSIP_GROOT_BUNDLE_5 = 9115,
+            GOSSIP_GROOT_BUNDLE_10 = 9120,
+            GOSSIP_GROOT_CONFIRM = 9150,
+            GOSSIP_GROOT_CANCEL = 9151,
+            GOSSIP_GROOT_BACK = 9152,
+            GOSSIP_GROOT_LAST = 9199
+        };
+
+        constexpr uint32 GOSSIP_SENDER_GROOT = 0;
+        constexpr uint32 TIRAXIS_TEXT_ID = 900007;
+        constexpr std::string_view SOURCE = "tiraxis";
+
+        uint32 BundleCoins(uint32 action)
+        {
+            switch (action)
+            {
+                case GOSSIP_GROOT_BUNDLE_1: return 1;
+                case GOSSIP_GROOT_BUNDLE_5: return 5;
+                case GOSSIP_GROOT_BUNDLE_10: return 10;
+                default: return 0;
+            }
+        }
+
+        uint32 BundleAction(uint32 coins)
+        {
+            switch (coins)
+            {
+                case 1: return GOSSIP_GROOT_BUNDLE_1;
+                case 5: return GOSSIP_GROOT_BUNDLE_5;
+                default: return GOSSIP_GROOT_BUNDLE_10;
+            }
+        }
+
+        void ShowExchange(Player* player, Creature* creature)
+        {
+            uint32 const carried = CarriedCoins(player);
+            uint32 const rate = GetSettings().tokensPerCoin;
+
+            ClearGossipMenuFor(player);
+            AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, Acore::StringFormat("You carry {} Groot Coin(s). One coin "
+                "is worth {} Bazaar Tokens.", carried, rate), GOSSIP_SENDER_GROOT, GOSSIP_GROOT_BALANCE);
+            for (uint32 const coins : EXCHANGE_BUNDLES)
+                if (carried >= coins)
+                    AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Acore::StringFormat("Exchange {} Groot Coin(s) for {} "
+                        "Bazaar Tokens.", coins, coins * rate), GOSSIP_SENDER_GROOT, BundleAction(coins));
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Back.", GOSSIP_SENDER_GROOT, GOSSIP_GROOT_BACK);
+            SendGossipMenuFor(player, TIRAXIS_TEXT_ID, creature);
+        }
+
+        void ShowConfirmation(Player* player, Creature* creature, Quote const& quote)
+        {
+            std::string const offer = Acore::StringFormat("Exchange {} Groot Coin(s) for {} Bazaar Tokens?",
+                quote.coins, quote.tokens);
+            ClearGossipMenuFor(player);
+            AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, Acore::StringFormat("Confirm: {} Groot Coin(s) for {} "
+                "Bazaar Tokens.", quote.coins, quote.tokens), quote.nonce, GOSSIP_GROOT_CONFIRM, offer, 0, false);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Cancel.", GOSSIP_SENDER_GROOT, GOSSIP_GROOT_CANCEL);
+            SendGossipMenuFor(player, TIRAXIS_TEXT_ID, creature);
+        }
+
+        void Tell(Player* player, std::string_view text)
+        {
+            ChatHandler(player->GetSession()).SendSysMessage(std::string(text));
+        }
+    }
+
+    bool IsAction(uint32 action)
+    {
+        return action >= GOSSIP_GROOT_FIRST && action <= GOSSIP_GROOT_LAST;
+    }
+
+    void AddEntry(Player* player)
+    {
+        if (ExchangeAvailable())
+            AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, "I want to exchange Groot Coins.", GOSSIP_SENDER_GROOT,
+                GOSSIP_GROOT_MENU);
+    }
+
+    void OnSelect(Player* player, Creature* creature, uint32 sender, uint32 action)
+    {
+        Vendor const vendor{ creature, SOURCE };
+        switch (action)
+        {
+            case GOSSIP_GROOT_MENU:
+            case GOSSIP_GROOT_BALANCE:
+                ShowExchange(player, creature);
+                return;
+            case GOSSIP_GROOT_CANCEL:
+                CancelQuote(player);
+                ShowExchange(player, creature);
+                return;
+            case GOSSIP_GROOT_BACK:
+                CancelQuote(player);
+                sScriptMgr->OnGossipHello(player, creature);
+                return;
+            case GOSSIP_GROOT_CONFIRM:
+            {
+                CloseGossipMenuFor(player);
+                ExchangeResult const result = ConfirmQuote(player, vendor, sender);
+                if (result != ExchangeResult::Ok)
+                    Tell(player, Describe(result));
+                return;
+            }
+            default:
+                break;
+        }
+
+        if (uint32 const coins = BundleCoins(action))
+        {
+            Quote quote;
+            ExchangeResult const result = CreateQuote(player, vendor, coins, quote);
+            if (result == ExchangeResult::Ok)
+            {
+                ShowConfirmation(player, creature, quote);
+                return;
+            }
+            Tell(player, Describe(result));
+        }
+        CloseGossipMenuFor(player);
+    }
+}
+
+namespace
+{
+    using namespace GrootCoin;
+    using namespace Acore::ChatCommands;
+
+    constexpr char const* AWARD_USAGE =
+        "Usage: .groot award <character> <amount> <issue-number> \"<reason>\" \"<attribution-ref>\"";
+
+    class groot_coin_commands : public CommandScript
+    {
+    public:
+        groot_coin_commands() : CommandScript("groot_coin_commands") { }
+
+        ChatCommandTable GetCommands() const override
+        {
+            static ChatCommandTable grootTable =
+            {
+                { "award",   HandleAward,   rbac::RBAC_PERM_COMMAND_GROOT_AWARD, Console::No },
+                { "history", HandleHistory, rbac::RBAC_PERM_COMMAND_GROOT_AUDIT, Console::Yes },
+                { "inspect", HandleInspect, rbac::RBAC_PERM_COMMAND_GROOT_AUDIT, Console::Yes },
+                { "status",  HandleStatus,  rbac::RBAC_PERM_COMMAND_GROOT_AUDIT, Console::Yes },
+            };
+            static ChatCommandTable root =
+            {
+                { "groot", grootTable },
+            };
+            return root;
+        }
+
+        static bool HandleAward(ChatHandler* handler, Optional<PlayerIdentifier> target, Optional<std::string> amountText,
+            Optional<std::string> issueText, Optional<QuotedString> reason, Optional<QuotedString> attribution)
+        {
+            WorldSession* session = handler->GetSession();
+            if (!session || !session->GetPlayer())
+            {
+                handler->SendSysMessage("Groot Coin awards need an in-game staff character.");
+                return true;
+            }
+            if (!AwardsAvailable())
+            {
+                handler->SendSysMessage("Groot Coin awards are disabled. See .groot status.");
+                return true;
+            }
+            if (session->GetSecurity() < SEC_GAMEMASTER)
+            {
+                handler->SendSysMessage("Groot Coin awards need Game Master security.");
+                return true;
+            }
+            if (!target || !amountText || !issueText || !reason || !attribution)
+            {
+                handler->SendSysMessage(AWARD_USAGE);
+                return true;
+            }
+
+            Optional<uint32> const amount = ParseAwardAmount(*amountText, GetSettings().maxAward);
+            Optional<uint32> const issue = ParseIssueNumber(*issueText);
+            if (!amount || !issue)
+            {
+                handler->PSendSysMessage("Amount must be a whole number from 1 to {}, and the issue the plain number of "
+                    "a jealous-sound/azerothcore-wotlk-coa issue.", GetSettings().maxAward);
+                handler->SendSysMessage(AWARD_USAGE);
+                return true;
+            }
+            if (!IsValidAuditText(*reason, REASON_MAX) || !IsValidAuditText(*attribution, ATTRIBUTION_MAX))
+            {
+                handler->PSendSysMessage("Reason (up to {} characters) and attribution reference (up to {}) are "
+                    "required.", REASON_MAX, ATTRIBUTION_MAX);
+                handler->SendSysMessage(AWARD_USAGE);
+                return true;
+            }
+
+            ObjectGuid const recipient = target->GetGUID();
+            if (sCharacterCache->GetCharacterAccountIdByGuid(recipient) == session->GetAccountId())
+            {
+                handler->SendSysMessage("You cannot award your own account.");
+                return true;
+            }
+
+            AwardRequest request;
+            request.recipient = recipient;
+            request.amount = *amount;
+            request.issueNumber = *issue;
+            request.reason = *reason;
+            request.attributionRef = *attribution;
+            request.actorAccountId = session->GetAccountId();
+            request.actor = session->GetPlayer()->GetGUID();
+            IssueAward(std::move(request));
+
+            handler->PSendSysMessage("Groot Coin: awarding {} coin(s) to {} for issue #{}...", *amount,
+                target->GetName(), *issue);
+            return true;
+        }
+
+        static bool HandleHistory(ChatHandler* handler, Optional<PlayerIdentifier> target, Optional<std::string> count)
+        {
+            if (!target)
+            {
+                handler->PSendSysMessage("Usage: .groot history <character> [count up to {}]", HISTORY_MAX);
+                return true;
+            }
+
+            Optional<uint32> const limit = ParseHistoryCount(count ? std::string_view(*count) : std::string_view());
+            if (!limit)
+            {
+                handler->PSendSysMessage("Usage: .groot history <character> [count up to {}]", HISTORY_MAX);
+                return true;
+            }
+
+            ShowHistory(handler, target->GetGUID(), target->GetName(), *limit);
+            return true;
+        }
+
+        static bool HandleInspect(ChatHandler* handler, Optional<std::string> id)
+        {
+            if (!id || !IsUuid(*id))
+            {
+                handler->SendSysMessage("Usage: .groot inspect <award-id or exchange-id>");
+                return true;
+            }
+
+            ShowRecord(handler, *id);
+            return true;
+        }
+
+        static bool HandleStatus(ChatHandler* handler)
+        {
+            ShowStatus(handler);
+            return true;
+        }
+    };
+
+    class groot_coin_world : public WorldScript
+    {
+    public:
+        groot_coin_world() : WorldScript("groot_coin_world") { }
+
+        void OnAfterConfigLoad(bool reload) override
+        {
+            if (!reload)
+                LoadSettings();
+        }
+
+        void OnStartup() override
+        {
+            Validate();
+        }
+
+        void OnUpdate(uint32 /*diff*/) override
+        {
+            Update();
+        }
+    };
+}
+
+void AddGrootCoinScripts()
+{
+    Ascension::ClientItemPatches::Instance().Register(COIN_ITEM);
+    new groot_coin_commands();
+    new groot_coin_world();
+}

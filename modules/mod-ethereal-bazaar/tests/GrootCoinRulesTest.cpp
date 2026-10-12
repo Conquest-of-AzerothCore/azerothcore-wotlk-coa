@@ -1,0 +1,98 @@
+#include "GrootCoinRules.h"
+#include <gtest/gtest.h>
+
+using namespace GrootCoin;
+
+TEST(GrootCoinRules, AwardAmountsAreStrictPositiveDecimalsUpToTheMaximum)
+{
+    EXPECT_EQ(ParseAwardAmount("1", 25), 1u);
+    EXPECT_EQ(ParseAwardAmount("25", 25), 25u);
+    EXPECT_FALSE(ParseAwardAmount("26", 25));
+    EXPECT_FALSE(ParseAwardAmount("0", 25));
+    EXPECT_FALSE(ParseAwardAmount("-1", 25));
+    EXPECT_FALSE(ParseAwardAmount("+3", 25));
+    EXPECT_FALSE(ParseAwardAmount(" 3", 25));
+    EXPECT_FALSE(ParseAwardAmount("3.0", 25));
+    EXPECT_FALSE(ParseAwardAmount("0x5", 25));
+    EXPECT_FALSE(ParseAwardAmount("", 25));
+    EXPECT_FALSE(ParseAwardAmount("4294967296", UINT32_MAX));
+    EXPECT_FALSE(ParseAwardAmount("99999999999", UINT32_MAX));
+    EXPECT_FALSE(ParseAwardAmount("1001", 5000));
+}
+
+TEST(GrootCoinRules, IssuesAreCanonicalNumbersNotUrls)
+{
+    EXPECT_EQ(ParseIssueNumber("6696"), 6696u);
+    EXPECT_FALSE(ParseIssueNumber("#6696"));
+    EXPECT_FALSE(ParseIssueNumber("https://github.com/jealous-sound/azerothcore-wotlk-coa/issues/6696"));
+    EXPECT_FALSE(ParseIssueNumber("0"));
+    EXPECT_FALSE(ParseIssueNumber("4294967296"));
+}
+
+TEST(GrootCoinRules, AuditTextIsRequiredBoundedAndPrintable)
+{
+    EXPECT_TRUE(IsValidAuditText("Reproduced the crash", REASON_MAX));
+    EXPECT_FALSE(IsValidAuditText("", REASON_MAX));
+    EXPECT_FALSE(IsValidAuditText("   ", REASON_MAX));
+    EXPECT_FALSE(IsValidAuditText("line\nbreak", REASON_MAX));
+    EXPECT_TRUE(IsValidAuditText(std::string(ATTRIBUTION_MAX, 'a'), ATTRIBUTION_MAX));
+    EXPECT_FALSE(IsValidAuditText(std::string(ATTRIBUTION_MAX + 1, 'a'), ATTRIBUTION_MAX));
+    EXPECT_TRUE(IsValidAuditText("'; DROP TABLE grootcoin_award; --", REASON_MAX));
+}
+
+TEST(GrootCoinRules, HistoryCountDefaultsAndCaps)
+{
+    EXPECT_EQ(ParseHistoryCount(""), HISTORY_DEFAULT);
+    EXPECT_EQ(ParseHistoryCount("5"), 5u);
+    EXPECT_EQ(ParseHistoryCount("1000"), HISTORY_MAX);
+    EXPECT_FALSE(ParseHistoryCount("0"));
+    EXPECT_FALSE(ParseHistoryCount("-5"));
+    EXPECT_FALSE(ParseHistoryCount("ten"));
+}
+
+TEST(GrootCoinRules, PilotRatePaysExactBundles)
+{
+    constexpr uint32_t tokenStack = 5000000;
+    EXPECT_EQ(TokensFor(1, DEFAULT_TOKENS_PER_COIN, tokenStack), 100u);
+    EXPECT_EQ(TokensFor(5, DEFAULT_TOKENS_PER_COIN, tokenStack), 500u);
+    EXPECT_EQ(TokensFor(10, DEFAULT_TOKENS_PER_COIN, tokenStack), 1000u);
+    EXPECT_TRUE(IsExchangeBundle(1));
+    EXPECT_TRUE(IsExchangeBundle(5));
+    EXPECT_TRUE(IsExchangeBundle(10));
+    EXPECT_FALSE(IsExchangeBundle(0));
+    EXPECT_FALSE(IsExchangeBundle(2));
+    EXPECT_FALSE(IsExchangeBundle(100));
+}
+
+TEST(GrootCoinRules, RatesThatOverflowOrExceedAStackAreRejected)
+{
+    EXPECT_FALSE(TokensFor(10, 0, 5000000));
+    EXPECT_FALSE(TokensFor(0, 100, 5000000));
+    EXPECT_FALSE(TokensFor(10, UINT32_MAX, 0));
+    EXPECT_FALSE(TokensFor(10, 500001, 5000000));
+    EXPECT_EQ(TokensFor(10, 500000, 5000000), 5000000u);
+    EXPECT_TRUE(IsValidRate(100, 5000000));
+    EXPECT_FALSE(IsValidRate(0, 5000000));
+    EXPECT_FALSE(IsValidRate(600000, 5000000));
+    EXPECT_FALSE(IsValidRate(UINT32_MAX / 5, 0));
+}
+
+TEST(GrootCoinRules, OperationIdsAreVersion4Uuids)
+{
+    std::array<uint8_t, 16> bytes{};
+    bytes.fill(0xFF);
+    std::string const id = FormatUuid(bytes);
+    EXPECT_EQ(id, "ffffffff-ffff-4fff-bfff-ffffffffffff");
+    EXPECT_TRUE(IsUuid(id));
+    EXPECT_EQ(FormatUuid({}), "00000000-0000-4000-8000-000000000000");
+    EXPECT_FALSE(IsUuid("FFFFFFFF-FFFF-4FFF-BFFF-FFFFFFFFFFFF"));
+    EXPECT_FALSE(IsUuid("ffffffff-ffff-4fff-bfff-fffffffffff"));
+    EXPECT_FALSE(IsUuid("ffffffffXffff-4fff-bfff-ffffffffffff"));
+}
+
+TEST(GrootCoinRules, CoinIdsAreDistinctFromTheBazaarToken)
+{
+    EXPECT_NE(COIN_ITEM, 975001u);
+    EXPECT_EQ(COIN_ITEM, 910001u);
+    EXPECT_EQ(COIN_FALLBACK_DISPLAY, 30015u);
+}
