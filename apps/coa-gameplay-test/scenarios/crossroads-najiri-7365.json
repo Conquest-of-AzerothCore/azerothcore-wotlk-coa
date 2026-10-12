@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "name": "Crossroads: Naj'iri sits beside Raj'iri and the sisters' quests still reward",
+  "contract": "Raj'iri 41719 gives and takes 'Play It by Ear' 255078 and takes 'Dancing to the Beat' 255080 at The Crossroads; her sister Naj'iri 741719 sits next to her and answers Raj'iri's lines after each of those quests (#7365). The reporter's capture shows Naj'iri as a level 8 Darkspear Trolls NPC beside Raj'iri, but rev_20261010_98 only added her template and her lines, so no Naj'iri existed in the world. This case walks onto Raj'iri's world spawn 9010700 and counts the living Naj'iri within 60 yd at her native level 8, which is zero before rev_20261012_03 and one after it. It then rewards 255078 and 255080 through the native reward path while Raj'iri runs her new SmartAI, so the quest rewards and the two action lists that make the sisters talk complete without breaking either quest. The spoken lines, Raj'iri's dance and Naj'iri's sitting are client-visible and are not observed here.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": -399.0,
+    "y": -2603.1,
+    "z": 95.8,
+    "o": 5.5
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 13
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, the phase the Crossroads spawns live in (the lane phase hides them)",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the Crossroads grids activate",
+      "ms": 2000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Walk to Raj'iri's world spawn 9010700",
+      "actor": "p",
+      "guid": 9010700
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Raj'iri herself is there",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 41719,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: exactly one living Naj'iri at level 8 is beside her",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 741719,
+      "min_level": 8,
+      "max_level": 8,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: 'Play It by Ear' is ready to turn in",
+      "actor": "p",
+      "quest": 255078
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in 'Play It by Ear', which starts Raj'iri's first action list",
+      "actor": "p",
+      "quest": 255078
+    },
+    {
+      "action": "assert",
+      "label": "'Play It by Ear' is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255078,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: 'Finding the Rhythm', the step between the two, is ready to turn in",
+      "actor": "p",
+      "quest": 255079
+    },
+    {
+      "action": "reward_quest",
+      "label": "SETUP: turn in 'Finding the Rhythm' so 'Dancing to the Beat' follows in the chain",
+      "actor": "p",
+      "quest": 255079
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: 'Dancing to the Beat' is ready to turn in",
+      "actor": "p",
+      "quest": 255080
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in 'Dancing to the Beat', which starts the second action list and Naj'iri's dance",
+      "actor": "p",
+      "quest": 255080
+    },
+    {
+      "action": "assert",
+      "label": "'Dancing to the Beat' is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255080,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let both lines and the start of Naj'iri's dance play out",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Naj'iri is still there after the action list drove her",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 741719,
+      "min_level": 8,
+      "max_level": 8,
+      "equals": 1,
+      "within_ms": 4000
+    }
+  ]
+}
