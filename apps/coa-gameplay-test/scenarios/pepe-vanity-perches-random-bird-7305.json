@@ -1,0 +1,1452 @@
+{
+  "schema": 1,
+  "name": "PepeVanity perches a random bird on the head and swaps with Winter Veil Pepe both ways (#7305)",
+  "contract": [
+    "Spell 985980 (item 99076) only carries a cast kit; the ten bird auras 985981-985990 hold the head-perched state kits and nothing cast them.",
+    "Using PepeVanity casts one of the ten bird auras on the player, replaces Winter Veil Pepe (498613) and leaves no 985980 aura behind; using Winter Veil Pepe (498612) removes the PepeVanity bird."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "owner",
+      "name": "Pepeowner",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn PepeVanity",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "set_aura",
+      "label": "Winter Veil Pepe already perched",
+      "actor": "owner",
+      "spell": 498613,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "assert",
+      "label": "The empty item aura does not stay on the bar",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985980,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Winter Veil Pepe is replaced",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 498613,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 1",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 2",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 3",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 4",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 5",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 6",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 7",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 8",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 9",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 10",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 11",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 12",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 13",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 14",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 15",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 16",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 17",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 18",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 19",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 20",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 21",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 22",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 23",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 24",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 25",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 26",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 27",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 28",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 29",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 30",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 31",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 32",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 33",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 34",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 35",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 36",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 37",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 38",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 39",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 40",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 41",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 42",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 43",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 44",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 45",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 46",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 47",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 48",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 49",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 50",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 51",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 52",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 53",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 54",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 55",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 56",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 57",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 58",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 59",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 60",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 61",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 62",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 63",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 64",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 65",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 66",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 67",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 68",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 69",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 70",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 71",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 72",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 73",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 74",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 75",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 76",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 77",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 78",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 79",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 80",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 81",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 82",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 83",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 84",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 85",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 86",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 87",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 88",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 89",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 90",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 91",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 92",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 93",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 94",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 95",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 96",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 97",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 98",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 99",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 100",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 101",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 102",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 103",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 104",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 105",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 106",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 107",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 108",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 109",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 110",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 111",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 112",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 113",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 114",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 115",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 116",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 117",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 118",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 119",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "label": "Use PepeVanity 120",
+      "actor": "owner",
+      "spell": 985980
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985981 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985981,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985982 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985982,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985983 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985983,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985984 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985984,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985985 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985985,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985986 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985986,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985987 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985987,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985988 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985988,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985989 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985989,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variant 985990 was perched",
+      "actor": "owner",
+      "metric": "spell_cast_count",
+      "spell": 985990,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The empty item aura still absent",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985980,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Learn Winter Veil Pepe",
+      "actor": "owner",
+      "spell": 498612
+    },
+    {
+      "action": "cast",
+      "label": "Use Winter Veil Pepe",
+      "actor": "owner",
+      "spell": 498612
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Winter Veil Pepe is perched",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 498613,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985981 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985981,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985982 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985982,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985983 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985983,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985984 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985984,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985985 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985985,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985986 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985986,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985987 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985987,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985988 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985988,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985989 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985989,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bird 985990 is gone",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 985990,
+      "equals": 0
+    }
+  ]
+}
