@@ -358,14 +358,26 @@ namespace
     // starts at the final encounter, not at the three-wave gong event.
     constexpr uint32 MANASTORM_MAP_RAZORFEN_DOWNS = 129;
     constexpr uint32 NPC_TUTEN_KASH = 7355;
+    constexpr uint32 NPC_PLAGUEMAW_THE_ROTTING = 7356;
     constexpr uint32 GO_RFD_GONG = 148917;
     constexpr uint32 SEGMENT_TUTEN_KASH_ENDGAME = 294;
+    constexpr uint32 SEGMENT_PLAGUEMAW_ENDGAME = 689;
 
     // Native TrinityCore 3.3.5 RFD gong's final Tuten'kash summon
     // position (not the player-authored game_tele 2158 arrival point).
     Position const TUTEN_KASH_GONG_POSITION =
     {
         2487.939f, 804.2224f, 43.10735f, 1.692969f
+    };
+
+    // RFD's npc_belnistrasz randomly chooses from PosSummonSpawner[3]
+    // for each wave. On wave eight (data == 7) the native
+    // npc_idol_room_spawner summons Plaguemaw at its own position.
+    // Use the first exact native spawner position as a deterministic
+    // standalone boss location, without requiring the escort quest.
+    Position const PLAGUEMAW_NATIVE_EVENT_POSITION =
+    {
+        2582.789f, 954.3925f, 52.48214f, 3.787364f
     };
 
     constexpr uint32 MANASTORM_MAP_ZUL_FARRAK = 209;
@@ -1352,6 +1364,80 @@ namespace
         return true;
     }
 
+    bool BootstrapRazorfenDownsPlaguemawEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_RAZORFEN_DOWNS ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            segment.MapId != MANASTORM_MAP_RAZORFEN_DOWNS ||
+            segment.SegmentId != SEGMENT_PLAGUEMAW_ENDGAME ||
+            segment.ObjectiveCreatureEntry != NPC_PLAGUEMAW_THE_ROTTING)
+        {
+            error = "Plaguemaw bootstrap received a nonmatching private Razorfen Downs stage.";
+            return false;
+        }
+
+        // Plaguemaw is normally event-summoned by Belnistrasz's final
+        // escort wave. In the recovered standalone Endgame Manastorm
+        // stage, only the final original creature is needed, not the
+        // escort, spawner (8611), or its preceding trash waves.
+        // Load only the genuine arena grid and keep public RFD intact.
+        map->LoadGrid(
+            PLAGUEMAW_NATIVE_EVENT_POSITION.GetPositionX(),
+            PLAGUEMAW_NATIVE_EVENT_POSITION.GetPositionY());
+
+        // A prior native event/creature hook might already have
+        // registered the objective in this private run.
+        // Never intentionally create a second Plaguemaw.
+        if (!run.GetObjectiveCreatureGuid().IsEmpty())
+        {
+            LOG_INFO(LOG_FILTER,
+                "Reused registered Plaguemaw objective in private RFD: "
+                "run={} segment={} instance={} guid={}.",
+                run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+                run.GetObjectiveCreatureGuid().GetRawValue());
+            return true;
+        }
+
+        TempSummon* plaguemaw = map->SummonCreature(
+            NPC_PLAGUEMAW_THE_ROTTING,
+            PLAGUEMAW_NATIVE_EVENT_POSITION);
+
+        if (!plaguemaw)
+        {
+            error = "Could not summon original Plaguemaw (7356) for private RFD Endgame stage.";
+            return false;
+        }
+
+        plaguemaw->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
+
+        // The normal AddToMap hook normally registers TempSummon;
+        // explicit duplicate-safe registration guarantees validation.
+        ManastormMgr::Instance().OnCreatureAddWorld(plaguemaw);
+
+        if (run.GetObjectiveCreatureGuid() != plaguemaw->GetGUID())
+        {
+            plaguemaw->DespawnOrUnsummon();
+            error = "Summoned Plaguemaw failed to register as the private Manastorm objective.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER,
+            "Summoned original Plaguemaw for private RFD Endgame: "
+            "run={} segment={} instance={} guid={}.",
+            run.GetRunId(), segment.SegmentId,
+            run.GetInstanceId(), plaguemaw->GetGUID().GetRawValue());
+
+        return true;
+    }
+
     bool BootstrapRazorfenDownsTutenKashEncounter(
         Map* map,
         ManastormRun& run,
@@ -1709,6 +1795,10 @@ namespace
         {
         case SEGMENT_TUTEN_KASH_ENDGAME:
             return BootstrapRazorfenDownsTutenKashEncounter(
+                map, run, error);
+
+        case SEGMENT_PLAGUEMAW_ENDGAME:
+            return BootstrapRazorfenDownsPlaguemawEncounter(
                 map, run, error);
 
         case SEGMENT_GAHZRILLA_NORMAL:
