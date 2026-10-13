@@ -3269,6 +3269,14 @@ private:
             }
             return 0.0;
         }
+        if (metric == "owned_creature_virtual_item")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Virtual item observation needs a present owned creature");
+            uint32 const slot = step.get<uint32>("slot", 0);
+            Require(slot < MAX_EQUIPMENT_ITEMS, "Virtual item slot out of range");
+            return creature->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + slot);
+        }
         if (metric == "owned_creature_spell_hit_chance")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
