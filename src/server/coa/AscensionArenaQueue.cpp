@@ -22,6 +22,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "StringFormat.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -74,6 +75,16 @@ namespace
     bool IsSoloTeamBracket(uint8 arenaType)
     {
         return arenaType == ARENA_TYPE_2v2 || arenaType == ARENA_TYPE_3v3;
+    }
+
+    bool IsSoloMatchedBracket(uint8 arenaType)
+    {
+        return arenaType == ARENA_TYPE_1v1 || IsSoloTeamBracket(arenaType);
+    }
+
+    uint8 SideTeamTypeFor(uint8 arenaType)
+    {
+        return arenaType == ARENA_TYPE_1v1 ? uint8(ARENA_TEAM_5v5) : arenaType;
     }
 
     class SoloSideTeam final : public ArenaTeam
@@ -533,7 +544,15 @@ namespace
 
     bool RoleBalanceRequired(uint8 arenaType)
     {
-        return arenaType == ARENA_TYPE_2v2 ? RoleBalance2v2 : RoleBalance3v3;
+        switch (arenaType)
+        {
+            case ARENA_TYPE_2v2:
+                return RoleBalance2v2;
+            case ARENA_TYPE_3v3:
+                return RoleBalance3v3;
+            default:
+                return false;
+        }
     }
 
     struct LineupCandidate
@@ -772,6 +791,15 @@ namespace
         return itr != personalTeams.end() ? itr->second : 0;
     }
 
+    std::string SideTeamName(uint8 arenaType, std::vector<GroupQueueInfo*> const& side)
+    {
+        bool withPremade = std::any_of(side.begin(), side.end(), [](GroupQueueInfo const* ginfo)
+        {
+            return ginfo->Players.size() > 1;
+        });
+        return Acore::StringFormat("{}v{}{}", arenaType, arenaType, withPremade ? "" : " (Solo Queue)");
+    }
+
     bool StartSoloMatch(BattlegroundQueue* queue, BattlegroundBracketId bracketId, uint8 arenaType,
         SoloLineup const& lineup)
     {
@@ -822,8 +850,9 @@ namespace
         }
 
         match.MatchmakerRating = matchmakerRating;
-        match.Sides[TEAM_ALLIANCE] = new SoloSideTeam(arenaType, "Gold Team", teamRating[TEAM_ALLIANCE]);
-        match.Sides[TEAM_HORDE] = new SoloSideTeam(arenaType, "Green Team", teamRating[TEAM_HORDE]);
+        for (uint8 side = 0; side < PVP_TEAMS_COUNT; ++side)
+            match.Sides[side] = new SoloSideTeam(SideTeamTypeFor(arenaType), SideTeamName(arenaType, lineup.Sides[side]),
+                teamRating[side]);
         for (uint8 side = 0; side < PVP_TEAMS_COUNT; ++side)
         {
             sArenaTeamMgr->AddArenaTeam(match.Sides[side]);
@@ -1288,14 +1317,14 @@ namespace
             BattlegroundTypeId bgTypeId, PvPDifficultyEntry const*, uint8 arenaType, bool isRated, bool, uint32, uint32,
             uint32 arenaTeamId, uint32) override
         {
-            if (isRated && bgTypeId == BATTLEGROUND_AA && IsSoloTeamBracket(arenaType) && IsPersonalTeam(arenaTeamId))
+            if (isRated && bgTypeId == BATTLEGROUND_AA && IsSoloMatchedBracket(arenaType) && IsPersonalTeam(arenaTeamId))
                 index = ginfo->teamId == TEAM_HORDE ? BG_QUEUE_NORMAL_HORDE : BG_QUEUE_NORMAL_ALLIANCE;
         }
 
         void OnQueueUpdate(BattlegroundQueue* queue, uint32, BattlegroundTypeId bgTypeId,
             BattlegroundBracketId bracketId, uint8 arenaType, bool isRated, uint32) override
         {
-            if (!isRated || bgTypeId != BATTLEGROUND_AA || !IsSoloTeamBracket(arenaType))
+            if (!isRated || bgTypeId != BATTLEGROUND_AA || !IsSoloMatchedBracket(arenaType))
                 return;
 
             uint32 teamSize = sBattlegroundMgr->isArenaTesting() ? 1 : arenaType;
