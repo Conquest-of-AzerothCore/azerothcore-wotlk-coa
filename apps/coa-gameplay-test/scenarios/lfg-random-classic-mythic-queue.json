@@ -73,7 +73,7 @@
     },
     {
       "action": "equip",
-      "label": "Every member is geared for the queue: Random Classic Dungeon Mythic needs average item level 58; 917 / 15 = 61.1",
+      "label": "Every member is geared for the queue: Random Classic Dungeon Mythic needs average item level 58 and PvE Power 350; 1940 / 15 = 129.3 item level, 6 x 45 + 96 = 366 PvE Power",
       "actor": "p1",
       "item": 1008202,
       "slot": 1
@@ -99,6 +99,50 @@
       "actor": "p1",
       "item": 1008280,
       "slot": 12
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p1",
+      "item": 1008240,
+      "slot": 13
     },
     {
       "action": "add_item",
@@ -135,6 +179,50 @@
     },
     {
       "action": "add_item",
+      "actor": "p2",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p2",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p2",
+      "item": 1008240,
+      "slot": 13
+    },
+    {
+      "action": "add_item",
       "actor": "p3",
       "item": 1008202
     },
@@ -168,6 +256,50 @@
     },
     {
       "action": "add_item",
+      "actor": "p3",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p3",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p3",
+      "item": 1008240,
+      "slot": 13
+    },
+    {
+      "action": "add_item",
       "actor": "p4",
       "item": 1008202
     },
@@ -201,6 +333,50 @@
     },
     {
       "action": "add_item",
+      "actor": "p4",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p4",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p4",
+      "item": 1008240,
+      "slot": 13
+    },
+    {
+      "action": "add_item",
       "actor": "p5",
       "item": 1008202
     },
@@ -231,6 +407,50 @@
       "actor": "p5",
       "item": 1008280,
       "slot": 12
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 30394
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 30394,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 1008283
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 1008283,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 1008260
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 1008260,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "p5",
+      "item": 1008240
+    },
+    {
+      "action": "equip",
+      "actor": "p5",
+      "item": 1008240,
+      "slot": 13
     },
     {
       "action": "lfg_join",

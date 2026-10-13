@@ -7,6 +7,7 @@
 #include "AllGameObjectScript.h"
 #include "AllSpellScript.h"
 #include "AscensionAverageItemLevel.h"
+#include "AscensionItemPower.h"
 #include "AuctionHouseMgr.h"
 #include "Battleground.h"
 #include "Config.h"
@@ -47,7 +48,6 @@ namespace PathToAscension
     namespace
     {
         constexpr uint16 SMSG_TUTORIAL_PATCH = 0x06A5;
-        constexpr uint32 MaxItemPower = 1000;
 
         Catalog catalog;
         Settings settings;
@@ -118,7 +118,6 @@ namespace PathToAscension
         uint32 EquippedItemPower(Player const* player, bool pvp)
         {
             uint32 power = 0;
-            std::string_view const prefix = pvp ? "PvP Power (+" : "PvE Power (+";
             for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
             {
                 Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
@@ -126,26 +125,7 @@ namespace PathToAscension
                     continue;
 
                 // Original equipment carries its PvE/PvP power as an on-equip marker spell.
-                for (auto const& effect : item->GetTemplate()->Spells)
-                {
-                    if (effect.SpellTrigger != ITEM_SPELLTRIGGER_ON_EQUIP)
-                        continue;
-
-                    SpellInfo const* spell = sSpellMgr->GetSpellInfo(effect.SpellId);
-                    if (!spell || !spell->SpellName[0])
-                        continue;
-
-                    std::string_view const name(spell->SpellName[0]);
-                    if (!name.starts_with(prefix) || !name.ends_with(')'))
-                        continue;
-
-                    uint32 amount = 0;
-                    char const* first = name.data() + prefix.size();
-                    char const* last = name.data() + name.size() - 1;
-                    auto const parsed = std::from_chars(first, last, amount);
-                    if (parsed.ec == std::errc() && parsed.ptr == last && amount <= MaxItemPower)
-                        power += amount;
-                }
+                power += AscensionItemPower::OfItem(item->GetTemplate(), pvp);
             }
 
             return power;
