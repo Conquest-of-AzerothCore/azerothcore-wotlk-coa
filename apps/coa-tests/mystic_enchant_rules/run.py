@@ -3,7 +3,8 @@ CLI_DESCRIPTION = """Check the mystic enchant rules the server shares with the c
 Compiles the mystic enchant rule code against the client DBC set the server loads (--dbc-dir), then checks the
 catalog, the realm, class and quality columns, slot validity, the per-quality caps, and the result each apply,
 destroy, scroll purchase, inspect, preset, reforge, collection reforge, save-to-collection and extract
-purchase request receives, with its price and the altar progress it earns.
+purchase request receives, with its price and the altar progress it earns, and how a followed Hero Architect
+build's enchants fill the slots.
 No database, server build or game client is needed.
 """
 
@@ -366,6 +367,43 @@ int main(int, char** argv)
     Check(favoredRight, "below 33% a Warcraft Reborn reveal is for the own class, above it for another class");
     Enchant const* fallback = RollReveal(catalog, freepick, nullptr, [](Enchant const&) { return false; }, 0.5, 0.1, 0.5);
     Check(fallback && !fallback->Worldforged, "with nothing favored, a reveal still gives a scroll from the rest");
+    std::vector<std::uint32_t> rares;
+    for (std::uint32_t item : RARE_SCROLLS)
+        rares.push_back(catalog.FindItem(item)->Spell);
+    std::vector<std::uint32_t> collected(rares.begin(), rares.begin() + 3);
+    Character follower = Hero(fusion, 80);
+    follower.Known = &collected;
+    Slots guided = GuideSlots(catalog, follower, Slots{},
+        { { rares[0], 1, 1 }, { rares[3], 1, 1 }, { rares[1], 1, 1 }, { rares[2], 1, 1 } });
+    Check(guided[1] == rares[0] && guided[2] == rares[1] && guided[3] == rares[2] && !guided[4] && !guided[0],
+        "a followed build applies only collected enchants, in its order, from the first fusion slot");
+    Slots mine{};
+    mine[1] = rares[4];
+    mine[2] = rares[5];
+    std::vector<std::uint32_t> withMine = { rares[0], rares[1], rares[4], rares[5] };
+    follower.Known = &withMine;
+    guided = GuideSlots(catalog, follower, mine, { { rares[0], 1, 1 }, { rares[1], 1, 1 } });
+    Check(guided[1] == rares[0] && guided[2] == rares[1] && guided[3] == rares[4] && guided[4] == rares[5],
+        "the build's enchants come first and the character's own fill the slots left");
+    std::vector<std::uint32_t> allRares = rares;
+    follower.Known = &allRares;
+    guided = GuideSlots(catalog, follower, Slots{}, { { rares[0], 1, 1 }, { rares[1], 1, 1 }, { rares[2], 1, 1 },
+        { rares[3], 1, 1 }, { rares[4], 1, 1 }, { rares[5], 1, 1 } });
+    Check(std::count_if(guided.begin(), guided.end(), [](std::uint32_t spell) { return spell != 0; }) == 5,
+        "the rare cap still holds: a sixth rare enchant is left out");
+    Check(GuideSlots(catalog, follower, Slots{}, { { rares[0], 2, 1 } })[2] == 0,
+        "the stack limit still holds");
+    Character young = Hero(fusion, 80);
+    young.Known = &allRares;
+    young.Level = 20;
+    guided = GuideSlots(catalog, young, Slots{}, { { rares[0], 1, 30 }, { rares[1], 1, 1 } });
+    Check(guided[1] == rares[1] && !guided[2], "an enchant listed for a higher level waits");
+    Character wildcardFollower = Hero(fusion, 80);
+    wildcardFollower.GameModes = WILDCARD_MODE;
+    wildcardFollower.Known = &allRares;
+    Check(GuideSlots(catalog, wildcardFollower, Slots{}, { { rares[0], 1, 1 } }) == Slots{},
+        "Wildcard applies no enchants");
+
     Character nowhere = Hero(plain, 80);
     nowhere.RealmGates = {};
     Check(!RollReveal(catalog, nowhere, nullptr, nullptr, 0.5, 0.5, 0.5), "a realm without enchants reveals nothing");

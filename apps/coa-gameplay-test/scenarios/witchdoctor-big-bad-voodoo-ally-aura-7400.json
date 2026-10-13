@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Big Bad Voodoo reduces nearby allies' damage taken and marks them with Waning Wuju (#7400)",
+  "contract": "Big Bad Voodoo 802719 summons Spirit of Bwonsamdi 310659 at the caster (Effect0), places a 15 yd persistent area aura that reduces allies' damage taken by 20% (Effect1 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -21/DieSides 1, TARGET_UNIT_DEST_AREA_ALLY, radius index 18) and triggers Waning Wuju 803495 on allied players in that area (Effect2). A recorded original-CoA combat log shows every nearby ally carrying 802719 and 803495 while only the Witch Doctor receives Spirit of Bwonsamdi's 802718 field, whose arrival removes the Witch Doctor's own 803495 within about 100 ms. The ally must therefore carry 802719 at -20% and 803495, never the unrelated Spirit Link Idol 504921, and not 802718.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 802719
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 802719
+    },
+    {
+      "action": "assert",
+      "label": "Big Bad Voodoo is cast",
+      "actor": "doctor",
+      "metric": "spell_go_count",
+      "spell": 802719,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The ally is marked with Waning Wuju",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803495,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The ally inside 15 yd gains the Big Bad Voodoo area aura from the Witch Doctor",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802719,
+      "caster": "doctor",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The area aura reduces the ally's damage taken by 20%",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 802719,
+      "effect": 1,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "label": "The Witch Doctor receives Spirit of Bwonsamdi's field",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 802718,
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Spirit of Bwonsamdi's field purges the Witch Doctor's own Waning Wuju, as the live combat log records",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 803495,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let Spirit of Bwonsamdi tick at least twice",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The ally never receives Spirit Link Idol",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 504921,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Spirit of Bwonsamdi's field stays on its owner",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802718,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The ally keeps the area aura while inside it",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802719,
+      "equals": 1
+    }
+  ]
+}

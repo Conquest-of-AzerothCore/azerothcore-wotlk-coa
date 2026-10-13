@@ -212,7 +212,10 @@ ItemTemplate const* InstanceTemplate(Item const* item)
     std::lock_guard lock(templatesMutex);
     auto [scaled, inserted] = scaledTemplates.try_emplace((uint64(base->ItemId) << 8) | level, *base);
     if (inserted)
+    {
         ItemLadder::ApplyRow(scaled->second, *row);
+        ItemScaling::RebracketDisenchant(scaled->second, *base, row->Level);
+    }
     return &scaled->second;
 }
 

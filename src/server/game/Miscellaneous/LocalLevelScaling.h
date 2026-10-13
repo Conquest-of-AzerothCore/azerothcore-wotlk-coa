@@ -311,8 +311,8 @@ inline std::uint32_t QuestRewardItemFor(Player const* player, std::uint32_t item
 }
 
 /// The template one item instance is built from. An item that was given a scaling level of its own keeps
-/// its authored entry, so the client still knows it, but its stats, damage, armor, required level and
-/// sell price come from the row for that level. The paths that apply, check or price an item ask here;
+/// its authored entry, so the client still knows it, but its stats, damage, armor, required level, sell
+/// price and disenchant loot come from the row for that level. The paths that apply, check or price an item ask here;
 /// nullptr from the owner means the instance is the authored item.
 using ItemInstanceTemplateResolver = ItemTemplate const* (*)(Item const*);
 inline std::atomic<ItemInstanceTemplateResolver> ItemInstanceTemplateOwner{nullptr};

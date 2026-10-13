@@ -1316,6 +1316,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     // mods at aura apply
     if (apply)
     {
+        if (sSpellMgr->GetSpellTwinSource(GetId()) == 60970 && target->IsPlayer())
+            for (uint32 intercept : sSpellMgr->GetSpellAndRelatives(20252))
+                target->ToPlayer()->RemoveSpellCooldown(intercept, true);
+
         switch (GetSpellInfo()->SpellFamilyName)
         {
             case SPELLFAMILY_GENERIC:
@@ -1332,10 +1336,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     case 50836: //Petrifying Grip, becomes stoned
                         if (GetStackAmount() >= 5 && !target->HasAura(50812))
                             target->CastSpell(target, 50812, true);
-                        break;
-                    case 60970: // Heroic Fury (remove Intercept cooldown)
-                        if (target->IsPlayer())
-                            target->ToPlayer()->RemoveSpellCooldown(20252, true);
                         break;
                 }
                 break;

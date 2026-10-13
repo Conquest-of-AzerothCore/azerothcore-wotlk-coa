@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "name": "Moonstalker Matriarch has two persistent runts before combat (#4348)",
+  "contract": [
+    "The report describes two runts already present before their matriarch enters combat. Observe native spawn-",
+    "time SmartAI from outside aggro range, without injecting a summon. The two runts must survive longer than",
+    "the old 30-second combat-summon lifetime; entering combat must not create a third. Killing the matriarch",
+    "must preserve the owner-specific cleanup added for #4347. The summoned runts are level 16-17, as reported",
+    "in upstream issue 8795 and supported by summon spell 8594's -3 level value. Both must wander from their",
+    "spawn positions; the 10-yard radius comes from existing wild Moonstalker Runt spawn data. Use the real",
+    "Darkshore Matriarch spawn 36967 as the mother's position, with the observer 30 yards west, so wandering",
+    "runs on terrain and navigation data that support these ground creatures.",
+    "The fixture creator places the mother at the observer's initial Z. After creating that mother at the",
+    "real spawn height, teleport only the observer to its local ground height, 28.1901, and verify both the",
+    "native terrain height and observer Z. This keeps the observer in melee reach when the mother chases it."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": 7788.77,
+    "y": -982.033,
+    "z": 32.4169,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "observer",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "matriarch",
+      "owner": "observer",
+      "entry": 2071,
+      "faction": 14,
+      "level": 20,
+      "health": 100000,
+      "reaction": 1,
+      "distance": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "teleport",
+      "actor": "observer",
+      "map": 1,
+      "x": 7788.77,
+      "y": -982.033,
+      "z": 28.1901,
+      "o": 0,
+      "label": "Place the observer on the ground without moving the mother or runts"
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "ground_height",
+      "min": 28.1,
+      "max": 28.3,
+      "label": "The observer position has the expected native terrain height"
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "position_z",
+      "min": 28.1,
+      "max": 28.3,
+      "label": "The observer stands at ground level for native melee"
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 10040,
+      "stacks": 20
+    },
+    {
+      "action": "set_health",
+      "actor": "observer",
+      "value": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "matriarch",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "equals": 2,
+      "within_ms": 3000,
+      "label": "Exactly two runts exist before combat"
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "min_level": 16,
+      "max_level": 17,
+      "equals": 2,
+      "label": "Both summoned runts have the reported level"
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "min_home_distance": 1,
+      "equals": 2,
+      "within_ms": 15000,
+      "label": "Both runts move away from their own spawn positions before combat"
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "assert",
+      "actor": "matriarch",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "equals": 2,
+      "label": "The pre-spawned runts do not expire after 30 seconds"
+    },
+    {
+      "action": "learn",
+      "actor": "observer",
+      "spell": 133
+    },
+    {
+      "action": "cast",
+      "actor": "observer",
+      "spell": 133,
+      "target": "matriarch"
+    },
+    {
+      "action": "assert",
+      "actor": "matriarch",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "equals": 2,
+      "label": "Entering combat does not summon an additional runt"
+    },
+    {
+      "action": "assert",
+      "actor": "matriarch",
+      "metric": "distance",
+      "target": "observer",
+      "max": 4,
+      "within_ms": 8000
+    },
+    {
+      "action": "attack",
+      "actor": "observer",
+      "target": "matriarch"
+    },
+    {
+      "action": "set_health",
+      "actor": "matriarch",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "matriarch",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 2070,
+      "equals": 0,
+      "within_ms": 3000,
+      "label": "Both pre-spawned runts leave with their matriarch"
+    }
+  ]
+}

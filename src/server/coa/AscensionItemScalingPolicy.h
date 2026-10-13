@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <map>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace ItemScaling
@@ -159,6 +160,49 @@ inline double CurveRatio(LevelCurve const& curve, std::uint32_t fromLevel, std::
     double const from = curve.At(fromLevel);
     double const to = curve.At(toLevel);
     return from > 0.0 && to > 0.0 ? to / from : fallback;
+}
+
+inline bool Disenchantable(std::uint32_t disenchantId, std::uint32_t requiredSkill)
+{
+    return disenchantId && std::int32_t(requiredSkill) >= 0;
+}
+
+struct DisenchantBracket
+{
+    std::uint32_t itemLevel = 0;
+    std::uint32_t disenchantId = 0;
+    std::uint32_t requiredSkill = 0;
+};
+
+class DisenchantLadder
+{
+public:
+    void Add(std::uint32_t itemLevel, std::uint32_t disenchantId, std::uint32_t requiredSkill)
+    {
+        if (itemLevel && Disenchantable(disenchantId, requiredSkill))
+            ++_donors[itemLevel][{ disenchantId, requiredSkill }];
+    }
+
+    DisenchantBracket AtOrBelow(std::uint32_t itemLevel) const
+    {
+        auto const above = _donors.upper_bound(itemLevel);
+        if (above == _donors.begin())
+            return {};
+
+        auto const& [donorLevel, brackets] = *std::prev(above);
+        auto const common = std::max_element(brackets.begin(), brackets.end(),
+            [](auto const& left, auto const& right) { return left.second < right.second; });
+        return { donorLevel, common->first.first, common->first.second };
+    }
+
+private:
+    std::map<std::uint32_t, std::map<std::pair<std::uint32_t, std::uint32_t>, std::uint32_t>> _donors;
+};
+
+inline DisenchantBracket NearestDisenchantBracket(DisenchantBracket const& sameSubClass,
+    DisenchantBracket const& sameSlot)
+{
+    return sameSlot.itemLevel > sameSubClass.itemLevel ? sameSlot : sameSubClass;
 }
 }
 

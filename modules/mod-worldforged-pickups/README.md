@@ -2,7 +2,11 @@
 
 Worldforged items are picked up off the ground on CoA: a pouch, a bucket, a pile of bones, a
 packet, a crate - a world object **named after the base item it holds**. Every character may
-open each one **once**; after that it is spent for that character, permanently.
+open each one **once per prestige cycle**; it is spent for that character until a successful
+Chromie prestige resets that character's pickup ledger. Existing items stay in the inventory,
+and item equip requirements are unchanged. This follows the player reports in
+[CoA Worldforged recovery](https://www.reddit.com/r/ProjectAscension/comments/1vyu132/coa_worldforged_recovery/),
+which describe prestiging and leveling again to recover the pickups.
 
 The objects themselves are data, restored by this module's
 `data/sql/db-world/2026_09_16_00_worldforged_pickups.sql`,
@@ -31,7 +35,7 @@ realm map itself records, and on nothing else - see that pass below. What data c
 | Spawns | 2,469 placements standing over the four continent maps, from the realm map's own 2,480 placements (the tenth pass), plus Elwynn's two objects the realm had never had, less the placings the marker-by-marker passes removed, plus the one the Redridge pass restored; 1,577 pickup objects stand somewhere, one visible companion prop among them |
 | Items | every pickup holds the one item its own name and the realm's catalog say it holds, at 100% |
 | Placement | the realm map's own marker for each pickup, in the zone it plots it in, with the height the client recorded for it |
-| Rule | one open per character, then inert for that character and only that character |
+| Rule | one open per character per prestige cycle, then inert for that character until prestige |
 | Discovery | an unspent pickup sparkles for the character who can still loot it |
 
 Nothing is invented: every template field is a captured value, every loot row is the realm
@@ -1480,9 +1484,15 @@ page plots them.
 
 * **Sparkle**: a pickup this character may still loot gets
   `GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE` - that is how they are found in the world.
-* **Spent, for one character only**: a pickup this character already looted stays visible
+* **Spent, for one character's current prestige cycle**: a pickup this character already looted stays visible
   (as on the realm) but is given `GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE`, so it cannot be
   opened again. Every other character still sees it sparkling and lootable.
+* **Prestige**: the prestige save transaction carries the deletion of only this character's
+  ledger rows. Once that transaction has committed, the in-memory ledger is cleared and nearby
+  pickup flags are refreshed; if the character database rolls the save back, the ledger stays
+  spent in memory and in the database. Pickup awards and the prestige save commit synchronously
+  so earlier claims finish before the reset, and the reset finishes before a new claim.
+  Relogging preserves the new cycle; ordinary level changes leave spent pickups locked.
 * **Recording**: `OnPlayerLootItem` fires the moment a base item leaves the pickup, so
   clicked, auto-stored and group-window loot are all covered. The item and the ledger row are
   written in one character-database transaction, so a crash cannot mark a pickup spent
@@ -1588,7 +1598,7 @@ SELECT * FROM acore_characters.character_worldforged_loot WHERE guid = <characte
 
 The data deliberately sets `Data3` (consumable) to `0` and `Data2` (restock) to `0`. A
 consumable chest despawns on loot and returns on a respawn timer - that would make a pickup a
-realm-wide roll per respawn instead of one open per character. Non-consumable keeps the object
+realm-wide roll per respawn instead of one open per character per prestige cycle. Non-consumable keeps the object
 in the world for everyone, and the core re-rolls its loot for each new opener:
 `Player::SendLoot` clears and re-fills the loot while the object is `GO_READY`, and
 `GameObject::Update` puts a chest back to `GO_READY` once a loot is released.

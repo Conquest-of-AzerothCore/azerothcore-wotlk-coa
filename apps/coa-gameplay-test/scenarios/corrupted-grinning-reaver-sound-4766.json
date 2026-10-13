@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Corrupted Grinning Reaver uses the reference mount sound set (#4766)",
+  "contract": [
+    "Corrupted Grinning Reaver display 125891 uses model 100161, ravager2mount.mdx, and sound set 107719.",
+    "That sound set assigns 62513, vo_pandarenfemale_main_meleewindup, to its second fidget slot.",
+    "The report asks for the normal Grinning Reaver sound template. Display 48604 uses sound set 2112,",
+    "whose fidget slots use 15961, QirajBattleTankSpecial. Preserve the corrupted model and mount display",
+    "while sending native client model patch row 100161 with SoundID 2112 in field 13.",
+    "This checks the native mount and client sound selector packet; it does not play audio in a rendered client."
+  ],
+  "timeout_ms": 45000,
+  "location": {
+    "map": 0,
+    "x": -9377.45,
+    "y": -1295.63,
+    "z": 56.7373,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rider",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 150,
+      "maximum": 150
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 900960
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 900960
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 125891,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 2420,
+      "row": 100161,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "server_packet_u32",
+      "opcode": 2420,
+      "row": 100161,
+      "index": 13,
+      "equals": 2112
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "server_packet_contains",
+      "opcode": 2420,
+      "row": 100161,
+      "text": "Creature\\ravager2\\ravager2mount.mdx",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "server_packet_float",
+      "opcode": 2420,
+      "row": 100161,
+      "index": 4,
+      "equals": 1
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0
+    }
+  ]
+}

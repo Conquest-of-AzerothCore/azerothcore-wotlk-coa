@@ -4,7 +4,7 @@
 
 /*
  * Worldforged pickups - the CoA world object that hands out a Worldforged base item,
- * which every character may loot once and then never again.
+ * which every character may loot once per prestige cycle.
  *
  * The data (Database/Custom/worldforged-pickups.sql) restores the pickups themselves:
  * 1,555 objects - bags, buckets, bones, packets, caches - each one named after the base
@@ -19,7 +19,7 @@
  *   * ScriptName 'worldforged_pickup', the marker this module keys on. The captures have
  *     an empty ScriptName.
  *
- * This module supplies what data cannot: the per-character, permanent memory.
+ * This module supplies what data cannot: the per-character memory for the current prestige cycle.
  *
  *   * 'looted' is remembered per (character, spawn) in the characters database table
  *     character_worldforged_loot and in memory for the session.
@@ -63,10 +63,12 @@
  */
 
 #include "Bag.h"
+#include "CellImpl.h"
 #include "DatabaseEnv.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
 #include "GlobalScript.h"
+#include "GridNotifiers.h"
 #include "Item.h"
 #include "LootMgr.h"
 #include "Map.h"
@@ -77,6 +79,7 @@
 #include "SharedDefines.h"
 #include "World.h"
 
+#include <list>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -139,6 +142,13 @@ public:
         _looted.erase(characterGuid);
     }
 
+    void QueueReset(uint32 characterGuid, CharacterDatabaseTransaction trans)
+    {
+        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_WORLDFORGED_LOOT);
+        stmt->SetData(0, characterGuid);
+        trans->Append(stmt);
+    }
+
     // The item and the fact that this pickup is now spent for this character are written
     // together: item_instance, character_inventory and the ledger row commit as one. The
     // item is still ITEM_NEW here - nothing has written it yet, because it is only flushed
@@ -178,7 +188,7 @@ public:
         trans->Append("INSERT IGNORE INTO `{}` (`guid`, `spawn_id`, `entry`) VALUES ({}, {}, {})",
                       WorldforgedLootTable, characterGuid, spawnId, entry);
 
-        CharacterDatabase.CommitTransaction(trans);
+        CharacterDatabase.AsyncCommitTransaction(trans).m_future.get();
     }
 
 private:
@@ -314,7 +324,8 @@ class worldforged_pickup_lifecycle : public PlayerScript
 {
 public:
     worldforged_pickup_lifecycle() : PlayerScript("worldforged_pickup_lifecycle",
-        {PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_LOOT_ITEM}) { }
+        {PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_LOOT_ITEM,
+            PLAYERHOOK_ON_COA_PRESTIGE, PLAYERHOOK_ON_COA_PRESTIGE_SAVED}) { }
 
     // Early enough that no gameobject has been sent to this client yet.
     void OnPlayerLoadFromDB(Player* player) override
@@ -325,6 +336,35 @@ public:
     void OnPlayerLogout(Player* player) override
     {
         WorldforgedLootStore::Instance().Unload(player->GetGUID().GetCounter());
+    }
+
+    void OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction trans) override
+    {
+        if (player && trans)
+            WorldforgedLootStore::Instance().QueueReset(player->GetGUID().GetCounter(), trans);
+    }
+
+    void OnPlayerCoAPrestigeSaved(Player* player) override
+    {
+        if (!player)
+            return;
+
+        WorldforgedLootStore::Instance().Unload(player->GetGUID().GetCounter());
+        if (!player->IsInWorld())
+            return;
+
+        std::list<GameObject*> pickups;
+        float const range = player->GetVisibilityRange();
+        Acore::GameObjectInRangeCheck check(player->GetPositionX(), player->GetPositionY(),
+            player->GetPositionZ(), range);
+        Acore::GameObjectListSearcher<Acore::GameObjectInRangeCheck> searcher(player, pickups, check);
+        Cell::VisitObjects(player, searcher, range);
+        for (GameObject* go : pickups)
+            if (IsWorldforgedPickup(go) && player->HaveAtClient(go))
+            {
+                go->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
+                go->ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
+            }
     }
 
     // The moment the base item leaves a pickup, that pickup is spent for this character -

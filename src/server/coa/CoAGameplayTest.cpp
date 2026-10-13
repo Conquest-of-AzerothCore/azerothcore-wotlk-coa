@@ -5,6 +5,8 @@
 
 #include "AscensionReaperTalents.h"
 #include "AccountMgr.h"
+#include "ArenaTeam.h"
+#include "ArenaTeamMgr.h"
 #include "AscensionCoATalentState.h"
 #include "AscensionItemScaling.h"
 #include "AscensionNativeItemScaling.h"
@@ -15,6 +17,8 @@
 #include "AscensionWildcardStarterData.h"
 #include "AsyncCallbackProcessor.h"
 #include "Bag.h"
+#include "BattlegroundMgr.h"
+#include "BattlegroundQueue.h"
 #include "CharacterCache.h"
 #include "CharmInfo.h"
 #include "Chat.h"
@@ -632,7 +636,8 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_SUPERCEDED_SPELL && packet.GetOpcode() != SMSG_REMOVED_SPELL &&
         packet.GetOpcode() != SMSG_ITEM_QUERY_SINGLE_RESPONSE && packet.GetOpcode() != SMSG_MOVE_KNOCK_BACK &&
         packet.GetOpcode() != SMSG_DUEL_REQUESTED && packet.GetOpcode() != SMSG_DUEL_COUNTDOWN &&
-        packet.GetOpcode() != SMSG_DUEL_COMPLETE && packet.GetOpcode() != SMSG_FRIEND_STATUS)
+        packet.GetOpcode() != SMSG_DUEL_COMPLETE && packet.GetOpcode() != SMSG_FRIEND_STATUS &&
+        packet.GetOpcode() != SMSG_SEND_MAIL_RESULT)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -1877,6 +1882,25 @@ private:
         return stable->StabledPets[slot]->PetNumber;
     }
 
+    static Battleground* InvitedBattleground(Player* player)
+    {
+        for (uint32 slot = 0; slot < PLAYER_MAX_BATTLEGROUND_QUEUES; ++slot)
+        {
+            BattlegroundQueueTypeId const queueType = player->GetBattlegroundQueueTypeId(slot);
+            if (queueType == BATTLEGROUND_QUEUE_NONE)
+                continue;
+
+            GroupQueueInfo info;
+            if (sBattlegroundMgr->GetBattlegroundQueue(queueType).GetPlayerGroupInfoData(player->GetGUID(), &info)
+                && info.IsInvitedToBGInstanceGUID)
+                if (Battleground* battleground =
+                    sBattlegroundMgr->GetBattleground(info.IsInvitedToBGInstanceGUID, BATTLEGROUND_TYPE_NONE))
+                    return battleground;
+        }
+
+        throw std::runtime_error("Packet invited battleground type requires a battleground invitation");
+    }
+
     WorldObject* GetQuestGiver(Player* player, Tree const& step)
     {
         if (auto const entry = step.get_optional<uint32>("gameobject"))
@@ -2118,6 +2142,26 @@ private:
             Require(unit->IsPlayer(), "LFG state needs a player");
             return double(sLFGMgr->GetState(unit->GetGUID()));
         }
+        if (metric == "in_arena")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Arena metric needs a player");
+            return player->InArena() ? 1 : 0;
+        }
+        if (metric == "arena_team_members" || metric == "arena_team_season_games" || metric == "arena_team_season_wins")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "Arena team metric needs a player");
+            uint32 slot = step.get<uint32>("slot");
+            Require(slot < MAX_ARENA_SLOT, "Arena team metric needs an arena slot");
+            ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(player->GetArenaTeamId(uint8(slot)));
+            if (!team)
+                return metric == "arena_team_members" ? 0 : -1;
+            if (metric == "arena_team_members")
+                return double(team->GetMembersSize());
+            ArenaTeamStats const& stats = team->GetStats();
+            return metric == "arena_team_season_games" ? stats.SeasonGames : stats.SeasonWins;
+        }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);
         if (metric == "sent_level" || metric == "sent_max_health")
@@ -2239,9 +2283,14 @@ private:
         {
             Require(unit->IsPlayer(), "Cast packets need a player observer");
             auto const entry = step.get_optional<uint32>("entry");
+            auto const namedCaster = step.get_optional<std::string>("caster");
             Require(!entry || !step.get<bool>("pet", false), "Cast query selects either a pet or a creature entry");
+            Require(!namedCaster || (!entry && !step.get_optional<bool>("pet")),
+                "Cast query selects one caster source");
             ObjectGuid caster;
-            if (!entry)
+            if (namedCaster)
+                caster = GetUnit(*namedCaster)->GetGUID();
+            else if (!entry)
             {
                 Unit* source = step.get<bool>("pet", false) ? static_cast<Unit*>(unit->ToPlayer()->GetPet()) : unit;
                 Require(source != nullptr, "Cast query needs a present pet");
@@ -2701,8 +2750,17 @@ private:
         {
             std::list<Creature*> creatures;
             player->GetCreatureListWithEntryInGrid(creatures, step.get<uint32>("entry"), 60.0f);
+            uint32 const minLevel = step.get<uint32>("min_level", 1);
+            uint32 const maxLevel = step.get<uint32>("max_level", 255);
+            float const minHomeDistance = step.get<float>("min_home_distance", 0.0f);
             return std::count_if(creatures.begin(), creatures.end(),
-                [](Creature* creature) { return creature->IsInWorld() && creature->IsAlive(); });
+                [minLevel, maxLevel, minHomeDistance](Creature* creature)
+                {
+                    return creature->IsInWorld() && creature->IsAlive()
+                        && creature->GetLevel() >= minLevel && creature->GetLevel() <= maxLevel
+                        && (minHomeDistance == 0.0f
+                            || creature->GetExactDist2d(creature->GetHomePosition()) >= minHomeDistance);
+                });
         }
         if (metric == "carried_money")
             return player->GetMoney();
@@ -3161,11 +3219,13 @@ private:
             player->GetCreatureListWithEntryInGrid(creatures, entry, 100.0f);
             float const minDistance = step.get<float>("min_distance", 0.0f);
             bool const ownerDisplay = step.get<bool>("owner_display", false);
+            bool const creatorOnly = step.get<bool>("creator_only", false);
             auto const rangedWeaponSubclass = step.get_optional<uint32>("ranged_weapon_subclass");
             Require(!rangedWeaponSubclass || *rangedWeaponSubclass < MAX_ITEM_SUBCLASS_WEAPON,
                 "Invalid ranged weapon subclass");
             return std::count_if(creatures.begin(), creatures.end(),
-                [player, spell, caster, minDistance, ownerDisplay, rangedWeaponSubclass](Creature* creature)
+                [player, spell, caster, minDistance, ownerDisplay, creatorOnly,
+                 rangedWeaponSubclass](Creature* creature)
             {
                 if (rangedWeaponSubclass)
                 {
@@ -3175,6 +3235,7 @@ private:
                         return false;
                 }
                 return IsLivingSummonOf(player, creature) && (!spell || creature->GetAura(spell, caster))
+                    && (!creatorOnly || creature->GetCreatorGUID() == player->GetGUID())
                     && player->GetExactDist2d(creature) >= minDistance
                     && (!ownerDisplay || creature->GetDisplayId() == player->GetDisplayId());
             });
@@ -3984,6 +4045,18 @@ private:
                             request << value.get_value<std::string>();
                         else if (kind == "buyback_guid")
                             request << BuybackGuid(player, value.get_value<uint32>());
+                        else if (kind == "item_guid")
+                        {
+                            Item* item = player->GetItemByEntry(value.get_value<uint32>());
+                            Require(item != nullptr, "Packet item GUID requires a carried item");
+                            request << item->GetGUID().GetRawValue();
+                        }
+                        else if (kind == "gameobject_guid")
+                        {
+                            std::list<GameObject*> objects = OwnedGameObjects(player, value.get_value<uint32>());
+                            Require(objects.size() == 1, "Packet gameobject GUID requires exactly one owned object");
+                            request << objects.front()->GetGUID().GetRawValue();
+                        }
                         else if (kind == "stabled_pet")
                             request << StabledPetNumber(player, value.get_value<uint32>());
                         else if (kind == "actor_guid")
@@ -3995,6 +4068,9 @@ private:
                             Require(!arbiter.IsEmpty(), "Packet duel arbiter requires a pending duel");
                             request << arbiter.GetRawValue();
                         }
+                        else if (kind == "invited_battleground_type")
+                            request << uint32(InvitedBattleground(GetPlayer(value.get_value<std::string>()))
+                                ->GetBgTypeID());
                         else if (kind == "pet_guid")
                         {
                             Pet* pet = GetPlayer(value.get_value<std::string>())->GetPet();
@@ -4448,9 +4524,17 @@ private:
         else if (action == "command")
         {
             ChatHandler handler(player->GetSession());
-            bool handled = handler.ParseCommands(CommandText(step));
-            Require(handled && !handler.HasSentErrorMessage(), "Player command failed");
-            record.put("result", "submitted; verify effects with assertions");
+            bool accepted = handler.ParseCommands(CommandText(step)) && !handler.HasSentErrorMessage();
+            if (step.get<bool>("rejected", false))
+            {
+                Require(!accepted, "Player command was accepted");
+                record.put("result", "rejected");
+            }
+            else
+            {
+                Require(accepted, "Player command failed");
+                record.put("result", "submitted; verify effects with assertions");
+            }
         }
         else if (action == "prepare_quest" || action == "reward_quest")
         {
@@ -4499,11 +4583,15 @@ private:
             player->SetMoney(step.get<uint32>("value"));
         else if (action == "use_nearby_gameobject")
         {
+            ObjectGuid owner;
+            if (auto ownerId = step.get_optional<std::string>("owner"))
+                owner = GetPlayer(*ownerId)->GetGUID();
             std::list<GameObject*> objects;
             player->GetGameObjectListWithEntryInGrid(objects, step.get<uint32>("entry"), 20.0f);
-            objects.remove_if([player](GameObject* object)
+            objects.remove_if([player, owner](GameObject* object)
             {
-                return !object->IsInWorld() || !player->InSamePhase(object);
+                return !object->IsInWorld() || !player->InSamePhase(object) ||
+                    (!owner.IsEmpty() && object->GetOwnerGUID() != owner);
             });
             Require(objects.size() == 1, "Nearby gameobject use needs exactly one object");
             WorldPacket packet(CMSG_GAMEOBJ_USE, 8);

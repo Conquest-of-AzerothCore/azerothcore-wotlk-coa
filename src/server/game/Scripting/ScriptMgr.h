@@ -526,6 +526,8 @@ public: /* PlayerScript */
     bool OnPlayerQuestGiverChooseReward(Player* player, Object* questGiver, Quest const* quest, uint32 reward);
     bool OnPlayerRefreshQuestGiver(Player* player, Object* questGiver, Quest const* quest);
     void OnPlayerCoAProgress(Player* player, CoAProgressEvent event, uint32 value);
+    void OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction trans);
+    void OnPlayerCoAPrestigeSaved(Player* player);
     std::optional<uint32> OnPlayerGetGameModeMask(Player const* player);
 
     // Anti cheat

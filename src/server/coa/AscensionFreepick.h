@@ -30,6 +30,7 @@ bool IsFreepickHero(Player const* player);
 bool HasFreepickBuild(Player const* player);
 std::vector<AscensionCoATalentState::KnownEntry> KnownEntries(Player const* player);
 UploadResult ApplyUpload(Player* player, std::vector<AscensionCoATalentState::KnownEntry> const& upload);
+UploadResult ApplyGuide(Player* player, std::vector<GuideSpell> const& spells, std::uint32_t primaryStat);
 void Synchronize(Player* player);
 std::array<bool, 5> RealmGates();
 std::uint32_t ActiveSpecialization(Player const* player);

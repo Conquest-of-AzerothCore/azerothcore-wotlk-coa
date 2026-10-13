@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Test zone bonus: .testzone add, xp, remove and duration change a zone's experience at once",
+  "contract": "Elwynn Forest (12) is not a test zone, so a level-20 Gravelflint Scout kill at x1 dynamic experience awards the live Ascension 146 (see coa-prestige-experience). '.testzone add 12 300' makes it a test zone at 300% experience without a restart (runes and tokens default to 200): the next kill awards 438. '.testzone xp 150 12' changes only its experience: the next kill awards 219. '.testzone remove 12' restores the normal 146. '.testzone duration 1m 12' makes it a 200% test zone for one minute: a kill within it awards 292, and once the minute has passed the zone stops being one by itself and a kill awards 146 again. The world announcements go through the session manager, which the harness sessions are not part of, so they are not asserted here.",
+  "timeout_ms": 300000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    {
+      "id": "tester",
+      "race": 1,
+      "class": 1,
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "first_target", "owner": "tester", "entry": 2158, "level": 20, "health": 20, "distance": 2 },
+    { "id": "second_target", "owner": "tester", "entry": 2158, "level": 20, "health": 20, "distance": 2 },
+    { "id": "third_target", "owner": "tester", "entry": 2158, "level": 20, "health": 20, "distance": 2 },
+    { "id": "fourth_target", "owner": "tester", "entry": 2158, "level": 20, "health": 20, "distance": 2 },
+    { "id": "fifth_target", "owner": "tester", "entry": 2158, "level": 20, "health": 20, "distance": 2 },
+    { "id": "sixth_target", "owner": "tester", "entry": 2158, "level": 20, "health": 20, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "command", "actor": "tester", "command": ".xp 1" },
+
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "normal_kill" },
+    { "action": "attack", "actor": "tester", "target": "first_target" },
+    { "action": "assert", "actor": "first_target", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "assert", "label": "Elwynn Forest before .testzone add", "actor": "tester", "metric": "xp", "relative_to": "normal_kill", "equals": 146, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "tester" },
+
+    { "action": "console", "command": "testzone add 12 300" },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "bonus_kill" },
+    { "action": "attack", "actor": "tester", "target": "second_target" },
+    { "action": "assert", "actor": "second_target", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "assert", "label": "Elwynn Forest as a 300% test zone", "actor": "tester", "metric": "xp", "relative_to": "bonus_kill", "equals": 438, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "tester" },
+
+    { "action": "console", "command": "testzone xp 150 12" },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "changed_kill" },
+    { "action": "attack", "actor": "tester", "target": "third_target" },
+    { "action": "assert", "actor": "third_target", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "assert", "label": "Elwynn Forest after .testzone xp 150", "actor": "tester", "metric": "xp", "relative_to": "changed_kill", "equals": 219, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "tester" },
+
+    { "action": "console", "command": "testzone remove 12" },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "removed_kill" },
+    { "action": "attack", "actor": "tester", "target": "fourth_target" },
+    { "action": "assert", "actor": "fourth_target", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "assert", "label": "Elwynn Forest after .testzone remove", "actor": "tester", "metric": "xp", "relative_to": "removed_kill", "equals": 146, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "tester" },
+
+    { "action": "console", "command": "testzone duration 1m 12" },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "timed_kill" },
+    { "action": "attack", "actor": "tester", "target": "fifth_target" },
+    { "action": "assert", "actor": "fifth_target", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "assert", "label": "Elwynn Forest during its one-minute duration", "actor": "tester", "metric": "xp", "relative_to": "timed_kill", "equals": 292, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "tester" },
+
+    { "action": "wait", "label": "Let the one-minute duration run out", "ms": 65000 },
+    { "action": "snapshot", "actor": "tester", "metric": "xp", "save_as": "expired_kill" },
+    { "action": "attack", "actor": "tester", "target": "sixth_target" },
+    { "action": "assert", "actor": "sixth_target", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "assert", "label": "Elwynn Forest after its duration ended", "actor": "tester", "metric": "xp", "relative_to": "expired_kill", "equals": 146, "within_ms": 5000 },
+    { "action": "stop_attack", "actor": "tester" }
+  ]
+}
