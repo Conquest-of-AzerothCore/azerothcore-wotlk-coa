@@ -10,6 +10,7 @@ void AddSC_manastorm_razorfen_kraul_compat();
 void AddSC_manastorm_scarlet_monastery_compat();
 void AddSC_manastorm_dire_maul_compat();
 void AddSC_manastorm_zul_farrak_compat();
+void AddSC_manastorm_blackfathom_deeps_compat();
 void AddSC_manastorm_molten_core_isolation();
 
 void Addmod_manastorm_endlessScripts()
@@ -28,5 +29,6 @@ void Addmod_manastorm_endlessScripts()
     AddSC_manastorm_scarlet_monastery_compat();
     AddSC_manastorm_dire_maul_compat();
     AddSC_manastorm_zul_farrak_compat();
+    AddSC_manastorm_blackfathom_deeps_compat();
     AddSC_manastorm_molten_core_isolation();
 }
