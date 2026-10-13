@@ -257,6 +257,7 @@ enum PlayerHook
     PLAYERHOOK_ON_AFTER_APPLY_ITEM_MODS,
     PLAYERHOOK_ON_COA_PRESTIGE,
     PLAYERHOOK_ON_COA_PRESTIGE_SAVED,
+    PLAYERHOOK_ON_MASTER_LOOT_ITEM,
     PLAYERHOOK_END
 };
 
@@ -1110,6 +1111,16 @@ public:
      * @param player Contains information about the Player
      */
     virtual void OnPlayerCoAPrestigeSaved(Player* /*player*/) { }
+
+    /**
+     * @brief This hook is called after the master looter gave a loot item to a group member.
+     *
+     * @param player The group member who received the item
+     * @param item The stored item
+     * @param count The stored count
+     * @param lootguid The creature or gameobject the item was looted from
+     */
+    virtual void OnPlayerMasterLootItem(Player* /*player*/, Item* /*item*/, uint32 /*count*/, ObjectGuid /*lootguid*/) { }
 
     /**
      * @brief This hook is called to resolve a character's Conquest of Azeroth game mode mask.

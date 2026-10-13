@@ -149,6 +149,22 @@ std::list<GameObject*> OwnedGameObjects(Player* player, uint32 entry)
     return objects;
 }
 
+uint8 OpenLootSlotForItem(Player* player, uint32 entry)
+{
+    Loot* source = nullptr;
+    if (Creature* creature = player->GetMap()->GetCreature(player->GetLootGUID()))
+        source = &creature->loot;
+    else if (GameObject* chest = player->GetMap()->GetGameObject(player->GetLootGUID()))
+        source = &chest->loot;
+    Require(source != nullptr, "Item-selected loot needs an open creature corpse or chest");
+    Loot& loot = *source;
+    for (uint32 candidate = 0; candidate < loot.GetMaxSlotInLootFor(player); ++candidate)
+        if (LootItem* item = loot.LootItemInSlot(candidate, player))
+            if (item->itemid == entry || ItemScaling::BaseEntry(item->itemid) == entry)
+                return uint8(candidate);
+    throw std::runtime_error("Requested item is not in this player's loot");
+}
+
 void WriteResult(std::string const& path, Tree const& result)
 {
     Require(!path.empty() && !std::filesystem::exists(path), "Output path must be new");
@@ -4461,6 +4477,8 @@ private:
             if (auto method = step.get_optional<uint32>("loot_method"))
             {
                 group->SetLootMethod(LootMethod(*method));
+                if (auto looter = step.get_optional<std::string>("master_looter"))
+                    group->SetMasterLooterGuid(GetPlayer(*looter)->GetGUID());
                 group->SendUpdate();
             }
         }
@@ -4704,28 +4722,37 @@ private:
         {
             uint32 slot = step.get<uint32>("slot", 0);
             if (auto entry = step.get_optional<uint32>("item"))
-            {
-                Loot* source = nullptr;
-                if (Creature* creature = player->GetMap()->GetCreature(player->GetLootGUID()))
-                    source = &creature->loot;
-                else if (GameObject* chest = player->GetMap()->GetGameObject(player->GetLootGUID()))
-                    source = &chest->loot;
-                Require(source != nullptr, "Item-selected loot needs an open creature corpse or chest");
-                Loot& loot = *source;
-                slot = loot.GetMaxSlotInLootFor(player);
-                for (uint32 candidate = 0; candidate < loot.GetMaxSlotInLootFor(player); ++candidate)
-                    if (LootItem* item = loot.LootItemInSlot(candidate, player))
-                        if (item->itemid == *entry || ItemScaling::BaseEntry(item->itemid) == *entry)
-                        {
-                            slot = candidate;
-                            break;
-                        }
-                Require(slot < loot.GetMaxSlotInLootFor(player), "Requested item is not in this player's loot");
-            }
+                slot = OpenLootSlotForItem(player, *entry);
             WorldPacket packet(CMSG_AUTOSTORE_LOOT_ITEM, 1);
             packet << uint8(slot);
             if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                 player->GetSession()->HandleAutostoreLootItemOpcode(packet);
+        }
+        else if (action == "loot_roll")
+        {
+            Group* group = player->GetGroup();
+            Require(group != nullptr, "A loot roll needs a group");
+            uint32 const entry = step.get<uint32>("item");
+            auto const rolls = group->GetRolls();
+            auto const pending = std::find_if(rolls.begin(), rolls.end(), [player, entry](Roll const* roll)
+            {
+                return (roll->itemid == entry || ItemScaling::BaseEntry(roll->itemid) == entry) &&
+                    roll->playerVote.contains(player->GetGUID());
+            });
+            Require(pending != rolls.end(), "No pending roll for this item includes the player");
+            WorldPacket packet(CMSG_LOOT_ROLL, 8 + 4 + 1);
+            packet << (*pending)->itemGUID << uint32((*pending)->itemSlot) << uint8(step.get<uint32>("vote"));
+            if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
+                player->GetSession()->HandleLootRoll(packet);
+        }
+        else if (action == "master_loot_give")
+        {
+            Player* recipient = GetPlayer(step.get<std::string>("target"));
+            WorldPacket packet(CMSG_LOOT_MASTER_GIVE, 8 + 1 + 8);
+            packet << player->GetLootGUID() << OpenLootSlotForItem(player, step.get<uint32>("item"))
+                << recipient->GetGUID();
+            if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
+                player->GetSession()->HandleLootMasterGiveOpcode(packet);
         }
         else if (action == "loot_money")
         {

@@ -187,7 +187,7 @@ ACTIONS = {
                                   'target_gameobject'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
     'pvp': ({'actor', 'enabled'}, {'actor', 'enabled'}),
-    'group': ({'actor', 'target'}, {'actor', 'target', 'loot_method'}),
+    'group': ({'actor', 'target'}, {'actor', 'target', 'loot_method', 'master_looter'}),
     'lfg_dungeon': ({'actor', 'dungeon'}, {'actor', 'dungeon'}),
     'lfg_teleport': ({'actor'}, {'actor', 'out'}),
     'lfg_join': ({'actor', 'dungeons', 'roles'}, {'actor', 'dungeons', 'roles'}),
@@ -227,6 +227,8 @@ ACTIONS = {
     'loot_creature': ({'actor', 'target'}, {'actor', 'target'}),
     'loot_slot': ({'actor'}, {'actor', 'slot', 'item'}),
     'loot_money': ({'actor'}, {'actor'}),
+    'loot_roll': ({'actor', 'item', 'vote'}, {'actor', 'item', 'vote'}),
+    'master_loot_give': ({'actor', 'item', 'target'}, {'actor', 'item', 'target'}),
     'prepare_quest': ({'actor', 'quest'}, {'actor', 'quest', 'complete'}),
     'reward_quest': ({'actor', 'quest'}, {'actor', 'quest', 'choice'}),
     'restore_quest_spells': ({'actor'}, {'actor'}),
@@ -468,6 +470,13 @@ def validate(scenario):
                     f'{where}: group needs another player')
             if 'loot_method' in step:
                 number(step['loot_method'], f'{where}.loot_method', 0, 4, True)
+            if 'master_looter' in step:
+                require('loot_method' in step and step['master_looter'] in player_ids,
+                        f'{where}: master looter needs a loot method and a player')
+        if action == 'loot_roll':
+            number(step['vote'], f'{where}.vote', 0, 3, True)
+        if action == 'master_loot_give':
+            require(step['target'] in player_ids, f'{where}: master loot needs a player recipient')
         if action == 'lfg_dungeon':
             number(step['dungeon'], f'{where}.dungeon', 1, 2**24 - 1, True)
         if action == 'encounter_credit':
