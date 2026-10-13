@@ -7,6 +7,7 @@
 #include "ObjectAccessor.h"
 #include "Creature.h"
 #include "CreatureAI.h"
+#include "GameObject.h"
 #include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
@@ -352,6 +353,21 @@ namespace
 
     // Lord Hel'nurath is summoned during the Warlock Dreadsteed ritual,
     // not loaded from a permanent dungeon creature spawn.
+    // Tuten'kash is an event-summoned Razorfen Downs boss with no
+    // persistent creature spawn row. Original Endgame Manastorm 294
+    // starts at the final encounter, not at the three-wave gong event.
+    constexpr uint32 MANASTORM_MAP_RAZORFEN_DOWNS = 129;
+    constexpr uint32 NPC_TUTEN_KASH = 7355;
+    constexpr uint32 GO_RFD_GONG = 148917;
+    constexpr uint32 SEGMENT_TUTEN_KASH_ENDGAME = 294;
+
+    // Native TrinityCore 3.3.5 RFD gong's final Tuten'kash summon
+    // position (not the player-authored game_tele 2158 arrival point).
+    Position const TUTEN_KASH_GONG_POSITION =
+    {
+        2487.939f, 804.2224f, 43.10735f, 1.692969f
+    };
+
     constexpr uint32 MANASTORM_MAP_ZUL_FARRAK = 209;
     constexpr uint32 NPC_GAHZRILLA = 7273;
     constexpr uint32 NPC_HYDROMANCER_VELRATHA = 7795;
@@ -1336,6 +1352,150 @@ namespace
         return true;
     }
 
+    bool BootstrapRazorfenDownsTutenKashEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_RAZORFEN_DOWNS ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            segment.SegmentId != SEGMENT_TUTEN_KASH_ENDGAME ||
+            segment.MapId != MANASTORM_MAP_RAZORFEN_DOWNS ||
+            segment.ObjectiveCreatureEntry != NPC_TUTEN_KASH)
+        {
+            error = "Tuten'kash bootstrap received a nonmatching private Razorfen Downs stage.";
+            return false;
+        }
+
+        // Regular RFD summons this boss only after the three gong waves.
+        // This isolated Endgame Manastorm stage selects the final boss
+        // directly. Disable interaction with the ORIGINAL gong in this
+        // one instance, preventing the native waves from spawning a
+        // second Tuten'kash after the direct objective summon.
+        //
+        // Obtain its real world DB coordinates and spawn ID; do not
+        // change the shared gameobject rows or manipulate the RFD
+        // instance's native gong progression.
+        QueryResult nativeGong = WorldDatabase.Query(
+            "SELECT `guid`, `position_x`, `position_y` "
+            "FROM `gameobject` "
+            "WHERE `map` = 129 AND `id` = 148917 "
+            "AND (`spawnMask` & 1) <> 0 "
+            "ORDER BY POW(`position_x` - 2514.93, 2) + "
+            "POW(`position_y` - 882.652, 2), `guid` LIMIT 1");
+
+        if (nativeGong)
+        {
+            Field* gongFields = nativeGong->Fetch();
+            ObjectGuid::LowType const spawnId =
+                gongFields[0].Get<uint32>();
+
+            map->LoadGrid(
+                gongFields[1].Get<float>(),
+                gongFields[2].Get<float>());
+
+            auto& objects = map->GetGameObjectBySpawnIdStore();
+            auto const gongRange = objects.equal_range(spawnId);
+            bool gongDisabled = false;
+
+            for (auto itr = gongRange.first;
+                 itr != gongRange.second; ++itr)
+            {
+                GameObject* gong = itr->second;
+                if (!gong || !gong->IsInWorld() ||
+                    gong->GetEntry() != GO_RFD_GONG)
+                    continue;
+
+                gong->SetGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
+                gongDisabled = true;
+            }
+
+            if (!gongDisabled)
+            {
+                LOG_WARN(LOG_FILTER,
+                    "Private RFD Tuten'kash gong could not be loaded: "
+                    "run={} segment={} instance={} DBspawn={}.",
+                    run.GetRunId(), segment.SegmentId,
+                    run.GetInstanceId(), spawnId);
+            }
+        }
+        else
+        {
+            // Missing gong does not prevent the objective from being
+            // summoned; there is no native event to duplicate here.
+            LOG_WARN(LOG_FILTER,
+                "Private RFD Tuten'kash gong GO 148917 missing in world DB: "
+                "run={} segment={} instance={}.",
+                run.GetRunId(), segment.SegmentId,
+                run.GetInstanceId());
+        }
+
+        // Prepare only the historical final-boss spawn grid. Normal
+        // dungeon path, other RFD Manastorm stages, and public world
+        // spawns remain untouched.
+        map->LoadGrid(
+            TUTEN_KASH_GONG_POSITION.GetPositionX(),
+            TUTEN_KASH_GONG_POSITION.GetPositionY());
+
+        // Avoid a replacement if an already-loaded persistent copy
+        // exists in this private map.
+        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        {
+            Creature* creature = spawn.second;
+            if (!creature || !creature->IsInWorld() ||
+                !creature->IsAlive() ||
+                creature->GetEntry() != NPC_TUTEN_KASH)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(creature);
+            if (run.GetObjectiveCreatureGuid() != creature->GetGUID())
+            {
+                error = "Existing Tuten'kash did not register as the Manastorm objective.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER,
+                "Reused original Tuten'kash in private RFD: "
+                "run={} segment={} instance={} guid={}.",
+                run.GetRunId(), segment.SegmentId,
+                run.GetInstanceId(), creature->GetGUID().GetRawValue());
+            return true;
+        }
+
+        TempSummon* tutenKash = map->SummonCreature(
+            NPC_TUTEN_KASH,
+            TUTEN_KASH_GONG_POSITION);
+
+        if (!tutenKash)
+        {
+            error = "Could not summon native Tuten'kash (7355) for private RFD Endgame stage.";
+            return false;
+        }
+
+        tutenKash->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
+        ManastormMgr::Instance().OnCreatureAddWorld(tutenKash);
+
+        if (run.GetObjectiveCreatureGuid() != tutenKash->GetGUID())
+        {
+            tutenKash->DespawnOrUnsummon();
+            error = "Summoned Tuten'kash failed private Manastorm objective registration.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER,
+            "Summoned original Tuten'kash for private RFD Endgame: "
+            "run={} segment={} instance={} guid={}.",
+            run.GetRunId(), segment.SegmentId,
+            run.GetInstanceId(), tutenKash->GetGUID().GetRawValue());
+
+        return true;
+    }
+
     bool BootstrapZulFarrakGahzrillaEncounter(
         Map* map,
         ManastormRun& run,
@@ -1547,6 +1707,10 @@ namespace
     {
         switch (run.GetSegment().SegmentId)
         {
+        case SEGMENT_TUTEN_KASH_ENDGAME:
+            return BootstrapRazorfenDownsTutenKashEncounter(
+                map, run, error);
+
         case SEGMENT_GAHZRILLA_NORMAL:
         case SEGMENT_GAHZRILLA_ENDGAME:
             return BootstrapZulFarrakGahzrillaEncounter(
