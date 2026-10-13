@@ -8,6 +8,12 @@
  * same request. A row whose outcome is unknown (database error, server
  * stopped mid-award) stays 'pending' and is read again later; the key lookup
  * then finds the earlier award and marks the row done instead of paying again.
+ *
+ * Trust: anyone who can INSERT into groot_coin_award_queue can mint coins for
+ * any character, up to MaxAward per row. The requested_by_account checks
+ * (Game Master and RBAC 1001) only stop rows naming an account that could
+ * not award in game; they do not authenticate the inserter. Grant INSERT on
+ * that table only to the trusted website or bot account.
  */
 
 #include "GrootCoin.h"
@@ -20,6 +26,7 @@
 #include "Log.h"
 #include "QueryCallback.h"
 #include "QueryResult.h"
+#include "RBAC.h"
 #include "Realm.h"
 
 #include <unordered_set>
@@ -70,9 +77,16 @@ namespace GrootCoin
                 return;
             }
 
+            // The same two gates as `.groot award`: Game Master security and RBAC 1001 (with its denials) on
+            // this realm. The queue cannot authenticate the inserter, so this only names who approved the row.
             if (AccountMgr::GetSecurity(requester, realm.Id.Realm) < SEC_GAMEMASTER)
             {
                 MarkFailed(id, "requested_by_account is not a Game Master on this realm");
+                return;
+            }
+            if (!AccountMgr::HasPermission(requester, rbac::RBAC_PERM_COMMAND_GROOT_AWARD, realm.Id.Realm))
+            {
+                MarkFailed(id, "requested_by_account lacks RBAC 1001 (Command: groot award) on this realm");
                 return;
             }
 
