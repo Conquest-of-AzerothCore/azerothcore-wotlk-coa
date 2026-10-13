@@ -11,6 +11,7 @@
 #include "BattlegroundMgr.h"
 #include "BattlegroundQueue.h"
 #include "Chat.h"
+#include "Config.h"
 #include "DBCStores.h"
 #include "DisableMgr.h"
 #include "GameTime.h"
@@ -827,6 +828,85 @@ namespace
         }
     }
 
+    constexpr uint32 RUNE_OF_ASCENSION_ITEM = 375250;
+    constexpr char WeeklyArenaPointsSetting[] = "core.rated_solo_arena_points";
+
+    enum WeeklyArenaPointsField : uint32
+    {
+        WEEKLY_ARENA_POINTS_RESET_TIME = 0,
+        WEEKLY_ARENA_POINTS_EARNED = 1
+    };
+
+    struct SoloWinRewards
+    {
+        uint32 ArenaPoints1v1 = 25;
+        uint32 ArenaPoints2v2 = 300;
+        uint32 ArenaPoints3v3 = 300;
+        uint32 RunesOfAscension = 25;
+        uint32 WeeklyArenaPointsCap = 36000;
+    };
+
+    SoloWinRewards WinRewards;
+
+    void LoadWinRewards()
+    {
+        WinRewards.ArenaPoints1v1 = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.ArenaPoints.1v1", 25);
+        WinRewards.ArenaPoints2v2 = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.ArenaPoints.2v2", 300);
+        WinRewards.ArenaPoints3v3 = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.ArenaPoints.3v3", 300);
+        WinRewards.RunesOfAscension = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.RunesOfAscension", 25);
+        WinRewards.WeeklyArenaPointsCap =
+            sConfigMgr->GetOption<uint32>("RatedSoloArena.WeeklyArenaPointsCap", 36000);
+    }
+
+    uint32 WinArenaPointsFor(uint32 teamType)
+    {
+        switch (teamType)
+        {
+            case ARENA_TEAM_2v2:
+                return WinRewards.ArenaPoints2v2;
+            case ARENA_TEAM_3v3:
+                return WinRewards.ArenaPoints3v3;
+            case ARENA_TEAM_5v5:
+                return WinRewards.ArenaPoints1v1;
+            default:
+                return 0;
+        }
+    }
+
+    uint32 ArenaPointsEarnedThisWeek(Player* player)
+    {
+        uint32 currentWeek = uint32(sWorld->GetNextWeeklyQuestsResetTime().count());
+        if (player->GetPlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_RESET_TIME).value == currentWeek)
+            return player->GetPlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_EARNED).value;
+
+        player->UpdatePlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_RESET_TIME, currentWeek);
+        player->UpdatePlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_EARNED, 0);
+        return 0;
+    }
+
+    void GrantWinArenaPoints(Player* player, uint32 teamType)
+    {
+        uint32 earned = ArenaPointsEarnedThisWeek(player);
+        uint32 cap = WinRewards.WeeklyArenaPointsCap;
+        uint32 points = std::min(WinArenaPointsFor(teamType), cap > earned ? cap - earned : 0);
+        if (!points)
+            return;
+
+        earned += points;
+        player->UpdatePlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_EARNED, earned);
+        player->ModifyArenaPoints(int32(points));
+        ChatHandler(player->GetSession()).PSendSysMessage(
+            "You've received {} Arena Points. Current Points: ({}) Cap: ({}/{})", points, player->GetArenaPoints(),
+            earned, cap);
+    }
+
+    void GrantWinRewards(Player* player, uint32 teamType)
+    {
+        GrantWinArenaPoints(player, teamType);
+        if (WinRewards.RunesOfAscension)
+            player->AddItem(RUNE_OF_ASCENSION_ITEM, WinRewards.RunesOfAscension);
+    }
+
     void ApplyPersonalResult(Player* player, RatingUpdate const& update, bool won)
     {
         ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(update.PersonalTeamId);
@@ -854,6 +934,9 @@ namespace
 
         team->SaveToDB();
         team->NotifyStatsChanged();
+
+        if (won)
+            GrantWinRewards(player, team->GetType());
     }
 
     std::optional<RatingUpdate> SettleParticipant(SoloMatch& match, ObjectGuid guid)
@@ -871,7 +954,22 @@ namespace
     {
     public:
         AscensionArenaQueueWorld()
-            : WorldScript("AscensionArenaQueueWorld", { WORLDHOOK_ON_UPDATE, WORLDHOOK_ON_SHUTDOWN }) { }
+            : WorldScript("AscensionArenaQueueWorld", {
+                WORLDHOOK_ON_AFTER_CONFIG_LOAD,
+                WORLDHOOK_ON_STARTUP,
+                WORLDHOOK_ON_UPDATE,
+                WORLDHOOK_ON_SHUTDOWN
+            }) { }
+
+        void OnAfterConfigLoad(bool) override
+        {
+            LoadWinRewards();
+        }
+
+        void OnStartup() override
+        {
+            LoadWinRewards();
+        }
 
         void OnUpdate(uint32) override
         {

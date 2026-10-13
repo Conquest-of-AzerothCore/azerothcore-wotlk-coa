@@ -255,6 +255,32 @@ HighRisk.GearChance = 50
 HighRisk.ResourceChance = 50
 HighRisk.GoldChance = 50
 
+###################################################################################################
+# RATED SOLO ARENA
+#
+#    RatedSoloArena.Win.ArenaPoints.1v1
+#    RatedSoloArena.Win.ArenaPoints.2v2
+#    RatedSoloArena.Win.ArenaPoints.3v3
+#        Description: Arena Points granted to each winner of a rated solo or party match, by bracket.
+#        Default:     25 (1v1), 300 (2v2), 300 (3v3)
+
+RatedSoloArena.Win.ArenaPoints.1v1 = 25
+RatedSoloArena.Win.ArenaPoints.2v2 = 300
+RatedSoloArena.Win.ArenaPoints.3v3 = 300
+
+#    RatedSoloArena.Win.RunesOfAscension
+#        Description: Runes of Ascension (item 375250) granted to each winner of a rated solo or party match.
+#        Default:     25
+
+RatedSoloArena.Win.RunesOfAscension = 25
+
+#    RatedSoloArena.WeeklyArenaPointsCap
+#        Description: Arena Points a character can earn from rated solo arena wins each week. The count
+#                     restarts at the realm's weekly reset.
+#        Default:     36000
+
+RatedSoloArena.WeeklyArenaPointsCap = 36000
+
 #    PvpPower.Enable
 #        Description: Item spells named "PvP Power (+N)" scale damage and healing at level 60, capped at
 #                     495 points. Damage +0.05% per point against players (and against uncontrolled
