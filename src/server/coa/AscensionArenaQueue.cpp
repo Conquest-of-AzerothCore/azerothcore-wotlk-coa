@@ -1082,23 +1082,6 @@ namespace
             player->AddItem(RUNE_OF_ASCENSION_ITEM, WinRewards.RunesOfAscension);
     }
 
-    std::string TitleNameFor(Player* player, CharTitlesEntry const* title)
-    {
-        LocaleConstant locale = player->GetSession()->GetSessionDbcLocale();
-        bool female = player->getGender() == GENDER_FEMALE;
-        char const* name = female ? title->nameFemale[locale] : title->nameMale[locale];
-        if (!name || !*name)
-            name = female ? title->nameFemale[LOCALE_enUS] : title->nameMale[LOCALE_enUS];
-        if (!name || !*name)
-            name = title->nameMale[LOCALE_enUS];
-
-        std::string text = name ? name : "";
-        std::size_t nameSlot = text.find("%s");
-        if (nameSlot != std::string::npos)
-            text.replace(nameSlot, 2, player->GetName());
-        return text;
-    }
-
     void GrantRatingTitles(Player* player, uint32 personalRating)
     {
         for (RatingTitle const& tier : RatingTitles)
@@ -1111,8 +1094,6 @@ namespace
                 continue;
 
             player->SetTitle(title);
-            ChatHandler(player->GetSession()).PSendSysMessage("You have earned the title '{}'.",
-                TitleNameFor(player, title));
         }
     }
 
