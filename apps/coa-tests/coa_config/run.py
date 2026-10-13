@@ -101,7 +101,8 @@ def compile_and_run(out, main_source, packet_prefix):
 
 def expected_rates(scale):
     _, names = config_names()
-    expected = {'RATE_XP_GLOBAL': 'RATE_XP_GLOBAL', 'RATE_XP_PROFESSION': 'RATE_XP_PROFESSION'}
+    expected = {'RATE_XP_GLOBAL': 'RATE_XP_GLOBAL', 'RATE_XP_PROFESSION': 'RATE_XP_PROFESSION',
+                'RATE_AUCTION_DEPOSIT': 'RATE_AUCTION_DEPOSIT'}
     for key in ('KILL KILL_TBC KILL_WOTLK QUEST QUEST_TBC QUEST_WOTLK EXPLORE ELITE DUNGEON_ELITE').split():
         expected[f'RATE_XP_{key}'] = f'RATE_XP_{key}'
     for suffix in ('GRAY GREEN YELLOW ORANGE MINING HERBALISM DISENCHANTING SKINNING FISHING '
