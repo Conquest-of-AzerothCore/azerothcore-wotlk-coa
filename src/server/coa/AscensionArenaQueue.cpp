@@ -867,10 +867,10 @@ namespace
     };
 
     std::array<RatingTitle, 4> RatingTitles{ {
-        { "RatedSoloArena.Title.Challenger", 45, 1600, 1600 },
-        { "RatedSoloArena.Title.Rival", 44, 1800, 1800 },
-        { "RatedSoloArena.Title.Duelist", 43, 2200, 2200 },
-        { "RatedSoloArena.Title.Gladiator", 42, 2700, 2700 }
+        { "RatedSoloArena.Title.Challenger", 45, 1700, 1700 },
+        { "RatedSoloArena.Title.Rival", 44, 2000, 2000 },
+        { "RatedSoloArena.Title.Duelist", 43, 2300, 2300 },
+        { "RatedSoloArena.Title.Gladiator", 42, 2600, 2600 }
     } };
 
     void LoadWinRewards()
