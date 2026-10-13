@@ -14,6 +14,7 @@
 #include "DBCStores.h"
 #include "DisableMgr.h"
 #include "GameTime.h"
+#include "Group.h"
 #include "LFGMgr.h"
 #include "Language.h"
 #include "Log.h"
@@ -29,6 +30,7 @@
 #include <bit>
 #include <mutex>
 #include <optional>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -114,6 +116,7 @@ namespace
     std::atomic<bool> AnyPending = false;
     std::unordered_map<ObjectGuid, ArenaRequest> ReadyRequests;
     std::unordered_map<ObjectGuid, bool> HealerByPlayer;
+    std::unordered_map<ObjectGuid, uint32> QueuedPersonalTeams;
     std::unordered_map<uint32, SoloMatch> MatchByInstance;
     std::unordered_map<uint32, uint32> InstanceBySideTeam;
 
@@ -279,16 +282,222 @@ namespace
             BATTLEGROUND_AA, bracketEntry->GetBracketId());
     }
 
-    bool IsSoloQueueEntry(GroupQueueInfo const* ginfo, uint8 arenaType)
+    std::optional<uint32> SoloRequestBracketForSlot(uint8 arenaSlot)
     {
-        return ginfo->IsRated && ginfo->ArenaType == arenaType && ginfo->Players.size() == 1
-            && !ginfo->IsInvitedToBGInstanceGUID;
+        switch (arenaSlot)
+        {
+            case 0:
+                return 2;
+            case 1:
+                return 3;
+            case 2:
+                return 5;
+            default:
+                return std::nullopt;
+        }
     }
 
-    bool IsHealer(GroupQueueInfo const* ginfo, std::unordered_map<ObjectGuid, bool> const& healers)
+    ArenaRequest RequestWithDeclaredRole(Player* player, uint32 bracket)
     {
-        auto itr = healers.find(*ginfo->Players.begin());
-        return itr != healers.end() && itr->second;
+        std::lock_guard<std::mutex> lock(StateLock);
+        auto itr = HealerByPlayer.find(player->GetGUID());
+        bool declaredHealer = itr != HealerByPlayer.end() && itr->second;
+        return ArenaRequest{ bracket, declaredHealer ? ARENA_ROLE_HEALER : 0 };
+    }
+
+    bool IsPersonalTeam(uint32 teamId)
+    {
+        ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(teamId);
+        return team && team->GetMembersSize() == 1;
+    }
+
+    bool IsWholePartyInLeaderTeam(Player* leader, Group* group, uint8 arenaSlot)
+    {
+        if (!group)
+            return false;
+
+        ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(leader->GetArenaTeamId(arenaSlot));
+        if (!team || team->GetMembersSize() < 2)
+            return false;
+
+        for (Group::MemberSlot const& slot : group->GetMemberSlots())
+            if (!team->IsMember(slot.guid))
+                return false;
+
+        return true;
+    }
+
+    std::vector<Player*> OnlinePartyMembers(Group* group)
+    {
+        std::vector<Player*> members;
+        group->DoForAllMembers([&members](Player* member)
+        {
+            members.push_back(member);
+        });
+        return members;
+    }
+
+    void SendJoinResultToParty(Group* group, GroupJoinBattlegroundResult result)
+    {
+        for (Player* member : OnlinePartyMembers(group))
+            SendJoinResult(member, result);
+    }
+
+    GroupJoinBattlegroundResult CheckRatedPremade(Group* group, Battleground* arenaTemplate,
+        BattlegroundQueueTypeId queueType, SoloBracket const& bracket, uint8 arenaSlot)
+    {
+        if (group->isRaidGroup() || group->GetMembersCount() > bracket.ArenaType)
+            return ERR_ARENA_TEAM_PARTY_SIZE;
+
+        GroupJoinBattlegroundResult result = group->CanJoinBattlegroundQueue(arenaTemplate, queueType,
+            group->GetMembersCount(), bracket.ArenaType, false, arenaSlot);
+        if (result <= 0)
+            return result;
+
+        for (Player* member : OnlinePartyMembers(group))
+        {
+            if (member->InBattlegroundQueue())
+                return ERR_BATTLEGROUND_CANNOT_QUEUE_FOR_RATED;
+
+            GroupJoinBattlegroundResult memberResult = GroupJoinBattlegroundResult(BATTLEGROUND_AA);
+            if (!sScriptMgr->OnPlayerCanJoinInArenaQueue(member, ObjectGuid::Empty, arenaSlot, BATTLEGROUND_AA, 0, 1,
+                memberResult) && memberResult <= 0)
+                return memberResult;
+        }
+
+        return result;
+    }
+
+    void JoinRatedPremadeQueue(Player* leader, Group* group, SoloBracket const& bracket, uint8 arenaSlot)
+    {
+        Battleground* arenaTemplate = sBattlegroundMgr->GetBattlegroundTemplate(BATTLEGROUND_AA);
+        if (!arenaTemplate)
+            return;
+
+        PvPDifficultyEntry const* bracketEntry =
+            GetBattlegroundBracketByLevel(arenaTemplate->GetMapId(), leader->GetLevel());
+        if (!bracketEntry)
+            return;
+
+        if (sArenaSeasonMgr->GetSeasonState() == ARENA_SEASON_STATE_DISABLED)
+        {
+            ChatHandler(leader->GetSession()).SendSysMessage("Rated arenas are closed until the next season starts.");
+            return;
+        }
+
+        BattlegroundQueueTypeId queueType = BattlegroundMgr::BGQueueTypeId(BATTLEGROUND_AA, bracket.ArenaType);
+        GroupJoinBattlegroundResult result = CheckRatedPremade(group, arenaTemplate, queueType, bracket, arenaSlot);
+        if (result <= 0)
+        {
+            SendJoinResultToParty(group, result);
+            return;
+        }
+
+        std::vector<Player*> members = OnlinePartyMembers(group);
+        std::unordered_map<ObjectGuid, uint32> personalTeams;
+        uint64 totalTeamRating = 0;
+        uint64 totalMatchmakerRating = 0;
+        for (Player* member : members)
+        {
+            ArenaTeam* team = PersonalTeam(member, bracket);
+            ArenaTeamMember* teamMember = team ? team->GetMember(member->GetGUID()) : nullptr;
+            if (!teamMember)
+            {
+                SendJoinResultToParty(group, ERR_BATTLEGROUND_JOIN_FAILED);
+                return;
+            }
+
+            personalTeams[member->GetGUID()] = team->GetId();
+            totalTeamRating += team->GetRating();
+            totalMatchmakerRating += teamMember->MatchMakerRating;
+        }
+
+        uint32 arenaRating = std::max<uint32>(uint32(totalTeamRating / members.size()), 1);
+        uint32 matchmakerRating = uint32(totalMatchmakerRating / members.size());
+
+        {
+            std::lock_guard<std::mutex> lock(StateLock);
+            for (auto const& [guid, teamId] : personalTeams)
+                QueuedPersonalTeams[guid] = teamId;
+        }
+
+        BattlegroundQueue& queue = sBattlegroundMgr->GetBattlegroundQueue(queueType);
+        GroupQueueInfo* ginfo = queue.AddGroup(leader, group, BATTLEGROUND_AA, bracketEntry, bracket.ArenaType, true,
+            false, arenaRating, matchmakerRating, personalTeams[leader->GetGUID()], 0);
+        uint32 averageWaitTime = queue.GetAverageQueueWaitTime(ginfo);
+
+        for (Player* member : members)
+        {
+            uint32 queueSlot = member->AddBattlegroundQueueId(queueType);
+
+            WorldPacket status;
+            sBattlegroundMgr->BuildBattlegroundStatusPacket(&status, arenaTemplate, queueSlot, STATUS_WAIT_QUEUE,
+                averageWaitTime, 0, bracket.ArenaType, TEAM_NEUTRAL, true);
+            member->SendDirectMessage(&status);
+            SendJoinResult(member, result);
+
+            sScriptMgr->OnPlayerJoinArena(member);
+        }
+
+        sBattlegroundMgr->ScheduleQueueUpdate(std::max<uint32>(matchmakerRating, 1), bracket.ArenaType, queueType,
+            BATTLEGROUND_AA, bracketEntry->GetBracketId());
+    }
+
+    bool RouteRatedPartyJoin(Player* player, uint8 arenaSlot)
+    {
+        std::optional<uint32> requestBracket = SoloRequestBracketForSlot(arenaSlot);
+        if (!requestBracket)
+            return false;
+
+        Group* group = player->GetGroup();
+        if (group && group->GetLeaderGUID() != player->GetGUID())
+            return true;
+
+        if (IsWholePartyInLeaderTeam(player, group, arenaSlot))
+            return false;
+
+        if (!group || group->GetMembersCount() == 1)
+        {
+            JoinRatedSoloQueue(player, RequestWithDeclaredRole(player, *requestBracket));
+            return true;
+        }
+
+        std::optional<SoloBracket> bracket = SoloBracketFor(*requestBracket);
+        if (!IsSoloTeamBracket(bracket->ArenaType))
+        {
+            for (Player* member : OnlinePartyMembers(group))
+                JoinRatedSoloQueue(member, RequestWithDeclaredRole(member, *requestBracket));
+            return true;
+        }
+
+        JoinRatedPremadeQueue(player, group, *bracket, arenaSlot);
+        return true;
+    }
+
+    bool IsSoloSystemEntry(GroupQueueInfo const* ginfo, uint8 arenaType, uint32 teamSize)
+    {
+        return ginfo->IsRated && ginfo->ArenaType == arenaType && !ginfo->Players.empty()
+            && ginfo->Players.size() <= teamSize && !ginfo->IsInvitedToBGInstanceGUID;
+    }
+
+    uint32 HealerCount(GroupQueueInfo const* ginfo, std::unordered_map<ObjectGuid, bool> const& healers)
+    {
+        uint32 count = 0;
+        for (ObjectGuid const& guid : ginfo->Players)
+        {
+            auto itr = healers.find(guid);
+            if (itr != healers.end() && itr->second)
+                ++count;
+        }
+        return count;
+    }
+
+    uint32 PlayerCount(std::vector<GroupQueueInfo*> const& entries)
+    {
+        uint32 total = 0;
+        for (GroupQueueInfo const* ginfo : entries)
+            total += uint32(ginfo->Players.size());
+        return total;
     }
 
     struct SoloLineup
@@ -300,80 +509,177 @@ namespace
     {
         uint64 total = 0;
         for (GroupQueueInfo const* ginfo : side)
-            total += ginfo->ArenaMatchmakerRating;
-        return side.empty() ? 0 : uint32(total / side.size());
+            total += uint64(ginfo->ArenaMatchmakerRating) * ginfo->Players.size();
+        uint32 players = PlayerCount(side);
+        return players ? uint32(total / players) : 0;
     }
 
     uint32 AverageTeamRating(std::vector<GroupQueueInfo*> const& side)
     {
         uint64 total = 0;
         for (GroupQueueInfo const* ginfo : side)
-            total += ginfo->ArenaTeamRating;
-        return side.empty() ? 0 : uint32(total / side.size());
+            total += uint64(ginfo->ArenaTeamRating) * ginfo->Players.size();
+        uint32 players = PlayerCount(side);
+        return players ? uint32(total / players) : 0;
     }
 
-    SoloLineup BalanceLineup(std::vector<GroupQueueInfo*> const& healers, std::vector<GroupQueueInfo*> const& damage,
-        uint32 teamSize)
+    struct LineupCandidate
     {
-        uint32 damagePerSide = teamSize - (healers.empty() ? 0 : 1);
-        uint32 bestMask = 0;
-        uint64 bestGap = UINT64_MAX;
-        for (uint32 mask = 0; mask < (1u << damage.size()); ++mask)
+        GroupQueueInfo* Entry = nullptr;
+        uint32 Players = 0;
+        uint32 Healers = 0;
+        bool Premade = false;
+    };
+
+    struct LineupSide
+    {
+        std::vector<GroupQueueInfo*> Entries;
+        uint32 Players = 0;
+        uint32 SoloHealers = 0;
+        uint32 PremadeHealers = 0;
+        uint64 MatchmakerRatingTotal = 0;
+
+        bool CanTake(LineupCandidate const& candidate, uint32 teamSize) const
         {
-            if (uint32(std::popcount(mask)) != damagePerSide)
-                continue;
+            if (Players + candidate.Players > teamSize)
+                return false;
 
-            SoloLineup lineup;
-            for (std::size_t i = 0; i < healers.size(); ++i)
-                lineup.Sides[i].push_back(healers[i]);
-            for (std::size_t i = 0; i < damage.size(); ++i)
-                lineup.Sides[(mask >> i) & 1 ? TEAM_ALLIANCE : TEAM_HORDE].push_back(damage[i]);
+            if (candidate.Premade)
+                return candidate.Healers == 0 || SoloHealers == 0;
 
-            int64 gap = int64(AverageMatchmakerRating(lineup.Sides[TEAM_ALLIANCE]))
-                - int64(AverageMatchmakerRating(lineup.Sides[TEAM_HORDE]));
-            uint64 absoluteGap = uint64(gap < 0 ? -gap : gap);
-            if (absoluteGap < bestGap)
-            {
-                bestGap = absoluteGap;
-                bestMask = mask;
-            }
+            return candidate.Healers == 0 || (SoloHealers == 0 && PremadeHealers == 0);
         }
 
-        SoloLineup lineup;
-        for (std::size_t i = 0; i < healers.size(); ++i)
-            lineup.Sides[i].push_back(healers[i]);
-        for (std::size_t i = 0; i < damage.size(); ++i)
-            lineup.Sides[(bestMask >> i) & 1 ? TEAM_ALLIANCE : TEAM_HORDE].push_back(damage[i]);
-        return lineup;
+        void Take(LineupCandidate const& candidate)
+        {
+            Entries.push_back(candidate.Entry);
+            Players += candidate.Players;
+            (candidate.Premade ? PremadeHealers : SoloHealers) += candidate.Healers;
+            MatchmakerRatingTotal += uint64(candidate.Entry->ArenaMatchmakerRating) * candidate.Players;
+        }
+
+        void Release(LineupCandidate const& candidate)
+        {
+            Entries.pop_back();
+            Players -= candidate.Players;
+            (candidate.Premade ? PremadeHealers : SoloHealers) -= candidate.Healers;
+            MatchmakerRatingTotal -= uint64(candidate.Entry->ArenaMatchmakerRating) * candidate.Players;
+        }
+
+        bool HasHealer() const
+        {
+            return SoloHealers + PremadeHealers > 0;
+        }
+    };
+
+    struct LineupScore
+    {
+        bool WithoutHealers = true;
+        uint32 QueueSeniority = 0;
+        uint64 RatingGap = 0;
+
+        bool operator<(LineupScore const& other) const
+        {
+            return std::tie(WithoutHealers, QueueSeniority, RatingGap)
+                < std::tie(other.WithoutHealers, other.QueueSeniority, other.RatingGap);
+        }
+    };
+
+    struct LineupSearch
+    {
+        std::vector<LineupCandidate> Pool;
+        std::vector<uint32> PlayersFrom;
+        uint32 TeamSize = 0;
+        std::array<LineupSide, PVP_TEAMS_COUNT> Sides;
+        std::optional<LineupScore> BestScore;
+        SoloLineup Best;
+
+        void Consider(uint32 queueSeniority)
+        {
+            if (Sides[TEAM_ALLIANCE].HasHealer() != Sides[TEAM_HORDE].HasHealer())
+                return;
+
+            uint64 allianceTotal = Sides[TEAM_ALLIANCE].MatchmakerRatingTotal;
+            uint64 hordeTotal = Sides[TEAM_HORDE].MatchmakerRatingTotal;
+            LineupScore score{ !Sides[TEAM_ALLIANCE].HasHealer(), queueSeniority,
+                allianceTotal > hordeTotal ? allianceTotal - hordeTotal : hordeTotal - allianceTotal };
+            if (BestScore && !(score < *BestScore))
+                return;
+
+            BestScore = score;
+            for (uint8 side = 0; side < PVP_TEAMS_COUNT; ++side)
+                Best.Sides[side] = Sides[side].Entries;
+        }
+
+        void Explore(std::size_t next, uint32 queueSeniority)
+        {
+            uint32 missingPlayers = 2 * TeamSize - Sides[TEAM_ALLIANCE].Players - Sides[TEAM_HORDE].Players;
+            if (!missingPlayers)
+            {
+                Consider(queueSeniority);
+                return;
+            }
+
+            if (next == Pool.size() || PlayersFrom[next] < missingPlayers)
+                return;
+
+            LineupCandidate const& candidate = Pool[next];
+            for (uint8 side = 0; side < PVP_TEAMS_COUNT; ++side)
+            {
+                if ((next == 0 && side != TEAM_ALLIANCE) || !Sides[side].CanTake(candidate, TeamSize))
+                    continue;
+
+                Sides[side].Take(candidate);
+                Explore(next + 1, queueSeniority + uint32(next));
+                Sides[side].Release(candidate);
+            }
+
+            if (next != 0)
+                Explore(next + 1, queueSeniority);
+        }
+    };
+
+    LineupCandidate CandidateFor(GroupQueueInfo* ginfo, std::unordered_map<ObjectGuid, bool> const& healerRoles)
+    {
+        uint32 players = uint32(ginfo->Players.size());
+        return LineupCandidate{ ginfo, players, HealerCount(ginfo, healerRoles), players > 1 };
     }
 
     std::optional<SoloLineup> ComposeLineup(GroupQueueInfo* anchor, std::vector<GroupQueueInfo*> const& eligible,
         uint32 teamSize, std::unordered_map<ObjectGuid, bool> const& healerRoles)
     {
-        std::vector<GroupQueueInfo*> healers;
-        std::vector<GroupQueueInfo*> damage;
-        bool anchorIsHealer = IsHealer(anchor, healerRoles);
-        (anchorIsHealer ? healers : damage).push_back(anchor);
+        constexpr uint32 PremadesKeptPerSize = 2;
+        constexpr uint32 SoloHealersKept = 2;
+
+        LineupSearch search;
+        search.TeamSize = teamSize;
+        search.Pool.push_back(CandidateFor(anchor, healerRoles));
+
+        uint32 soloHealers = 0;
+        uint32 soloDamage = 0;
+        std::array<uint32, ARENA_TYPE_5v5 + 1> premadesBySize{};
         for (GroupQueueInfo* ginfo : eligible)
         {
-            if (ginfo != anchor)
-                (IsHealer(ginfo, healerRoles) ? healers : damage).push_back(ginfo);
+            if (ginfo == anchor)
+                continue;
+
+            LineupCandidate candidate = CandidateFor(ginfo, healerRoles);
+            bool kept = candidate.Premade ? premadesBySize[candidate.Players]++ < PremadesKeptPerSize
+                : candidate.Healers ? soloHealers++ < SoloHealersKept
+                : soloDamage++ < 2 * teamSize;
+            if (kept)
+                search.Pool.push_back(candidate);
         }
 
-        if (healers.size() >= 2 && damage.size() >= 2 * teamSize - 2)
-        {
-            healers.resize(2);
-            damage.resize(2 * teamSize - 2);
-            return BalanceLineup(healers, damage, teamSize);
-        }
+        search.PlayersFrom.assign(search.Pool.size() + 1, 0);
+        for (std::size_t i = search.Pool.size(); i-- > 0;)
+            search.PlayersFrom[i] = search.PlayersFrom[i + 1] + search.Pool[i].Players;
 
-        if (!anchorIsHealer && damage.size() >= 2 * teamSize)
-        {
-            damage.resize(2 * teamSize);
-            return BalanceLineup({}, damage, teamSize);
-        }
+        search.Explore(0, 0);
+        if (!search.BestScore)
+            return std::nullopt;
 
-        return std::nullopt;
+        return search.Best;
     }
 
     std::optional<SoloLineup> FindLineup(BattlegroundQueue* queue, BattlegroundBracketId bracketId, uint8 arenaType,
@@ -382,10 +688,10 @@ namespace
         std::vector<GroupQueueInfo*> waiting;
         for (uint32 index : { BG_QUEUE_NORMAL_ALLIANCE, BG_QUEUE_NORMAL_HORDE })
             for (GroupQueueInfo* ginfo : queue->m_QueuedGroups[bracketId][index])
-                if (IsSoloQueueEntry(ginfo, arenaType))
+                if (IsSoloSystemEntry(ginfo, arenaType, teamSize))
                     waiting.push_back(ginfo);
 
-        if (waiting.size() < 2 * teamSize)
+        if (PlayerCount(waiting) < 2 * teamSize)
             return std::nullopt;
 
         std::stable_sort(waiting.begin(), waiting.end(), [](GroupQueueInfo const* left, GroupQueueInfo const* right)
@@ -416,7 +722,7 @@ namespace
                     eligible.push_back(ginfo);
             }
 
-            if (eligible.size() < 2 * teamSize)
+            if (PlayerCount(eligible) < 2 * teamSize)
                 continue;
 
             if (std::optional<SoloLineup> lineup = ComposeLineup(anchor, eligible, teamSize, healerRoles))
@@ -424,6 +730,16 @@ namespace
         }
 
         return std::nullopt;
+    }
+
+    uint32 PersonalTeamIdFor(GroupQueueInfo const* ginfo, ObjectGuid guid,
+        std::unordered_map<ObjectGuid, uint32> const& personalTeams)
+    {
+        if (ginfo->Players.size() == 1)
+            return ginfo->ArenaTeamId;
+
+        auto itr = personalTeams.find(guid);
+        return itr != personalTeams.end() ? itr->second : 0;
     }
 
     bool StartSoloMatch(BattlegroundQueue* queue, BattlegroundBracketId bracketId, uint8 arenaType,
@@ -452,6 +768,12 @@ namespace
             teamRating[side] = AverageTeamRating(lineup.Sides[side]);
         }
 
+        std::unordered_map<ObjectGuid, uint32> personalTeams;
+        {
+            std::lock_guard<std::mutex> lock(StateLock);
+            personalTeams = QueuedPersonalTeams;
+        }
+
         SoloMatch match;
         for (uint8 side = 0; side < PVP_TEAMS_COUNT; ++side)
         {
@@ -462,7 +784,9 @@ namespace
             {
                 ginfo->OpponentsTeamRating = teamRating[opponent];
                 ginfo->OpponentsMatchmakerRating = matchmakerRating[opponent];
-                match.Participants[*ginfo->Players.begin()] = SoloParticipant{ ginfo->ArenaTeamId, teamId, false };
+                for (ObjectGuid const& guid : ginfo->Players)
+                    match.Participants[guid] = SoloParticipant{ PersonalTeamIdFor(ginfo, guid, personalTeams), teamId,
+                        false };
                 queue->InviteGroupToBG(ginfo, arena, teamId);
             }
         }
@@ -479,7 +803,7 @@ namespace
         {
             std::lock_guard<std::mutex> lock(StateLock);
             for (auto const& [guid, participant] : match.Participants)
-                HealerByPlayer.erase(guid);
+                QueuedPersonalTeams.erase(guid);
             for (SoloSideTeam* sideTeam : match.Sides)
                 InstanceBySideTeam[sideTeam->GetId()] = arena->GetInstanceID();
             MatchByInstance[arena->GetInstanceID()] = std::move(match);
@@ -577,7 +901,11 @@ namespace
     {
     public:
         AscensionArenaQueuePlayer()
-            : PlayerScript("AscensionArenaQueuePlayer", { PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE }) { }
+            : PlayerScript("AscensionArenaQueuePlayer", {
+                PLAYERHOOK_ON_LOGOUT,
+                PLAYERHOOK_ON_UPDATE,
+                PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE
+            }) { }
 
         void OnPlayerLogout(Player* player) override
         {
@@ -586,6 +914,7 @@ namespace
             AnyPending = !PendingRequests.empty();
             ReadyRequests.erase(player->GetGUID());
             HealerByPlayer.erase(player->GetGUID());
+            QueuedPersonalTeams.erase(player->GetGUID());
         }
 
         void OnPlayerUpdate(Player* player, uint32) override
@@ -602,6 +931,16 @@ namespace
             PendingRequests.erase(itr);
             AnyPending = !PendingRequests.empty();
         }
+
+        bool OnPlayerCanJoinInArenaQueue(Player* player, ObjectGuid, uint8 arenaSlot, BattlegroundTypeId bgTypeId,
+            uint8 joinAsGroup, uint8 isRated, GroupJoinBattlegroundResult& err) override
+        {
+            if (!isRated || !joinAsGroup || bgTypeId != BATTLEGROUND_AA || !RouteRatedPartyJoin(player, arenaSlot))
+                return true;
+
+            err = ERR_BATTLEGROUND_NONE;
+            return false;
+        }
     };
 
     class AscensionArenaQueueMatchmaker final : public AllBattlegroundScript
@@ -616,11 +955,11 @@ namespace
             ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_DESTROY
         }) { }
 
-        void OnAddGroup(BattlegroundQueue*, GroupQueueInfo* ginfo, uint32& index, Player*, Group* group,
+        void OnAddGroup(BattlegroundQueue*, GroupQueueInfo* ginfo, uint32& index, Player*, Group*,
             BattlegroundTypeId bgTypeId, PvPDifficultyEntry const*, uint8 arenaType, bool isRated, bool, uint32, uint32,
-            uint32, uint32) override
+            uint32 arenaTeamId, uint32) override
         {
-            if (isRated && !group && bgTypeId == BATTLEGROUND_AA && IsSoloTeamBracket(arenaType))
+            if (isRated && bgTypeId == BATTLEGROUND_AA && IsSoloTeamBracket(arenaType) && IsPersonalTeam(arenaTeamId))
                 index = ginfo->teamId == TEAM_HORDE ? BG_QUEUE_NORMAL_HORDE : BG_QUEUE_NORMAL_ALLIANCE;
         }
 
