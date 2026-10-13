@@ -527,6 +527,8 @@ namespace
         return players ? uint32(total / players) : 0;
     }
 
+    uint32 RoleBalanceWaitSeconds = 60;
+
     struct LineupCandidate
     {
         GroupQueueInfo* Entry = nullptr;
@@ -543,10 +545,13 @@ namespace
         uint32 PremadeHealers = 0;
         uint64 MatchmakerRatingTotal = 0;
 
-        bool CanTake(LineupCandidate const& candidate, uint32 teamSize) const
+        bool CanTake(LineupCandidate const& candidate, uint32 teamSize, bool roleBalanceRelaxed) const
         {
             if (Players + candidate.Players > teamSize)
                 return false;
+
+            if (roleBalanceRelaxed)
+                return true;
 
             if (candidate.Premade)
                 return candidate.Healers == 0 || SoloHealers == 0;
@@ -570,6 +575,11 @@ namespace
             MatchmakerRatingTotal -= uint64(candidate.Entry->ArenaMatchmakerRating) * candidate.Players;
         }
 
+        bool HasBalancedHealers() const
+        {
+            return SoloHealers == 0 || (SoloHealers == 1 && PremadeHealers == 0);
+        }
+
         bool HasHealer() const
         {
             return SoloHealers + PremadeHealers > 0;
@@ -578,14 +588,15 @@ namespace
 
     struct LineupScore
     {
+        bool RoleUnbalanced = false;
         bool WithoutHealers = true;
         uint32 QueueSeniority = 0;
         uint64 RatingGap = 0;
 
         bool operator<(LineupScore const& other) const
         {
-            return std::tie(WithoutHealers, QueueSeniority, RatingGap)
-                < std::tie(other.WithoutHealers, other.QueueSeniority, other.RatingGap);
+            return std::tie(RoleUnbalanced, WithoutHealers, QueueSeniority, RatingGap)
+                < std::tie(other.RoleUnbalanced, other.WithoutHealers, other.QueueSeniority, other.RatingGap);
         }
     };
 
@@ -594,18 +605,21 @@ namespace
         std::vector<LineupCandidate> Pool;
         std::vector<uint32> PlayersFrom;
         uint32 TeamSize = 0;
+        bool RoleBalanceRelaxed = false;
         std::array<LineupSide, PVP_TEAMS_COUNT> Sides;
         std::optional<LineupScore> BestScore;
         SoloLineup Best;
 
         void Consider(uint32 queueSeniority)
         {
-            if (Sides[TEAM_ALLIANCE].HasHealer() != Sides[TEAM_HORDE].HasHealer())
+            bool roleBalanced = Sides[TEAM_ALLIANCE].HasHealer() == Sides[TEAM_HORDE].HasHealer()
+                && Sides[TEAM_ALLIANCE].HasBalancedHealers() && Sides[TEAM_HORDE].HasBalancedHealers();
+            if (!roleBalanced && !RoleBalanceRelaxed)
                 return;
 
             uint64 allianceTotal = Sides[TEAM_ALLIANCE].MatchmakerRatingTotal;
             uint64 hordeTotal = Sides[TEAM_HORDE].MatchmakerRatingTotal;
-            LineupScore score{ !Sides[TEAM_ALLIANCE].HasHealer(), queueSeniority,
+            LineupScore score{ !roleBalanced, !Sides[TEAM_ALLIANCE].HasHealer(), queueSeniority,
                 allianceTotal > hordeTotal ? allianceTotal - hordeTotal : hordeTotal - allianceTotal };
             if (BestScore && !(score < *BestScore))
                 return;
@@ -630,7 +644,7 @@ namespace
             LineupCandidate const& candidate = Pool[next];
             for (uint8 side = 0; side < PVP_TEAMS_COUNT; ++side)
             {
-                if ((next == 0 && side != TEAM_ALLIANCE) || !Sides[side].CanTake(candidate, TeamSize))
+                if ((next == 0 && side != TEAM_ALLIANCE) || !Sides[side].CanTake(candidate, TeamSize, RoleBalanceRelaxed))
                     continue;
 
                 Sides[side].Take(candidate);
@@ -650,13 +664,14 @@ namespace
     }
 
     std::optional<SoloLineup> ComposeLineup(GroupQueueInfo* anchor, std::vector<GroupQueueInfo*> const& eligible,
-        uint32 teamSize, std::unordered_map<ObjectGuid, bool> const& healerRoles)
+        uint32 teamSize, std::unordered_map<ObjectGuid, bool> const& healerRoles, bool roleBalanceRelaxed)
     {
         constexpr uint32 PremadesKeptPerSize = 2;
-        constexpr uint32 SoloHealersKept = 2;
+        uint32 soloHealersKept = roleBalanceRelaxed ? 2 * teamSize : 2;
 
         LineupSearch search;
         search.TeamSize = teamSize;
+        search.RoleBalanceRelaxed = roleBalanceRelaxed;
         search.Pool.push_back(CandidateFor(anchor, healerRoles));
 
         uint32 soloHealers = 0;
@@ -669,7 +684,7 @@ namespace
 
             LineupCandidate candidate = CandidateFor(ginfo, healerRoles);
             bool kept = candidate.Premade ? premadesBySize[candidate.Players]++ < PremadesKeptPerSize
-                : candidate.Healers ? soloHealers++ < SoloHealersKept
+                : candidate.Healers ? soloHealers++ < soloHealersKept
                 : soloDamage++ < 2 * teamSize;
             if (kept)
                 search.Pool.push_back(candidate);
@@ -729,7 +744,11 @@ namespace
             if (PlayerCount(eligible) < 2 * teamSize)
                 continue;
 
-            if (std::optional<SoloLineup> lineup = ComposeLineup(anchor, eligible, teamSize, healerRoles))
+            bool roleBalanceRelaxed = RoleBalanceWaitSeconds
+                && getMSTimeDiff(anchor->JoinTime, uint32(GameTime::GetGameTimeMS().count()))
+                    > RoleBalanceWaitSeconds * IN_MILLISECONDS;
+            if (std::optional<SoloLineup> lineup =
+                ComposeLineup(anchor, eligible, teamSize, healerRoles, roleBalanceRelaxed))
                 return lineup;
         }
 
@@ -882,6 +901,7 @@ namespace
         WinRewards.ConquestCapPerWeek = sConfigMgr->GetOption<uint32>("RatedSoloArena.SeasonCap.PerWeek", 12000);
         WinRewards.ConquestCapMax = sConfigMgr->GetOption<uint32>("RatedSoloArena.SeasonCap.Max", 0);
         WinRewards.CombatantRating = sConfigMgr->GetOption<uint32>("RatedSoloArena.Tier.Combatant", 1400);
+        RoleBalanceWaitSeconds = sConfigMgr->GetOption<uint32>("RatedSoloArena.RoleBalanceWaitSeconds", 60);
         for (RatingTitle& title : RatingTitles)
             title.Rating = sConfigMgr->GetOption<uint32>(title.ConfigName, title.DefaultRating);
     }

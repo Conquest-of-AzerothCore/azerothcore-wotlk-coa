@@ -258,6 +258,14 @@ HighRisk.GoldChance = 50
 ###################################################################################################
 # RATED SOLO ARENA
 #
+#    RatedSoloArena.RoleBalanceWaitSeconds
+#        Description: Seconds the oldest rated solo queue entry waits before matchmaking may ignore the
+#                     healer balance (one healer per side or none). Balanced lineups stay preferred.
+#        Default:     60
+#                     0 - (Never relax the healer balance)
+
+RatedSoloArena.RoleBalanceWaitSeconds = 60
+
 #    RatedSoloArena.Win.ArenaPoints.1v1
 #    RatedSoloArena.Win.ArenaPoints.2v2
 #    RatedSoloArena.Win.ArenaPoints.3v3
