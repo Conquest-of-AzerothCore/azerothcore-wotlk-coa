@@ -562,3 +562,8 @@ INSERT INTO `creature_addon` (`guid`, `emote`) SELECT `guid`, 234 FROM `creature
 
 -- The Ice Troll the user placed on the Druk'Thar side carries its weapons.
 UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9970232 AND `id` = 192;
+
+-- Graysky Soldiers also appear with their second (female) model.
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 164027 AND `Idx` = 1;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
+(164027, 1, 50, 1, 1, NULL);
