@@ -14,6 +14,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
+#include "StringFormat.h"
 #include "WorldSession.h"
 
 namespace
@@ -25,12 +26,43 @@ namespace
         GOSSIP_CONVENIENCE = 2,
         GOSSIP_LOST_CACHES = 3,
         GOSSIP_STONES = 4,
-        GOSSIP_HEIRLOOMS = 5
+        GOSSIP_HEIRLOOMS = 5,
+        GOSSIP_CONSUMABLES = 6,
+        GOSSIP_TOKENS = 7,
+        GOSSIP_BACK = 8
     };
 
     // Tiraxis' own text, from the client's npccache. Kept as he said it,
     // including the missing word in the third line - that is how it shipped.
     constexpr uint32 GOSSIP_TEXT_ID = 900007;
+    // "How do I get Bazaar Tokens?": the live answer is not in any client cache, so this one names this realm's sources.
+    constexpr uint32 GOSSIP_TOKENS_TEXT_ID = 900012;
+
+    // The live menu shows a large icon in front of each option, as an inline texture in the option text.
+    std::string IconOption(char const* icon, char const* label)
+    {
+        return Acore::StringFormat("|TInterface/ICONS/{}:40:40:-22:0|t|r{}", icon, label);
+    }
+
+    void SendMainMenu(Player* player, Creature* creature)
+    {
+        ClearGossipMenuFor(player);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, IconOption("Spell_Shadow_Teleport", "Explore the Bazaar"),
+                         GOSSIP_SENDER, GOSSIP_BAZAAR);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, IconOption("inv_legion_chest_legionfall", "Lost Caches"),
+                         GOSSIP_SENDER, GOSSIP_LOST_CACHES);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, IconOption("inv_chest_awakening", "Convenience Items"),
+                         GOSSIP_SENDER, GOSSIP_CONVENIENCE);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, IconOption("inv_misc_scrollrolled02c", "Consumables"),
+                         GOSSIP_SENDER, GOSSIP_CONSUMABLES);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, IconOption("inv_sword_39", "Heirlooms"),
+                         GOSSIP_SENDER, GOSSIP_HEIRLOOMS);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, IconOption("inv_item_stonen", "Stones of Retreat"),
+                         GOSSIP_SENDER, GOSSIP_STONES);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "How do I get Bazaar Tokens?", GOSSIP_SENDER, GOSSIP_TOKENS);
+        GrootCoin::TiraxisMenu::AddEntry(player);
+        SendGossipMenuFor(player, GOSSIP_TEXT_ID, creature);
+    }
 
     bool Enabled()
     {
@@ -48,19 +80,7 @@ public:
         if (!Enabled())
             return false;
 
-        ClearGossipMenuFor(player);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to browse the Ethereal Bazaar.",
-                         GOSSIP_SENDER, GOSSIP_BAZAAR);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to browse Convenience Items.",
-                         GOSSIP_SENDER, GOSSIP_CONVENIENCE);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to browse Lost Caches.",
-                         GOSSIP_SENDER, GOSSIP_LOST_CACHES);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to browse Stones of Retreat.",
-                         GOSSIP_SENDER, GOSSIP_STONES);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to browse Heirlooms.",
-                         GOSSIP_SENDER, GOSSIP_HEIRLOOMS);
-        GrootCoin::TiraxisMenu::AddEntry(player);
-        SendGossipMenuFor(player, GOSSIP_TEXT_ID, creature);
+        SendMainMenu(player, creature);
         return true;
     }
 
@@ -94,6 +114,17 @@ public:
                 break;
             case GOSSIP_HEIRLOOMS:
                 player->GetSession()->SendListInventory(creature->GetGUID(), BAZAAR_VENDOR_HEIRLOOMS);
+                break;
+            case GOSSIP_CONSUMABLES:
+                player->GetSession()->SendListInventory(creature->GetGUID(), BAZAAR_VENDOR_CONSUMABLES);
+                break;
+            case GOSSIP_TOKENS:
+                ClearGossipMenuFor(player);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Back", GOSSIP_SENDER, GOSSIP_BACK);
+                SendGossipMenuFor(player, GOSSIP_TOKENS_TEXT_ID, creature);
+                break;
+            case GOSSIP_BACK:
+                SendMainMenu(player, creature);
                 break;
             default:
                 CloseGossipMenuFor(player);
