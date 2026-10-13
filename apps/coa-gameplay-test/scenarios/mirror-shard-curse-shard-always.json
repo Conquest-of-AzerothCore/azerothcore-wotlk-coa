@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Seven Years of Bad Luck: inspecting a Mirror Shard always summons the Curse Shard",
+  "contract": [
+    "Inspecting a Mirror Shard (2300546) credits 162920, summons the hostile Curse Shard 162919 at the shard and hides the shard for 60 seconds.",
+    "The ambush was cut to a 40% roll (#7230) from the pattern of other Northshire ambushes alone; the quest expects the Curse Shard on every inspection."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9308.5,
+    "y": 499.5,
+    "z": 77.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 1660057 Seven Years of Bad Luck unfinished",
+      "actor": "c",
+      "quest": 1660057,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Curse Shard around yet",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 162919,
+      "equals": 0
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "A Mirror Shard within reach",
+      "actor": "c",
+      "entry": 2300546,
+      "distance": 3
+    },
+    {
+      "action": "use_gameobject",
+      "label": "Inspect the Mirror Shard",
+      "actor": "c",
+      "entry": 2300546
+    },
+    {
+      "action": "wait",
+      "label": "The 3 second Inspecting cast completes",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The inspection is credited",
+      "actor": "c",
+      "metric": "quest_objective_count",
+      "quest": 1660057,
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Curse Shard ambush appears every time, not on a 40% roll",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 162919,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}
