@@ -521,7 +521,7 @@ namespace GrootCoin
             return ExchangeResult::Disabled;
         if (pending.contains(player->GetGUID()))
             return ExchangeResult::Busy;
-        if (!IsExchangeBundle(coins))
+        if (!IsExchangeAmount(coins, CarriedCoins(player)))
             return ExchangeResult::InvalidAmount;
 
         ExchangeResult result = CheckPlayer(player);

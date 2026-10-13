@@ -129,6 +129,7 @@ namespace GrootCoin
     uint32 CarriedCoins(Player* player);
 
     // Server-side quote bound to the player, the NPC, the amount and the rate.
+    // The amount is 1, 5, 10 or exactly the coins the player carries.
     ExchangeResult CreateQuote(Player* player, Vendor const& vendor, uint32 coins, Quote& quote);
     ExchangeResult ConfirmQuote(Player* player, Vendor const& vendor, uint32 nonce);
     void CancelQuote(Player* player);

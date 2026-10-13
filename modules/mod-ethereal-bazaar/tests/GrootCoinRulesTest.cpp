@@ -156,3 +156,16 @@ TEST(GrootCoinRules, TheQueueIsLeftAloneUnlessBothSwitchesAreOn)
     EXPECT_EQ(QueuePollSeconds(60), 60u);
     EXPECT_EQ(QueuePollSeconds(0), MIN_QUEUE_POLL_SECONDS);
 }
+
+TEST(GrootCoinRules, ExchangeAllTakesExactlyTheCarriedCoins)
+{
+    EXPECT_TRUE(IsExchangeAmount(1, 0));
+    EXPECT_TRUE(IsExchangeAmount(5, 3));
+    EXPECT_TRUE(IsExchangeAmount(10, 12));
+    EXPECT_TRUE(IsExchangeAmount(7, 7));
+    EXPECT_TRUE(IsExchangeAmount(1000, 1000));
+    EXPECT_FALSE(IsExchangeAmount(7, 8));
+    EXPECT_FALSE(IsExchangeAmount(0, 0));
+    EXPECT_FALSE(IsExchangeAmount(3, 0));
+    EXPECT_EQ(TokensFor(7, 100, 5000000), 700u);
+}

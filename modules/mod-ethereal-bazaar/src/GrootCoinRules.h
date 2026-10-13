@@ -196,6 +196,15 @@ namespace GrootCoin
         return *count > HISTORY_MAX ? HISTORY_MAX : *count;
     }
 
+    // A fixed bundle, or every coin the player carries ("exchange all").
+    inline bool IsExchangeAmount(uint32_t coins, uint32_t carried)
+    {
+        for (uint32_t const bundle : EXCHANGE_BUNDLES)
+            if (bundle == coins)
+                return true;
+        return coins != 0 && coins == carried;
+    }
+
     inline bool IsExchangeBundle(uint32_t coins)
     {
         for (uint32_t const bundle : EXCHANGE_BUNDLES)

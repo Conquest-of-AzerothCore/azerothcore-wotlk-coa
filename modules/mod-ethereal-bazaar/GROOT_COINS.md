@@ -178,7 +178,7 @@ claimed or deleted. `.groot inspect <award-id>` shows whether the mail is still 
 
 ## How the exchange stays exactly-once
 
-Player flow: Tiraxis -> "I want to exchange Groot Coins" -> carried balance and rate -> 1, 5 or 10 -> a
+Player flow: Tiraxis -> "I want to exchange Groot Coins" -> the carried balance and rate in Tiraxis' text -> 1, 5, 10 or "Exchange all N" -> a
 confirmation with a pop-up -> result. Back and Cancel spend nothing.
 
 - Only coins in the backpack and equipped bags count; bank, mail, guild bank, buyback and auction coins never do.
@@ -215,7 +215,7 @@ A vanity store (or any NPC) can offer the same exchange without new rules:
 #include "GrootCoin.h"
 
 GrootCoin::Vendor const vendor{ creature, "vanity_store" };   // stored in grootcoin_exchange.source
-GrootCoin::ExchangeResult result = GrootCoin::TryExchange(player, vendor, coins);   // 1, 5 or 10
+GrootCoin::ExchangeResult result = GrootCoin::TryExchange(player, vendor, coins);   // 1, 5, 10 or all carried
 ChatHandler(player->GetSession()).SendSysMessage(std::string(GrootCoin::Describe(result)));
 ```
 

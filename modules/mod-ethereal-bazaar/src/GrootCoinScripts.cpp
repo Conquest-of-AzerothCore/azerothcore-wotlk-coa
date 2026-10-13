@@ -26,6 +26,7 @@ namespace GrootCoin::TiraxisMenu
             GOSSIP_GROOT_BUNDLE_1 = 9111,
             GOSSIP_GROOT_BUNDLE_5 = 9115,
             GOSSIP_GROOT_BUNDLE_10 = 9120,
+            GOSSIP_GROOT_ALL = 9130,
             GOSSIP_GROOT_CONFIRM = 9150,
             GOSSIP_GROOT_CANCEL = 9151,
             GOSSIP_GROOT_BACK = 9152,
@@ -63,14 +64,16 @@ namespace GrootCoin::TiraxisMenu
             uint32 const rate = GetSettings().tokensPerCoin;
 
             ClearGossipMenuFor(player);
-            AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, Acore::StringFormat("You carry {} Groot Coin(s). One coin "
-                "is worth {} Bazaar Tokens.", carried, rate), GOSSIP_SENDER_GROOT, GOSSIP_GROOT_BALANCE);
             for (uint32 const coins : EXCHANGE_BUNDLES)
                 if (carried >= coins)
                     AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Acore::StringFormat("Exchange {} Groot Coin(s) for {} "
                         "Bazaar Tokens.", coins, coins * rate), GOSSIP_SENDER_GROOT, BundleAction(coins));
+            if (carried >= 1)
+                AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Acore::StringFormat("Exchange all {} Groot Coin(s) for {} "
+                    "Bazaar Tokens.", carried, uint64(carried) * rate), GOSSIP_SENDER_GROOT, GOSSIP_GROOT_ALL);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Back.", GOSSIP_SENDER_GROOT, GOSSIP_GROOT_BACK);
-            SendGossipMenuFor(player, TIRAXIS_TEXT_ID, creature);
+            player->PlayerTalkClass->SendDynamicGossipMenu(Acore::StringFormat("You carry {} Groot Coin(s). One coin "
+                "is worth {} Bazaar Tokens.", carried, rate), creature->GetGUID());
         }
 
         void ShowConfirmation(Player* player, Creature* creature, Quote const& quote)
@@ -131,7 +134,7 @@ namespace GrootCoin::TiraxisMenu
                 break;
         }
 
-        if (uint32 const coins = BundleCoins(action))
+        if (uint32 const coins = action == GOSSIP_GROOT_ALL ? CarriedCoins(player) : BundleCoins(action))
         {
             Quote quote;
             ExchangeResult const result = CreateQuote(player, vendor, coins, quote);
