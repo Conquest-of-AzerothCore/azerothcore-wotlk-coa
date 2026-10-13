@@ -958,6 +958,22 @@ namespace
         }
     }
 
+    void SettleSoloDuel(Player* player, bool won)
+    {
+        if (!player)
+            return;
+
+        ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(player->GetArenaTeamId(ArenaTeam::GetSlotByType(ARENA_TEAM_5v5)));
+        if (!team)
+            return;
+
+        if (won)
+            GrantWinRewards(player, ARENA_TEAM_5v5);
+
+        if (ArenaTeamMember* member = team->GetMember(player->GetGUID()))
+            GrantRatingTitles(player, member->PersonalRating);
+    }
+
     void ApplyPersonalResult(Player* player, RatingUpdate const& update, bool won)
     {
         ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(update.PersonalTeamId);
@@ -1148,12 +1164,17 @@ namespace
                 ApplyPersonalResult(player, *update, false);
         }
 
-        void OnBattlegroundEnd(Battleground* bg, TeamId) override
+        void OnBattlegroundEnd(Battleground* bg, TeamId winnerTeamId) override
         {
             std::lock_guard<std::mutex> lock(StateLock);
             auto itr = MatchByInstance.find(bg->GetInstanceID());
             if (itr == MatchByInstance.end())
+            {
+                if (bg->isArena() && bg->isRated() && bg->GetArenaType() == ARENA_TYPE_1v1)
+                    for (auto const& [guid, player] : bg->GetPlayers())
+                        SettleSoloDuel(player, player->GetBgTeamId() == winnerTeamId);
                 return;
+            }
 
             for (auto const& [guid, player] : bg->GetPlayers())
                 SettleParticipant(itr->second, guid);
