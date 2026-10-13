@@ -25,6 +25,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "WorldSessionMgr.h"
 #include "WorldState.h"
 #include <algorithm>
 #include <array>
@@ -34,6 +35,7 @@
 #include <optional>
 #include <tuple>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace
@@ -851,6 +853,7 @@ namespace
         uint32 RunesOfAscension = 25;
         uint32 ConquestCapPerWeek = 12000;
         uint32 ConquestCapMax = 0;
+        uint32 CombatantRating = 1400;
     };
 
     SoloWinRewards WinRewards;
@@ -878,6 +881,7 @@ namespace
         WinRewards.RunesOfAscension = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.RunesOfAscension", 25);
         WinRewards.ConquestCapPerWeek = sConfigMgr->GetOption<uint32>("RatedSoloArena.SeasonCap.PerWeek", 12000);
         WinRewards.ConquestCapMax = sConfigMgr->GetOption<uint32>("RatedSoloArena.SeasonCap.Max", 0);
+        WinRewards.CombatantRating = sConfigMgr->GetOption<uint32>("RatedSoloArena.Tier.Combatant", 1400);
         for (RatingTitle& title : RatingTitles)
             title.Rating = sConfigMgr->GetOption<uint32>(title.ConfigName, title.DefaultRating);
     }
@@ -933,6 +937,96 @@ namespace
             return 0;
 
         return player->GetPlayerSetting(SeasonConquestSetting, SEASON_CONQUEST_EARNED).value;
+    }
+
+    constexpr uint16 CMSG_ASCENSION_PVP_REWARD_INFO_QUERY = 0x053E;
+    constexpr uint16 SMSG_ASCENSION_PVP_REWARD_INFO_QUERY_RESPONSE = 0x0925;
+
+    enum ArenaRewardBracket : uint32
+    {
+        ARENA_REWARD_BRACKET_NONE = 0,
+        ARENA_REWARD_BRACKET_COMBATANT = 1
+    };
+
+    std::unordered_set<WorldSession const*> RewardInfoDue;
+    std::atomic<bool> AnyRewardInfoDue = false;
+    uint32 AnnouncedConquestWeek = 0;
+    uint32 AnnouncedConquestSeason = 0;
+
+    uint32 BestSoloPersonalRating(Player* player)
+    {
+        uint32 best = 0;
+        for (uint8 slot = 0; slot < MAX_ARENA_SLOT; ++slot)
+            if (ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(player->GetArenaTeamId(slot)))
+                if (ArenaTeamMember* member = team->GetMember(player->GetGUID()))
+                    best = std::max<uint32>(best, member->PersonalRating);
+        return best;
+    }
+
+    uint32 ArenaRewardBracketFor(uint32 personalRating)
+    {
+        if (personalRating < WinRewards.CombatantRating)
+            return ARENA_REWARD_BRACKET_NONE;
+
+        uint32 bracket = ARENA_REWARD_BRACKET_COMBATANT;
+        for (RatingTitle const& tier : RatingTitles)
+            if (personalRating >= tier.Rating)
+                ++bracket;
+        return bracket;
+    }
+
+    void SendArenaRewardInfo(Player* player)
+    {
+        if (player->GetSession()->IsBot())
+            return;
+
+        constexpr uint32 PointsForLoss = 0;
+        WorldPacket packet(SMSG_ASCENSION_PVP_REWARD_INFO_QUERY_RESPONSE, 7 * sizeof(uint32));
+        packet << uint32(ConquestCap()) << uint32(ConquestEarnedThisSeason(player))
+               << uint32(ArenaRewardBracketFor(BestSoloPersonalRating(player))) << PointsForLoss << PointsForLoss
+               << uint32(WinRewards.ArenaPoints2v2) << uint32(WinRewards.ArenaPoints1v1);
+        player->SendDirectMessage(&packet);
+    }
+
+    bool QueueRewardInfoQuery(WorldSession* session, WorldPacket const&)
+    {
+        if (!session)
+            return true;
+
+        std::lock_guard<std::mutex> lock(StateLock);
+        RewardInfoDue.insert(session);
+        AnyRewardInfoDue = true;
+        return true;
+    }
+
+    bool TakeRewardInfoDue(WorldSession const* session)
+    {
+        std::lock_guard<std::mutex> lock(StateLock);
+        bool due = RewardInfoDue.erase(session) != 0;
+        AnyRewardInfoDue = !RewardInfoDue.empty();
+        return due;
+    }
+
+    void ScheduleRewardInfoForEveryone()
+    {
+        std::lock_guard<std::mutex> lock(StateLock);
+        for (auto const& [accountId, session] : sWorldSessionMgr->GetAllSessions())
+            if (session && !session->IsBot() && session->GetPlayer())
+                RewardInfoDue.insert(session);
+        AnyRewardInfoDue = !RewardInfoDue.empty();
+    }
+
+    void AnnounceConquestCapChanges()
+    {
+        uint32 week = ConquestSeasonWeek();
+        if (week == AnnouncedConquestWeek && ConquestSeason == AnnouncedConquestSeason)
+            return;
+
+        bool alreadyAnnounced = AnnouncedConquestWeek != 0;
+        AnnouncedConquestWeek = week;
+        AnnouncedConquestSeason = ConquestSeason;
+        if (alreadyAnnounced)
+            ScheduleRewardInfoForEveryone();
     }
 
     void GrantWinArenaPoints(Player* player, uint32 teamType)
@@ -993,6 +1087,12 @@ namespace
         }
     }
 
+    void UpdateRatingProgress(Player* player, uint32 personalRating)
+    {
+        GrantRatingTitles(player, personalRating);
+        SendArenaRewardInfo(player);
+    }
+
     void SettleSoloDuel(Player* player, bool won)
     {
         if (!player)
@@ -1006,7 +1106,7 @@ namespace
             GrantWinRewards(player, ARENA_TEAM_5v5);
 
         if (ArenaTeamMember* member = team->GetMember(player->GetGUID()))
-            GrantRatingTitles(player, member->PersonalRating);
+            UpdateRatingProgress(player, member->PersonalRating);
     }
 
     void ApplyPersonalResult(Player* player, RatingUpdate const& update, bool won)
@@ -1041,7 +1141,7 @@ namespace
             GrantWinRewards(player, team->GetType());
 
         if (ArenaTeamMember* updatedMember = team->GetMember(player->GetGUID()))
-            GrantRatingTitles(player, updatedMember->PersonalRating);
+            UpdateRatingProgress(player, updatedMember->PersonalRating);
     }
 
     std::optional<RatingUpdate> SettleParticipant(SoloMatch& match, ObjectGuid guid)
@@ -1081,6 +1181,7 @@ namespace
         {
             if (sArenaSeasonMgr->GetCurrentSeason() != ConquestSeason)
                 TrackConquestSeason();
+            AnnounceConquestCapChanges();
 
             std::unordered_map<ObjectGuid, ArenaRequest> requests;
             {
@@ -1109,6 +1210,7 @@ namespace
     public:
         AscensionArenaQueuePlayer()
             : PlayerScript("AscensionArenaQueuePlayer", {
+                PLAYERHOOK_ON_LOGIN,
                 PLAYERHOOK_ON_LOGOUT,
                 PLAYERHOOK_ON_UPDATE,
                 PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE
@@ -1120,12 +1222,22 @@ namespace
             PendingRequests.erase(player->GetSession());
             AnyPending = !PendingRequests.empty();
             ReadyRequests.erase(player->GetGUID());
+            RewardInfoDue.erase(player->GetSession());
+            AnyRewardInfoDue = !RewardInfoDue.empty();
             HealerByPlayer.erase(player->GetGUID());
             QueuedPersonalTeams.erase(player->GetGUID());
         }
 
+        void OnPlayerLogin(Player* player) override
+        {
+            SendArenaRewardInfo(player);
+        }
+
         void OnPlayerUpdate(Player* player, uint32) override
         {
+            if (AnyRewardInfoDue && TakeRewardInfoDue(player->GetSession()))
+                SendArenaRewardInfo(player);
+
             if (!AnyPending)
                 return;
 
@@ -1284,6 +1396,7 @@ namespace
 void AddAscensionArenaQueueScripts()
 {
     AscensionCompatOpcodes::Claim(CMSG_BATTLEMASTER_JOIN_ARENA_WITH_ROLE, &QueueRequest);
+    AscensionCompatOpcodes::Claim(CMSG_ASCENSION_PVP_REWARD_INFO_QUERY, &QueueRewardInfoQuery);
     new AscensionArenaQueueWorld();
     new AscensionArenaQueuePlayer();
     new AscensionArenaQueueMatchmaker();

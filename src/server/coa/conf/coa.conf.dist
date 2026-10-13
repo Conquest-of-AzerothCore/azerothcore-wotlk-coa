@@ -288,6 +288,12 @@ RatedSoloArena.SeasonCap.PerWeek = 12000
 
 RatedSoloArena.SeasonCap.Max = 0
 
+#    RatedSoloArena.Tier.Combatant
+#        Description: Personal rating shown as the Combatant rank in the PvP frame. Combatant has no title.
+#        Default:     1400
+
+RatedSoloArena.Tier.Combatant = 1400
+
 #    RatedSoloArena.Title.Challenger
 #    RatedSoloArena.Title.Rival
 #    RatedSoloArena.Title.Duelist
