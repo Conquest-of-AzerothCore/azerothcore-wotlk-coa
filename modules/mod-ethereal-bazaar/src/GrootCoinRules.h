@@ -16,9 +16,10 @@
 namespace GrootCoin
 {
     // Allocated once; the world migration, the client item registration and
-    // the docs use the same numbers. Display 30015 is the Bazaar Token icon.
+    // the docs use the same numbers. Display 990001 is the custom INV_GrootCoin
+    // icon; it needs the client patch in client-art/.
     constexpr uint32_t COIN_ITEM = 910001;
-    constexpr uint32_t COIN_FALLBACK_DISPLAY = 30015;
+    constexpr uint32_t COIN_DISPLAY = 990001;
     constexpr uint32_t COIN_STACK_SIZE = 1000;
 
     constexpr uint32_t DEFAULT_TOKENS_PER_COIN = 100;

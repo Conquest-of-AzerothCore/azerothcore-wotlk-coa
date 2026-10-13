@@ -179,7 +179,7 @@ namespace GrootCoin
         handler->PSendSysMessage("Config: GrootCoin.Enable={} GrootCoin.ExchangeEnable={} TokensPerCoin={} MaxAward={}.",
             settings.enable ? 1 : 0, settings.exchangeEnable ? 1 : 0, settings.tokensPerCoin, settings.maxAward);
         handler->PSendSysMessage("Items: coin {} (display {}), Bazaar Token {}. Client item patch registered: {}.",
-            COIN_ITEM, COIN_FALLBACK_DISPLAY, BAZAAR_TOKEN_ITEM,
+            COIN_ITEM, COIN_DISPLAY, BAZAAR_TOKEN_ITEM,
             Ascension::ClientItemPatches::Instance().Contains(COIN_ITEM) ? "yes" : "no");
         handler->PSendSysMessage("External awards (groot_coin_award_queue): {}, polled every {} s.",
             ShouldPollQueue(AwardsAvailable(), settings.externalAwardsEnable) ? "on" : "off", settings.queuePollSeconds);

@@ -10,8 +10,7 @@ for **Bazaar Tokens** (item 975001). The feature lives in this module:
 | What | Value | Where |
 | --- | --- | --- |
 | Coin item | 910001 | `GrootCoin::COIN_ITEM`, world migration `rev_20261012_60_groot_coin_item.sql` |
-| Coin display (Release A) | 30015, the Bazaar Token icon | same |
-| Custom display (Release B, reserved, not shipped) | 990001 | `client-art/` |
+| Coin display | 990001, custom icon `INV_GrootCoin` (needs the client patch) | same, plus `client-art/` |
 | RBAC: issue awards | 1001 `Command: groot award` | auth migration `rev_20261012_60_groot_coin_rbac.sql`, `RBAC.h` |
 | RBAC: read the audit | 1002 `Command: groot audit` | same |
 | Tiraxis gossip actions | 9100-9199 (existing menus use 1-5) | `GrootCoinScripts.cpp` |
@@ -22,7 +21,7 @@ for **Bazaar Tokens** (item 975001). The feature lives in this module:
 
 - Local dev databases (`coa_dev_world`, `coa_dev_auth`, `coa_dev_characters`, MySQL 8.0.46):
   no `item_template` or `item_dbc` row for 910001; no `itemdisplayinfo_dbc` row for 990001 (the overlay
-  table is empty); `currencytypes_dbc` has no row for 910001 or 975001; `rbac_permissions` holds only 1000
+  table had one unrelated row); `currencytypes_dbc` has no row for 910001 or 975001; `rbac_permissions` holds only 1000
   in the custom range, and no `rbac_linked_permissions` or `rbac_account_permissions` row uses 1001/1002;
   no `item_instance` of 910001.
 - Installed client DBCs (`env/dist/data/dbc`): `Item.dbc` (563,770 records) has 975001 but not 910001;
@@ -237,13 +236,23 @@ the player bags, which is what a `BazaarTokenCost` purchase spends. A later "con
 Vanity window can call `GrootCoin::TryExchange` with its own `Vendor` source (for example `"vanity_store"`)
 instead of reimplementing the exchange.
 
-## Release A and Release B (custom icon)
+## Coin icon and the client patch
 
-Release A (this change) uses display 30015, so the coin works with today's client: the server registers 910001
-with `Ascension::ClientItemPatches` unconditionally and streams its `item_dbc` row (`CoA.SendDisplayPatches`).
+**Ship the client patch before, or together with, this change.** The world migration puts the coin on display
+990001 and adds that `itemdisplayinfo_dbc` row; the server registers 910001 with `Ascension::ClientItemPatches`
+and streams its `item_dbc` and display rows (`CoA.SendDisplayPatches`). It never sends textures, so a client
+without the patch shows the coin as a red question mark.
 
-Release B adds the custom icon. See `client-art/README.md`. Its display row and the item's display switch are
-**not** part of this change; ship the texture through the launcher first.
+The client patch is two files, built by `client-art/build_client_patch.sh`:
+
+- `Interface\Icons\INV_GrootCoin.blp`: 64 x 64 BLP2 DXT5 with alpha, the layout of the client's own icons,
+  built by `client-art/make_blp.py`. Confirmed in game on 13 Oct 2026 (bags and mailbox). A palettized BLP did
+  not render.
+- `DBFilesClient\ItemDisplayInfo.dbc`: the client's current table with row 990001 appended.
+
+Players need a full client restart and a cleared `Cache\WDB` (or an expired item cache) to see it. If the patch
+cannot ship in time, the revert SQL in `client-art/README.md` puts the coin back on display 30015 (the Bazaar
+Token icon) without touching anything else.
 
 ## Rollback, corrections and wipes
 

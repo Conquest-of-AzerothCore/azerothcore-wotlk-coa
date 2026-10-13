@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Builds patch-ZG.MPQ for a LOCAL test client: the Groot Coin icon plus the client's own ItemDisplayInfo.dbc with
-# display 990001 appended. Never ships to players; see README.md.
+# Builds patch-ZG.MPQ: the Groot Coin icon plus the client's own ItemDisplayInfo.dbc with display 990001 appended.
+# These two files must reach players before or with the world migration that uses 990001; see README.md.
 # Usage: build_client_patch.sh <client Data dir> <mpqcli> <output dir>
 set -euo pipefail
 data=$1 mpqcli=$2 out=$3

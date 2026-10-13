@@ -94,7 +94,7 @@ TEST(GrootCoinRules, CoinIdsAreDistinctFromTheBazaarToken)
 {
     EXPECT_NE(COIN_ITEM, 975001u);
     EXPECT_EQ(COIN_ITEM, 910001u);
-    EXPECT_EQ(COIN_FALLBACK_DISPLAY, 30015u);
+    EXPECT_EQ(COIN_DISPLAY, 990001u);
 }
 
 TEST(GrootCoinRules, ExternalSourcesAreNamedAndNeverGm)
