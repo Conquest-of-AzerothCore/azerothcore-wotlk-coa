@@ -274,12 +274,19 @@ RatedSoloArena.Win.ArenaPoints.3v3 = 300
 
 RatedSoloArena.Win.RunesOfAscension = 25
 
-#    RatedSoloArena.WeeklyArenaPointsCap
-#        Description: Arena Points a character can earn from rated solo arena wins each week. The count
-#                     restarts at the realm's weekly reset.
-#        Default:     36000
+#    RatedSoloArena.SeasonCap.PerWeek
+#        Description: Conquest cap on Arena Points earned from rated solo arena wins during the current
+#                     arena season. The cap grows by this amount at each weekly reset since the season
+#                     started (week 1 = one step).
+#        Default:     12000
 
-RatedSoloArena.WeeklyArenaPointsCap = 36000
+RatedSoloArena.SeasonCap.PerWeek = 12000
+
+#    RatedSoloArena.SeasonCap.Max
+#        Description: Upper limit of the season conquest cap.
+#        Default:     0 - (No limit)
+
+RatedSoloArena.SeasonCap.Max = 0
 
 #    RatedSoloArena.Title.Challenger
 #    RatedSoloArena.Title.Rival

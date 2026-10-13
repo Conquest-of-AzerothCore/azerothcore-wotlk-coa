@@ -25,6 +25,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "WorldState.h"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -829,13 +830,18 @@ namespace
     }
 
     constexpr uint32 RUNE_OF_ASCENSION_ITEM = 375250;
-    constexpr char WeeklyArenaPointsSetting[] = "core.rated_solo_arena_points";
+    constexpr char SeasonConquestSetting[] = "core.rated_solo_conquest";
+    constexpr uint32 WORLD_STATE_RATED_SOLO_CONQUEST_SEASON = 20101;
+    constexpr uint32 WORLD_STATE_RATED_SOLO_CONQUEST_SEASON_START = 20102;
 
-    enum WeeklyArenaPointsField : uint32
+    enum SeasonConquestField : uint32
     {
-        WEEKLY_ARENA_POINTS_RESET_TIME = 0,
-        WEEKLY_ARENA_POINTS_EARNED = 1
+        SEASON_CONQUEST_SEASON = 0,
+        SEASON_CONQUEST_EARNED = 1
     };
+
+    std::atomic<uint32> ConquestSeason = 0;
+    std::atomic<int64> ConquestSeasonStart = 0;
 
     struct SoloWinRewards
     {
@@ -843,7 +849,8 @@ namespace
         uint32 ArenaPoints2v2 = 300;
         uint32 ArenaPoints3v3 = 300;
         uint32 RunesOfAscension = 25;
-        uint32 WeeklyArenaPointsCap = 36000;
+        uint32 ConquestCapPerWeek = 12000;
+        uint32 ConquestCapMax = 0;
     };
 
     SoloWinRewards WinRewards;
@@ -869,8 +876,8 @@ namespace
         WinRewards.ArenaPoints2v2 = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.ArenaPoints.2v2", 300);
         WinRewards.ArenaPoints3v3 = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.ArenaPoints.3v3", 300);
         WinRewards.RunesOfAscension = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.RunesOfAscension", 25);
-        WinRewards.WeeklyArenaPointsCap =
-            sConfigMgr->GetOption<uint32>("RatedSoloArena.WeeklyArenaPointsCap", 36000);
+        WinRewards.ConquestCapPerWeek = sConfigMgr->GetOption<uint32>("RatedSoloArena.SeasonCap.PerWeek", 12000);
+        WinRewards.ConquestCapMax = sConfigMgr->GetOption<uint32>("RatedSoloArena.SeasonCap.Max", 0);
         for (RatingTitle& title : RatingTitles)
             title.Rating = sConfigMgr->GetOption<uint32>(title.ConfigName, title.DefaultRating);
     }
@@ -890,27 +897,55 @@ namespace
         }
     }
 
-    uint32 ArenaPointsEarnedThisWeek(Player* player)
+    void TrackConquestSeason()
     {
-        uint32 currentWeek = uint32(sWorld->GetNextWeeklyQuestsResetTime().count());
-        if (player->GetPlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_RESET_TIME).value == currentWeek)
-            return player->GetPlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_EARNED).value;
+        uint32 season = sArenaSeasonMgr->GetCurrentSeason();
+        if (sWorldState->getWorldState(WORLD_STATE_RATED_SOLO_CONQUEST_SEASON) != season
+            || !sWorldState->getWorldState(WORLD_STATE_RATED_SOLO_CONQUEST_SEASON_START))
+        {
+            int64 currentWeekStart = sWorld->GetNextWeeklyQuestsResetTime().count() - int64(WEEK);
+            int64 seasonStart = currentWeekStart > 0 ? currentWeekStart : int64(GameTime::GetGameTime().count());
+            sWorldState->setWorldState(WORLD_STATE_RATED_SOLO_CONQUEST_SEASON, season);
+            sWorldState->setWorldState(WORLD_STATE_RATED_SOLO_CONQUEST_SEASON_START, uint64(seasonStart));
+        }
 
-        player->UpdatePlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_RESET_TIME, currentWeek);
-        player->UpdatePlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_EARNED, 0);
-        return 0;
+        ConquestSeasonStart = int64(sWorldState->getWorldState(WORLD_STATE_RATED_SOLO_CONQUEST_SEASON_START));
+        ConquestSeason = season;
+    }
+
+    uint32 ConquestSeasonWeek()
+    {
+        int64 elapsed = int64(GameTime::GetGameTime().count()) - ConquestSeasonStart;
+        return 1 + uint32(std::max<int64>(elapsed, 0) / int64(WEEK));
+    }
+
+    uint32 ConquestCap()
+    {
+        uint64 cap = uint64(WinRewards.ConquestCapPerWeek) * ConquestSeasonWeek();
+        if (WinRewards.ConquestCapMax)
+            cap = std::min<uint64>(cap, WinRewards.ConquestCapMax);
+        return uint32(std::min<uint64>(cap, UINT32_MAX));
+    }
+
+    uint32 ConquestEarnedThisSeason(Player* player)
+    {
+        if (player->GetPlayerSetting(SeasonConquestSetting, SEASON_CONQUEST_SEASON).value != ConquestSeason)
+            return 0;
+
+        return player->GetPlayerSetting(SeasonConquestSetting, SEASON_CONQUEST_EARNED).value;
     }
 
     void GrantWinArenaPoints(Player* player, uint32 teamType)
     {
-        uint32 earned = ArenaPointsEarnedThisWeek(player);
-        uint32 cap = WinRewards.WeeklyArenaPointsCap;
+        uint32 earned = ConquestEarnedThisSeason(player);
+        uint32 cap = ConquestCap();
         uint32 points = std::min(WinArenaPointsFor(teamType), cap > earned ? cap - earned : 0);
         if (!points)
             return;
 
         earned += points;
-        player->UpdatePlayerSetting(WeeklyArenaPointsSetting, WEEKLY_ARENA_POINTS_EARNED, earned);
+        player->UpdatePlayerSetting(SeasonConquestSetting, SEASON_CONQUEST_SEASON, ConquestSeason);
+        player->UpdatePlayerSetting(SeasonConquestSetting, SEASON_CONQUEST_EARNED, earned);
         player->ModifyArenaPoints(int32(points));
         ChatHandler(player->GetSession()).PSendSysMessage(
             "You've received {} Arena Points. Current Points: ({}) Cap: ({}/{})", points, player->GetArenaPoints(),
@@ -1039,10 +1074,14 @@ namespace
         void OnStartup() override
         {
             LoadWinRewards();
+            TrackConquestSeason();
         }
 
         void OnUpdate(uint32) override
         {
+            if (sArenaSeasonMgr->GetCurrentSeason() != ConquestSeason)
+                TrackConquestSeason();
+
             std::unordered_map<ObjectGuid, ArenaRequest> requests;
             {
                 std::lock_guard<std::mutex> lock(StateLock);
