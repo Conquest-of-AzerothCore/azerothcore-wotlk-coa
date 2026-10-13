@@ -1194,9 +1194,28 @@ namespace
         return RatingUpdate{ itr->second.PersonalTeamId, match.MatchmakerRating[opponent] };
     }
 
-    std::optional<int32> AveragePersonalRatingChange(SoloMatch const& match, TeamId side, bool won)
+    struct PersonalRatingOutcome
     {
-        uint32 opponentMatchmakerRating = match.MatchmakerRating[Battleground::GetOtherTeamId(side)];
+        int32 RatingChange = 0;
+        uint32 MatchmakerRating = 0;
+    };
+
+    std::optional<PersonalRatingOutcome> ForecastPersonalOutcome(SoloMatch const& match, ObjectGuid guid,
+        SoloParticipant const& participant, bool won)
+    {
+        ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(participant.PersonalTeamId);
+        ArenaTeamMember* member = team ? team->GetMember(guid) : nullptr;
+        if (!member)
+            return std::nullopt;
+
+        uint32 opponentMatchmakerRating = match.MatchmakerRating[Battleground::GetOtherTeamId(participant.Side)];
+        int32 change = team->GetRatingMod(member->PersonalRating, opponentMatchmakerRating, won);
+        return PersonalRatingOutcome{ std::max<int32>(change, -int32(member->PersonalRating)),
+            member->MatchMakerRating };
+    }
+
+    std::optional<int32> AveragePersonalRatingChange(Battleground* bg, SoloMatch const& match, TeamId side, bool won)
+    {
         int64 total = 0;
         uint32 counted = 0;
         for (auto const& [guid, participant] : match.Participants)
@@ -1204,13 +1223,12 @@ namespace
             if (participant.Side != side || participant.Settled)
                 continue;
 
-            ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(participant.PersonalTeamId);
-            ArenaTeamMember* member = team ? team->GetMember(guid) : nullptr;
-            if (!member)
+            std::optional<PersonalRatingOutcome> outcome = ForecastPersonalOutcome(match, guid, participant, won);
+            if (!outcome)
                 continue;
 
-            int32 change = team->GetRatingMod(member->PersonalRating, opponentMatchmakerRating, won);
-            total += std::max<int32>(change, -int32(member->PersonalRating));
+            bg->SetArenaPersonalScore(guid, side, outcome->RatingChange, outcome->MatchmakerRating);
+            total += outcome->RatingChange;
             ++counted;
         }
 
@@ -1250,9 +1268,9 @@ namespace
                 return;
 
             if (std::optional<int32> change =
-                AveragePersonalRatingChange(itr->second, Battleground::GetOtherTeamId(*loser), true))
+                AveragePersonalRatingChange(bg, itr->second, Battleground::GetOtherTeamId(*loser), true))
                 winnerChange = *change;
-            if (std::optional<int32> change = AveragePersonalRatingChange(itr->second, *loser, false))
+            if (std::optional<int32> change = AveragePersonalRatingChange(bg, itr->second, *loser, false))
                 loserChange = *change;
         }
     };
