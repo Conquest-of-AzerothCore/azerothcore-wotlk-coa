@@ -28,6 +28,7 @@
 #include "QueryResult.h"
 #include "RBAC.h"
 #include "Realm.h"
+#include "World.h"
 
 #include <unordered_set>
 

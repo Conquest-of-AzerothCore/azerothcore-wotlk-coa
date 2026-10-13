@@ -213,7 +213,7 @@ namespace GrootCoin
         quote.coins = coins;
         quote.tokens = *tokens;
         quote.tokensPerCoin = rate;
-        quotes[player->GetGUID()] = { quote, vendor.npc->GetGUID(), GameTime::GetGameTimeMS().count() + QUOTE_LIFETIME_MS };
+        quotes[player->GetGUID()] = { quote, vendor.npc->GetGUID(), uint64(GameTime::GetGameTimeMS().count()) + QUOTE_LIFETIME_MS };
         return ExchangeResult::Ok;
     }
 
