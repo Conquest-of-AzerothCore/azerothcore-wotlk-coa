@@ -38,6 +38,7 @@ void AddSC_AscensionClosestResurrection();
 void AddSC_AscensionDungeonRelease();
 void AddSC_AscensionRaidRelease();
 void AddSC_AscensionThreatRedirect();
+void AddSC_cs_coa_npc_outfit();
 void AddSC_AscensionTalentDataProcs();
 void AddSC_AscensionTreeOfLife();
 void AddSC_CoALfgStartPoint();
@@ -709,4 +710,5 @@ void AddCoAScripts()
     AddSC_AscensionClassBundleStore();
     AddSC_AscensionLfgObjective();
     AddSC_AscensionBushcraft();
+    AddSC_cs_coa_npc_outfit();
 }

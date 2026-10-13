@@ -176,10 +176,10 @@ static void LogCommandUsage(WorldSession const& session, std::string_view cmdStr
         zoneName = zone->area_name[locale];
     }
 
-    std::string logMessage = Acore::StringFormat("Command: {} [Player: {} ({}) (Account: {}) X: {} Y: {} Z: {} Map: {} ({}) Area: {} ({}) Zone: {} ({}) Selected: {} ({})]",
+    std::string logMessage = Acore::StringFormat("Command: {} [Player: {} ({}) (Account: {}) X: {} Y: {} Z: {} O: {} Map: {} ({}) Area: {} ({}) Zone: {} ({}) Selected: {} ({})]",
         cmdStr, player->GetName(), player->GetGUID().ToString(),
         session.GetAccountId(),
-        player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(),
+        player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), player->GetMapId(),
         player->FindMap() ? player->FindMap()->GetMapName() : "Unknown",
         areaId, areaName, zoneId, zoneName,
         (player->GetSelectedUnit()) ? player->GetSelectedUnit()->GetName() : "",
