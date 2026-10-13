@@ -20,8 +20,8 @@ namespace AscensionAverageItemLevel
 
         ++count;
         if (Item const* item = slot == emptiedSlot ? nullptr : player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
-            sum += item->GetTemplate()->Quality == ITEM_QUALITY_HEIRLOOM ? player->GetLevel()
-                                                                        : item->GetTemplate()->ItemLevel;
+            if (item->GetTemplate()->Quality != ITEM_QUALITY_HEIRLOOM)
+                sum += item->GetTemplate()->ItemLevel;
     }
     return sum / count;
 }

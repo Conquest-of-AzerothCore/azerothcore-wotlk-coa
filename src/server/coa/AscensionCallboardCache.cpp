@@ -40,7 +40,7 @@ constexpr char CallboardPointsToken[] = "TOKEN_TYPE_CALLBOARD_CACHE_POINTS";
 constexpr char CallboardPointsSetting[] = "core.callboard.points";
 constexpr char CallboardItemLevelSetting[] = "core.callboard.itemlevel";
 constexpr uint32 ReachedItemLevelRecountIndex = 1;
-constexpr uint32 ReachedItemLevelRecountVersion = 1;
+constexpr uint32 ReachedItemLevelRecountVersion = 2;
 constexpr uint32 HighestItemLevelReachedCriterion = 80129;
 constexpr uint32 PointsPerDisplayedPoint = 10;
 
