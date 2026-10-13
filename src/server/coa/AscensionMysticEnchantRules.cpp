@@ -639,6 +639,58 @@ std::string QualityTier(std::uint32_t quality)
         "ARTIFACT", "" };
     return TIERS[quality];
 }
+
+bool GuideFits(Catalog const& catalog, Character const& character, Slots const& slots, std::uint32_t spell)
+{
+    Enchant const* enchant = catalog.FindSpell(spell);
+    if (!enchant || !character.Knows(spell) || !RealmAllows(*enchant, character.RealmGates) || character.Wildcard() ||
+        !ClassAllowed(*enchant, character.Class) || character.Level < enchant->RequiredLevel ||
+        !InvestmentMet(character, *enchant, false) || !InvestmentMet(character, *enchant, true))
+        return false;
+    std::uint32_t const quality = QualityOf(*enchant, character.Class);
+    std::uint32_t sameSpell = 1;
+    std::uint32_t sameQuality = 1;
+    std::uint32_t rareWorldforged = quality == QUALITY_RARE && enchant->Worldforged;
+    for (std::uint32_t held : slots)
+    {
+        sameSpell += held == spell;
+        if (Enchant const* other = held ? catalog.FindSpell(held) : nullptr)
+        {
+            sameQuality += QualityOf(*other, character.Class) == quality;
+            rareWorldforged += QualityOf(*other, character.Class) == QUALITY_RARE && other->Worldforged;
+        }
+    }
+    std::uint32_t const stackLimit = character.StackLimit ? character.StackLimit(spell) : 0;
+    return sameSpell <= stackLimit && sameQuality <= QualityCap(character, quality) &&
+        !(quality == QUALITY_RARE && enchant->Worldforged && rareWorldforged > RARE_WORLDFORGED_LIMIT);
+}
+}
+
+Slots GuideSlots(Catalog const& catalog, Character const& character, Slots const& current,
+    std::vector<GuideEnchant> const& guide)
+{
+    bool const fusion = character.Fusion();
+    std::vector<std::uint32_t> open;
+    for (std::uint32_t slot = 0; slot < SLOT_COUNT; ++slot)
+        if (SlotValid(slot, fusion))
+            open.push_back(slot);
+    Slots slots{};
+    std::size_t next = 0;
+    auto place = [&](std::uint32_t spell)
+    {
+        if (next >= open.size() || !GuideFits(catalog, character, slots, spell))
+            return false;
+        slots[open[next++]] = spell;
+        return true;
+    };
+    for (GuideEnchant const& enchant : guide)
+        if (enchant.Level <= character.Level)
+            for (std::uint32_t stack = 0; stack < enchant.Stacks && place(enchant.Spell); ++stack)
+                ;
+    for (std::uint32_t slot : open)
+        if (current[slot])
+            place(current[slot]);
+    return slots;
 }
 
 bool Character::Knows(std::uint32_t spell) const

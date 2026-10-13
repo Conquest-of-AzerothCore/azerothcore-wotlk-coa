@@ -198,6 +198,25 @@ void MailDraft::SendMailTo(CharacterDatabaseTransaction trans, MailReceiver cons
     if (pReceiver)
         prepareItems(pReceiver, trans);                            // generate mail template items
 
+    StagedMail const staged = AppendMailRows(trans, receiver.GetPlayerGUIDLow(), sender, checked, deliver_delay, custom_expiration);
+    PublishStagedMail(staged, pReceiver);
+}
+
+Optional<StagedMail> MailDraft::StageMailTo(CharacterDatabaseTransaction trans, ObjectGuid::LowType receiverGuidLow, MailSender const& sender, MailCheckMask checked, uint32 custom_expiration)
+{
+    uint32 deliver_delay = 0;
+    bool deleteMailItemsFromDB = false;
+    bool sendMail = true;
+    sScriptMgr->OnBeforeMailDraftSendMailTo(this, MailReceiver(receiverGuidLow), sender, checked, deliver_delay, custom_expiration, deleteMailItemsFromDB, sendMail);
+
+    if (deleteMailItemsFromDB || !sendMail)
+        return std::nullopt;
+
+    return AppendMailRows(trans, receiverGuidLow, sender, checked, deliver_delay, custom_expiration);
+}
+
+StagedMail MailDraft::AppendMailRows(CharacterDatabaseTransaction trans, ObjectGuid::LowType receiverGuidLow, MailSender const& sender, MailCheckMask checked, uint32 deliver_delay, uint32 custom_expiration)
+{
     uint32 mailId = sObjectMgr->GenerateMailID();
 
     time_t deliver_time = GameTime::GetGameTime().count() + deliver_delay;
@@ -232,7 +251,7 @@ void MailDraft::SendMailTo(CharacterDatabaseTransaction trans, MailReceiver cons
     stmt->SetData(++index, int8(sender.GetStationery()));
     stmt->SetData(++index, GetMailTemplateId());
     stmt->SetData(++index, sender.GetSenderId());
-    stmt->SetData(++index, receiver.GetPlayerGUIDLow());
+    stmt->SetData(++index, receiverGuidLow);
     stmt->SetData(++index, GetSubject());
     stmt->SetData(++index, GetBody());
     stmt->SetData(++index, !m_items.empty());
@@ -248,19 +267,24 @@ void MailDraft::SendMailTo(CharacterDatabaseTransaction trans, MailReceiver cons
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_MAIL_ITEM);
         stmt->SetData(0, mailId);
         stmt->SetData(1, mailItemIter->second->GetGUID().GetCounter());
-        stmt->SetData(2, receiver.GetPlayerGUIDLow());
+        stmt->SetData(2, receiverGuidLow);
         trans->Append(stmt);
     }
 
-    sMailMgr->OnMailSent(receiver.GetPlayerGUIDLow());
+    return StagedMail{ mailId, receiverGuidLow, sender, checked, deliver_time, expire_time };
+}
+
+void MailDraft::PublishStagedMail(StagedMail const& staged, Player* pReceiver)
+{
+    sMailMgr->OnMailSent(staged.receiverGuidLow);
 
     // For online receiver update in game mail status and data
-    if (pReceiver)
+    if (pReceiver && !pReceiver->GetMail(staged.mailId))
     {
-        pReceiver->AddNewMailDeliverTime(deliver_time);
+        pReceiver->AddNewMailDeliverTime(staged.deliverTime);
 
         Mail* m = new Mail;
-        m->messageID = mailId;
+        m->messageID = staged.mailId;
         m->mailTemplateId = GetMailTemplateId();
         m->subject = GetSubject();
         m->body = GetBody();
@@ -273,13 +297,13 @@ void MailDraft::SendMailTo(CharacterDatabaseTransaction trans, MailReceiver cons
             m->AddItem(item->GetGUID().GetCounter(), item->GetEntry());
         }
 
-        m->messageType = sender.GetMailMessageType();
-        m->stationery = sender.GetStationery();
-        m->sender = sender.GetSenderId();
-        m->receiver = receiver.GetPlayerGUIDLow();
-        m->expire_time = expire_time;
-        m->deliver_time = deliver_time;
-        m->checked = checked;
+        m->messageType = staged.sender.GetMailMessageType();
+        m->stationery = staged.sender.GetStationery();
+        m->sender = staged.sender.GetSenderId();
+        m->receiver = staged.receiverGuidLow;
+        m->expire_time = staged.expireTime;
+        m->deliver_time = staged.deliverTime;
+        m->checked = staged.checked;
         m->state = MAIL_STATE_UNCHANGED;
 
         pReceiver->AddMail(m);                           // to insert new mail to beginning of maillist
@@ -290,6 +314,7 @@ void MailDraft::SendMailTo(CharacterDatabaseTransaction trans, MailReceiver cons
             {
                 pReceiver->AddMItem(mailItemIter->second);
             }
+            m_items.clear();
         }
     }
     else if (!m_items.empty())

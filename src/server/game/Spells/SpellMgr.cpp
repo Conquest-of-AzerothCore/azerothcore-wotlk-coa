@@ -1526,6 +1526,15 @@ uint32 SpellMgr::GetSpellTwinSource(uint32 spellId) const
     return spellId;
 }
 
+uint32 SpellMgr::GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const
+{
+    uint32 const relatedSource = GetSpellTwinSource(relatedSpellId);
+    if (relatedSource == relatedSpellId || relatedSpellId < relatedSource)
+        return stockSpellId;
+    uint32 const candidate = stockSpellId + (relatedSpellId - relatedSource);
+    return GetSpellInfo(candidate) && GetSpellTwinSource(candidate) == stockSpellId ? candidate : stockSpellId;
+}
+
 std::vector<uint32> SpellMgr::GetSpellAndRelatives(uint32 spellId) const
 {
     std::vector<uint32> spells = { spellId };
@@ -2219,6 +2228,7 @@ void SpellMgr::LoadSpellProcs()
     uint32 oldMSTime = getMSTime();
 
     mSpellProcMap.clear();                             // need for reload case
+    std::unordered_map<uint32, SpellProcEntry> procRows;
 
     //                                                 0        1           2                3                 4                 5                 6          7              8              9         10              11                  12             13      14        15
     QueryResult result = WorldDatabase.Query("SELECT SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, DisableEffectsMask, ProcsPerMinute, Chance, Cooldown, Charges FROM spell_proc");
@@ -2285,6 +2295,7 @@ void SpellMgr::LoadSpellProcs()
                 break;
             }
             SpellProcEntry procEntry = SpellProcEntry(baseProcEntry);
+            procRows[spellInfo->Id] = baseProcEntry;
 
             // take defaults from dbcs
             if (!procEntry.ProcFlags)
@@ -2370,6 +2381,22 @@ void SpellMgr::LoadSpellProcs()
     // Generate default procs for spells with proc flags but no explicit spell_proc entry
     // This ensures backward compatibility and covers spells that rely on DBC data
     CopyToSpellTwins(mSpellProcMap);
+    for (auto const& [source, twin] : _spellTwins)
+    {
+        auto const row = procRows.find(source);
+        auto const entry = mSpellProcMap.find(twin);
+        SpellInfo const* twinInfo = GetSpellInfo(twin);
+        if (row == procRows.end() || entry == mSpellProcMap.end() || !twinInfo || procRows.contains(twin))
+            continue;
+        SpellProcEntry procEntry = row->second;
+        if (!procEntry.ProcFlags)
+            procEntry.ProcFlags = twinInfo->ProcFlags;
+        if (!procEntry.Charges)
+            procEntry.Charges = twinInfo->ProcCharges;
+        if (!procEntry.Chance && !procEntry.ProcsPerMinute)
+            procEntry.Chance = float(twinInfo->ProcChance);
+        entry->second = procEntry;
+    }
 
     LOG_INFO("server.loading", "Generating spell proc data from SpellMap...");
     count = 0;

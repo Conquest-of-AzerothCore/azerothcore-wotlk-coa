@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Gahz'rilla's Icicle and Jammal'an's mana pool let their spells go out (#7380)",
+  "contract": [
+    "Gahz'rilla (7273) is unit_class 1 and has no mana; its Ascension kit row 9000 casts Icicle (11131, 135 mana) and every cast failed with NO_POWER. The kit cast is now triggered, so Icicle goes out without mana.",
+    "Jammal'an the Prophet (5710), raised to level 54, had 2041 mana against Healing Wave 835 + Flamestrike 1207; ManaModifier 2 gives 4082."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "gahz", "owner": "tank", "entry": 7273, "distance": 3, "stationary": true },
+    { "id": "jammal", "owner": "tank", "entry": 5710, "distance": 30, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "Jammal'an holds Healing Wave plus Flamestrike at level 54",
+      "actor": "jammal", "metric": "max_power", "power": 0, "min": 4082
+    },
+    { "action": "attack", "actor": "tank", "target": "gahz" },
+    {
+      "action": "assert", "label": "Gahz'rilla's kit Icicle goes out (first cast 6-8 s into combat)",
+      "actor": "tank", "metric": "spell_go_count", "caster": "gahz", "spell": 11131, "min": 1, "within_ms": 15000
+    }
+  ]
+}

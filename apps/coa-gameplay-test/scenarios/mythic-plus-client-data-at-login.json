@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Mythic+: client data at login",
-  "contract": "At login the server sends what the client needs for Mythic+ and the Classic Heroics and Mythics without an addon: the Lua string for the Mythic difficulty, the champion count per dungeon, and the affix rows with Tiny swapped out for the week (fixed to 39 with .mythic week, then a relog).",
+  "contract": "At login the server sends what the client needs for Mythic+ and the Classic Heroics and Mythics without an addon: the Lua string for the Mythic difficulty, the champion count per dungeon, and the affix rows with Tiny swapped out for the week (fixed to 39 with .mythic week, then a relog). Every login also sends an empty +1 row for this week and the next, since MythicAffixes.dbc starts at +2 and the client would otherwise show the week's full set on a +1 key; week 40, which swaps nothing, gets exactly those two rows.",
   "timeout_ms": 30000,
   "location": {
     "map": 0,
@@ -57,6 +57,34 @@
       "metric": "server_packets",
       "opcode": 1388,
       "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 1388,
+      "save_as": "affix_rows"
+    },
+    {
+      "action": "console",
+      "command": "mythic week 40"
+    },
+    {
+      "action": "relog",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Week 40 swaps nothing: only the empty +1 rows of weeks 40 and 41 (SMSG_PATCH_MYTHIC_AFFIXES)",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 1388,
+      "equals": 2,
+      "relative_to": "affix_rows"
     },
     {
       "action": "console",

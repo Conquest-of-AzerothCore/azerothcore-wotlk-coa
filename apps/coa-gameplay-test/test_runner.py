@@ -46,15 +46,16 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaises(ValueError):
                 run.validate(scenario)
 
-    def test_duel_arbiter_packet_field_requires_a_player(self):
-        step = {'action': 'client_packet', 'actor': 'caster', 'opcode': 364,
-                'fields': [{'duel_arbiter': 'caster'}], 'consumed': False}
+    def test_player_packet_fields_require_a_player(self):
+        step = {'action': 'client_packet', 'actor': 'caster', 'opcode': 364, 'consumed': False}
         self.scenario['steps'].append(step)
-        self.assertIs(run.validate(self.scenario), self.scenario)
-        for actor in ('target', 'missing', 1):
-            step['fields'] = [{'duel_arbiter': actor}]
-            with self.subTest(actor=actor), self.assertRaisesRegex(ValueError, 'expected a player id'):
-                run.validate(self.scenario)
+        for kind in ('duel_arbiter', 'invited_battleground_type'):
+            step['fields'] = [{kind: 'caster'}]
+            self.assertIs(run.validate(self.scenario), self.scenario)
+            for actor in ('target', 'missing', 1):
+                step['fields'] = [{kind: actor}]
+                with self.subTest(kind=kind, actor=actor), self.assertRaisesRegex(ValueError, 'expected a player id'):
+                    run.validate(self.scenario)
 
     def test_nearby_gameobject_use_owner_requires_a_player(self):
         step = {'action': 'use_nearby_gameobject', 'actor': 'caster', 'entry': 80775, 'owner': 'caster'}

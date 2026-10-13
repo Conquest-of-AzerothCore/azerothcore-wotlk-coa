@@ -3,6 +3,7 @@
 #include "AscensionCoAConfig.h"
 #include "AscensionCompatOpcodes.h"
 #include "AscensionFreepick.h"
+#include "AscensionMysticEnchant.h"
 #include "AscensionMysticEnchantRules.h"
 #include "Chat.h"
 #include "Config.h"
@@ -1002,6 +1003,27 @@ public:
             LOG_ERROR("coa", "Mystic enchants are unavailable: MysticEnchant.dbc did not load");
     }
 };
+}
+
+bool ApplyGuide(Player* player, std::vector<GuideEnchant> const& guide)
+{
+    State* state = Ready ? Find(player) : nullptr;
+    if (!state || guide.empty())
+        return false;
+    ClientConfig const config = CurrentClientConfig();
+    Character character = Describe(player, config);
+    character.Known = &state->Known;
+    Slots const before = state->Active();
+    Slots const after = GuideSlots(Loaded, character, before, guide);
+    if (after == before)
+        return false;
+    state->Active() = after;
+    for (uint32 slot = 0; slot < SLOT_COUNT; ++slot)
+        if (before[slot] != after[slot])
+            SaveSlot(player, state->ActivePreset, slot, after[slot]);
+    SyncAuras(player, *state);
+    SendChangedSlots(player, before, after);
+    return true;
 }
 }
 

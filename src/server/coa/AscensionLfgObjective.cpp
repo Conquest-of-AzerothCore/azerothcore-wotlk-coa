@@ -9,6 +9,7 @@
 #include "ScriptMgr.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include <algorithm>
 
 namespace
 {
@@ -38,13 +39,19 @@ public:
     }
 };
 
+bool HasOwnFinalEncounter(std::list<DungeonEncounter const*> const* encounters, uint32 dungeonId)
+{
+    return encounters && std::any_of(encounters->begin(), encounters->end(),
+        [dungeonId](DungeonEncounter const* encounter) { return encounter->lastEncounterDungeon == dungeonId; });
+}
+
 class lfg_final_boss_reward : public GlobalScript
 {
 public:
     lfg_final_boss_reward() : GlobalScript("lfg_final_boss_reward", {GLOBALHOOK_ON_AFTER_UPDATE_ENCOUNTER_STATE}) { }
 
     void OnAfterUpdateEncounterState(Map* map, EncounterCreditType, uint32, Unit*, Difficulty,
-        std::list<DungeonEncounter const*> const*, uint32 dungeonCompleted, bool) override
+        std::list<DungeonEncounter const*> const* encounters, uint32 dungeonCompleted, bool) override
     {
         if (!map || !dungeonCompleted)
             return;
@@ -62,7 +69,7 @@ public:
                 continue;
 
             uint32 const queued = sLFGMgr->GetDungeon(group->GetGUID());
-            if (queued && queued != dungeonCompleted)
+            if (queued && queued != dungeonCompleted && !HasOwnFinalEncounter(encounters, queued))
             {
                 lfg::LFGDungeonData const* selected = sLFGMgr->GetLFGDungeon(queued);
                 if (selected && selected->map == completed->map)

@@ -21,7 +21,7 @@ def main():
         exe = Path(directory) / 'rules.exe'
         subprocess.run(command(HERE / 'test_rules.cpp', exe), cwd=directory, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=directory, check=True, timeout=15)
-    print('PASS: Hero Architect wire form, publish validation, ownership, ratings, categories, paging and build ids')
+    print('PASS: Hero Architect wire form, publish validation, ownership, ratings, categories, paging, build ids and activation')
 
 
 if __name__ == '__main__':

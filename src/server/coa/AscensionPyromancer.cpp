@@ -401,7 +401,8 @@ void Refresh(Player* player)
         player->removeSpell(802117, SPEC_MASK_ALL, true);
     if (player->HasAura(520937))
         for (uint32 id : PyromancerEchoRanks)
-            if (sSpellMgr->GetSpellInfo(id)->SpellLevel <= player->GetLevel() && !player->HasSpell(id))
+            if ((id == 802174 || sSpellMgr->GetSpellInfo(id)->SpellLevel <= player->GetLevel()) &&
+                !player->HasSpell(id))
                 player->learnSpell(id);
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800792))
