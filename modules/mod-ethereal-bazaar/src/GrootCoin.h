@@ -18,6 +18,7 @@
 #include "GrootCoinRules.h"
 #include "ObjectGuid.h"
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -33,6 +34,8 @@ namespace GrootCoin
         bool exchangeEnable = false;
         uint32 tokensPerCoin = DEFAULT_TOKENS_PER_COIN;
         uint32 maxAward = DEFAULT_MAX_AWARD;
+        bool externalAwardsEnable = false;
+        uint32 queuePollSeconds = DEFAULT_QUEUE_POLL_SECONDS;
     };
 
     Settings const& GetSettings();
@@ -50,20 +53,41 @@ namespace GrootCoin
 
     // ---- awards ---------------------------------------------------------
 
+    struct AwardOutcome
+    {
+        enum class Kind : uint8
+        {
+            Delivered,        // this request committed; awardId is new
+            AlreadyDelivered, // the same request was paid before; awardId is that award
+            Rejected,         // nothing sent, permanently; error says why
+            Unknown           // the database did not answer; nothing is known to be sent
+        };
+
+        Kind kind = Kind::Unknown;
+        std::string awardId;
+        std::string error;
+    };
+
     struct AwardRequest
     {
         ObjectGuid recipient;
         uint32 amount = 0;
-        uint32 issueNumber = 0;
+        uint32 issueNumber = 0;          // 0: no issue (queue awards)
         std::string reason;
         std::string attributionRef;
-        uint32 actorAccountId = 0;
-        ObjectGuid actor;
+        uint32 actorAccountId = 0;       // the staff account; never paid by its own award
+        ObjectGuid actor;                // empty when not issued from a character
+        std::string source{ GM_SOURCE }; // "gm" in game, the queue row's source otherwise
+        std::string sourceRef;           // empty in game: the (source, source_ref) key then does not apply
+        uint64 queueId = 0;              // set to mark that groot_coin_award_queue row done in the award's transaction
+        std::function<void(AwardOutcome const&)> onDone;
     };
 
-    // Validates the recipient against the database, rejects self-awards and
-    // duplicates, then delivers by mail. Replies go to the actor's session
-    // if it is still online.
+    // The one award path, for `.groot award` and the external queue alike.
+    // Checks the caps, validates the recipient against the database, rejects
+    // self-awards and duplicates (per issue and account, or per source
+    // reference), then delivers by mail with the audit rows. Replies go to the
+    // actor's session if it is still online; onDone gets the outcome.
     void IssueAward(AwardRequest request);
 
     // ---- exchange -------------------------------------------------------

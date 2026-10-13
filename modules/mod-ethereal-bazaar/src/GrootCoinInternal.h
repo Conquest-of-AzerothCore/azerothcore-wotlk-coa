@@ -21,6 +21,10 @@ namespace GrootCoin::Internal
     std::size_t PendingExchanges();
     std::size_t PendingAwards();
 
+    // groot_coin_award_queue poller; a no-op unless external awards are on.
+    void UpdateQueue();
+    std::size_t QueuedInFlight();
+
     // Sends a system message to the character if it is in the world.
     void Notify(ObjectGuid character, std::string const& text);
 }

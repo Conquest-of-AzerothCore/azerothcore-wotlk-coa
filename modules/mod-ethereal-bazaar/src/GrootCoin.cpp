@@ -104,7 +104,7 @@ namespace GrootCoin
 
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GROOTCOIN_SCHEMA);
             PreparedQueryResult result = CharacterDatabase.Query(stmt);
-            if (!result || result->Fetch()[0].Get<uint64>() != 4)
+            if (!result || result->Fetch()[0].Get<uint64>() != 5)
                 Fail("the grootcoin_* audit tables are missing from the characters database.");
         }
     }
@@ -120,6 +120,9 @@ namespace GrootCoin
         settings.exchangeEnable = sConfigMgr->GetOption<bool>("GrootCoin.ExchangeEnable", false);
         settings.tokensPerCoin = sConfigMgr->GetOption<uint32>("GrootCoin.TokensPerCoin", DEFAULT_TOKENS_PER_COIN);
         settings.maxAward = sConfigMgr->GetOption<uint32>("GrootCoin.MaxAward", DEFAULT_MAX_AWARD);
+        settings.externalAwardsEnable = sConfigMgr->GetOption<bool>("GrootCoin.ExternalAwardsEnable", false);
+        settings.queuePollSeconds = QueuePollSeconds(
+            sConfigMgr->GetOption<uint32>("GrootCoin.QueuePollInterval", DEFAULT_QUEUE_POLL_SECONDS));
     }
 
     void Validate()
@@ -134,8 +137,9 @@ namespace GrootCoin
         ValidateEnvironment();
 
         if (failures.empty())
-            LOG_INFO("module.bazaar", "Groot Coin: awards {}, exchange {}, {} tokens per coin.",
-                settings.enable ? "on" : "off", settings.exchangeEnable ? "on" : "off", settings.tokensPerCoin);
+            LOG_INFO("module.bazaar", "Groot Coin: awards {}, exchange {}, {} tokens per coin, external awards {}.",
+                settings.enable ? "on" : "off", settings.exchangeEnable ? "on" : "off", settings.tokensPerCoin,
+                ShouldPollQueue(settings.enable, settings.externalAwardsEnable) ? "on" : "off");
         else
             LOG_ERROR("module.bazaar", "Groot Coin: disabled after {} failed startup check(s).", failures.size());
     }
@@ -160,6 +164,7 @@ namespace GrootCoin
         queryCallbacks.ProcessReadyCallbacks();
         transactionCallbacks.ProcessReadyCallbacks();
         Internal::UpdateExchanges();
+        Internal::UpdateQueue();
     }
 
     std::string NewOperationId()
@@ -176,8 +181,10 @@ namespace GrootCoin
         handler->PSendSysMessage("Items: coin {} (display {}), Bazaar Token {}. Client item patch registered: {}.",
             COIN_ITEM, COIN_FALLBACK_DISPLAY, BAZAAR_TOKEN_ITEM,
             Ascension::ClientItemPatches::Instance().Contains(COIN_ITEM) ? "yes" : "no");
-        handler->PSendSysMessage("Pending: {} award(s), {} exchange(s).", Internal::PendingAwards(),
-            Internal::PendingExchanges());
+        handler->PSendSysMessage("External awards (groot_coin_award_queue): {}, polled every {} s.",
+            ShouldPollQueue(AwardsAvailable(), settings.externalAwardsEnable) ? "on" : "off", settings.queuePollSeconds);
+        handler->PSendSysMessage("Pending: {} award(s) ({} from the queue), {} exchange(s).", Internal::PendingAwards(),
+            Internal::QueuedInFlight(), Internal::PendingExchanges());
 
         for (std::string const& failure : failures)
             handler->PSendSysMessage("Startup check failed: {}", failure);
@@ -201,9 +208,11 @@ namespace GrootCoin
         do
         {
             Field const* fields = result->Fetch();
-            handler->PSendSysMessage("{} | issue #{} | {} coin(s) | {} | by account {}",
-                fields[0].Get<std::string>(), fields[1].Get<uint32>(), fields[2].Get<uint32>(),
-                fields[3].Get<std::string>(), fields[4].Get<uint32>());
+            std::string const subject = fields[1].IsNull()
+                ? Acore::StringFormat("{} {}", fields[5].Get<std::string>(), fields[6].Get<std::string>())
+                : Acore::StringFormat("issue #{}", fields[1].Get<uint32>());
+            handler->PSendSysMessage("{} | {} | {} coin(s) | {} | by account {}", fields[0].Get<std::string>(), subject,
+                fields[2].Get<uint32>(), fields[3].Get<std::string>(), fields[4].Get<uint32>());
         } while (result->NextRow());
     }
 
@@ -214,8 +223,11 @@ namespace GrootCoin
         if (PreparedQueryResult award = CharacterDatabase.Query(stmt))
         {
             Field const* f = award->Fetch();
-            handler->PSendSysMessage("Award {}: issue #{}, {} coin(s), created {}.", f[0].Get<std::string>(),
-                f[1].Get<uint32>(), f[6].Get<uint32>(), f[9].Get<std::string>());
+            std::string const subject = f[1].IsNull()
+                ? Acore::StringFormat("{} {}", f[13].Get<std::string>(), f[14].Get<std::string>())
+                : Acore::StringFormat("issue #{}", f[1].Get<uint32>());
+            handler->PSendSysMessage("Award {}: {}, {} coin(s), created {}.", f[0].Get<std::string>(), subject,
+                f[6].Get<uint32>(), f[9].Get<std::string>());
             handler->PSendSysMessage("Recipient account {} character {}; issued by account {} character {}.",
                 f[2].Get<uint32>(), f[3].Get<uint32>(), f[4].Get<uint32>(), f[5].Get<uint32>());
             handler->PSendSysMessage("Reason: {}", f[7].Get<std::string>());

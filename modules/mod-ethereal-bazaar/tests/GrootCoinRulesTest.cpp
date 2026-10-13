@@ -96,3 +96,62 @@ TEST(GrootCoinRules, CoinIdsAreDistinctFromTheBazaarToken)
     EXPECT_EQ(COIN_ITEM, 910001u);
     EXPECT_EQ(COIN_FALLBACK_DISPLAY, 30015u);
 }
+
+TEST(GrootCoinRules, ExternalSourcesAreNamedAndNeverGm)
+{
+    EXPECT_TRUE(IsValidExternalSource("website"));
+    EXPECT_TRUE(IsValidExternalSource("github"));
+    EXPECT_TRUE(IsValidExternalSource("bug-bot_2"));
+    EXPECT_FALSE(IsValidExternalSource("gm"));
+    EXPECT_TRUE(IsValidSource("gm"));
+    EXPECT_FALSE(IsValidExternalSource(""));
+    EXPECT_FALSE(IsValidExternalSource("Website"));
+    EXPECT_FALSE(IsValidExternalSource("web site"));
+    EXPECT_FALSE(IsValidExternalSource(std::string(SOURCE_MAX + 1, 'a')));
+    EXPECT_TRUE(IsValidSourceRef("bug:1234"));
+    EXPECT_TRUE(IsValidSourceRef("7447"));
+    EXPECT_FALSE(IsValidSourceRef(""));
+    EXPECT_FALSE(IsValidSourceRef(" 7447"));
+    EXPECT_FALSE(IsValidSourceRef("74\n47"));
+    EXPECT_FALSE(IsValidSourceRef(std::string(SOURCE_REF_MAX + 1, '1')));
+}
+
+TEST(GrootCoinRules, QueuedAwardsPassTheSameCapsAsTheCommand)
+{
+    EXPECT_EQ(CheckQueuedAward("website", "bug:1234", 42, 1, 25, "Confirmed bug #1234", 7), QueuedAwardCheck::Ok);
+    EXPECT_EQ(CheckQueuedAward("gm", "bug:1234", 42, 1, 25, "r", 7), QueuedAwardCheck::InvalidSource);
+    EXPECT_EQ(CheckQueuedAward("website", "", 42, 1, 25, "r", 7), QueuedAwardCheck::InvalidSourceRef);
+    EXPECT_EQ(CheckQueuedAward("website", "x", 42, 0, 25, "r", 7), QueuedAwardCheck::InvalidAmount);
+    EXPECT_EQ(CheckQueuedAward("website", "x", 42, 26, 25, "r", 7), QueuedAwardCheck::InvalidAmount);
+    EXPECT_EQ(CheckQueuedAward("website", "x", 42, 1001, 5000, "r", 7), QueuedAwardCheck::InvalidAmount);
+    EXPECT_EQ(CheckQueuedAward("website", "x", 42, 1, 25, "  ", 7), QueuedAwardCheck::InvalidReason);
+    EXPECT_EQ(CheckQueuedAward("website", "x", 0, 1, 25, "r", 7), QueuedAwardCheck::InvalidCharacter);
+    EXPECT_EQ(CheckQueuedAward("website", "x", 42, 1, 25, "r", 0), QueuedAwardCheck::NoRequester);
+}
+
+TEST(GrootCoinRules, RequestersCannotAwardTheirOwnAccount)
+{
+    EXPECT_TRUE(IsSelfAward(7, 7));
+    EXPECT_FALSE(IsSelfAward(8, 7));
+    EXPECT_FALSE(IsSelfAward(0, 0));
+}
+
+TEST(GrootCoinRules, AReusedReferenceIsNeverPaidTwice)
+{
+    EXPECT_EQ(ClassifyExisting(false, 0, 0, 42, 1), ExistingAward::None);
+    // The same request seen again (a retry after a restart) is reported as already paid.
+    EXPECT_EQ(ClassifyExisting(true, 42, 1, 42, 1), ExistingAward::SameRequest);
+    // A different character or amount under a used reference is a conflict; nothing is sent.
+    EXPECT_EQ(ClassifyExisting(true, 42, 1, 43, 1), ExistingAward::Conflict);
+    EXPECT_EQ(ClassifyExisting(true, 42, 1, 42, 2), ExistingAward::Conflict);
+}
+
+TEST(GrootCoinRules, TheQueueIsLeftAloneUnlessBothSwitchesAreOn)
+{
+    EXPECT_FALSE(ShouldPollQueue(false, false));
+    EXPECT_FALSE(ShouldPollQueue(true, false));
+    EXPECT_FALSE(ShouldPollQueue(false, true));
+    EXPECT_TRUE(ShouldPollQueue(true, true));
+    EXPECT_EQ(QueuePollSeconds(60), 60u);
+    EXPECT_EQ(QueuePollSeconds(0), MIN_QUEUE_POLL_SECONDS);
+}

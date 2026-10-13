@@ -32,6 +32,14 @@ namespace GrootCoin
 
     constexpr std::array<uint32_t, 3> EXCHANGE_BUNDLES = { 1, 5, 10 };
 
+    // Awards from outside the game (groot_coin_award_queue).
+    constexpr std::string_view GM_SOURCE = "gm";
+    constexpr std::size_t SOURCE_MAX = 32;
+    constexpr std::size_t SOURCE_REF_MAX = 64;
+    constexpr uint32_t DEFAULT_QUEUE_POLL_SECONDS = 60;
+    constexpr uint32_t MIN_QUEUE_POLL_SECONDS = 5;
+    constexpr uint32_t QUEUE_BATCH = 20;
+
     // Strictly decimal digits: no sign, no whitespace, no hex, no URL.
     inline std::optional<uint32_t> ParsePositive(std::string_view text)
     {
@@ -80,6 +88,107 @@ namespace GrootCoin
                 hasVisible = true;
         }
         return hasVisible;
+    }
+
+    // A requester name such as "website" or "github": lower-case letters, digits, '-' and '_'.
+    inline bool IsValidSource(std::string_view source)
+    {
+        if (source.empty() || source.size() > SOURCE_MAX)
+            return false;
+        for (char const c : source)
+            if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_'))
+                return false;
+        return true;
+    }
+
+    // "gm" is reserved for in-game awards, which have no reference.
+    inline bool IsValidExternalSource(std::string_view source)
+    {
+        return IsValidSource(source) && source != GM_SOURCE;
+    }
+
+    inline bool IsValidSourceRef(std::string_view ref)
+    {
+        return IsValidAuditText(ref, SOURCE_REF_MAX) && ref.front() != ' ' && ref.back() != ' ';
+    }
+
+    // Nobody awards their own account. Account 0 is never a requester.
+    inline bool IsSelfAward(uint32_t recipientAccountId, uint32_t requesterAccountId)
+    {
+        return requesterAccountId != 0 && recipientAccountId == requesterAccountId;
+    }
+
+    enum class QueuedAwardCheck : uint8_t
+    {
+        Ok,
+        InvalidSource,
+        InvalidSourceRef,
+        InvalidAmount,
+        InvalidReason,
+        InvalidCharacter,
+        NoRequester
+    };
+
+    // The checks a queue row must pass before any database lookup.
+    inline QueuedAwardCheck CheckQueuedAward(std::string_view source, std::string_view ref, uint32_t characterGuid,
+        uint32_t amount, uint32_t maxAward, std::string_view reason, uint32_t requesterAccountId)
+    {
+        if (!IsValidExternalSource(source))
+            return QueuedAwardCheck::InvalidSource;
+        if (!IsValidSourceRef(ref))
+            return QueuedAwardCheck::InvalidSourceRef;
+        if (!amount || amount > maxAward || amount > COIN_STACK_SIZE)
+            return QueuedAwardCheck::InvalidAmount;
+        if (!IsValidAuditText(reason, REASON_MAX))
+            return QueuedAwardCheck::InvalidReason;
+        if (!characterGuid)
+            return QueuedAwardCheck::InvalidCharacter;
+        if (!requesterAccountId)
+            return QueuedAwardCheck::NoRequester;
+        return QueuedAwardCheck::Ok;
+    }
+
+    inline std::string_view DescribeQueuedAwardCheck(QueuedAwardCheck check)
+    {
+        switch (check)
+        {
+            case QueuedAwardCheck::Ok: return "ok";
+            case QueuedAwardCheck::InvalidSource: return "source must be 1-32 of a-z, 0-9, '-', '_' and not 'gm'";
+            case QueuedAwardCheck::InvalidSourceRef: return "source_ref must be 1-64 printable characters";
+            case QueuedAwardCheck::InvalidAmount: return "amount must be 1 to GrootCoin.MaxAward";
+            case QueuedAwardCheck::InvalidReason: return "reason must be 1-255 printable characters";
+            case QueuedAwardCheck::InvalidCharacter: return "character_guid is 0";
+            case QueuedAwardCheck::NoRequester: return "requested_by_account is 0";
+        }
+        return "invalid";
+    }
+
+    // What an award already stored under the same key means for a new request.
+    enum class ExistingAward : uint8_t
+    {
+        None,
+        SameRequest,
+        Conflict
+    };
+
+    inline ExistingAward ClassifyExisting(bool exists, uint32_t existingCharacter, uint32_t existingAmount,
+        uint32_t character, uint32_t amount)
+    {
+        if (!exists)
+            return ExistingAward::None;
+        return existingCharacter == character && existingAmount == amount ? ExistingAward::SameRequest
+            : ExistingAward::Conflict;
+    }
+
+    // The queue is read only while awards and external awards are both on.
+    inline bool ShouldPollQueue(bool awardsAvailable, bool externalAwardsEnable)
+    {
+        return awardsAvailable && externalAwardsEnable;
+    }
+
+    inline uint32_t QueuePollSeconds(uint32_t configured)
+    {
+        return configured < MIN_QUEUE_POLL_SECONDS ? MIN_QUEUE_POLL_SECONDS : configured;
     }
 
     inline std::optional<uint32_t> ParseHistoryCount(std::string_view text)

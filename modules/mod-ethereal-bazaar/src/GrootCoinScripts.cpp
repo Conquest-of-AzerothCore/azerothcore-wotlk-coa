@@ -219,7 +219,7 @@ namespace
             }
 
             ObjectGuid const recipient = target->GetGUID();
-            if (sCharacterCache->GetCharacterAccountIdByGuid(recipient) == session->GetAccountId())
+            if (IsSelfAward(sCharacterCache->GetCharacterAccountIdByGuid(recipient), session->GetAccountId()))
             {
                 handler->SendSysMessage("You cannot award your own account.");
                 return true;
