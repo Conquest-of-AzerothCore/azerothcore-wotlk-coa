@@ -200,8 +200,11 @@ std::vector<TrainerSpell> TrainerSpells(Data const& data, Realm const& realm, st
         {
             TrainerSpell const retuned = reborn(spellId);
             spell.SpellId = spellId;
-            spell.ReqLevel = retuned.ReqLevel;
-            spell.MoneyCost = retuned.MoneyCost;
+            if (retuned.ReqLevel)
+            {
+                spell.ReqLevel = retuned.ReqLevel;
+                spell.MoneyCost = retuned.MoneyCost;
+            }
         }
         for (std::uint32_t& ability : spell.ReqAbility)
             ability = RebornSpell(ability, exists);
@@ -234,6 +237,7 @@ std::vector<TrainerSpell> TrainerSpells(Data const& data, Realm const& realm, st
     for (std::uint32_t spellId : missing)
     {
         TrainerSpell spell = reborn(spellId);
+        spell.ReqLevel = std::max<std::uint32_t>(spell.ReqLevel, 1);
         if (spell.ReqLevel <= maxLevel)
             spells.push_back(spell);
     }
