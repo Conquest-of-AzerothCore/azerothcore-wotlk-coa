@@ -17,6 +17,7 @@
 
 #include "Arena.h"
 #include "ArenaTeamMgr.h"
+#include "DBCStores.h"
 #include "GroupMgr.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
@@ -79,6 +80,10 @@ void Arena::AddPlayer(Player* player)
 {
     Battleground::AddPlayer(player);
     PlayerScores.emplace(player->GetGUID().GetCounter(), new ArenaScore(player->GetGUID(), player->GetBgTeamId()));
+
+    if (player->GetTeamId(true) != player->GetBgTeamId())
+        if (ChrRacesEntry const* sideRace = sChrRacesStore.LookupEntry(player->GetBgTeamId() == TEAM_ALLIANCE ? RACE_HUMAN : RACE_ORC))
+            player->SetFaction(sideRace->FactionID);
 
     if (player->GetBgTeamId() == TEAM_ALLIANCE) // gold
     {
@@ -188,6 +193,9 @@ void Arena::RemovePlayerAtLeave(Player* player)
                 loserArenaTeam->MemberLost(player, GetArenaMatchmakerRating(GetOtherTeamId(teamId)));
         }
     }
+
+    if (player->GetTeamId(true) != player->GetBgTeamId())
+        player->SetFactionForRace(player->getRace(true));
 
     // remove player
     Battleground::RemovePlayerAtLeave(player);
