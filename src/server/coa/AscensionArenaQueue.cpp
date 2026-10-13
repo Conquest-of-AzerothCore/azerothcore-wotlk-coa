@@ -1194,6 +1194,69 @@ namespace
         return RatingUpdate{ itr->second.PersonalTeamId, match.MatchmakerRating[opponent] };
     }
 
+    std::optional<int32> AveragePersonalRatingChange(SoloMatch const& match, TeamId side, bool won)
+    {
+        uint32 opponentMatchmakerRating = match.MatchmakerRating[Battleground::GetOtherTeamId(side)];
+        int64 total = 0;
+        uint32 counted = 0;
+        for (auto const& [guid, participant] : match.Participants)
+        {
+            if (participant.Side != side || participant.Settled)
+                continue;
+
+            ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(participant.PersonalTeamId);
+            ArenaTeamMember* member = team ? team->GetMember(guid) : nullptr;
+            if (!member)
+                continue;
+
+            int32 change = team->GetRatingMod(member->PersonalRating, opponentMatchmakerRating, won);
+            total += std::max<int32>(change, -int32(member->PersonalRating));
+            ++counted;
+        }
+
+        if (!counted)
+            return std::nullopt;
+
+        return int32(total / int64(counted));
+    }
+
+    std::optional<TeamId> LosingSide(SoloMatch const& match)
+    {
+        for (uint8 side = 0; side < PVP_TEAMS_COUNT; ++side)
+        {
+            ArenaTeamStats const& stats = match.Sides[side]->GetStats();
+            if (stats.SeasonGames && !stats.SeasonWins)
+                return TeamId(side);
+        }
+        return std::nullopt;
+    }
+
+    class AscensionArenaQueueScoreboard final : public FormulaScript
+    {
+    public:
+        AscensionArenaQueueScoreboard()
+            : FormulaScript("AscensionArenaQueueScoreboard", { FORMULAHOOK_ON_AFTER_ARENA_RATING_CALCULATION }) { }
+
+        void OnAfterArenaRatingCalculation(Battleground* const bg, int32&, int32&, int32& winnerChange,
+            int32& loserChange) override
+        {
+            std::lock_guard<std::mutex> lock(StateLock);
+            auto itr = MatchByInstance.find(bg->GetInstanceID());
+            if (itr == MatchByInstance.end())
+                return;
+
+            std::optional<TeamId> loser = LosingSide(itr->second);
+            if (!loser)
+                return;
+
+            if (std::optional<int32> change =
+                AveragePersonalRatingChange(itr->second, Battleground::GetOtherTeamId(*loser), true))
+                winnerChange = *change;
+            if (std::optional<int32> change = AveragePersonalRatingChange(itr->second, *loser, false))
+                loserChange = *change;
+        }
+    };
+
     class AscensionArenaQueueWorld final : public WorldScript
     {
     public:
@@ -1440,4 +1503,5 @@ void AddAscensionArenaQueueScripts()
     new AscensionArenaQueuePlayer();
     new AscensionArenaQueueMatchmaker();
     new AscensionArenaQueueRating();
+    new AscensionArenaQueueScoreboard();
 }
