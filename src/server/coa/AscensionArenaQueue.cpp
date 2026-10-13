@@ -848,6 +848,21 @@ namespace
 
     SoloWinRewards WinRewards;
 
+    struct RatingTitle
+    {
+        char const* ConfigName;
+        uint32 TitleId;
+        uint32 DefaultRating;
+        uint32 Rating;
+    };
+
+    std::array<RatingTitle, 4> RatingTitles{ {
+        { "RatedSoloArena.Title.Challenger", 45, 1600, 1600 },
+        { "RatedSoloArena.Title.Rival", 44, 1800, 1800 },
+        { "RatedSoloArena.Title.Duelist", 43, 2200, 2200 },
+        { "RatedSoloArena.Title.Gladiator", 42, 2700, 2700 }
+    } };
+
     void LoadWinRewards()
     {
         WinRewards.ArenaPoints1v1 = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.ArenaPoints.1v1", 25);
@@ -856,6 +871,8 @@ namespace
         WinRewards.RunesOfAscension = sConfigMgr->GetOption<uint32>("RatedSoloArena.Win.RunesOfAscension", 25);
         WinRewards.WeeklyArenaPointsCap =
             sConfigMgr->GetOption<uint32>("RatedSoloArena.WeeklyArenaPointsCap", 36000);
+        for (RatingTitle& title : RatingTitles)
+            title.Rating = sConfigMgr->GetOption<uint32>(title.ConfigName, title.DefaultRating);
     }
 
     uint32 WinArenaPointsFor(uint32 teamType)
@@ -907,6 +924,40 @@ namespace
             player->AddItem(RUNE_OF_ASCENSION_ITEM, WinRewards.RunesOfAscension);
     }
 
+    std::string TitleNameFor(Player* player, CharTitlesEntry const* title)
+    {
+        LocaleConstant locale = player->GetSession()->GetSessionDbcLocale();
+        bool female = player->getGender() == GENDER_FEMALE;
+        char const* name = female ? title->nameFemale[locale] : title->nameMale[locale];
+        if (!name || !*name)
+            name = female ? title->nameFemale[LOCALE_enUS] : title->nameMale[LOCALE_enUS];
+        if (!name || !*name)
+            name = title->nameMale[LOCALE_enUS];
+
+        std::string text = name ? name : "";
+        std::size_t nameSlot = text.find("%s");
+        if (nameSlot != std::string::npos)
+            text.replace(nameSlot, 2, player->GetName());
+        return text;
+    }
+
+    void GrantRatingTitles(Player* player, uint32 personalRating)
+    {
+        for (RatingTitle const& tier : RatingTitles)
+        {
+            if (personalRating < tier.Rating)
+                continue;
+
+            CharTitlesEntry const* title = sCharTitlesStore.LookupEntry(tier.TitleId);
+            if (!title || player->HasTitle(title))
+                continue;
+
+            player->SetTitle(title);
+            ChatHandler(player->GetSession()).PSendSysMessage("You have earned the title '{}'.",
+                TitleNameFor(player, title));
+        }
+    }
+
     void ApplyPersonalResult(Player* player, RatingUpdate const& update, bool won)
     {
         ArenaTeam* team = sArenaTeamMgr->GetArenaTeamById(update.PersonalTeamId);
@@ -937,6 +988,9 @@ namespace
 
         if (won)
             GrantWinRewards(player, team->GetType());
+
+        if (ArenaTeamMember* updatedMember = team->GetMember(player->GetGUID()))
+            GrantRatingTitles(player, updatedMember->PersonalRating);
     }
 
     std::optional<RatingUpdate> SettleParticipant(SoloMatch& match, ObjectGuid guid)

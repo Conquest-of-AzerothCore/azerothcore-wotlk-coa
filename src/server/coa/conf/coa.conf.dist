@@ -281,6 +281,19 @@ RatedSoloArena.Win.RunesOfAscension = 25
 
 RatedSoloArena.WeeklyArenaPointsCap = 36000
 
+#    RatedSoloArena.Title.Challenger
+#    RatedSoloArena.Title.Rival
+#    RatedSoloArena.Title.Duelist
+#    RatedSoloArena.Title.Gladiator
+#        Description: Personal rating in a rated solo bracket that grants the matching character title
+#                     the first time it is reached. Titles are never removed.
+#        Default:     1600 (Challenger), 1800 (Rival), 2200 (Duelist), 2700 (Gladiator)
+
+RatedSoloArena.Title.Challenger = 1600
+RatedSoloArena.Title.Rival = 1800
+RatedSoloArena.Title.Duelist = 2200
+RatedSoloArena.Title.Gladiator = 2700
+
 #    PvpPower.Enable
 #        Description: Item spells named "PvP Power (+N)" scale damage and healing at level 60, capped at
 #                     495 points. Damage +0.05% per point against players (and against uncontrolled
