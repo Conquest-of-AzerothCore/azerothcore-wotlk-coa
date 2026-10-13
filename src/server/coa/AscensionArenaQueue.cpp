@@ -528,6 +528,13 @@ namespace
     }
 
     uint32 RoleBalanceWaitSeconds = 60;
+    bool RoleBalance2v2 = false;
+    bool RoleBalance3v3 = true;
+
+    bool RoleBalanceRequired(uint8 arenaType)
+    {
+        return arenaType == ARENA_TYPE_2v2 ? RoleBalance2v2 : RoleBalance3v3;
+    }
 
     struct LineupCandidate
     {
@@ -744,9 +751,9 @@ namespace
             if (PlayerCount(eligible) < 2 * teamSize)
                 continue;
 
-            bool roleBalanceRelaxed = RoleBalanceWaitSeconds
+            bool roleBalanceRelaxed = !RoleBalanceRequired(arenaType) || (RoleBalanceWaitSeconds
                 && getMSTimeDiff(anchor->JoinTime, uint32(GameTime::GetGameTimeMS().count()))
-                    > RoleBalanceWaitSeconds * IN_MILLISECONDS;
+                    > RoleBalanceWaitSeconds * IN_MILLISECONDS);
             if (std::optional<SoloLineup> lineup =
                 ComposeLineup(anchor, eligible, teamSize, healerRoles, roleBalanceRelaxed))
                 return lineup;
@@ -902,6 +909,8 @@ namespace
         WinRewards.ConquestCapMax = sConfigMgr->GetOption<uint32>("RatedSoloArena.SeasonCap.Max", 0);
         WinRewards.CombatantRating = sConfigMgr->GetOption<uint32>("RatedSoloArena.Tier.Combatant", 1400);
         RoleBalanceWaitSeconds = sConfigMgr->GetOption<uint32>("RatedSoloArena.RoleBalanceWaitSeconds", 60);
+        RoleBalance2v2 = sConfigMgr->GetOption<bool>("RatedSoloArena.RoleBalance.2v2", false);
+        RoleBalance3v3 = sConfigMgr->GetOption<bool>("RatedSoloArena.RoleBalance.3v3", true);
         for (RatingTitle& title : RatingTitles)
             title.Rating = sConfigMgr->GetOption<uint32>(title.ConfigName, title.DefaultRating);
     }

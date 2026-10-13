@@ -266,6 +266,17 @@ HighRisk.GoldChance = 50
 
 RatedSoloArena.RoleBalanceWaitSeconds = 60
 
+#    RatedSoloArena.RoleBalance.2v2
+#    RatedSoloArena.RoleBalance.3v3
+#        Description: Whether rated solo lineups of the bracket require the healer balance until
+#                     RatedSoloArena.RoleBalanceWaitSeconds has elapsed. When disabled, any split is
+#                     accepted from the start and a role-balanced split is still preferred when one exists.
+#        Default:     0 - (2v2: double damage lineups allowed)
+#                     1 - (3v3: healer balance required)
+
+RatedSoloArena.RoleBalance.2v2 = 0
+RatedSoloArena.RoleBalance.3v3 = 1
+
 #    RatedSoloArena.Win.ArenaPoints.1v1
 #    RatedSoloArena.Win.ArenaPoints.2v2
 #    RatedSoloArena.Win.ArenaPoints.3v3
