@@ -313,12 +313,8 @@ namespace GrootCoin
                     return;
                 }
 
+                // Staff may award their own characters; the audit row records the awarding account either way.
                 delivery->recipientAccountId = result->Fetch()[0].Get<uint32>();
-                if (IsSelfAward(delivery->recipientAccountId, delivery->request.actorAccountId))
-                {
-                    Finish(*delivery, Kind::Rejected, "the requesting account cannot award its own account; nothing sent.");
-                    return;
-                }
 
                 CheckDuplicate(delivery);
             }));

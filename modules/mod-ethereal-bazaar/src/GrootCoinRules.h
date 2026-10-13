@@ -112,12 +112,6 @@ namespace GrootCoin
         return IsValidAuditText(ref, SOURCE_REF_MAX) && ref.front() != ' ' && ref.back() != ' ';
     }
 
-    // Nobody awards their own account. Account 0 is never a requester.
-    inline bool IsSelfAward(uint32_t recipientAccountId, uint32_t requesterAccountId)
-    {
-        return requesterAccountId != 0 && recipientAccountId == requesterAccountId;
-    }
-
     enum class QueuedAwardCheck : uint8_t
     {
         Ok,

@@ -85,7 +85,7 @@ namespace GrootCoin
 
     // The one award path, for `.groot award` and the external queue alike.
     // Checks the caps, validates the recipient against the database, rejects
-    // self-awards and duplicates (per issue and account, or per source
+    // duplicates (per issue and account, or per source
     // reference), then delivers by mail with the audit rows. Replies go to the
     // actor's session if it is still online; onDone gets the outcome.
     void IssueAward(AwardRequest request);

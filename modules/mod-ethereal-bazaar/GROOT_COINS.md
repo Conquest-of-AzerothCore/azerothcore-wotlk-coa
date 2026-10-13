@@ -70,8 +70,8 @@ the realm in question (check `.help rbac account grant` first; `-1` means every 
 .rbac account grant <staff-account> 1002 <realm-id>
 ```
 
-`.groot award` additionally requires Game Master security (level 2+) on the session, refuses awards to the
-issuer's own account, and is not available from the console. 1002 alone gives read-only access, also from the
+`.groot award` additionally requires Game Master security (level 2+) on the session and is not available from the
+console. Staff may award their own characters; every award row records the awarding account. 1002 alone gives read-only access, also from the
 console. Ordinary `.additem` access remains a separate administrative power this module cannot restrict.
 
 ## Commands
@@ -121,7 +121,7 @@ the queue is not read and rows wait unchanged.
 | `character_guid` | requester | `characters.guid` of the character that receives the mail. |
 | `amount` | requester | Coins, 1 to `GrootCoin.MaxAward`. |
 | `reason` | requester | Shown in the mail and stored in the audit; 1-255 printable characters. |
-| `requested_by_account` | requester | Auth account id of the staff member approving it. Must be Game Master (security 2+) on this realm and must not own the character. |
+| `requested_by_account` | requester | Auth account id of the staff member approving it. Must be Game Master (security 2+) on this realm; it may own the character. Stored as the awarding account. |
 | `status` | server | `pending` (default), `done` or `failed`. |
 | `error` | server | Why a row failed. |
 | `award_id` | server | The `grootcoin_award` id that paid it; use `.groot inspect <award_id>`. |
@@ -151,7 +151,7 @@ How rows settle:
 - `done`: the coins are in the recipient's mailbox. The row is set `done` in the same transaction that writes
   the coin, the mail and the audit row, so `done` and the award exist together or not at all.
 - `failed`: nothing was sent. `error` says why: invalid source, reference, amount or reason; the character does
-  not exist or was deleted; the requester is not a Game Master or owns the character; or the reference was
+  not exist or was deleted; the requester is not a Game Master; or the reference was
   already used for a different character or amount. Fix the cause and queue a new reference; failed rows are
   never retried.
 - `pending` after a poll: still being processed, or the outcome was unknown (database error, server stopped

@@ -129,11 +129,12 @@ TEST(GrootCoinRules, QueuedAwardsPassTheSameCapsAsTheCommand)
     EXPECT_EQ(CheckQueuedAward("website", "x", 42, 1, 25, "r", 0), QueuedAwardCheck::NoRequester);
 }
 
-TEST(GrootCoinRules, RequestersCannotAwardTheirOwnAccount)
+TEST(GrootCoinRules, StaffMayAwardTheirOwnAccount)
 {
-    EXPECT_TRUE(IsSelfAward(7, 7));
-    EXPECT_FALSE(IsSelfAward(8, 7));
-    EXPECT_FALSE(IsSelfAward(0, 0));
+    // The checks never look at who owns the character: a requester awarding
+    // a character on their own account passes like any other request.
+    EXPECT_EQ(CheckQueuedAward("website", "bug:9", 42, 1, 25, "Own report", 7), QueuedAwardCheck::Ok);
+    EXPECT_EQ(CheckQueuedAward("website", "bug:9", 7, 1, 25, "Own report", 7), QueuedAwardCheck::Ok);
 }
 
 TEST(GrootCoinRules, AReusedReferenceIsNeverPaidTwice)

@@ -5,7 +5,6 @@
 #include "GrootCoin.h"
 
 #include "AscensionClientSpellPatches.h"
-#include "CharacterCache.h"
 #include "Chat.h"
 #include "ChatCommand.h"
 #include "Creature.h"
@@ -219,11 +218,6 @@ namespace
             }
 
             ObjectGuid const recipient = target->GetGUID();
-            if (IsSelfAward(sCharacterCache->GetCharacterAccountIdByGuid(recipient), session->GetAccountId()))
-            {
-                handler->SendSysMessage("You cannot award your own account.");
-                return true;
-            }
 
             AwardRequest request;
             request.recipient = recipient;
