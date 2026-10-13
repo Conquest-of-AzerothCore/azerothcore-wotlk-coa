@@ -18,7 +18,6 @@ namespace GrootCoin::Internal
     std::vector<std::string> const& Reconciliations();
 
     void UpdateExchanges();
-    std::size_t PendingExchanges();
     std::size_t PendingAwards();
 
     // groot_coin_award_queue poller; a no-op unless external awards are on.

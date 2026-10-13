@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `grootcoin_award_mail` (
   KEY `coin_item` (`coin_item_guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- One row per committed exchange, with the rate that applied.
+-- One row per exchange, written in the same transaction as the player's inventory save, with the rate that applied.
 CREATE TABLE IF NOT EXISTS `grootcoin_exchange` (
   `exchange_id` CHAR(36) NOT NULL,
   `account_id` INT UNSIGNED NOT NULL,
@@ -55,23 +55,6 @@ CREATE TABLE IF NOT EXISTS `grootcoin_exchange` (
   KEY `character_history` (`character_guid`, `created_at`),
   KEY `created` (`created_at`),
   CONSTRAINT `grootcoin_exchange_payout` CHECK (`coins_spent` > 0 AND `tokens_delivered` > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- The item stacks an exchange debited and credited. `stored_count` is what the database held for the stack when
--- the exchange ran (-1: no such stack) and `expected_count` what the server had in memory; the CHECK makes the
--- whole exchange fail, with nothing changed, when the two differ or the target slot is taken.
-CREATE TABLE IF NOT EXISTS `grootcoin_exchange_item` (
-  `exchange_id` CHAR(36) NOT NULL,
-  `item_guid` INT UNSIGNED NOT NULL,
-  `item_entry` INT UNSIGNED NOT NULL,
-  `expected_count` BIGINT NOT NULL,
-  `stored_count` BIGINT NOT NULL,
-  `resulting_count` INT UNSIGNED NOT NULL,
-  `slot_conflicts` INT UNSIGNED NOT NULL DEFAULT 0,
-  PRIMARY KEY (`exchange_id`, `item_guid`),
-  KEY `item` (`item_guid`),
-  CONSTRAINT `grootcoin_exchange_item_matches_inventory`
-    CHECK (`stored_count` = `expected_count` AND `slot_conflicts` = 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Awards requested from outside the game (a website, a bot). The requester inserts a 'pending' row; with

@@ -22,6 +22,7 @@ namespace GrootCoin
         Settings settings;
         std::vector<std::string> failures;
         bool validated = false;
+        std::string exchangeBlocked;
         std::vector<std::string> reconciliations;
         QueryCallbackProcessor queryCallbacks;
         AsyncCallbackProcessor<TransactionCallback> transactionCallbacks;
@@ -104,7 +105,7 @@ namespace GrootCoin
 
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_GROOTCOIN_SCHEMA);
             PreparedQueryResult result = CharacterDatabase.Query(stmt);
-            if (!result || result->Fetch()[0].Get<uint64>() != 5)
+            if (!result || result->Fetch()[0].Get<uint64>() != 4)
                 Fail("the grootcoin_* audit tables are missing from the characters database.");
         }
     }
@@ -123,11 +124,14 @@ namespace GrootCoin
         settings.externalAwardsEnable = sConfigMgr->GetOption<bool>("GrootCoin.ExternalAwardsEnable", false);
         settings.queuePollSeconds = QueuePollSeconds(
             sConfigMgr->GetOption<uint32>("GrootCoin.QueuePollInterval", DEFAULT_QUEUE_POLL_SECONDS));
+        settings.characterDbWorkers = sConfigMgr->GetOption<uint32>("CharacterDatabase.WorkerThreads",
+            REQUIRED_CHARACTER_DB_WORKERS, false);
     }
 
     void Validate()
     {
         failures.clear();
+        exchangeBlocked.clear();
         validated = true;
         if (!settings.enable && !settings.exchangeEnable)
             return;
@@ -136,9 +140,16 @@ namespace GrootCoin
         ValidateTokenTemplate();
         ValidateEnvironment();
 
+        if (settings.exchangeEnable && !ExchangeSafeWithWorkers(settings.characterDbWorkers))
+        {
+            exchangeBlocked = Acore::StringFormat("CharacterDatabase.WorkerThreads is {}; the exchange needs {}. "
+                "GrootCoin.ExchangeEnable is treated as 0.", settings.characterDbWorkers, REQUIRED_CHARACTER_DB_WORKERS);
+            LOG_ERROR("module.bazaar", "Groot Coin: {}", exchangeBlocked);
+        }
+
         if (failures.empty())
             LOG_INFO("module.bazaar", "Groot Coin: awards {}, exchange {}, {} tokens per coin, external awards {}.",
-                settings.enable ? "on" : "off", settings.exchangeEnable ? "on" : "off", settings.tokensPerCoin,
+                settings.enable ? "on" : "off", ExchangeAvailable() ? "on" : "off", settings.tokensPerCoin,
                 ShouldPollQueue(settings.enable, settings.externalAwardsEnable) ? "on" : "off");
         else
             LOG_ERROR("module.bazaar", "Groot Coin: disabled after {} failed startup check(s).", failures.size());
@@ -156,7 +167,7 @@ namespace GrootCoin
 
     bool ExchangeAvailable()
     {
-        return validated && settings.exchangeEnable && failures.empty();
+        return validated && settings.exchangeEnable && failures.empty() && exchangeBlocked.empty();
     }
 
     void Update()
@@ -183,8 +194,10 @@ namespace GrootCoin
             Ascension::ClientItemPatches::Instance().Contains(COIN_ITEM) ? "yes" : "no");
         handler->PSendSysMessage("External awards (groot_coin_award_queue): {}, polled every {} s.",
             ShouldPollQueue(AwardsAvailable(), settings.externalAwardsEnable) ? "on" : "off", settings.queuePollSeconds);
-        handler->PSendSysMessage("Pending: {} award(s) ({} from the queue), {} exchange(s).", Internal::PendingAwards(),
-            Internal::QueuedInFlight(), Internal::PendingExchanges());
+        handler->PSendSysMessage("Pending: {} award(s) ({} from the queue).", Internal::PendingAwards(),
+            Internal::QueuedInFlight());
+        if (!exchangeBlocked.empty())
+            handler->PSendSysMessage("Exchange blocked: {}", exchangeBlocked);
 
         for (std::string const& failure : failures)
             handler->PSendSysMessage("Startup check failed: {}", failure);

@@ -6,12 +6,14 @@
 #ifndef MOD_ETHEREAL_BAZAAR_GROOT_COIN_RULES_H
 #define MOD_ETHEREAL_BAZAAR_GROOT_COIN_RULES_H
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <limits>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace GrootCoin
 {
@@ -211,6 +213,42 @@ namespace GrootCoin
     inline bool MatchesOffer(uint32_t coins, uint32_t tokensPerCoin, uint32_t offeredTokens)
     {
         return coins != 0 && tokensPerCoin != 0 && uint64_t(coins) * tokensPerCoin == offeredTokens;
+    }
+
+    // The exchange relies on one character's saves committing in the order
+    // they were queued, which only a single characters-database worker gives.
+    constexpr uint32_t REQUIRED_CHARACTER_DB_WORKERS = 1;
+
+    inline bool ExchangeSafeWithWorkers(uint32_t characterDbWorkers)
+    {
+        return characterDbWorkers == REQUIRED_CHARACTER_DB_WORKERS;
+    }
+
+    // Coins to take from each carried stack, aligned with `stacks`: smallest
+    // stacks first (ties by position), so partial stacks are used up before
+    // full ones. Empty when the stacks hold fewer than `coins` or coins is 0.
+    inline std::vector<uint32_t> PlanDebits(std::vector<uint32_t> const& stacks, uint32_t coins)
+    {
+        if (!coins)
+            return {};
+        std::vector<std::size_t> order(stacks.size());
+        for (std::size_t i = 0; i < order.size(); ++i)
+            order[i] = i;
+        std::stable_sort(order.begin(), order.end(),
+            [&stacks](std::size_t a, std::size_t b) { return stacks[a] < stacks[b]; });
+
+        std::vector<uint32_t> takes(stacks.size(), 0);
+        uint32_t remaining = coins;
+        for (std::size_t const index : order)
+        {
+            if (!remaining)
+                break;
+            takes[index] = std::min(stacks[index], remaining);
+            remaining -= takes[index];
+        }
+        if (remaining)
+            return {};
+        return takes;
     }
 
     inline bool IsExchangeBundle(uint32_t coins)

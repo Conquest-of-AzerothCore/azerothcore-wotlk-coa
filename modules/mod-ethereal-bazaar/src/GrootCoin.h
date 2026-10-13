@@ -36,6 +36,7 @@ namespace GrootCoin
         uint32 maxAward = DEFAULT_MAX_AWARD;
         bool externalAwardsEnable = false;
         uint32 queuePollSeconds = DEFAULT_QUEUE_POLL_SECONDS;
+        uint32 characterDbWorkers = REQUIRED_CHARACTER_DB_WORKERS; // CharacterDatabase.WorkerThreads
     };
 
     Settings const& GetSettings();
@@ -96,16 +97,13 @@ namespace GrootCoin
     {
         Ok,
         Disabled,
-        Busy,
         InvalidAmount,
         NotEnoughCoins,
         NoSpace,
         InvalidQuote,
         NotAtVendor,
         PlayerState,
-        StorageChanged,
-        Failed,
-        Pending
+        Failed
     };
 
     std::string_view Describe(ExchangeResult result);

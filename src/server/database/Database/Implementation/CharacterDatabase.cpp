@@ -111,8 +111,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "UPDATE coa_lottery_round SET active = NULL WHERE id = ? AND active = 1", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_GROOTCOIN_SCHEMA,
         "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name IN "
-        "('grootcoin_award', 'grootcoin_award_mail', 'grootcoin_exchange', 'grootcoin_exchange_item', "
-        "'groot_coin_award_queue')", CONNECTION_SYNCH);
+        "('grootcoin_award', 'grootcoin_award_mail', 'grootcoin_exchange', 'groot_coin_award_queue')", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_GROOTCOIN_RECIPIENT,
         "SELECT account FROM characters WHERE guid = ? AND deleteDate IS NULL AND account <> 0", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_GROOTCOIN_AWARD_BY_KEY,
@@ -137,23 +136,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_GROOTCOIN_EXCHANGE,
         "SELECT exchange_id, account_id, character_guid, coins_spent, tokens_delivered, tokens_per_coin, source, "
         "CAST(created_at AS CHAR) FROM grootcoin_exchange WHERE exchange_id = ?", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_SEL_GROOTCOIN_EXCHANGE_COMMITTED,
-        "SELECT COUNT(*) FROM grootcoin_exchange WHERE exchange_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_GROOTCOIN_EXCHANGE,
         "INSERT INTO grootcoin_exchange (exchange_id, account_id, character_guid, coin_entry, token_entry, coins_spent, "
         "tokens_delivered, tokens_per_coin, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_INS_GROOTCOIN_EXCHANGE_STACK,
-        "INSERT INTO grootcoin_exchange_item (exchange_id, item_guid, item_entry, expected_count, stored_count, "
-        "resulting_count, slot_conflicts) SELECT ?, ?, ?, ?, "
-        "COALESCE((SELECT count FROM item_instance WHERE guid = ? AND owner_guid = ? AND itemEntry = ?), -1), ?, "
-        "1 - (SELECT COUNT(*) FROM character_inventory WHERE item = ? AND guid = ? AND bag = ? AND slot = ?)",
-        CONNECTION_ASYNC);
-    PrepareStatement(CHAR_INS_GROOTCOIN_EXCHANGE_NEW_STACK,
-        "INSERT INTO grootcoin_exchange_item (exchange_id, item_guid, item_entry, expected_count, stored_count, "
-        "resulting_count, slot_conflicts) SELECT ?, ?, ?, -1, "
-        "COALESCE((SELECT count FROM item_instance WHERE guid = ?), -1), ?, "
-        "(SELECT COUNT(*) FROM character_inventory WHERE guid = ? AND bag = ? AND slot = ?)", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_UPD_GROOTCOIN_STACK_COUNT, "UPDATE item_instance SET count = ? WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_GROOTCOIN_AWARD_BY_REF,
         "SELECT COUNT(*), MAX(award_id), MAX(recipient_character_guid), MAX(amount) FROM grootcoin_award "
         "WHERE source = ? AND source_ref = ?", CONNECTION_ASYNC);
