@@ -2,7 +2,7 @@
 
 | File | Purpose |
 | --- | --- |
-| `groot_coin_rim_1024.png` | Source art chosen by John: the coin with the "GROOTLOOPS33" / "CONQUEST OF AZEROTHCORE" rim |
+| `groot_coin_rim_1024.png` | Source art chosen by John: the coin with the "CONQUEST OF AZEROTHCORE" rim (server name only) |
 | `groot_coin_rim_256.png` | The same art at 256 x 256 |
 | `groot_coin_source.png` | The originally supplied coin, kept for reference |
 | `make_blp.py` | Deterministic converter (Python 3 + Pillow) |
