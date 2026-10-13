@@ -15,7 +15,7 @@ for **Bazaar Tokens** (item 975001). The feature lives in this module:
 | RBAC: read the audit | 1002 `Command: groot audit` | same |
 | Tiraxis gossip actions | 9100-9199 (existing menus use 1-5) | `GrootCoinScripts.cpp` |
 | Exchange NPC | Tiraxis, entry 900007, script `npc_tiraxis` | unchanged |
-| Audit tables | `grootcoin_award`, `grootcoin_award_mail`, `grootcoin_exchange`, `grootcoin_exchange_item` | characters migration `rev_20261012_60_groot_coin_audit.sql` |
+| Audit tables | `grootcoin_award`, `grootcoin_award_mail`, `grootcoin_exchange` (plus the queue `groot_coin_award_queue`) | characters migration `rev_20261012_60_groot_coin_audit.sql` |
 
 ### Collision evidence (12 Oct 2026, read-only)
 
@@ -55,9 +55,13 @@ every exchange row stores the rate it used.
 With either switch on, startup checks the coin template (class 15/0, bind on pickup, no price, no unique limit
 or duration, stack at least `MaxAward`), its `item_dbc` row matching the template, the client item
 registration, the Bazaar Token template and that the rate fits a token stack for 10 coins, `EtherealBazaar.Enable`,
-`CoA.SendDisplayPatches`, that creature 900007 runs `npc_tiraxis`, `MaxAward` in 1-1000 and the five Groot Coin
-tables (four audit tables and the award queue). Any failure disables both parts with `Groot Coin: ...` lines in the server log and in `.groot status`;
+`CoA.SendDisplayPatches`, that creature 900007 runs `npc_tiraxis`, `MaxAward` in 1-1000 and the four Groot Coin
+tables (three audit tables and the award queue). Any failure disables both parts with `Groot Coin: ...` lines in the server log and in `.groot status`;
 nothing else in the bazaar is affected.
+
+The exchange additionally requires `CharacterDatabase.WorkerThreads = 1` (the worldserver default). With any other
+value `GrootCoin.ExchangeEnable` is treated as 0: startup logs an error, `.groot status` shows "Exchange blocked",
+and awards are unaffected. See "How the exchange stays exactly-once" for why.
 
 ## Permissions
 
@@ -120,7 +124,7 @@ the queue is not read and rows wait unchanged.
 | `character_guid` | requester | `characters.guid` of the character that receives the mail. |
 | `amount` | requester | Coins, 1 to `GrootCoin.MaxAward`. |
 | `reason` | requester | Shown in the mail and stored in the audit; 1-255 printable characters. |
-| `requested_by_account` | requester | Auth account id of the staff member approving it. Must be Game Master (security 2+) on this realm; it may own the character. Stored as the awarding account. |
+| `requested_by_account` | requester | Auth account id of the staff member approving it. Must pass the same gates as `.groot award` on this realm: Game Master (security 2+) and RBAC 1001 granted and not denied. It may own the character. Stored as the awarding account. |
 | `status` | server | `pending` (default), `done` or `failed`. |
 | `error` | server | Why a row failed. |
 | `award_id` | server | The `grootcoin_award` id that paid it; use `.groot inspect <award_id>`. |
@@ -150,7 +154,7 @@ How rows settle:
 - `done`: the coins are in the recipient's mailbox. The row is set `done` in the same transaction that writes
   the coin, the mail and the audit row, so `done` and the award exist together or not at all.
 - `failed`: nothing was sent. `error` says why: invalid source, reference, amount or reason; the character does
-  not exist or was deleted; the requester is not a Game Master; or the reference was
+  not exist or was deleted; the requester is not a Game Master or lacks RBAC 1001; or the reference was
   already used for a different character or amount. Fix the cause and queue a new reference; failed rows are
   never retried.
 - `pending` after a poll: still being processed, or the outcome was unknown (database error, server stopped
@@ -159,6 +163,12 @@ How rows settle:
 
 The website needs an account on the characters database with `INSERT` and `SELECT` on
 `groot_coin_award_queue` only. It never writes `status`, `error`, `award_id` or `processed_at`.
+
+Trust model: the queue cannot tell who inserted a row. Anyone with `INSERT` on `groot_coin_award_queue` can mint
+coins for any character, up to `MaxAward` per row, by naming a qualifying `requested_by_account`. The
+requester checks only stop rows naming an account that could not award in game. Grant that `INSERT` to the
+trusted website or bot account alone, keep `ExternalAwardsEnable = 0` where no such integration exists, and
+review `.groot history` for queue awards (`source`/`source_ref`).
 
 ## How delivery stays exactly-once
 
@@ -191,22 +201,22 @@ client pop-up ("Exchange 3 Groot Coins for 300 Bazaar Tokens?") -> result. Back 
   coin stack would free is not counted.
 - The tokens are plain item 975001 stored in the bags. No level bonus, test-zone bonus or loot multiplier is
   applied, and there is no reverse conversion.
-- The database is written before memory. One transaction holds guard rows, the coin debits, the token credit
-  and the audit row. Each guard row's CHECK fails the whole transaction if the database does not hold exactly
-  the stack counts and positions the server has in memory. The involved stacks are always written again through
-  the normal inventory save first, and that save is waited for. If a guard still fails (for example a save of
-  the same stack was in flight on another database worker), nothing was spent and the exchange is tried once
-  more after a fresh save.
-- The map thread waits up to five seconds for the acknowledgement, so no other action of that player
-  interleaves. Only on success is the inventory changed in memory, with the GUIDs and counts the database
-  already holds; later saves rewrite the same values. A definite failure therefore leaves memory untouched.
-- A missing acknowledgement keeps the exchange pending (no further exchanges for that character) until the
-  outcome is read back by exchange id. If the character changed the involved stacks in the meantime, the
-  exchange is listed for reconciliation.
-
-Known limit: a server with more than one characters-database async worker could in principle let an older,
-already queued inventory save of the same stack land after the exchange. The guard rows reject the opposite
-order. Keep `CharacterDatabase.WorkerThreads = 1` (the default) on realms with the exchange enabled.
+- The exchange is an ordinary inventory change, made the way the core makes a mail take or a trade: every check
+  runs first (player state, vendor, coins carried, room for the tokens) and nothing is touched if one fails.
+  Then, on the map thread, the tokens are stored through the normal item API (the only step that can fail; then
+  no coin is touched), the planned coin stacks are destroyed (smallest stacks first), and the player's
+  inventory save (`SaveInventoryAndGoldToDB`) and the `grootcoin_exchange` audit row are queued as **one**
+  characters transaction. The database therefore holds either the old inventory without the audit row or the
+  new inventory with it.
+- Nothing waits for the database and nothing is left pending. Memory is authoritative at once, like any vendor
+  purchase, so moving or destroying items, spending the tokens, logging out or a later save can only write the
+  new state.
+- That relies on one character's saves committing in the order they were queued, which a single
+  characters-database worker guarantees (the same assumption trade and mail make). With
+  `CharacterDatabase.WorkerThreads` above 1 an older save could land after the exchange, so the exchange then
+  refuses to start (see Startup checks).
+- A crash before the transaction commits loses the exchange as a whole: the player keeps the coins and has no
+  tokens, and no audit row exists.
 
 ## Interop: a second exchange entry point
 
@@ -267,6 +277,9 @@ Token icon) without touching anything else.
 
 ## Testing
 
-`python -B tools/verify_all.py --stages build,unit` runs `GrootCoinRules.*` (amount, issue, text, history,
-rate and overflow, UUID rules). The acceptance matrix in the implementation brief still needs an in-game pass;
-see the playtest list in the change description.
+`python -B tools/verify_all.py --stages build,unit` runs `GrootCoinRules.*`: amount, issue, text, history,
+rate and overflow, UUID, exchange amount and pop-up offer, debit planning and the worker gate.
+
+`tests/scenarios/` holds gameplay scenarios that need the exchange switched on, so they are not in the default
+suite. Run them with the test runner and a module config directory whose `ethereal_bazaar.conf` sets
+`GrootCoin.ExchangeEnable = 1` (`--modules-config-dir`), see `tests/scenarios/README.md`.

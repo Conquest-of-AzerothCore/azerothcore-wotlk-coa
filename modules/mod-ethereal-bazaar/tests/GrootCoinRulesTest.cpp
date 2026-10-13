@@ -180,3 +180,23 @@ TEST(GrootCoinRules, PopupOfferMustMatchCoinsAndRate)
     EXPECT_FALSE(MatchesOffer(3, 0, 0));
     EXPECT_FALSE(MatchesOffer(50000000, 100, 705032704u)); // no wrap-around
 }
+
+TEST(GrootCoinRules, ExchangeNeedsExactlyOneCharacterDatabaseWorker)
+{
+    EXPECT_TRUE(ExchangeSafeWithWorkers(1));
+    EXPECT_FALSE(ExchangeSafeWithWorkers(0));
+    EXPECT_FALSE(ExchangeSafeWithWorkers(2));
+    EXPECT_FALSE(ExchangeSafeWithWorkers(16));
+}
+
+TEST(GrootCoinRules, DebitsUseSmallestStacksFirstAndNeverOverdraw)
+{
+    using V = std::vector<uint32_t>;
+    EXPECT_EQ(PlanDebits(V{ 10, 3, 7 }, 5), (V{ 0, 3, 2 }));
+    EXPECT_EQ(PlanDebits(V{ 10, 3, 7 }, 20), (V{ 10, 3, 7 }));
+    EXPECT_EQ(PlanDebits(V{ 4, 4 }, 5), (V{ 4, 1 }));      // ties keep position order
+    EXPECT_EQ(PlanDebits(V{ 1000 }, 1), (V{ 1 }));
+    EXPECT_TRUE(PlanDebits(V{ 10, 3, 7 }, 21).empty());   // not enough: nothing is planned
+    EXPECT_TRUE(PlanDebits(V{}, 1).empty());
+    EXPECT_TRUE(PlanDebits(V{ 5 }, 0).empty());
+}
