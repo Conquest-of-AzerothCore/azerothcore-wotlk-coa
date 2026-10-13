@@ -28,6 +28,7 @@ void AddSC_AscensionItemScaling();
 void AddSC_AscensionNativeItemScaling();
 void AddSC_AscensionQuestScaling();
 void AddSC_AscensionBloodforged();
+void AddSC_AscensionBloodforging();
 void AddAscensionEquippedGearLootScripts();
 void AddSC_AscensionPvpPower();
 void AddSC_AscensionGlory();
@@ -680,6 +681,7 @@ void AddCoAScripts()
     AddSC_AscensionNativeItemScaling();
     AddSC_AscensionQuestScaling();
     AddSC_AscensionBloodforged();
+    AddSC_AscensionBloodforging();
     AddAscensionEquippedGearLootScripts();
     AddSC_AscensionPvpPower();
     AddSC_AscensionGlory();

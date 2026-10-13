@@ -427,6 +427,7 @@ struct Actor
     std::map<uint32, uint32> creatureQueryRank;
     std::map<uint32, uint32> clientCastTimeMs;
     std::map<uint32, uint32> clientAttributes;
+    std::map<uint32, uint32> clientSpellTargets;
     std::map<uint32, uint32> questQueryFlags;
     std::map<uint32, uint32> questQueryFirstChoiceItem;
     std::map<uint32, uint32> questOfferXP;
@@ -637,7 +638,7 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_ITEM_QUERY_SINGLE_RESPONSE && packet.GetOpcode() != SMSG_MOVE_KNOCK_BACK &&
         packet.GetOpcode() != SMSG_DUEL_REQUESTED && packet.GetOpcode() != SMSG_DUEL_COUNTDOWN &&
         packet.GetOpcode() != SMSG_DUEL_COMPLETE && packet.GetOpcode() != SMSG_FRIEND_STATUS &&
-        packet.GetOpcode() != SMSG_SEND_MAIL_RESULT)
+        packet.GetOpcode() != SMSG_SEND_MAIL_RESULT && packet.GetOpcode() != SMSG_GOSSIP_MESSAGE)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -807,6 +808,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         if (SpellCastTimesEntry const* entry = sSpellCastTimesStore.LookupEntry(castTimeIndex))
             actor.clientCastTimeMs[streamedSpell] = entry->CastTime > 0 ? uint32(entry->CastTime) : 0;
         actor.clientAttributes[streamedSpell] = packet.read<uint32>(4 * sizeof(uint32));
+        actor.clientSpellTargets[streamedSpell] = packet.read<uint32>(16 * sizeof(uint32));
     }
 
     if (packet.GetOpcode() == CoASpellbook::SMSG_PATCH_SPELL_CUSTOM_ATTR)
@@ -2200,6 +2202,12 @@ private:
             auto itr = actor.clientCastTimeMs.find(step.get<uint32>("spell"));
             return itr == actor.clientCastTimeMs.end() ? -1 : int64(itr->second);
         }
+        if (metric == "client_spell_targets")
+        {
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.clientSpellTargets.find(step.get<uint32>("spell"));
+            return itr == actor.clientSpellTargets.end() ? -1 : int64(itr->second);
+        }
         if (metric == "client_attributes")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
@@ -3481,6 +3489,23 @@ private:
             Require(slot < EQUIPMENT_SLOT_END, "Equipment observation needs a slot from 0 through 18");
             Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, uint8(slot));
             return item ? item->GetEntry() : 0;
+        }
+        if (metric == "item_random_property" || metric == "item_suffix_factor" || metric == "item_enchantment" ||
+            metric == "item_guid" || metric == "item_soulbound")
+        {
+            Item* item = player->GetItemByEntry(step.get<uint32>("item"));
+            Require(item != nullptr, "Item observation requires a carried item");
+            if (metric == "item_guid")
+                return double(item->GetGUID().GetCounter());
+            if (metric == "item_soulbound")
+                return item->IsSoulBound();
+            if (metric == "item_random_property")
+                return item->GetItemRandomPropertyId();
+            if (metric == "item_suffix_factor")
+                return item->GetItemSuffixFactor();
+            uint32 slot = step.get<uint32>("slot");
+            Require(slot < MAX_ENCHANTMENT_SLOT, "Invalid enchantment observation slot");
+            return item->GetEnchantmentId(EnchantmentSlot(slot));
         }
         if (metric == "item_count")
         {
@@ -5095,6 +5120,16 @@ private:
         }
         else if (action == "add_item")
             Require(player->AddItem(step.get<uint32>("item"), step.get<uint32>("count", 1)), "Item grant failed");
+        else if (action == "set_item_random_property")
+        {
+            Item* item = player->GetItemByEntry(step.get<uint32>("item"));
+            Require(item != nullptr && !item->IsEquipped(), "Random property fixture requires an unequipped item");
+            item->SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, 0);
+            item->SetUInt32Value(ITEM_FIELD_PROPERTY_SEED, 0);
+            for (uint8 slot = PROP_ENCHANTMENT_SLOT_0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
+                item->ClearEnchantment(EnchantmentSlot(slot));
+            item->SetItemRandomProperties(step.get<int32>("property"));
+        }
         else if (action == "fill_bags")
         {
             uint32 const target = step.get<uint32>("slots", 0);

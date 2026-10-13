@@ -7,6 +7,12 @@
 # Enable the compatibility packet filter.
 CoA.Enable = 1
 
+# Maximum crafted-item upgrade steps: 0 disables upgrade kits, 1 allows Refined,
+# 2 allows Superior, and 3 allows Masterwork. Default: 2. Values are clamped to 0-3.
+# Applies on startup and config reload; existing upgraded items remain unchanged.
+# Shirts, bags/quivers, Arclight Spanner and excluded ambiguous families cannot be upgraded.
+CoA.Crafting.MaxUpgradeSteps = 2
+
 # Apply the Ascension protocol settings to remote connections as well as loopback
 # (extension opcodes, ping interval, spell-modifier layout, class-10 mapping).
 # Enable only on realms dedicated to the matching Ascension client build.

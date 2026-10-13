@@ -69,6 +69,7 @@
 #include "GameObjectAI.h"
 #include "GlobalScript.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "Item.h"
 #include "LootMgr.h"
 #include "Map.h"
