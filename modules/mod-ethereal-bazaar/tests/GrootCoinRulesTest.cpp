@@ -169,3 +169,14 @@ TEST(GrootCoinRules, ExchangeAllTakesExactlyTheCarriedCoins)
     EXPECT_FALSE(IsExchangeAmount(3, 0));
     EXPECT_EQ(TokensFor(7, 100, 5000000), 700u);
 }
+
+TEST(GrootCoinRules, PopupOfferMustMatchCoinsAndRate)
+{
+    EXPECT_TRUE(MatchesOffer(3, 100, 300));
+    EXPECT_TRUE(MatchesOffer(10, 100, 1000));
+    EXPECT_FALSE(MatchesOffer(4, 100, 300));   // carried changed after the pop-up
+    EXPECT_FALSE(MatchesOffer(3, 120, 300));   // rate changed after the pop-up
+    EXPECT_FALSE(MatchesOffer(0, 100, 0));
+    EXPECT_FALSE(MatchesOffer(3, 0, 0));
+    EXPECT_FALSE(MatchesOffer(50000000, 100, 705032704u)); // no wrap-around
+}

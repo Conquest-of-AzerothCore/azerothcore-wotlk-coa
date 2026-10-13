@@ -178,12 +178,14 @@ claimed or deleted. `.groot inspect <award-id>` shows whether the mail is still 
 
 ## How the exchange stays exactly-once
 
-Player flow: Tiraxis -> "I want to exchange Groot Coins" -> the carried balance and rate in Tiraxis' text -> 1, 5, 10 or "Exchange all N" -> a
-confirmation with a pop-up -> result. Back and Cancel spend nothing.
+Player flow: Tiraxis -> "I want to exchange Groot Coins" -> the carried balance and rate in Tiraxis' text -> 1, 5, 10 or "Exchange all N" -> one
+client pop-up ("Exchange 3 Groot Coins for 300 Bazaar Tokens?") -> result. Back and the pop-up's Cancel spend nothing.
 
 - Only coins in the backpack and equipped bags count; bank, mail, guild bank, buyback and auction coins never do.
-- Choosing an amount stores a server-side quote (random nonce, NPC GUID, coins, tokens, rate) valid 60 seconds.
-  Confirming consumes it once; a stale, replayed, different-NPC or changed-rate confirmation is rejected.
+- Each option carries the token payout its pop-up named. On OK the server recounts the carried coins and the
+  current rate; if the coins (for "all"), the rate or the payout no longer match the pop-up, nothing is exchanged
+  and the player is told the offer expired. The exchange itself then runs through `TryExchange` (quote and
+  confirm in one call) with the same checks and full rollback.
 - The payout is the integer rate times the coins, checked for overflow and against the token stack size. The
   tokens must fit one free slot or an existing stack; otherwise nothing happens. Bazaar Tokens are a currency
   (BagFamily 8192), so they normally go to the Currency tab and full bags do not block an exchange. The slot a
@@ -219,8 +221,9 @@ GrootCoin::ExchangeResult result = GrootCoin::TryExchange(player, vendor, coins)
 ChatHandler(player->GetSession()).SendSysMessage(std::string(GrootCoin::Describe(result)));
 ```
 
-`TryExchange` quotes and confirms in one call, for a UI that already asked the player to confirm. A gossip UI
-can use `CreateQuote` / `ConfirmQuote` / `CancelQuote` as Tiraxis does. The vendor must be a creature the player
+`TryExchange` quotes and confirms in one call, for a UI that already asked the player to confirm. Tiraxis uses
+it behind the gossip pop-up; a UI that needs a separate confirmation step can use `CreateQuote` / `ConfirmQuote` /
+`CancelQuote`. The vendor must be a creature the player
 can interact with; the tokens arrive as ordinary Bazaar Tokens, so anything that charges item 975001 can spend
 them. Keep any new gossip action ids clear of 9100-9199 on Tiraxis.
 

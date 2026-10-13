@@ -205,6 +205,13 @@ namespace GrootCoin
         return coins != 0 && coins == carried;
     }
 
+    // The pop-up the player accepted named these tokens; the exchange runs only
+    // if the coins and the current rate still give exactly that payout.
+    inline bool MatchesOffer(uint32_t coins, uint32_t tokensPerCoin, uint32_t offeredTokens)
+    {
+        return coins != 0 && tokensPerCoin != 0 && uint64_t(coins) * tokensPerCoin == offeredTokens;
+    }
+
     inline bool IsExchangeBundle(uint32_t coins)
     {
         for (uint32_t const bundle : EXCHANGE_BUNDLES)

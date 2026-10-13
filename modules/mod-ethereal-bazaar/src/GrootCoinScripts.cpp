@@ -14,6 +14,8 @@
 #include "ScriptedGossip.h"
 #include "WorldSession.h"
 
+#include <limits>
+
 namespace GrootCoin::TiraxisMenu
 {
     namespace
@@ -58,6 +60,22 @@ namespace GrootCoin::TiraxisMenu
             }
         }
 
+        std::string Coins(uint32 coins)
+        {
+            return Acore::StringFormat("{} Groot Coin{}", coins, coins == 1 ? "" : "s");
+        }
+
+        // One option per amount. The client's own pop-up is the only confirmation;
+        // the sender carries the token payout the pop-up named, re-checked on OK.
+        void AddOffer(Player* player, std::string const& label, uint32 coins, uint32 rate, uint32 action)
+        {
+            uint64 const tokens = uint64(coins) * rate;
+            if (tokens > std::numeric_limits<uint32>::max())
+                return;
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, label, uint32(tokens), action,
+                Acore::StringFormat("Exchange {} for {} Bazaar Tokens?", Coins(coins), tokens), 0, false);
+        }
+
         void ShowExchange(Player* player, Creature* creature)
         {
             uint32 const carried = CarriedCoins(player);
@@ -66,25 +84,14 @@ namespace GrootCoin::TiraxisMenu
             ClearGossipMenuFor(player);
             for (uint32 const coins : EXCHANGE_BUNDLES)
                 if (carried >= coins)
-                    AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Acore::StringFormat("Exchange {} Groot Coin(s) for {} "
-                        "Bazaar Tokens.", coins, coins * rate), GOSSIP_SENDER_GROOT, BundleAction(coins));
+                    AddOffer(player, Acore::StringFormat("Exchange {} for {} Bazaar Tokens.", Coins(coins),
+                        uint64(coins) * rate), coins, rate, BundleAction(coins));
             if (carried >= 1)
-                AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Acore::StringFormat("Exchange all {} Groot Coin(s) for {} "
-                    "Bazaar Tokens.", carried, uint64(carried) * rate), GOSSIP_SENDER_GROOT, GOSSIP_GROOT_ALL);
+                AddOffer(player, Acore::StringFormat("Exchange all {} for {} Bazaar Tokens.", Coins(carried),
+                    uint64(carried) * rate), carried, rate, GOSSIP_GROOT_ALL);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Back.", GOSSIP_SENDER_GROOT, GOSSIP_GROOT_BACK);
             player->PlayerTalkClass->SendDynamicGossipMenu(Acore::StringFormat("You carry {} Groot Coin(s). One coin "
                 "is worth {} Bazaar Tokens.", carried, rate), creature->GetGUID());
-        }
-
-        void ShowConfirmation(Player* player, Creature* creature, Quote const& quote)
-        {
-            std::string const offer = Acore::StringFormat("Exchange {} Groot Coin(s) for {} Bazaar Tokens?",
-                quote.coins, quote.tokens);
-            ClearGossipMenuFor(player);
-            AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, Acore::StringFormat("Confirm: {} Groot Coin(s) for {} "
-                "Bazaar Tokens.", quote.coins, quote.tokens), quote.nonce, GOSSIP_GROOT_CONFIRM, offer, 0, false);
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Cancel.", GOSSIP_SENDER_GROOT, GOSSIP_GROOT_CANCEL);
-            SendGossipMenuFor(player, TIRAXIS_TEXT_ID, creature);
         }
 
         void Tell(Player* player, std::string_view text)
@@ -122,30 +129,21 @@ namespace GrootCoin::TiraxisMenu
                 CancelQuote(player);
                 sScriptMgr->OnGossipHello(player, creature);
                 return;
-            case GOSSIP_GROOT_CONFIRM:
-            {
-                CloseGossipMenuFor(player);
-                ExchangeResult const result = ConfirmQuote(player, vendor, sender);
-                if (result != ExchangeResult::Ok)
-                    Tell(player, Describe(result));
-                return;
-            }
             default:
                 break;
         }
 
-        if (uint32 const coins = action == GOSSIP_GROOT_ALL ? CarriedCoins(player) : BundleCoins(action))
-        {
-            Quote quote;
-            ExchangeResult const result = CreateQuote(player, vendor, coins, quote);
-            if (result == ExchangeResult::Ok)
-            {
-                ShowConfirmation(player, creature, quote);
-                return;
-            }
-            Tell(player, Describe(result));
-        }
         CloseGossipMenuFor(player);
+        uint32 const coins = action == GOSSIP_GROOT_ALL ? CarriedCoins(player) : BundleCoins(action);
+        if (!coins)
+            return;
+
+        // The player already accepted the pop-up. Coins carried, rate and payout
+        // must still match what it showed; TryExchange re-validates and rolls back.
+        ExchangeResult const result = MatchesOffer(coins, GetSettings().tokensPerCoin, sender)
+            ? TryExchange(player, vendor, coins) : ExchangeResult::InvalidQuote;
+        if (result != ExchangeResult::Ok)
+            Tell(player, Describe(result));
     }
 }
 
