@@ -362,6 +362,12 @@ namespace
     constexpr uint32 GO_RFD_GONG = 148917;
     constexpr uint32 SEGMENT_TUTEN_KASH_ENDGAME = 294;
     constexpr uint32 SEGMENT_PLAGUEMAW_ENDGAME = 689;
+    // Ragglesnout is a genuinely rare native RFD dungeon spawn.
+    // Both of these are recovered original Manastorm segment identities;
+    // 9999 is the original Normal encounter ID, not a replacement value.
+    constexpr uint32 NPC_RAGGLESNOUT = 7354;
+    constexpr uint32 SEGMENT_RAGGLESNOUT_NORMAL = 692;
+    constexpr uint32 SEGMENT_RAGGLESNOUT_ENDGAME = 690;
 
     // Native TrinityCore 3.3.5 RFD gong's final Tuten'kash summon
     // position (not the player-authored game_tele 2158 arrival point).
@@ -1364,6 +1370,137 @@ namespace
         return true;
     }
 
+    bool BootstrapRazorfenDownsRagglesnoutEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_RAZORFEN_DOWNS ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            segment.MapId != MANASTORM_MAP_RAZORFEN_DOWNS ||
+            segment.ObjectiveCreatureEntry != NPC_RAGGLESNOUT ||
+            !((segment.SegmentId == SEGMENT_RAGGLESNOUT_NORMAL &&
+               segment.Difficulty == 0 &&
+               segment.DungeonEncounterId == 9999) ||
+              (segment.SegmentId == SEGMENT_RAGGLESNOUT_ENDGAME &&
+               segment.Difficulty == 2 &&
+               segment.DungeonEncounterId == 2619)))
+        {
+            error = "Ragglesnout bootstrap received a nonmatching private Razorfen Downs stage.";
+            return false;
+        }
+
+        // In an ordinary Razorfen Downs instance, Ragglesnout is a
+        // random rare. The recovered Manastorm segment explicitly
+        // selects him, so this disposable private stage must ensure
+        // the original spawn exists, without editing the common world
+        // table or spawning a creature at the player's teleport.
+        //
+        // Look up actual native spawn coordinates/GUID at runtime.
+        // The player's teleport is an arrival/reference point ONLY;
+        // the original boss remains at the DB-authored spawn point.
+        QueryResult result = WorldDatabase.Query(
+            "SELECT `guid`, `position_x`, `position_y` "
+            "FROM `creature` "
+            "WHERE `map` = 129 AND `id` = 7354 "
+            "AND (`spawnMask` & 1) <> 0 "
+            "ORDER BY POW(`position_x` - {}, 2) + "
+            "POW(`position_y` - {}, 2), `guid` LIMIT 1",
+            2413.95f, 897.604f);
+
+        if (!result)
+        {
+            error = "Native Ragglesnout (7354) spawn not found in the Razorfen Downs world DB.";
+            return false;
+        }
+
+        Field* fields = result->Fetch();
+        ObjectGuid::LowType const spawnId = fields[0].Get<uint32>();
+        float const spawnX = fields[1].Get<float>();
+        float const spawnY = fields[2].Get<float>();
+
+        CreatureData const* spawnData = sObjectMgr->GetCreatureData(spawnId);
+        if (!spawnData ||
+            spawnData->mapid != MANASTORM_MAP_RAZORFEN_DOWNS ||
+            spawnData->id != NPC_RAGGLESNOUT)
+        {
+            error = "Ragglesnout native spawn does not resolve to NPC 7354 on map 129.";
+            return false;
+        }
+
+        map->LoadGrid(spawnX, spawnY);
+
+        // Prefer an already-existing native creature, preserving its
+        // DB spawn identity, rarity, movement and combat behavior.
+        // The instance's object index is local, not a global map scan.
+        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        {
+            Creature* existing = spawn.second;
+            if (!existing || !existing->IsInWorld() ||
+                !existing->IsAlive() ||
+                existing->GetEntry() != NPC_RAGGLESNOUT)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(existing);
+            if (run.GetObjectiveCreatureGuid() != existing->GetGUID())
+            {
+                error = "Existing native Ragglesnout did not register as the Manastorm objective.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER,
+                "Reused native RFD rare Ragglesnout in private Manastorm: "
+                "run={} segment={} instance={} spawn={} guid={}.",
+                run.GetRunId(), segment.SegmentId,
+                run.GetInstanceId(), existing->GetSpawnId(),
+                existing->GetGUID().GetRawValue());
+            return true;
+        }
+
+        // The selected rare may be absent due to its normal respawn
+        // timer or pool selection. The Manastorm copy owns its own
+        // disposable respawn state; never modify the live dungeon.
+        map->RemoveCreatureRespawnTime(spawnId);
+
+        Creature* ragglesnout = new Creature();
+        if (!ragglesnout->LoadCreatureFromDB(
+                spawnId, map, true, true))
+        {
+            delete ragglesnout;
+            error = "Could not load native Ragglesnout DB spawn into private Razorfen Downs.";
+            return false;
+        }
+
+        if (!ragglesnout->IsInWorld() ||
+            !ragglesnout->IsAlive() ||
+            ragglesnout->GetEntry() != NPC_RAGGLESNOUT)
+        {
+            ragglesnout->AddObjectToRemoveList();
+            error = "Ragglesnout DB spawn loaded but did not create a living NPC 7354.";
+            return false;
+        }
+
+        ManastormMgr::Instance().OnCreatureAddWorld(ragglesnout);
+        if (run.GetObjectiveCreatureGuid() != ragglesnout->GetGUID())
+        {
+            ragglesnout->AddObjectToRemoveList();
+            error = "Native Ragglesnout failed to register as the Manastorm objective.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER,
+            "Restored native RFD Ragglesnout rare for private Manastorm: "
+            "run={} segment={} instance={} spawn={} guid={}.",
+            run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+            spawnId, ragglesnout->GetGUID().GetRawValue());
+        return true;
+    }
+
     bool BootstrapRazorfenDownsPlaguemawEncounter(
         Map* map,
         ManastormRun& run,
@@ -1799,6 +1936,11 @@ namespace
 
         case SEGMENT_PLAGUEMAW_ENDGAME:
             return BootstrapRazorfenDownsPlaguemawEncounter(
+                map, run, error);
+
+        case SEGMENT_RAGGLESNOUT_NORMAL:
+        case SEGMENT_RAGGLESNOUT_ENDGAME:
+            return BootstrapRazorfenDownsRagglesnoutEncounter(
                 map, run, error);
 
         case SEGMENT_GAHZRILLA_NORMAL:
