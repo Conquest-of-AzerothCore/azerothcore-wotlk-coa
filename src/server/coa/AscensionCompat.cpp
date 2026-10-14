@@ -408,7 +408,8 @@ constexpr uint32 COMPANION_SPELL_BATCH_INTERVAL_MS = 200;
 
 enum AscensionItems : uint32
 {
-    ITEM_HEARTWOOD_KEY = 1041710
+    ITEM_HEARTWOOD_KEY = 1041710,
+    ITEM_CUIRBOULLI_BOOTS = 2143
 };
 
 constexpr std::array<uint32, 9> BUSHCRAFT_CRAFTED_ITEMS =
@@ -9927,6 +9928,7 @@ void AppendConfiguredClientConfigs(AscensionClientConfig& config) {
 
 void AddAscensionCompatScripts() {
   Ascension::ClientItemPatches::Instance().Register(ITEM_HEARTWOOD_KEY);
+  Ascension::ClientItemPatches::Instance().Register(ITEM_CUIRBOULLI_BOOTS);
   for (uint32 itemId : BUSHCRAFT_CRAFTED_ITEMS)
     Ascension::ClientItemPatches::Instance().Register(itemId);
   RegisterAscensionClientConfig([](AscensionClientConfig& config) {
