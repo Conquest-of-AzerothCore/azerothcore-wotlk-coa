@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
-#include <limits>
 #include <optional>
 #include <vector>
 
@@ -69,7 +68,6 @@ namespace
 
     std::atomic<bool> enabled{true};
     std::atomic<bool> autoOffer{true};
-    std::atomic<uint32> loginOfferLimit{2};
 
     bool IsCallBoard(uint32 entry)
     {
@@ -126,28 +124,17 @@ namespace
         return nullptr;
     }
 
-    void OfferZoneOrders(Player* player, uint32 previousLevel, std::size_t limit)
+    void OfferZoneOrdersUnlockedSince(Player* player, uint32 previousLevel)
     {
-        std::vector<Quest const*> orders;
         auto const starters = sObjectMgr->GetGOQuestRelationBounds(FactionBoard(player));
         for (auto itr = starters.first; itr != starters.second; ++itr)
         {
             Quest const* quest = sObjectMgr->GetQuestTemplate(itr->second);
-            if (quest && IsZoneOrder(quest) && quest->GetMinLevel() > previousLevel
-                && quest->GetMinLevel() <= player->GetLevel() && player->CanSeeStartQuest(quest)
-                && player->CanTakeQuest(quest, false))
-                orders.push_back(quest);
-        }
+            if (!quest || !IsZoneOrder(quest) || quest->GetMinLevel() <= previousLevel
+                || quest->GetMinLevel() > player->GetLevel() || !player->CanSeeStartQuest(quest)
+                || !player->CanTakeQuest(quest, false))
+                continue;
 
-        std::sort(orders.begin(), orders.end(), [](Quest const* left, Quest const* right)
-        {
-            return left->GetMinLevel() != right->GetMinLevel() ? left->GetMinLevel() > right->GetMinLevel()
-                : left->GetQuestId() < right->GetQuestId();
-        });
-        orders.resize(std::min(orders.size(), limit));
-
-        for (Quest const* quest : orders)
-        {
             WorldPacket offer(SmsgAutoQuestUpdate, 2 * sizeof(uint32));
             offer << quest->GetQuestId() << AutoQuestOffer;
             player->SendDirectMessage(&offer);
@@ -303,19 +290,12 @@ class HeroCallBoardPlayers final : public PlayerScript
 public:
     HeroCallBoardPlayers() : PlayerScript("HeroCallBoardPlayers",
         { PLAYERHOOK_ON_REFRESH_QUEST_GIVER, PLAYERHOOK_ON_QUEST_ABANDON, PLAYERHOOK_ON_DUEL_END,
-            PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_LEVEL_CHANGED,
-            PLAYERHOOK_ON_LOGIN }) { }
-
-    void OnPlayerLogin(Player* player) override
-    {
-        if (OffersZoneOrders(player))
-            OfferZoneOrders(player, 0, loginOfferLimit.load());
-    }
+            PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_LEVEL_CHANGED }) { }
 
     void OnPlayerLevelChanged(Player* player, uint8 oldLevel) override
     {
         if (OffersZoneOrders(player) && player->GetLevel() > oldLevel)
-            OfferZoneOrders(player, oldLevel, std::numeric_limits<std::size_t>::max());
+            OfferZoneOrdersUnlockedSince(player, oldLevel);
     }
 
     void OnPlayerCreatureKill(Player* killer, Creature* killed) override { CreditRaidLeader(killer, killed); }
@@ -475,7 +455,6 @@ public:
     {
         enabled.store(sConfigMgr->GetOption<bool>("HeroCallBoard.Enable", true));
         autoOffer.store(sConfigMgr->GetOption<bool>("HeroCallBoard.AutoOffer", true));
-        loginOfferLimit.store(sConfigMgr->GetOption<uint32>("HeroCallBoard.AutoOffer.LoginLimit", 2));
     }
 };
 

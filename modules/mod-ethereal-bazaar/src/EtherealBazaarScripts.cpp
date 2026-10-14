@@ -4,6 +4,7 @@
  */
 
 #include "EtherealBazaar.h"
+#include "GrootCoin.h"
 
 #include "Chat.h"
 #include "Configuration/Config.h"
@@ -58,14 +59,21 @@ public:
                          GOSSIP_SENDER, GOSSIP_STONES);
         AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to browse Heirlooms.",
                          GOSSIP_SENDER, GOSSIP_HEIRLOOMS);
+        GrootCoin::TiraxisMenu::AddEntry(player);
         SendGossipMenuFor(player, GOSSIP_TEXT_ID, creature);
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
     {
         if (!Enabled())
             return false;
+
+        if (GrootCoin::TiraxisMenu::IsAction(action))
+        {
+            GrootCoin::TiraxisMenu::OnSelect(player, creature, sender, action);
+            return true;
+        }
 
         // The rotating list lives on the creature's own entry, so it opens with
         // no vendor entry at all. The two fixed lists carry their own entries;

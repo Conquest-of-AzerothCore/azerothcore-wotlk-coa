@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Exposed Flesh has a shared 1 s internal cooldown (COA-5796)",
+  "contract": [
+    "Exposed Flesh's passive (92144, helper 805098, ProcChance 50) granted a stack of Exposed Flesh 805095 on every",
+    "incoming non-periodic hit that won the 50% roll, so a crowd of attackers stacked it almost at once. On Ascension it",
+    "has an internal cooldown of about 1 s shared by every attacker. Chance(player, 805098, 1000) now schedules a 1000 ms",
+    "per-player cooldown. Eight aggressive level 80 gnolls swing for 6 s (about 24 hits): without the",
+    "cooldown Exposed Flesh reaches its 10-stack cap, with it at most 7 stacks (one per second at worst)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "v",
+      "spell": 10040,
+      "stacks": 20
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 92144
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 803183,
+      "label": "Enter Beetle Form"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Beetle Form",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 803183,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Exposed Flesh proc helper is active",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805098,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the crowd is attacking",
+      "actor": "g0",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the crowd's hits grant Exposed Flesh",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805095,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let any earlier proc's cooldown run out",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear Exposed Flesh",
+      "actor": "v",
+      "spell": 805095,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 100000
+    },
+    {
+      "action": "wait",
+      "label": "Eight attackers swing for 6 s",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with a shared 1 s internal cooldown, 6 s of hits grant at most 7 stacks",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 805095,
+      "max": 7
+    }
+  ],
+  "creatures": [
+    {
+      "id": "g0",
+      "owner": "v",
+      "entry": 16334,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    },
+    {
+      "id": "g1",
+      "owner": "v",
+      "entry": 16334,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    },
+    {
+      "id": "g2",
+      "owner": "v",
+      "entry": 16334,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    },
+    {
+      "id": "g3",
+      "owner": "v",
+      "entry": 16334,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    },
+    {
+      "id": "g4",
+      "owner": "v",
+      "entry": 16334,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    },
+    {
+      "id": "g5",
+      "owner": "v",
+      "entry": 16334,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    },
+    {
+      "id": "g6",
+      "owner": "v",
+      "entry": 16334,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    },
+    {
+      "id": "g7",
+      "owner": "v",
+      "entry": 16334,
+      "faction": 14,
+      "level": 80,
+      "health": 100000,
+      "reaction": 2,
+      "distance": 3
+    }
+  ]
+}

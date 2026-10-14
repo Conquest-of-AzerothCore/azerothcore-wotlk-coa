@@ -897,7 +897,8 @@ class spell_pal_holy_shock : public SpellScript
             return false;
 
         // can't use other spell than holy shock due to spell_ranks dependency
-        if (!spellInfo->IsRankOf(firstRankSpellInfo))
+        SpellInfo const* stockInfo = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(spellInfo->Id));
+        if (!stockInfo || !stockInfo->IsRankOf(firstRankSpellInfo))
             return false;
 
         uint8 rank = spellInfo->GetRank();
@@ -913,10 +914,9 @@ class spell_pal_holy_shock : public SpellScript
         if (Unit* unitTarget = GetHitUnit())
         {
             uint8 rank = GetSpellInfo()->GetRank();
-            if (caster->IsFriendlyTo(unitTarget))
-                caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(SPELL_PALADIN_HOLY_SHOCK_R1_HEALING, rank), true);
-            else
-                caster->CastSpell(unitTarget, sSpellMgr->GetSpellWithRank(SPELL_PALADIN_HOLY_SHOCK_R1_DAMAGE, rank), true);
+            uint32 const stockSpell = sSpellMgr->GetSpellWithRank(caster->IsFriendlyTo(unitTarget) ?
+                SPELL_PALADIN_HOLY_SHOCK_R1_HEALING : SPELL_PALADIN_HOLY_SHOCK_R1_DAMAGE, rank);
+            caster->CastSpell(unitTarget, sSpellMgr->GetSpellTwinFor(stockSpell, GetSpellInfo()->Id), true);
         }
     }
 
@@ -1215,7 +1215,8 @@ class spell_pal_seal_of_righteousness : public AuraScript
         }
 
         int32 bp = std::max<int32>(0, int32((ap * 0.022f + 0.044f * holy) * GetTarget()->GetAttackTime(BASE_ATTACK) / 1000));
-        GetTarget()->CastCustomSpell(SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, SPELLVALUE_BASE_POINT0, bp, eventInfo.GetProcTarget(), true, nullptr, aurEff);
+        uint32 const damageSpell = sSpellMgr->GetSpellTwinFor(SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, GetId());
+        GetTarget()->CastCustomSpell(damageSpell, SPELLVALUE_BASE_POINT0, bp, eventInfo.GetProcTarget(), true, nullptr, aurEff);
 
         // Judgements of the Just: Seal of Righteousness procs
         // twice from Judgements
@@ -1223,7 +1224,7 @@ class spell_pal_seal_of_righteousness : public AuraScript
             HasJudgementsOfTheJust(GetTarget()))
         {
             GetTarget()->CastCustomSpell(
-                SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS,
+                damageSpell,
                 SPELLVALUE_BASE_POINT0, bp,
                 eventInfo.GetProcTarget(), true, nullptr, aurEff);
         }
@@ -1250,7 +1251,12 @@ class spell_pal_judgements_of_the_wise : public AuraScript
     {
         PreventDefaultAction();
         Unit* caster = GetTarget();
-        caster->CastSpell(caster, SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA, true, nullptr, aurEff);
+        uint32 const rebornMana = sSpellMgr->GetSpellTwinFor(SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA, GetId());
+        if (rebornMana != SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA)
+            caster->CastCustomSpell(SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA, SPELLVALUE_BASE_POINT0,
+                sSpellMgr->AssertSpellInfo(rebornMana)->Effects[EFFECT_0].CalcValue(caster), caster, true, nullptr, aurEff);
+        else
+            caster->CastSpell(caster, SPELL_PALADIN_JUDGEMENTS_OF_THE_WISE_MANA, true, nullptr, aurEff);
         caster->CastSpell(caster, SPELL_PALADIN_REPLENISHMENT, true, nullptr, aurEff);
     }
 

@@ -580,6 +580,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     target->SendNewItem(newitem, uint32(item.count), false, false, true);
     LocalLevelScaling::NotifyMasterLoot(target, newitem);
     target->UpdateLootAchievements(&item, loot);
+    sScriptMgr->OnPlayerMasterLootItem(target, newitem, uint32(item.count), lootguid);
 
     // mark as looted
     item.count = 0;

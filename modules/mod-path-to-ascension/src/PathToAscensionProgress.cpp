@@ -6,6 +6,8 @@
 #include "AllCreatureScript.h"
 #include "AllGameObjectScript.h"
 #include "AllSpellScript.h"
+#include "AscensionAverageItemLevel.h"
+#include "AscensionItemPower.h"
 #include "AuctionHouseMgr.h"
 #include "Battleground.h"
 #include "Config.h"
@@ -46,7 +48,6 @@ namespace PathToAscension
     namespace
     {
         constexpr uint16 SMSG_TUTORIAL_PATCH = 0x06A5;
-        constexpr uint32 MaxItemPower = 1000;
 
         Catalog catalog;
         Settings settings;
@@ -117,7 +118,6 @@ namespace PathToAscension
         uint32 EquippedItemPower(Player const* player, bool pvp)
         {
             uint32 power = 0;
-            std::string_view const prefix = pvp ? "PvP Power (+" : "PvE Power (+";
             for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
             {
                 Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
@@ -125,26 +125,7 @@ namespace PathToAscension
                     continue;
 
                 // Original equipment carries its PvE/PvP power as an on-equip marker spell.
-                for (auto const& effect : item->GetTemplate()->Spells)
-                {
-                    if (effect.SpellTrigger != ITEM_SPELLTRIGGER_ON_EQUIP)
-                        continue;
-
-                    SpellInfo const* spell = sSpellMgr->GetSpellInfo(effect.SpellId);
-                    if (!spell || !spell->SpellName[0])
-                        continue;
-
-                    std::string_view const name(spell->SpellName[0]);
-                    if (!name.starts_with(prefix) || !name.ends_with(')'))
-                        continue;
-
-                    uint32 amount = 0;
-                    char const* first = name.data() + prefix.size();
-                    char const* last = name.data() + name.size() - 1;
-                    auto const parsed = std::from_chars(first, last, amount);
-                    if (parsed.ec == std::errc() && parsed.ptr == last && amount <= MaxItemPower)
-                        power += amount;
-                }
+                power += AscensionItemPower::OfItem(item->GetTemplate(), pvp);
             }
 
             return power;
@@ -154,7 +135,7 @@ namespace PathToAscension
         {
             // Explicit equipped-average item level thresholds. Where the installed client carries two
             // conflicting values for a Vanilla prerequisite, the higher one satisfies both.
-            float const itemLevel = player->GetAverageItemLevel();
+            float const itemLevel = AscensionAverageItemLevel::Equipped(player);
             for (auto const [tutorialId, threshold] : {std::pair{10u, 40u}, {200u, 52u}, {201u, 58u}, {202u, 62u},
                 {203u, 62u}, {204u, 64u}, {205u, 69u}, {206u, 75u}, {207u, 80u}, {208u, 92u}, {209u, 95u},
                 {210u, 100u}, {211u, 108u}, {212u, 114u}, {213u, 116u}, {214u, 134u}, {215u, 134u},
