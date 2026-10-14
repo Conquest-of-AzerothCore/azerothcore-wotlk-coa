@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "name": "Infused, Infernos of Elemental Fury (Normal): Infernal Strike tiles, burn stacks and weapon hit",
+  "contract": "Using the equipped axe casts Infernal Strike (909834, 2 s cast): 3 min cooldown, the caster is rooted, 7 tiles run in a straight line in front of the caster; every enemy in a tile gets an Infernal Strike Burn stack (909842, 125 Fire/s for 30 s) per tile and the weapon hit (909838) once. Enemies past the last tile are untouched.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "warrior",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "far",
+      "owner": "warrior",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 17,
+      "stationary": true
+    },
+    {
+      "id": "outside",
+      "owner": "warrior",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 40,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 998102
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 998102,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "Axe is equipped",
+      "actor": "warrior",
+      "metric": "item_count",
+      "item": 998102,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Equipping applies the normal 30 s on-use cooldown",
+      "actor": "warrior",
+      "metric": "cooldown_ms",
+      "spell": 909834,
+      "min": 25000,
+      "max": 30000
+    },
+    {
+      "action": "wait",
+      "label": "Let the equip cooldown expire",
+      "ms": 31000
+    },
+    {
+      "action": "assert",
+      "label": "Equip cooldown expired",
+      "actor": "warrior",
+      "metric": "cooldown_ms",
+      "spell": 909834,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "hp0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "warrior",
+      "metric": "spell_go_count",
+      "spell": 909834,
+      "save_as": "go0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "warrior",
+      "metric": "spell_go_count",
+      "spell": 909844,
+      "save_as": "line0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "warrior",
+      "metric": "spell_go_count",
+      "spell": 909838,
+      "save_as": "hit0"
+    },
+    {
+      "action": "use_item",
+      "label": "Use Infernal Strike",
+      "actor": "warrior",
+      "item": 998102,
+      "spell": 909834,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Use is not rejected",
+      "actor": "warrior",
+      "metric": "cast_failure",
+      "spell": 909834,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Infernal Strike goes off",
+      "actor": "warrior",
+      "metric": "spell_go_count",
+      "spell": 909834,
+      "relative_to": "go0",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Infernal Strike starts its cooldown",
+      "actor": "warrior",
+      "metric": "cooldown_ms",
+      "spell": 909834,
+      "min": 170000
+    },
+    {
+      "action": "assert",
+      "label": "Caster is rooted by Infernal Strike Root",
+      "actor": "warrior",
+      "metric": "aura",
+      "spell": 909843,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Dummy is hit by the Normal damage spell",
+      "actor": "warrior",
+      "metric": "spell_damage_count",
+      "spell": 909838,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Dummy burns",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 909842,
+      "caster": "warrior",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Far enemy down the line also burns",
+      "actor": "far",
+      "metric": "aura",
+      "spell": 909842,
+      "caster": "warrior",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Far enemy takes the weapon hit exactly once",
+      "actor": "warrior",
+      "metric": "spell_damage_count",
+      "spell": 909838,
+      "target": "far",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Dummy takes the weapon hit exactly once",
+      "actor": "warrior",
+      "metric": "spell_damage_count",
+      "spell": 909838,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Enemy past the last tile is untouched",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 909842,
+      "caster": "warrior",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Server sends the Line tile visual spell exactly 7 times",
+      "actor": "warrior",
+      "metric": "spell_go_count",
+      "spell": 909844,
+      "relative_to": "line0",
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Server sends the weapon-hit spell once per struck enemy (2)",
+      "actor": "warrior",
+      "metric": "spell_go_count",
+      "spell": 909838,
+      "relative_to": "hit0",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Normal-sized target in one tile gets exactly 1 Burn stack: dummy",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 909842,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Normal-sized target in one tile gets exactly 1 Burn stack: far enemy",
+      "actor": "far",
+      "metric": "aura_stacks",
+      "spell": 909842,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Dummy takes the strike's damage",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "hp0",
+      "max": -1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "hp1"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Dummy keeps burning afterwards",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "hp1",
+      "max": -400
+    }
+  ]
+}
