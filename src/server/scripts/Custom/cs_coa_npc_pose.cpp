@@ -4,6 +4,7 @@
  *   .npcemote <id>          looping emote state
  *   .npcnudge <dx> <dy> <dz> move by an exact offset from the current spawn point
  *   .npcface [orientation]  turn to an angle, or to the player's facing
+ *   .npcsheath <0|1|2>      weapons put away, melee weapons and shield in hand, or ranged weapon in hand
  * Every change applies at once and is saved for that spawn, so it survives a restart.
  */
 
@@ -31,7 +32,8 @@ public:
             { "npcpose",  HandleNpcPoseCommand,  SEC_GAMEMASTER, Console::No },
             { "npcemote", HandleNpcEmoteCommand, SEC_GAMEMASTER, Console::No },
             { "npcnudge", HandleNpcNudgeCommand, SEC_GAMEMASTER, Console::No },
-            { "npcface",  HandleNpcFaceCommand,  SEC_GAMEMASTER, Console::No }
+            { "npcface",  HandleNpcFaceCommand,  SEC_GAMEMASTER, Console::No },
+            { "npcsheath", HandleNpcSheathCommand, SEC_GAMEMASTER, Console::No }
         };
         return commandTable;
     }
@@ -48,7 +50,7 @@ public:
     }
 
     // Keeps the loaded addon data in step with the database so a respawn shows the saved pose.
-    static void RememberAddon(ObjectGuid::LowType spawnId, Optional<uint32> bytes1, Optional<uint32> emote)
+    static void RememberAddon(ObjectGuid::LowType spawnId, Optional<uint32> bytes1, Optional<uint32> emote, Optional<uint8> sheath = {})
     {
         if (CreatureAddon const* addon = sObjectMgr->GetCreatureAddon(spawnId))
         {
@@ -56,6 +58,8 @@ public:
                 const_cast<CreatureAddon*>(addon)->bytes1 = *bytes1;
             if (emote)
                 const_cast<CreatureAddon*>(addon)->emote = *emote;
+            if (sheath)
+                const_cast<CreatureAddon*>(addon)->bytes2 = (addon->bytes2 & ~0xFFu) | *sheath;
         }
     }
 
@@ -90,6 +94,27 @@ public:
         WorldDatabase.Execute("INSERT INTO `creature_addon` (`guid`, `bytes2`, `emote`) VALUES ({}, 1, {}) "
             "ON DUPLICATE KEY UPDATE `emote` = {}", creature->GetSpawnId(), emote, emote);
         handler->PSendSysMessage("Creature (GUID: {}) animation {} saved", creature->GetSpawnId(), emote);
+        return true;
+    }
+
+    // Sheath state is the low byte of bytes2; the other bytes (PvP and pet flags) are kept.
+    static bool HandleNpcSheathCommand(ChatHandler* handler, uint32 sheath)
+    {
+        if (sheath >= MAX_SHEATH_STATE)
+        {
+            handler->SendErrorMessage("Sheath must be 0 (weapons away), 1 (melee in hand) or 2 (ranged in hand).");
+            return false;
+        }
+
+        Creature* creature = SelectedSpawn(handler);
+        if (!creature)
+            return false;
+
+        creature->SetSheath(SheathState(sheath));
+        RememberAddon(creature->GetSpawnId(), {}, {}, uint8(sheath));
+        WorldDatabase.Execute("INSERT INTO `creature_addon` (`guid`, `bytes2`) VALUES ({}, {}) "
+            "ON DUPLICATE KEY UPDATE `bytes2` = (`bytes2` & ~255) | {}", creature->GetSpawnId(), sheath, sheath);
+        handler->PSendSysMessage("Creature (GUID: {}) sheath {} saved", creature->GetSpawnId(), sheath);
         return true;
     }
 

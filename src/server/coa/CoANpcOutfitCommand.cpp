@@ -5,6 +5,9 @@
  * creature_display_preset (item display ids, keeping an existing preset's race, face and hair, or taking race and gender
  * from the NPC's model), the weapons its creature_equip_template. The presets are reloaded and the selected NPC and the
  * other NPCs of that entry nearby are redrawn at once; every other spawn of the entry shows it after a restart.
+ *   .npclook [skin|face|hair|haircolor|facialhair] [next|prev|<value>]
+ * Changes the selected NPC's skin colour, face, hair style, hair colour or facial hair, using only the choices the client
+ * has for the NPC's own race and gender; with no part it reports the current look. Saved in the entry's preset.
  */
 
 #include "AscensionCreaturePreset.h"
@@ -16,11 +19,16 @@
 #include "Language.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "StringConvert.h"
 #include "UnitDefines.h"
 #include "WorldPacket.h"
+#include <algorithm>
 #include <array>
+#include <iterator>
 #include <list>
+#include <set>
 #include <sstream>
+#include <vector>
 
 using namespace Acore::ChatCommands;
 
@@ -47,6 +55,70 @@ namespace
 
     char const* const PRESET_COLUMNS[11] = { "item_head", "item_shoulders", "item_body", "item_chest", "item_waist", "item_legs",
                                              "item_feet", "item_wrists", "item_hands", "item_back", "item_tabard" };
+
+    // The client's texture choices for one race and gender: the variations of a section, or, given a variation, its colours;
+    // a colour narrows the variations to those drawn in that colour (faces per skin colour).
+    std::vector<uint8> SectionChoices(uint8 race, uint8 gender, CharSectionType section, int32 variation = -1, int32 color = -1)
+    {
+        std::set<uint8> values;
+        for (CharSectionsEntry const* entry : sCharSectionsStore)
+        {
+            if (entry->Race != race || entry->Gender != gender || entry->GenType != uint32(section))
+                continue;
+            if (variation >= 0 && entry->Type != uint32(variation))
+                continue;
+            if (color >= 0 && entry->Color != uint32(color))
+                continue;
+            values.insert(uint8(variation >= 0 ? entry->Color : entry->Type));
+        }
+        return { values.begin(), values.end() };
+    }
+
+    // Facial hair (beards, or earrings and markings on some female models) is a geoset choice the barber shop lists.
+    std::vector<uint8> FacialHairChoices(uint8 race, uint8 gender)
+    {
+        std::set<uint8> values = { 0 };
+        for (BarberShopStyleEntry const* style : sBarberShopStyleStore)
+            if (style->type == 2 && style->race == race && style->gender == gender)
+                values.insert(uint8(style->hair_id));
+        if (values.size() == 1)
+            for (uint8 type : SectionChoices(race, gender, SECTION_TYPE_FACIAL_HAIR))
+                values.insert(type);
+        return { values.begin(), values.end() };
+    }
+
+    struct LookPart
+    {
+        char const* name;
+        char const* column;
+    };
+
+    LookPart const LOOK_PARTS[5] = { { "skin", "skin" }, { "face", "face" }, { "hair", "hair" }, { "haircolor", "haircolor" },
+                                     { "facialhair", "facialhair" } };
+
+    // The valid values of one part, given the rest of the look (faces depend on skin colour, hair colours on the style).
+    std::vector<uint8> LookChoices(std::size_t part, uint8 race, uint8 gender, std::array<uint8, 5> const& look)
+    {
+        switch (part)
+        {
+            case 0: return SectionChoices(race, gender, SECTION_TYPE_SKIN, 0);
+            case 1:
+            {
+                std::vector<uint8> faces = SectionChoices(race, gender, SECTION_TYPE_FACE, -1, look[0]);
+                return faces.empty() ? SectionChoices(race, gender, SECTION_TYPE_FACE) : faces;
+            }
+            case 2: return SectionChoices(race, gender, SECTION_TYPE_HAIR);
+            case 3: return SectionChoices(race, gender, SECTION_TYPE_HAIR, look[2]);
+            default: return FacialHairChoices(race, gender);
+        }
+    }
+
+    // "3/12": where a value sits among its choices, for the addon's display.
+    std::string ChoicePosition(std::vector<uint8> const& choices, uint8 value)
+    {
+        auto it = std::find(choices.begin(), choices.end(), value);
+        return (it == choices.end() ? std::string("?") : std::to_string(it - choices.begin() + 1)) + "/" + std::to_string(choices.size());
+    }
 }
 
 class coa_npc_outfit_commandscript : public CommandScript
@@ -58,7 +130,8 @@ public:
     {
         static ChatCommandTable commandTable =
         {
-            { "npcoutfit", HandleNpcOutfitCommand, SEC_GAMEMASTER, Console::No }
+            { "npcoutfit", HandleNpcOutfitCommand, SEC_GAMEMASTER, Console::No },
+            { "npclook",   HandleNpcLookCommand,   SEC_GAMEMASTER, Console::No }
         };
         return commandTable;
     }
@@ -183,6 +256,109 @@ public:
 
         handler->PSendSysMessage("Outfit saved for {} (entry {}) and shown on {} nearby. Other spawns of it show it after a restart.",
             creature->GetName(), entry, uint32(nearby.size()));
+        return true;
+    }
+
+    static void ReportLook(ChatHandler* handler, CreatureDisplayPreset const* preset, std::array<uint8, 5> const& look)
+    {
+        std::ostringstream line;
+        line << "npclook:";
+        for (std::size_t i = 0; i < 5; ++i)
+            line << ' ' << LOOK_PARTS[i].name << ' ' << ChoicePosition(LookChoices(i, preset->race, preset->gender, look), look[i]);
+        handler->SendSysMessage(line.str());
+    }
+
+    static bool HandleNpcLookCommand(ChatHandler* handler, Optional<std::string> partName, Optional<std::string> value)
+    {
+        Creature* creature = handler->getSelectedCreature();
+        if (!creature || creature->IsPet())
+        {
+            handler->SendErrorMessage(LANG_SELECT_CREATURE);
+            return false;
+        }
+
+        uint32 entry = creature->GetEntry();
+        CreatureDisplayPreset const* preset = sAscensionPresets->GetPreset(entry, creature->GetDisplayId());
+        if (!preset)
+            preset = sAscensionPresets->GetPreset(entry);
+        if (!preset)
+        {
+            handler->SendErrorMessage("{} (entry {}) has no outfit preset yet; give it an outfit first, then change its look.",
+                creature->GetName(), entry);
+            return false;
+        }
+
+        std::array<uint8, 5> look = { preset->skin, preset->face, preset->hair, preset->haircolor, preset->facialhair };
+        if (!partName)
+        {
+            ReportLook(handler, preset, look);
+            return true;
+        }
+
+        std::size_t part = 0;
+        while (part < 5 && *partName != LOOK_PARTS[part].name)
+            ++part;
+        if (part == 5 || !value)
+        {
+            handler->SendErrorMessage("Usage: .npclook [skin|face|hair|haircolor|facialhair] [next|prev|<value>]");
+            return false;
+        }
+
+        std::vector<uint8> choices = LookChoices(part, preset->race, preset->gender, look);
+        if (choices.empty())
+        {
+            handler->SendErrorMessage("The client has no {} choices for this NPC's race and gender.", LOOK_PARTS[part].name);
+            return false;
+        }
+
+        auto it = std::find(choices.begin(), choices.end(), look[part]);
+        if (*value == "next")
+            look[part] = (it == choices.end() || std::next(it) == choices.end()) ? choices.front() : *std::next(it);
+        else if (*value == "prev")
+            look[part] = (it == choices.end() || it == choices.begin()) ? choices.back() : *std::prev(it);
+        else
+        {
+            Optional<uint8> number = Acore::StringTo<uint8>(*value);
+            if (!number || std::find(choices.begin(), choices.end(), *number) == choices.end())
+            {
+                handler->SendErrorMessage("{} {} is not one of this race and gender's choices.", LOOK_PARTS[part].name, *value);
+                return false;
+            }
+            look[part] = *number;
+        }
+
+        // A new skin colour or hair style can leave the face or hair colour without textures; take the first that has them.
+        for (std::size_t dependent : { std::size_t(1), std::size_t(3) })
+        {
+            std::vector<uint8> valid = LookChoices(dependent, preset->race, preset->gender, look);
+            if (!valid.empty() && std::find(valid.begin(), valid.end(), look[dependent]) == valid.end())
+                look[dependent] = valid.front();
+        }
+
+        WorldDatabase.DirectExecute("UPDATE `creature_display_preset` SET `skin` = " + std::to_string(look[0]) + ", `face` = " +
+            std::to_string(look[1]) + ", `hair` = " + std::to_string(look[2]) + ", `haircolor` = " + std::to_string(look[3]) +
+            ", `facialhair` = " + std::to_string(look[4]) + " WHERE `entry` = " + std::to_string(entry) + " AND `display_id` = " +
+            std::to_string(preset->display_id));
+
+        uint32 displayId = preset->display_id;
+        sAscensionPresets->LoadFromDB();
+        preset = sAscensionPresets->GetPreset(entry, displayId);
+        if (!preset)
+        {
+            handler->SendErrorMessage("The look was saved but the preset did not load; use .localreloadoutfits.");
+            return false;
+        }
+
+        std::list<Creature*> nearby;
+        creature->GetCreatureListWithEntryInGrid(nearby, entry, 200.0f);
+        nearby.push_back(creature);
+        nearby.sort();
+        nearby.unique();
+        for (Creature* npc : nearby)
+            if (npc->GetDisplayId() == displayId)
+                Redraw(npc, preset);
+
+        ReportLook(handler, preset, look);
         return true;
     }
 };
