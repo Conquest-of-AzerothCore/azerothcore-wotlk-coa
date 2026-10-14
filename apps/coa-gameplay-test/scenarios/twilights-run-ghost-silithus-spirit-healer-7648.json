@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Silithus: a ghost released in Twilight's Run reaches a Spirit Healer (#7648)",
+  "contract": "A player who dies inside Twilight's Run (zone 3446, at the middle of its main cave (-6275.9,9.2,9.3)) releases at the nearest graveyard of Silithus (1377), graveyard 70 (-6432.26,-278.292,3.79411), instead of the default Westfall graveyard. Its Spirit Healer 6491 stands near it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -6275.9,
+    "y": 9.2,
+    "z": 9.3,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Silithus graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -6447.3,
+      "max": -6417.3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -293.3,
+      "max": -263.3
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

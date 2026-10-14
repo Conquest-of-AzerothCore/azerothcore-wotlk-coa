@@ -6,11 +6,11 @@
 -- (10138), Gold Coast Quarry 10136 and Jangolode Mine 10137 -> Westfall (40).
 DELETE FROM `graveyard_zone` WHERE `GhostZone` IN (10124, 10125, 10126, 10130, 10136, 10137);
 INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`)
-SELECT `gz`.`ID`, `m`.`mine`, `gz`.`Faction`, CONCAT(`m`.`name`, ' - ', `gz`.`Comment`)
+SELECT `gz`.`ID`, `m`.`mine`, `gz`.`Faction`, `m`.`name`
 FROM `graveyard_zone` `gz`
-JOIN (SELECT 10124 AS `mine`, 12 AS `parent`, 'Fargodeep Mine' AS `name`
-      UNION ALL SELECT 10125, 12, 'Fargodeep Mine'
-      UNION ALL SELECT 10126, 12, 'Jasperlode Mine'
-      UNION ALL SELECT 10130, 10138, 'Echo Ridge Mine'
-      UNION ALL SELECT 10136, 40, 'Gold Coast Quarry'
-      UNION ALL SELECT 10137, 40, 'Jangolode Mine') `m` ON `m`.`parent` = `gz`.`GhostZone`;
+JOIN (SELECT 10124 AS `mine`, 12 AS `parent`, 'Fargodeep Mine - Elwynn Forest graveyards' AS `name`
+      UNION ALL SELECT 10125, 12, 'Fargodeep Mine - Elwynn Forest graveyards'
+      UNION ALL SELECT 10126, 12, 'Jasperlode Mine - Elwynn Forest graveyards'
+      UNION ALL SELECT 10130, 10138, 'Echo Ridge Mine - Northshire Valley graveyard'
+      UNION ALL SELECT 10136, 40, 'Gold Coast Quarry - Westfall graveyards'
+      UNION ALL SELECT 10137, 40, 'Jangolode Mine - Westfall graveyards') `m` ON `m`.`parent` = `gz`.`GhostZone`;
