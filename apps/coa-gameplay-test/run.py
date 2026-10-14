@@ -158,7 +158,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'min_level', 'max_level', 'min_home_distance'}
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
-    'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled'}),
+    'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag'}),
     'level_scaling_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'client_packet': ({'actor', 'opcode'},
                       {'actor', 'opcode', 'fields', 'consumed', 'early', 'cast_before', 'pet_loading_before'}),
@@ -449,6 +449,9 @@ def validate(scenario):
             number(step['owned_entry'], f'{where}.owned_entry', 1, 2**32 - 1, True)
         if action in {'pvp', 'set_moving'}:
             require(type(step['enabled']) is bool, f'{where}: enabled must be boolean')
+        if action == 'set_moving' and 'flag' in step:
+            require(step['flag'] in {'forward', 'backward', 'strafe_left', 'strafe_right'},
+                f'{where}: flag must be forward, backward, strafe_left or strafe_right')
         if 'all_specs' in step:
             require(type(step['all_specs']) is bool, f'{where}: all_specs must be boolean')
         if action == 'talent' and 'command' in step:

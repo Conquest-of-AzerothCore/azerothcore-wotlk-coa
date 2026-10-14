@@ -4450,10 +4450,20 @@ private:
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell: " + std::to_string(spell));
         if (action == "set_moving")
         {
-            if (step.get<bool>("enabled"))
-                player->AddUnitMovementFlag(MOVEMENTFLAG_FORWARD);
+            std::string const direction = step.get<std::string>("flag", "forward");
+            uint32 movementFlag = MOVEMENTFLAG_FORWARD;
+            if (direction == "backward")
+                movementFlag = MOVEMENTFLAG_BACKWARD;
+            else if (direction == "strafe_left")
+                movementFlag = MOVEMENTFLAG_STRAFE_LEFT;
+            else if (direction == "strafe_right")
+                movementFlag = MOVEMENTFLAG_STRAFE_RIGHT;
             else
-                player->RemoveUnitMovementFlag(MOVEMENTFLAG_FORWARD);
+                Require(direction == "forward", "Unknown movement flag: " + direction);
+            if (step.get<bool>("enabled"))
+                player->AddUnitMovementFlag(movementFlag);
+            else
+                player->RemoveUnitMovementFlag(movementFlag);
         }
         else if (action == "stop_attack")
         {
