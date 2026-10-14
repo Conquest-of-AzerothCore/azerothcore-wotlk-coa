@@ -200,6 +200,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].Amplitude = 0;
         info->ProcFlags = 0;
     }
+    if (id == 706698)
+        info->DurationEntry = sSpellDurationStore.LookupEntry(32);
     if (id == 808008)
     {
         info->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
