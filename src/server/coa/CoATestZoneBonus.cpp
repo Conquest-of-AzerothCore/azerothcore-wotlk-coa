@@ -18,10 +18,12 @@
 #include "WorldScript.h"
 #include <algorithm>
 #include <atomic>
+#include <fmt/ranges.h>
 #include <limits>
 #include <map>
 #include <memory>
 #include <mutex>
+#include <tuple>
 #include <vector>
 
 using namespace Acore::ChatCommands;
@@ -141,6 +143,26 @@ std::string DescribeEnd(Bonus const& bonus)
     return bonus.expiresAt ? Acore::StringFormat("ends in {}", TimeLeft(bonus.expiresAt)) : "no end";
 }
 
+std::string AnnouncedZone(uint32 zoneId, Bonus const& bonus)
+{
+    if (!bonus.expiresAt)
+        return ZoneName(zoneId);
+    return Acore::StringFormat("{} (ends in {})", ZoneName(zoneId), AnnouncedValue(TimeLeft(bonus.expiresAt)));
+}
+
+std::string JoinZoneNames(std::vector<std::string>& names)
+{
+    std::sort(names.begin(), names.end());
+    std::string text;
+    for (std::size_t i = 0; i < names.size(); ++i)
+    {
+        if (i)
+            text += i + 1 == names.size() ? " & " : ", ";
+        text += names[i];
+    }
+    return text;
+}
+
 void AnnounceActivated(uint32 zoneId, Bonus const& bonus)
 {
     std::string const ending = bonus.expiresAt
@@ -155,14 +177,20 @@ void AnnounceActiveZones()
     if (zones->empty())
         return;
 
-    std::string text = Acore::StringFormat("{}Test for bugs in these zones and earn more rewards:", ANNOUNCE_PREFIX);
+    std::map<std::tuple<uint32, uint32, uint32>, std::vector<std::string>> zonesByRates;
     for (auto const& [zoneId, bonus] : *zones)
+        zonesByRates[{ bonus.experience, bonus.runes, bonus.bazaarTokens }].push_back(AnnouncedZone(zoneId, bonus));
+
+    std::vector<std::string> groups;
+    for (auto& [rates, names] : zonesByRates)
     {
-        std::string const ending = bonus.expiresAt
-            ? Acore::StringFormat(" (ends in {})", AnnouncedValue(TimeLeft(bonus.expiresAt))) : std::string();
-        text += Acore::StringFormat("\n{}{}: {}{}", ANNOUNCE_PREFIX, ZoneName(zoneId), DescribeRates(bonus), ending);
+        auto const [experience, runes, bazaarTokens] = rates;
+        groups.push_back(Acore::StringFormat("{} with {} XP, {} Runes and {} Bazaar Tokens", JoinZoneNames(names),
+            AnnouncedPercent(experience), AnnouncedPercent(runes), AnnouncedPercent(bazaarTokens)));
     }
-    ChatHandler(nullptr).SendWorldText("{}", text);
+
+    ChatHandler(nullptr).SendWorldText("{}The official test {} {}.", ANNOUNCE_PREFIX,
+        zones->size() > 1 ? "zones are:" : "zone is:", fmt::join(groups, "; "));
 }
 
 void ExpireZones()
