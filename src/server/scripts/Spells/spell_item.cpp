@@ -1965,6 +1965,13 @@ class spell_item_flask_of_the_north : public SpellScript
                 possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_SP);
                 possibleSpells.push_back(SPELL_FLASK_OF_THE_NORTH_AP);
                 break;
+            default:
+            {
+                bool const spellPower = caster->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_MAGIC) >
+                    caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                possibleSpells.push_back(spellPower ? SPELL_FLASK_OF_THE_NORTH_SP : SPELL_FLASK_OF_THE_NORTH_AP);
+                break;
+            }
         }
 
         caster->CastSpell(caster, possibleSpells[irand(0, (possibleSpells.size() - 1))], true, nullptr);
