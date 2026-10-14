@@ -3,6 +3,7 @@
 #include "AllBattlegroundScript.h"
 #include "Battleground.h"
 #include "Config.h"
+#include "DBCStores.h"
 #include "GameObject.h"
 #include "GameObjectScript.h"
 #include "GlobalScript.h"
@@ -15,6 +16,7 @@
 #include "Player.h"
 #include "PlayerScript.h"
 #include "QuestDef.h"
+#include "ReputationMgr.h"
 #include "ScriptedGossip.h"
 #include "ServerScript.h"
 #include "World.h"
@@ -58,6 +60,10 @@ namespace
     constexpr uint32 MythicDungeonCredit = 80652;
     constexpr uint32 RaidLeaderCredit = 101000;
     constexpr uint32 DungeonLeaderCredit = 101001;
+    constexpr uint32 QuelLithienUnrestQuest = 18044;
+    constexpr uint32 SilvermoonRemnantFaction = 269;
+    constexpr uint32 QuelLithienLodgeFactionTemplate = 1576;
+    constexpr uint32 EasternPlaguelandsZone = 139;
     constexpr std::array<uint32, 16> FinalRaidBosses = { 10184, 11502, 11583, 14834, 15339, 15727, 15990, 110184,
         111502, 111583, 114834, 115339, 115727, 115990, 210184, 211502 };
 
@@ -241,6 +247,30 @@ namespace
         ShowCategory(player, board, *category);
         return true;
     }
+
+    // Quest 18044 is offered on both faction boards, but the Quel'Lithien Lodge elves are friendly to the Alliance:
+    // they turn hostile to a character in Eastern Plaguelands while the quest is in its log. Their faction also has
+    // friendly quest givers and trainers elsewhere, so the forced reaction stays within the zone.
+    void UpdateQuelLithienReaction(Player* player, uint32 zoneId)
+    {
+        FactionTemplateEntry const* lodge = sFactionTemplateStore.LookupEntry(QuelLithienLodgeFactionTemplate);
+        if (!lodge)
+            return;
+
+        QuestStatus const status = player->GetQuestStatus(QuelLithienUnrestQuest);
+        bool const hostile = zoneId == EasternPlaguelandsZone
+            && (status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_COMPLETE);
+        ReputationMgr& reputation = player->GetReputationMgr();
+        if (hostile == (reputation.GetForcedRankIfAny(lodge) != nullptr))
+            return;
+
+        reputation.ApplyForceReaction(SilvermoonRemnantFaction, REP_HOSTILE, hostile);
+        reputation.SendForceReactions();
+
+        FactionTemplateEntry const* own = player->GetFactionTemplateEntry();
+        if (!hostile && own && lodge->IsFriendlyTo(*own))
+            player->StopAttackFaction(SilvermoonRemnantFaction);
+    }
 }
 
 class go_hero_call_board final : public GameObjectScript
@@ -290,7 +320,28 @@ class HeroCallBoardPlayers final : public PlayerScript
 public:
     HeroCallBoardPlayers() : PlayerScript("HeroCallBoardPlayers",
         { PLAYERHOOK_ON_REFRESH_QUEST_GIVER, PLAYERHOOK_ON_QUEST_ABANDON, PLAYERHOOK_ON_DUEL_END,
-            PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_LEVEL_CHANGED }) { }
+            PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_LEVEL_CHANGED,
+            PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_UPDATE_ZONE, PLAYERHOOK_ON_PLAYER_QUEST_ACCEPT,
+            PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST }) { }
+
+    void OnPlayerLogin(Player* player) override { UpdateQuelLithienReaction(player, player->GetZoneId()); }
+
+    void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 /*newArea*/) override
+    {
+        UpdateQuelLithienReaction(player, newZone);
+    }
+
+    void OnPlayerQuestAccept(Player* player, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QuelLithienUnrestQuest)
+            UpdateQuelLithienReaction(player, player->GetZoneId());
+    }
+
+    void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == QuelLithienUnrestQuest)
+            UpdateQuelLithienReaction(player, player->GetZoneId());
+    }
 
     void OnPlayerLevelChanged(Player* player, uint8 oldLevel) override
     {
@@ -311,6 +362,9 @@ public:
 
     void OnPlayerQuestAbandon(Player* player, uint32 questId) override
     {
+        if (questId == QuelLithienUnrestQuest)
+            UpdateQuelLithienReaction(player, player->GetZoneId());
+
         if (!enabled.load())
             return;
 
