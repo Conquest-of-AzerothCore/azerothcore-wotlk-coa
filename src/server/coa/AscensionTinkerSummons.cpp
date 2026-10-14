@@ -233,10 +233,14 @@ struct npc_ascension_tinker_pet : PetAI
             events.Update(diff);
             if (!initialized)
             {
-                if (me->HasReactState(REACT_PASSIVE))
-                    me->SetReactState(REACT_DEFENSIVE);
                 if (CharmInfo* charmInfo = me->GetCharmInfo())
-                    charmInfo->SetPlayerReactState(me->GetReactState());
+                {
+                    if (me->HasReactState(REACT_PASSIVE) && charmInfo->GetPlayerReactState() != REACT_PASSIVE)
+                    {
+                        me->SetReactState(REACT_DEFENSIVE);
+                        charmInfo->SetPlayerReactState(REACT_DEFENSIVE);
+                    }
+                }
             }
             if (!initialized || events.ExecuteEvent())
             {

@@ -3428,6 +3428,19 @@ private:
                     return 1;
             return 0;
         }
+        if (metric == "pet_react_state")
+        {
+            Pet* pet = player->GetPet();
+            Require(pet != nullptr, "Pet react state observation needs a current pet");
+            return pet->GetReactState();
+        }
+        if (metric == "pet_player_react_state")
+        {
+            Pet* pet = player->GetPet();
+            Require(pet != nullptr, "Pet player react state observation needs a current pet");
+            CharmInfo* charmInfo = pet->GetCharmInfo();
+            return charmInfo ? charmInfo->GetPlayerReactState() : -1;
+        }
         if (metric == "pet_loading")
         {
             Pet const* pet = player->GetPet();
@@ -4949,6 +4962,17 @@ private:
             creature->SetPhaseMask(player->GetPhaseMask(), true);
             _targets.emplace(id, Target{ creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() });
             record.put("result", creature->GetCreatureTemplate()->Entry);
+        }
+        else if (action == "pet_stance")
+        {
+            Pet* pet = player->GetPet();
+            Require(pet != nullptr, "Pet stance requires a current pet");
+            uint32 const stance = step.get<uint32>("stance");
+            Require(stance == REACT_PASSIVE || stance == REACT_DEFENSIVE || stance == REACT_AGGRESSIVE,
+                "Pet stance must be a react state");
+            WorldPacket packet(CMSG_PET_ACTION, 20);
+            packet << pet->GetGUID() << uint32(stance | (uint32(ACT_REACTION) << 24)) << ObjectGuid::Empty;
+            player->GetSession()->HandlePetAction(packet);
         }
         else if (action == "attack")
         {
