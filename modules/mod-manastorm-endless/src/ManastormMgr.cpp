@@ -469,6 +469,23 @@ namespace
     // objective. Brightwing is a rare native DB spawn and is not guaranteed
     // to exist in a fresh disposable Manastorm instance, so this one segment
     // owns a direct objective bootstrap without changing normal WC behavior.
+    // The Unforgiven normally emerges near the Stratholme archway with
+    // Vengeful Phantoms. The native instance script does not summon him.
+    // Only exact recovered Manastorm routes use the private bootstrap.
+    constexpr uint32 MANASTORM_MAP_STRATHOLME = 329;
+    constexpr uint32 NPC_STRATHOLME_UNFORGIVEN = 10516;
+    constexpr uint32 NPC_STRATHOLME_VENGEFUL_PHANTOM = 10387;
+    constexpr uint32 SEGMENT_UNFORGIVEN_NORMAL = 130;
+    constexpr uint32 SEGMENT_UNFORGIVEN_ENDGAME = 354;
+
+    // Historical emulator report locates the original encounter near
+    // this gateway. This is an approximate fallback arena, NOT a
+    // verified original creature DB spawn or the player's game_tele.
+    Position const UNFORGIVEN_REPORTED_GATE_POSITION =
+    {
+        3721.607f, -3424.507f, 131.761f, 0.0f
+    };
+
     constexpr uint32 MANASTORM_MAP_WAILING_CAVERNS = 43;
     constexpr uint32 NPC_BRIGHTWING = 5912;
     constexpr ObjectGuid::LowType SPAWN_BRIGHTWING = 517;
@@ -2418,6 +2435,169 @@ namespace
         return true;
     }
 
+    bool BootstrapStratholmeUnforgivenEncounter(
+        Map* map, ManastormRun& run, std::string& error)
+    {
+        error.clear();
+        ManastormSegment const& segment = run.GetSegment();
+
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_STRATHOLME ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            segment.MapId != MANASTORM_MAP_STRATHOLME ||
+            segment.ObjectiveCreatureEntry != NPC_STRATHOLME_UNFORGIVEN ||
+            !((segment.SegmentId == SEGMENT_UNFORGIVEN_NORMAL &&
+               segment.Difficulty == 0 && segment.DungeonEncounterId == 472) ||
+              (segment.SegmentId == SEGMENT_UNFORGIVEN_ENDGAME &&
+               segment.Difficulty == 2 && segment.DungeonEncounterId == 2472)))
+        {
+            error = "The Unforgiven bootstrap received a nonmatching private Stratholme stage.";
+            return false;
+        }
+
+        GameTele const* entrance = sObjectMgr->GetGameTele(segment.StartGameTeleId);
+        if (!entrance || entrance->mapId != MANASTORM_MAP_STRATHOLME)
+        {
+            error = "The Unforgiven is missing the authored Stratholme arrival teleport.";
+            return false;
+        }
+
+        // Prefer a real native creature spawn, if the server DB has one.
+        QueryResult result = WorldDatabase.Query(
+            "SELECT `guid`, `position_x`, `position_y` FROM `creature` "
+            "WHERE `map` = 329 AND `id` = 10516 AND (`spawnMask` & 1) <> 0 "
+            "ORDER BY POW(`position_x` - 3721.607, 2) + "
+            "POW(`position_y` + 3424.507, 2), `guid` LIMIT 1");
+
+        ObjectGuid::LowType nativeSpawnId = 0;
+        float spawnX = UNFORGIVEN_REPORTED_GATE_POSITION.GetPositionX();
+        float spawnY = UNFORGIVEN_REPORTED_GATE_POSITION.GetPositionY();
+
+        if (result)
+        {
+            Field* fields = result->Fetch();
+            nativeSpawnId = fields[0].Get<uint32>();
+            spawnX = fields[1].Get<float>();
+            spawnY = fields[2].Get<float>();
+
+            CreatureData const* data = sObjectMgr->GetCreatureData(nativeSpawnId);
+            if (!data || data->mapid != MANASTORM_MAP_STRATHOLME ||
+                data->id != NPC_STRATHOLME_UNFORGIVEN)
+            {
+                error = "Native Unforgiven world-DB spawn is not creature 10516 in Stratholme.";
+                return false;
+            }
+        }
+
+        map->LoadGrid(spawnX, spawnY);
+
+        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        {
+            Creature* existing = spawn.second;
+            if (!existing || !existing->IsInWorld() ||
+                !existing->IsAlive() ||
+                existing->GetEntry() != NPC_STRATHOLME_UNFORGIVEN)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(existing);
+            if (run.GetObjectiveCreatureGuid() != existing->GetGUID())
+            {
+                error = "Existing native Unforgiven failed private Manastorm objective registration.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER,
+                "Reused original Stratholme Unforgiven: run={} segment={} instance={} spawn={} guid={}.",
+                run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+                existing->GetSpawnId(), existing->GetGUID().GetRawValue());
+            return true;
+        }
+
+        if (nativeSpawnId)
+        {
+            // Only clear respawn data in this run's disposable private map.
+            map->RemoveCreatureRespawnTime(nativeSpawnId);
+
+            Creature* original = new Creature();
+            if (!original->LoadCreatureFromDB(nativeSpawnId, map, true, true))
+            {
+                delete original;
+                error = "Failed to load native Unforgiven spawn into private Stratholme.";
+                return false;
+            }
+
+            if (!original->IsInWorld() || !original->IsAlive() ||
+                original->GetEntry() != NPC_STRATHOLME_UNFORGIVEN)
+            {
+                original->AddObjectToRemoveList();
+                error = "Loaded Stratholme Unforgiven is not a living creature 10516.";
+                return false;
+            }
+
+            ManastormMgr::Instance().OnCreatureAddWorld(original);
+            if (run.GetObjectiveCreatureGuid() != original->GetGUID())
+            {
+                original->AddObjectToRemoveList();
+                error = "Native Unforgiven failed private Manastorm registration.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER,
+                "Loaded native Unforgiven objective: run={} segment={} instance={} spawn={} guid={}.",
+                run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+                nativeSpawnId, original->GetGUID().GetRawValue());
+            return true;
+        }
+
+        // Some world databases spawn this boss only through the archway
+        // event. Guarantee the objective in this private Manastorm stage.
+        // The reported gate vicinity is a documented approximation.
+        TempSummon* unforgiven = map->SummonCreature(
+            NPC_STRATHOLME_UNFORGIVEN, UNFORGIVEN_REPORTED_GATE_POSITION);
+        if (!unforgiven)
+        {
+            error = "Failed to summon The Unforgiven in the private Stratholme archway.";
+            return false;
+        }
+
+        unforgiven->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
+        ManastormMgr::Instance().OnCreatureAddWorld(unforgiven);
+        if (run.GetObjectiveCreatureGuid() != unforgiven->GetGUID())
+        {
+            unforgiven->DespawnOrUnsummon();
+            error = "Summoned Unforgiven failed private Manastorm objective registration.";
+            return false;
+        }
+
+        // The original ambush includes four Vengeful Phantoms. These
+        // compact offsets are private-stage placements, not purported
+        // Blizzard DB spawn coordinates; phantoms are never objectives.
+        for (uint8 i = 0; i < 4; ++i)
+        {
+            float const dx = i < 2 ? -3.0f : 3.0f;
+            float const dy = (i % 2) == 0 ? -3.0f : 3.0f;
+            Position const position(
+                UNFORGIVEN_REPORTED_GATE_POSITION.GetPositionX() + dx,
+                UNFORGIVEN_REPORTED_GATE_POSITION.GetPositionY() + dy,
+                UNFORGIVEN_REPORTED_GATE_POSITION.GetPositionZ(), 0.0f);
+
+            if (TempSummon* phantom = map->SummonCreature(
+                    NPC_STRATHOLME_VENGEFUL_PHANTOM, position))
+            {
+                phantom->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
+                ManastormMgr::Instance().OnCreatureAddWorld(phantom);
+            }
+        }
+
+        LOG_INFO(LOG_FILTER,
+            "Bootstrapped private Stratholme Unforgiven at reported archway: "
+            "run={} segment={} instance={} guid={}.",
+            run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+            unforgiven->GetGUID().GetRawValue());
+        return true;
+    }
+
     bool BootstrapSpecialEncounter(
         Map* map,
         ManastormRun& run,
@@ -2425,6 +2605,10 @@ namespace
     {
         switch (run.GetSegment().SegmentId)
         {
+        case SEGMENT_UNFORGIVEN_NORMAL:
+        case SEGMENT_UNFORGIVEN_ENDGAME:
+            return BootstrapStratholmeUnforgivenEncounter(map, run, error);
+
         case SEGMENT_MESHLOK_NORMAL:
         case SEGMENT_MESHLOK_ENDGAME:
             return BootstrapMaraudonMeshlokEncounter(
