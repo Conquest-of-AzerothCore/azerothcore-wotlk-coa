@@ -1,0 +1,183 @@
+{
+  "schema": 1,
+  "name": "Tinker: I'm The Creator Now (503534) grants its AP/SP buff from summon damage (#7433)",
+  "contract": "Issue #7433: 'I'm The Creator Now [503534]' - 'Talent does not add any AP or SP. Does not apply buff.' Expected: '40% Chance to Apply Buff of +9 to AP and SP, stacking 3 times.' Spell.dbc 503534 is passive, ProcChance 40, with effect 0 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) carrying aura 42 SPELL_AURA_PROC_TRIGGER_SPELL and EffectTriggerSpell 503549. 503549 ('I'm The Creator Now') is two SPELL_EFFECT_APPLY_AURA effects on TARGET_UNIT_MASTER (27): aura 344 SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT and aura 345 SPELL_AURA_MOD_SPELL_POWER_FLAT, EffectBasePoints 8 with DieSides 1, StackAmount 3 and a 30 s duration; its Targets field is 0, so only the master-targeted effects, never an explicit unit target, can carry it. Matching the issue's '+9', 503549 resolves to 9 at the reporter's level 34, and to 20 at level 80 where SpellEffectInfo::CalcValue adds 0.25 per level above BaseLevel 15 up to MaxLevel 60. The delivery is the Tinker package: AscensionTinkerContracts.cpp makes 503534 a TinkerDrivers dummy aura on the player, and AscensionTinkerEvents.cpp DeviceEvent() rolls Chance(player,503534) on every damage event from an owned device, which then has the summon cast 503549 so its master-targeted effects land on the summon's owner. The Mechano-Bear build 803405 summons the permanent device 60671, which AscensionTinkerSummons.cpp::Scale() gives aura 707698 - the aura whose script dispatches DeviceEvent. A level 80 Tinker that learns 503534, summons the bear and sends it at a dummy must therefore see 503549 land on itself, and the same setup without the talent must not. aura_amount is the AuraEffect's own amount, which this core scales by the aura's stack count, so the scenario records it instead of asserting a stack-invariant number; the per-stack value of 20 (both effects) for 1, 2 and 3 stacks was measured directly against this fix.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "talent",
+      "entry": 299,
+      "level": 80,
+      "distance": 3
+    },
+    {
+      "id": "dummy2",
+      "owner": "plain",
+      "entry": 299,
+      "level": 80,
+      "distance": 25
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 503534
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the talented Tinker carries the 503534 aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 503534,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control Tinker does not know 503534",
+      "actor": "plain",
+      "metric": "knows_spell",
+      "spell": 503534,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 803405
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the talented Tinker's Mechano-Bear is out",
+      "actor": "talent",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control Tinker's Mechano-Bear is out",
+      "actor": "plain",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no buff before any summon damage",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 503549,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the summoned device carries the event aura 707698",
+      "actor": "talent",
+      "metric": "owned_creature_count",
+      "entry": 60671,
+      "spell": 707698,
+      "caster": "talent",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack",
+      "actor": "talent",
+      "target": "dummy",
+      "pet": true
+    },
+    {
+      "action": "attack",
+      "actor": "plain",
+      "target": "dummy2",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "The summon melee actually landed on the dummy",
+      "actor": "dummy",
+      "metric": "health",
+      "max": 99900
+    },
+    {
+      "action": "assert",
+      "label": "I'm The Creator Now applies its buff to the talented Tinker",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 503549,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "snapshot",
+      "label": "Observe the AuraEffect amount the buff reports on its current stack count for the run record",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 503549,
+      "effect": 0,
+      "save_as": "creator_amount"
+    },
+    {
+      "action": "assert",
+      "label": "The buff stays within the DBC's StackAmount of 3",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 503549,
+      "min": 1,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Tinker without the talent never receives the buff",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 503549,
+      "equals": 0
+    }
+  ]
+}

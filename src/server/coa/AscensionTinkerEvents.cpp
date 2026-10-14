@@ -43,7 +43,7 @@ void DeviceEvent(Player* player, Creature* device, Unit* target, SpellInfo const
         Cast(player,player,520276);
     }
     if (Chance(player,503534))
-        Cast(player,player,503549);
+        Cast(device,player,503549);
     if (critical && player->HasAura(705831))
     {
         Cast(player,player,503535);
