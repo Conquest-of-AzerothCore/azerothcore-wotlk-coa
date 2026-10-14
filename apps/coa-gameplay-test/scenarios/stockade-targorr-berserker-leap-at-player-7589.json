@@ -5,7 +5,8 @@
     "Berserker Leap 2102736 is a 3 s, 40 yd jump to a destination (target flag 0x40, JUMP_DEST plus missile 2102737).",
     "Targorr the Dread's Ascension kit casts it every 15-17 s; in the live 2026-05-25 Stockade log it landed on",
     "players other than the tank, so it must leap to a player instead of onto Targorr's own position.",
-    "A Stormwind Guard holds Targorr 20 yd from the only player on his threat list, a mage who chilled him once."
+    "A Stormwind Guard holds Targorr 20 yd from the only player on his threat list, a mage who chilled him once.",
+    "Before he jumps, Berserker Leap Dest Area 2102735 (4 yd dummy area aura, 3.5 s) marks the landing spot."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -102,6 +103,23 @@
       "actor": "mage",
       "value": 10000000,
       "maximum": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "The landing area 2102735 marks the mage before the leap",
+      "actor": "mage",
+      "metric": "aura",
+      "spell": 2102735,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the landing area appears while Targorr is still away from the mage",
+      "actor": "boss",
+      "metric": "distance",
+      "target": "mage",
+      "min": 15
     },
     {
       "action": "assert",
