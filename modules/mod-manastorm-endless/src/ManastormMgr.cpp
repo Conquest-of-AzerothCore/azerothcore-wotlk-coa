@@ -388,6 +388,14 @@ namespace
     constexpr uint32 GO_ULDAMAN_IRONAYA_SEAL = 124372;
     constexpr uint32 GO_ULDAMAN_KEYSTONE = 124371;
 
+    // Meshlok is a native Maraudon rare. Both original Manastorm
+    // segments must guarantee his DB spawn inside the disposable
+    // private instance, without changing his public-dungeon rarity.
+    constexpr uint32 MANASTORM_MAP_MARAUDON = 349;
+    constexpr uint32 NPC_MARAUDON_MESHLOK = 12237;
+    constexpr uint32 SEGMENT_MESHLOK_NORMAL = 684;
+    constexpr uint32 SEGMENT_MESHLOK_ENDGAME = 683;
+
 
     // Native TrinityCore 3.3.5 RFD gong's final Tuten'kash summon
     // position (not the player-authored game_tele 2158 arrival point).
@@ -1723,6 +1731,140 @@ namespace
         return true;
     }
 
+    bool BootstrapMaraudonMeshlokEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_MARAUDON ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            segment.MapId != MANASTORM_MAP_MARAUDON ||
+            segment.ObjectiveCreatureEntry != NPC_MARAUDON_MESHLOK ||
+            !((segment.SegmentId == SEGMENT_MESHLOK_NORMAL &&
+               segment.Difficulty == 0 &&
+               segment.DungeonEncounterId == 9997) ||
+              (segment.SegmentId == SEGMENT_MESHLOK_ENDGAME &&
+               segment.Difficulty == 2 &&
+               segment.DungeonEncounterId == 2621)))
+        {
+            error = "Meshlok bootstrap received a nonmatching private Maraudon stage.";
+            return false;
+        }
+
+        // The user's teleport is an arrival point, not Meshlok's
+        // spawn. Select the real native DB record nearest that arrival.
+        // This also handles databases containing multiple rare locations.
+        GameTele const* entrance =
+            sObjectMgr->GetGameTele(segment.StartGameTeleId);
+        if (!entrance || entrance->mapId != MANASTORM_MAP_MARAUDON)
+        {
+            error = "Meshlok is missing his Maraudon arrival teleport.";
+            return false;
+        }
+
+        QueryResult result = WorldDatabase.Query(
+            "SELECT `guid`, `position_x`, `position_y` "
+            "FROM `creature` "
+            "WHERE `map` = 349 AND `id` = 12237 "
+            "AND (`spawnMask` & 1) <> 0 "
+            "ORDER BY POW(`position_x` - {}, 2) + "
+            "POW(`position_y` - {}, 2), `guid` LIMIT 1",
+            entrance->position_x, entrance->position_y);
+
+        if (!result)
+        {
+            error = "Native Meshlok (12237) spawn not found in Maraudon world DB.";
+            return false;
+        }
+
+        Field* fields = result->Fetch();
+        ObjectGuid::LowType const spawnId = fields[0].Get<uint32>();
+        float const spawnX = fields[1].Get<float>();
+        float const spawnY = fields[2].Get<float>();
+
+        CreatureData const* spawnData = sObjectMgr->GetCreatureData(spawnId);
+        if (!spawnData ||
+            spawnData->mapid != MANASTORM_MAP_MARAUDON ||
+            spawnData->id != NPC_MARAUDON_MESHLOK)
+        {
+            error = "Meshlok's native DB spawn does not resolve to NPC 12237 on map 349.";
+            return false;
+        }
+
+        map->LoadGrid(spawnX, spawnY);
+
+        // Reuse a living native rare already loaded in this instance.
+        // A private-map-local index is safe; do not scan other maps
+        // or create duplicate creatures in the same dungeon copy.
+        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        {
+            Creature* existing = spawn.second;
+            if (!existing ||
+                !existing->IsInWorld() ||
+                !existing->IsAlive() ||
+                existing->GetEntry() != NPC_MARAUDON_MESHLOK)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(existing);
+            if (run.GetObjectiveCreatureGuid() != existing->GetGUID())
+            {
+                error = "Existing native Meshlok did not register as the Manastorm objective.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER,
+                "Reused native Maraudon Meshlok in private Manastorm: "
+                "run={} segment={} instance={} spawn={} guid={}.",
+                run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+                existing->GetSpawnId(),
+                existing->GetGUID().GetRawValue());
+            return true;
+        }
+
+        // A rare may be missing due to respawn or pool selection.
+        // Clear ONLY this scripted-private stage's transient respawn
+        // timer, and instantiate the original DB GUID at its home.
+        // Leave normal Maraudon untouched.
+        map->RemoveCreatureRespawnTime(spawnId);
+
+        Creature* meshlok = new Creature();
+        if (!meshlok->LoadCreatureFromDB(spawnId, map, true, true))
+        {
+            delete meshlok;
+            error = "Failed loading native Meshlok DB spawn into private Maraudon.";
+            return false;
+        }
+
+        if (!meshlok->IsInWorld() ||
+            !meshlok->IsAlive() ||
+            meshlok->GetEntry() != NPC_MARAUDON_MESHLOK)
+        {
+            meshlok->AddObjectToRemoveList();
+            error = "Meshlok DB spawn loaded but did not create a living NPC 12237.";
+            return false;
+        }
+
+        ManastormMgr::Instance().OnCreatureAddWorld(meshlok);
+        if (run.GetObjectiveCreatureGuid() != meshlok->GetGUID())
+        {
+            meshlok->AddObjectToRemoveList();
+            error = "Native Meshlok failed to register as the Manastorm objective.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER,
+            "Restored native Maraudon rare Meshlok in private Manastorm: "
+            "run={} segment={} instance={} spawn={} guid={}.",
+            run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+            spawnId, meshlok->GetGUID().GetRawValue());
+        return true;
+    }
+
     bool BootstrapRazorfenDownsRagglesnoutEncounter(
         Map* map,
         ManastormRun& run,
@@ -2283,6 +2425,11 @@ namespace
     {
         switch (run.GetSegment().SegmentId)
         {
+        case SEGMENT_MESHLOK_NORMAL:
+        case SEGMENT_MESHLOK_ENDGAME:
+            return BootstrapMaraudonMeshlokEncounter(
+                map, run, error);
+
         case SEGMENT_IRONAYA_NORMAL:
         case SEGMENT_IRONAYA_ENDGAME:
             return BootstrapUldamanIronayaEncounter(
