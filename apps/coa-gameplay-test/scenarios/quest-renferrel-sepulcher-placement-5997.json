@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "The Sepulcher: Apothecary Renferrel stands at his patch-WB1 placement and takes his quests (#5997, #6992)",
+  "contract": [
+    "Apothecary Renferrel 1937 (guid 17612) ends Speak with Renferrel 3221 and Delivery to Silverpine Forest 445",
+    "(SUB creature_quest_ends 1937/445). Patch-WB1 rebuilt The Sepulcher; rev_20261010_95 (#7185) lifted him out",
+    "of the raised ground to z 128.01 and rev_20261010_99 (#7244) moved him to 516.17 1625.86 from the stock",
+    "522.45 1652.3. Expected: a hero 12 yards from the WB1 placement, 39 yards from the stock spot and beyond the",
+    "30-yard quest-giver search, sees Renferrel's turn-in marker and hands in Speak with Renferrel."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": 513.5, "y": 1614.0, "z": 128.5, "o": 1.35},
+  "players": [{"id": "courier", "race": 5, "class": 1, "level": 10}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "set_phase", "actor": "courier", "value": 1},
+    {"action": "assert", "label": "Apothecary Renferrel stands at the Sepulcher", "actor": "courier",
+     "metric": "nearby_creature_count", "entry": 1937, "equals": 1, "within_ms": 10000},
+    {"action": "prepare_quest", "label": "Fixture: Speak with Renferrel is ready to hand in", "actor": "courier",
+     "quest": 3221},
+    {"action": "assert", "label": "Renferrel at the WB1 placement shows the turn-in marker", "actor": "courier",
+     "metric": "dialog_status", "entry": 1937, "equals": 10, "within_ms": 5000},
+    {"action": "reward_quest", "label": "Speak with Renferrel", "actor": "courier", "quest": 3221},
+    {"action": "assert", "label": "Speak with Renferrel is rewarded", "actor": "courier", "metric": "quest_rewarded",
+     "quest": 3221, "equals": 1}
+  ]
+}
