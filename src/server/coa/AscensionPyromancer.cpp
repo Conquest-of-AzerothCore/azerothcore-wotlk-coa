@@ -399,6 +399,8 @@ void Refresh(Player* player)
         player->learnSpell(802117, true);
     if (!player->HasAura(92128))
         player->removeSpell(802117, SPEC_MASK_ALL, true);
+    if (player->HasAura(802117) && player->GetDisplayId() == player->GetNativeDisplayId())
+        player->SetDisplayId(PyromancerDraconicDisplay);
     if (player->HasAura(520937))
         for (uint32 id : PyromancerEchoRanks)
             if ((id == 802174 || sSpellMgr->GetSpellInfo(id)->SpellLevel <= player->GetLevel()) &&

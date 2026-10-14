@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Draconic Aspect keeps the Dracthyr model across a relog (COA-5850)",
+  "contract": [
+    "Draconic Aspect (802117) shows the Dracthyr model 142067 through aura_ascension_pyromancer_draconic_form,",
+    "which calls SetDisplayId when the aura applies. On login the aura is loaded and applied, but the player's display",
+    "is restored to the native model afterwards (RestoreDisplayId only honours transform auras), so a character who",
+    "logged out in the form, or a bot logging in, kept the buff without the model. AscensionPyromancer::Refresh, which",
+    "runs every 500 ms, now puts the model back while the aura is active and the player shows the native model."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 6,
+      "class": 24,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "display_id",
+      "save_as": "native"
+    },
+    {
+      "action": "set_aura",
+      "label": "Enter Draconic Aspect",
+      "actor": "p",
+      "spell": 802117,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Draconic Aspect shows the Dracthyr model",
+      "actor": "p",
+      "metric": "display_id",
+      "equals": 142067,
+      "within_ms": 2000
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Draconic Aspect is still active after the relog",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 802117,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Dracthyr model comes back after the relog",
+      "actor": "p",
+      "metric": "display_id",
+      "equals": 142067,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Leave Draconic Aspect",
+      "actor": "p",
+      "spell": 802117,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the form restores the native model",
+      "actor": "p",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}
