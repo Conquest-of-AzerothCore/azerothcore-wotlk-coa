@@ -92,6 +92,7 @@ void AddAscensionWarcraftRebornDruidScripts();
 void AddAscensionTamingScripts();
 void AddAscensionBarnabusWhistleScripts();
 void AddAscensionPepeVanityScripts();
+void AddAscensionRaidMarkerScripts();
 void AddAscensionAchievementConditionScripts();
 void AddAscensionAccountInfoScripts();
 void AddCoAGameplayTestScripts();
@@ -672,6 +673,7 @@ void AddCoAScripts()
     AddAscensionTamingScripts();
     AddAscensionBarnabusWhistleScripts();
     AddAscensionPepeVanityScripts();
+    AddAscensionRaidMarkerScripts();
     AddAscensionAchievementConditionScripts();
     AddAscensionAccountInfoScripts();
     AddCoAGameplayTestScripts();
