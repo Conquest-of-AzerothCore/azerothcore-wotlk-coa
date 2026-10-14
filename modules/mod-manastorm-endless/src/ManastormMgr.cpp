@@ -369,6 +369,16 @@ namespace
     constexpr uint32 SEGMENT_RAGGLESNOUT_NORMAL = 692;
     constexpr uint32 SEGMENT_RAGGLESNOUT_ENDGAME = 690;
 
+    // Uldaman's altar-locked Archaedas is a normal native DB boss.
+    // Manastorm loads his original creature in PREPARING, then reproduces
+    // the altar spell's native SetData sequence once the stage is ACTIVE.
+    constexpr uint32 MANASTORM_MAP_ULDAMAN = 70;
+    constexpr uint32 NPC_ULDAMAN_ARCHAEDAS = 2748;
+    constexpr uint32 SEGMENT_ARCHAEDAS_NORMAL = 101;
+    constexpr uint32 SEGMENT_ARCHAEDAS_ENDGAME = 385;
+    constexpr uint32 DATA_ULDAMAN_ARCHAEDAS = 2;
+
+
     // Native TrinityCore 3.3.5 RFD gong's final Tuten'kash summon
     // position (not the player-authored game_tele 2158 arrival point).
     Position const TUTEN_KASH_GONG_POSITION =
@@ -1370,6 +1380,200 @@ namespace
         return true;
     }
 
+    bool IsUldamanArchaedasStage(ManastormSegment const& segment)
+    {
+        return segment.MapId == MANASTORM_MAP_ULDAMAN &&
+            segment.ObjectiveCreatureEntry == NPC_ULDAMAN_ARCHAEDAS &&
+            ((segment.SegmentId == SEGMENT_ARCHAEDAS_NORMAL &&
+              segment.Difficulty == 0 &&
+              segment.DungeonEncounterId == 554) ||
+             (segment.SegmentId == SEGMENT_ARCHAEDAS_ENDGAME &&
+              segment.Difficulty == 2 &&
+              segment.DungeonEncounterId == 2554));
+    }
+
+    bool BootstrapUldamanArchaedasEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_ULDAMAN ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            !IsUldamanArchaedasStage(segment))
+        {
+            error = "Archaedas bootstrap received a nonmatching private Uldaman stage.";
+            return false;
+        }
+
+        // The native boss is a persistent petrified DB creature. Do not
+        // spawn a duplicate or bypass his altar/SmartAI encounter mechanics.
+        // Resolve his original spawn coordinates and GUID rather than
+        // mistaking the player-authored arrival point for his home position.
+        QueryResult spawn = WorldDatabase.Query(
+            "SELECT `guid`, `position_x`, `position_y` "
+            "FROM `creature` WHERE `map` = 70 AND `id` = 2748 "
+            "AND (`spawnMask` & 1) <> 0 ORDER BY `guid` LIMIT 1");
+
+        if (!spawn)
+        {
+            error = "Uldaman's native Archaedas (2748) spawn was not found in the world DB.";
+            return false;
+        }
+
+        Field* fields = spawn->Fetch();
+        ObjectGuid::LowType const spawnId = fields[0].Get<uint32>();
+        float const x = fields[1].Get<float>();
+        float const y = fields[2].Get<float>();
+
+        CreatureData const* spawnData = sObjectMgr->GetCreatureData(spawnId);
+        if (!spawnData ||
+            spawnData->mapid != MANASTORM_MAP_ULDAMAN ||
+            spawnData->id != NPC_ULDAMAN_ARCHAEDAS)
+        {
+            error = "Native Uldaman Archaedas spawn GUID does not resolve to entry 2748 on map 70.";
+            return false;
+        }
+
+        map->LoadGrid(x, y);
+
+        auto const bounds = map->GetCreatureBySpawnIdStore().equal_range(spawnId);
+        for (auto itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            Creature* existing = itr->second;
+            if (!existing ||
+                !existing->IsInWorld() ||
+                !existing->IsAlive() ||
+                existing->GetEntry() != NPC_ULDAMAN_ARCHAEDAS)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(existing);
+            if (run.GetObjectiveCreatureGuid() != existing->GetGUID())
+            {
+                error = "Native Archaedas did not register as the Manastorm objective.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER,
+                "Registered original Uldaman Archaedas in private Manastorm: "
+                "run={} segment={} instance={} spawn={} guid={}.",
+                run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+                spawnId, existing->GetGUID().GetRawValue());
+            return true;
+        }
+
+        // Honor the exact native DB record if it was absent due to
+        // a private-instance respawn state. Public Uldaman is untouched.
+        map->RemoveCreatureRespawnTime(spawnId);
+
+        Creature* archaedas = new Creature();
+        if (!archaedas->LoadCreatureFromDB(spawnId, map, true, true))
+        {
+            delete archaedas;
+            error = "Could not load the original Archaedas DB spawn into private Uldaman.";
+            return false;
+        }
+
+        if (!archaedas->IsInWorld() ||
+            !archaedas->IsAlive() ||
+            archaedas->GetEntry() != NPC_ULDAMAN_ARCHAEDAS)
+        {
+            archaedas->AddObjectToRemoveList();
+            error = "Native Archaedas loaded but is not a living NPC 2748.";
+            return false;
+        }
+
+        ManastormMgr::Instance().OnCreatureAddWorld(archaedas);
+        if (run.GetObjectiveCreatureGuid() != archaedas->GetGUID())
+        {
+            archaedas->AddObjectToRemoveList();
+            error = "Loaded native Archaedas failed Manastorm objective registration.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER,
+            "Loaded original Uldaman Archaedas in private Manastorm: "
+            "run={} segment={} instance={} spawn={} guid={}.",
+            run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+            spawnId, archaedas->GetGUID().GetRawValue());
+        return true;
+    }
+
+    bool ActivateUldamanArchaedasEncounter(
+        Player* player,
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        if (!IsUldamanArchaedasStage(run.GetSegment()))
+            return true;
+
+        if (!player ||
+            !map ||
+            map->GetId() != MANASTORM_MAP_ULDAMAN ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            run.GetState() != ManastormRunState::Active)
+        {
+            error = "Archaedas awakening requested outside the active private Uldaman stage.";
+            return false;
+        }
+
+        InstanceMap* instanceMap = map->ToInstanceMap();
+        InstanceScript* instance =
+            instanceMap ? instanceMap->GetInstanceScript() : nullptr;
+
+        if (!instance)
+        {
+            error = "Uldaman's native instance script was not available for Archaedas.";
+            return false;
+        }
+
+        if (instance->GetData(DATA_ULDAMAN_ARCHAEDAS) == DONE)
+        {
+            error = "Uldaman reports Archaedas already defeated before Manastorm activation.";
+            return false;
+        }
+
+        if (instance->GetData(DATA_ULDAMAN_ARCHAEDAS) == IN_PROGRESS)
+            return true;
+
+        ObjectGuid const guid = run.GetObjectiveCreatureGuid();
+        Creature* archaedas =
+            guid.IsEmpty() ? nullptr : ObjectAccessor::GetCreature(*player, guid);
+
+        if (!archaedas ||
+            !archaedas->IsInWorld() ||
+            !archaedas->IsAlive() ||
+            archaedas->GetEntry() != NPC_ULDAMAN_ARCHAEDAS ||
+            !archaedas->AI())
+        {
+            error = "Original Archaedas is not available for his native altar awakening.";
+            return false;
+        }
+
+        // These are the exact two native operations performed by
+        // spell_uldaman_boss_agro_archaedas, in the same order.
+        // Start only when the protection bubble has been cleared.
+        // Keep the original Stoned aura, SmartAI transition, combat
+        // abilities and instance-door state under native ownership.
+        instance->SetData(DATA_ULDAMAN_ARCHAEDAS, IN_PROGRESS);
+        archaedas->AI()->SetData(1, 1);
+
+        LOG_INFO(LOG_FILTER,
+            "Activated native Uldaman Archaedas altar sequence in "
+            "private Manastorm: run={} segment={} instance={} guid={}.",
+            run.GetRunId(), run.GetSegment().SegmentId,
+            run.GetInstanceId(), guid.GetRawValue());
+        return true;
+    }
+
     bool BootstrapRazorfenDownsRagglesnoutEncounter(
         Map* map,
         ManastormRun& run,
@@ -1930,6 +2134,11 @@ namespace
     {
         switch (run.GetSegment().SegmentId)
         {
+        case SEGMENT_ARCHAEDAS_NORMAL:
+        case SEGMENT_ARCHAEDAS_ENDGAME:
+            return BootstrapUldamanArchaedasEncounter(
+                map, run, error);
+
         case SEGMENT_TUTEN_KASH_ENDGAME:
             return BootstrapRazorfenDownsTutenKashEncounter(
                 map, run, error);
@@ -5086,6 +5295,27 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
                 ClearSafetyBubble(member);
         run->SetState(ManastormRunState::Active);
+
+        //
+        // Archaedas's native altar awakening is deliberately deferred
+        // until ACTIVE, after all members' safety bubbles are cleared.
+        // BootstrapSpecialEncounter only loads/registers his original
+        // petrified DB boss while the group is still preparing.
+        //
+        if ((segment.SegmentId == SEGMENT_ARCHAEDAS_NORMAL ||
+             segment.SegmentId == SEGMENT_ARCHAEDAS_ENDGAME))
+        {
+            std::string archaedasError;
+            if (!ActivateUldamanArchaedasEncounter(
+                    player, map, *run, archaedasError))
+            {
+                FailRun(
+                    *run,
+                    "Uldaman Archaedas native activation failed: " +
+                        archaedasError);
+                return;
+            }
+        }
 
         //
         // Voice presentation starts only once the safety bubble collapses and
