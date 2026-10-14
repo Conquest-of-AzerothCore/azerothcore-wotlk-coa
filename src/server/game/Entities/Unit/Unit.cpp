@@ -16694,6 +16694,11 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId)
 
     if (IsPlayer())
     {
+        uint32 incarnationModel = 0;
+        sScriptMgr->OnPlayerGetShapeshiftModel(ToPlayer(), form, spellId, incarnationModel);
+        if (incarnationModel)
+            return incarnationModel;
+
         if (uint32 ModelId = sObjectMgr->GetModelForShapeshift(form, ToPlayer()))
             return ModelId;
     }
