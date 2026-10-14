@@ -378,6 +378,16 @@ namespace
     constexpr uint32 SEGMENT_ARCHAEDAS_ENDGAME = 385;
     constexpr uint32 DATA_ULDAMAN_ARCHAEDAS = 2;
 
+    // Ironaya is the native sealed-chamber DB boss. The Uldaman
+    // instance script opens both the seal and keystone on DONE.
+    // Only original Manastorm segments 694/693 use this private bootstrap.
+    constexpr uint32 NPC_ULDAMAN_IRONAYA = 7228;
+    constexpr uint32 SEGMENT_IRONAYA_NORMAL = 694;
+    constexpr uint32 SEGMENT_IRONAYA_ENDGAME = 693;
+    constexpr uint32 DATA_ULDAMAN_IRONAYA_DOORS = 0;
+    constexpr uint32 GO_ULDAMAN_IRONAYA_SEAL = 124372;
+    constexpr uint32 GO_ULDAMAN_KEYSTONE = 124371;
+
 
     // Native TrinityCore 3.3.5 RFD gong's final Tuten'kash summon
     // position (not the player-authored game_tele 2158 arrival point).
@@ -1380,6 +1390,145 @@ namespace
         return true;
     }
 
+    bool IsUldamanIronayaStage(ManastormSegment const& segment)
+    {
+        return segment.MapId == MANASTORM_MAP_ULDAMAN &&
+            segment.ObjectiveCreatureEntry == NPC_ULDAMAN_IRONAYA &&
+            ((segment.SegmentId == SEGMENT_IRONAYA_NORMAL &&
+              segment.Difficulty == 0 &&
+              segment.DungeonEncounterId == 549) ||
+             (segment.SegmentId == SEGMENT_IRONAYA_ENDGAME &&
+              segment.Difficulty == 2 &&
+              segment.DungeonEncounterId == 2549));
+    }
+
+    bool BootstrapUldamanIronayaEncounter(
+        Map* map,
+        ManastormRun& run,
+        std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map ||
+            map->GetId() != MANASTORM_MAP_ULDAMAN ||
+            !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId() ||
+            !IsUldamanIronayaStage(segment))
+        {
+            error = "Ironaya bootstrap received a nonmatching private Uldaman stage.";
+            return false;
+        }
+
+        InstanceMap* instanceMap = map->ToInstanceMap();
+        InstanceScript* instance =
+            instanceMap ? instanceMap->GetInstanceScript() : nullptr;
+
+        if (!instance)
+        {
+            error = "Uldaman's native instance script is unavailable for Ironaya.";
+            return false;
+        }
+
+        // Original Uldaman OnGameObjectCreate checks this state to open
+        // the Ironaya seal (124372) and keystone (124371). Manastorm
+        // starts directly at this boss without collecting the staff, so
+        // complete just the door prerequisite on this disposable map.
+        // Do not alter public Uldaman, boss AI, or dungeon GO templates.
+        if (instance->GetData(DATA_ULDAMAN_IRONAYA_DOORS) != DONE)
+            instance->SetData(DATA_ULDAMAN_IRONAYA_DOORS, DONE);
+
+        GameTele const* entrance =
+            sObjectMgr->GetGameTele(segment.StartGameTeleId);
+        if (!entrance)
+        {
+            error = "Ironaya stage is missing its authored arrival teleport.";
+            return false;
+        }
+
+        map->LoadGrid(entrance->position_x, entrance->position_y);
+
+        // OnGameObjectCreate handles newly loaded GOs, but existing
+        // loaded gameobjects won't receive the callback again just
+        // because the instance's door flag changed. Open both native
+        // objects already present in this private map as well.
+        for (auto const& spawn : map->GetGameObjectBySpawnIdStore())
+        {
+            GameObject* gameObject = spawn.second;
+            if (!gameObject ||
+                !gameObject->IsInWorld() ||
+                (gameObject->GetEntry() != GO_ULDAMAN_IRONAYA_SEAL &&
+                 gameObject->GetEntry() != GO_ULDAMAN_KEYSTONE))
+                continue;
+
+            instance->HandleGameObject(
+                ObjectGuid::Empty, true, gameObject);
+            gameObject->SetGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
+        }
+
+        // Force-load only the genuine Ironaya arena grid. She is a
+        // permanent native world DB boss, not an event-only summon.
+        // This ensures the original objective can be registered before
+        // the stage's safety-bubble preparation finishes.
+        QueryResult spawn = WorldDatabase.Query(
+            "SELECT `guid`, `position_x`, `position_y` "
+            "FROM `creature` WHERE `map` = 70 AND `id` = 7228 "
+            "AND (`spawnMask` & 1) <> 0 ORDER BY `guid` LIMIT 1");
+
+        if (!spawn)
+        {
+            error = "Native Ironaya (7228) spawn not found in Uldaman world DB.";
+            return false;
+        }
+
+        Field* fields = spawn->Fetch();
+        ObjectGuid::LowType const spawnId = fields[0].Get<uint32>();
+        float const x = fields[1].Get<float>();
+        float const y = fields[2].Get<float>();
+
+        CreatureData const* spawnData = sObjectMgr->GetCreatureData(spawnId);
+        if (!spawnData ||
+            spawnData->mapid != MANASTORM_MAP_ULDAMAN ||
+            spawnData->id != NPC_ULDAMAN_IRONAYA)
+        {
+            error = "Resolved Ironaya DB spawn does not match NPC 7228 on map 70.";
+            return false;
+        }
+
+        map->LoadGrid(x, y);
+
+        // The map-local store contains only loaded creatures; do not
+        // scan all world creatures or summon an artificial replacement.
+        auto const bounds =
+            map->GetCreatureBySpawnIdStore().equal_range(spawnId);
+        for (auto itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            Creature* ironaya = itr->second;
+            if (!ironaya ||
+                !ironaya->IsInWorld() ||
+                !ironaya->IsAlive() ||
+                ironaya->GetEntry() != NPC_ULDAMAN_IRONAYA)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(ironaya);
+            if (run.GetObjectiveCreatureGuid() != ironaya->GetGUID())
+            {
+                error = "Original Ironaya failed Manastorm objective registration.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER,
+                "Opened native Ironaya seal in private Manastorm: "
+                "run={} segment={} instance={} spawn={} guid={}.",
+                run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
+                spawnId, ironaya->GetGUID().GetRawValue());
+            return true;
+        }
+
+        error = "Ironaya's native DB spawn is not loaded/alive in the private Uldaman stage.";
+        return false;
+    }
+
     bool IsUldamanArchaedasStage(ManastormSegment const& segment)
     {
         return segment.MapId == MANASTORM_MAP_ULDAMAN &&
@@ -2134,6 +2283,11 @@ namespace
     {
         switch (run.GetSegment().SegmentId)
         {
+        case SEGMENT_IRONAYA_NORMAL:
+        case SEGMENT_IRONAYA_ENDGAME:
+            return BootstrapUldamanIronayaEncounter(
+                map, run, error);
+
         case SEGMENT_ARCHAEDAS_NORMAL:
         case SEGMENT_ARCHAEDAS_ENDGAME:
             return BootstrapUldamanArchaedasEncounter(
