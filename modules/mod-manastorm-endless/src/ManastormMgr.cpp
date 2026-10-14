@@ -5297,27 +5297,6 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         run->SetState(ManastormRunState::Active);
 
         //
-        // Archaedas's native altar awakening is deliberately deferred
-        // until ACTIVE, after all members' safety bubbles are cleared.
-        // BootstrapSpecialEncounter only loads/registers his original
-        // petrified DB boss while the group is still preparing.
-        //
-        if ((segment.SegmentId == SEGMENT_ARCHAEDAS_NORMAL ||
-             segment.SegmentId == SEGMENT_ARCHAEDAS_ENDGAME))
-        {
-            std::string archaedasError;
-            if (!ActivateUldamanArchaedasEncounter(
-                    player, map, *run, archaedasError))
-            {
-                FailRun(
-                    *run,
-                    "Uldaman Archaedas native activation failed: " +
-                        archaedasError);
-                return;
-            }
-        }
-
-        //
         // Voice presentation starts only once the safety bubble collapses and
         // the stage is truly ACTIVE. This prevents intro/dungeon VO from
         // firing during private-instance construction or partial transfers.
@@ -5427,6 +5406,28 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                 SyncChaoticLinkAura(
                     objectiveBoss,
                     *run);
+            }
+        }
+
+        //
+        // Archaedas's native altar awakening is deliberately deferred
+        // until ACTIVE, after all members' safety bubbles are cleared,
+        // and after native creatures have their stage scaling, affixes,
+        // and Chaotic Links. The PREPARING bootstrap only loads his
+        // original petrified DB spawn.
+        //
+        if ((segment.SegmentId == SEGMENT_ARCHAEDAS_NORMAL ||
+             segment.SegmentId == SEGMENT_ARCHAEDAS_ENDGAME))
+        {
+            std::string archaedasError;
+            if (!ActivateUldamanArchaedasEncounter(
+                    player, map, *run, archaedasError))
+            {
+                FailRun(
+                    *run,
+                    "Uldaman Archaedas native activation failed: " +
+                        archaedasError);
+                return;
             }
         }
 
