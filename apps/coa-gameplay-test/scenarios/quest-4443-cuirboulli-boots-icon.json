@@ -61,6 +61,7 @@
       "action": "client_packet",
       "actor": "hero",
       "opcode": 86,
+      "consumed": false,
       "fields": [
         {
           "u32": 2143
