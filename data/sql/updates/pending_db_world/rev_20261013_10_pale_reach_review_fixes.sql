@@ -38,6 +38,16 @@ DELETE FROM `gameobject` WHERE `guid` = 9999302;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `Comment`) VALUES
 (9999302, 2310437, 0, 0, 0, 1, 1, -7125.164, 1019.128, 296.522, 3.417428, 0, 0, 0.990504, -0.137481, 300, 0, 1, 'Pale Reach: Graysky mailbox by the Plucked Rook Inn door');
 
--- #6: every Raven becomes a perched Possessed Crow (blue raven-aura eyes, sitting) from the Possessed Crow template addon (user decision).
-DELETE FROM `creature_addon` WHERE `guid` IN (9960029, 9960647, 9961725, 9961860, 9961932);
+-- #6: every Raven becomes a Possessed Crow (user decision): perched with the blue raven-aura eyes from the template addon;
+-- the export's live-capture spawns keep their kneel and cannibalize poses with the aura added. Levels 18-21 as targeted in
+-- 2r0PE1dBarE, DuWTvw19xtg and F5g2uzWFLqA.
 UPDATE `creature` SET `id` = 164944, `MovementType` = 0, `wander_distance` = 0 WHERE `id` = 164371;
+UPDATE `creature_template` SET `minlevel` = 18, `maxlevel` = 21 WHERE `entry` = 164944;
+
+DELETE FROM `creature_addon` WHERE `guid` IN (9960029, 9960647, 9961725, 9961860, 9961932);
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(9960029, 0, 0, 8, 1, 0, 0, '365403'),
+(9960647, 0, 0, 0, 1, 398, 0, '365403'),
+(9961725, 0, 0, 0, 1, 398, 0, '365403'),
+(9961860, 0, 0, 0, 1, 398, 0, '365403'),
+(9961932, 0, 0, 8, 1, 0, 0, '365403');
