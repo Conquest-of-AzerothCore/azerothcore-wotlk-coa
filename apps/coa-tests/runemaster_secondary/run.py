@@ -17,11 +17,12 @@ HERE = Path(__file__).resolve().parent
 def fixture():
     method = runpy.run_path(str(HERE.parent / 'client_compat/run.py'))['method']
     code = (HERE.parent / 'reaper_secondary/harness.cpp').read_text().split('// SOURCE')[0]
-    code = code.replace('// ENUMS', method((ROOT / 'src/server/game/Spells/SpellInfo.h').read_text(),
-                                         'enum SpellCustomAttributes') + ';')
+    code = code.replace('// ENUMS', '#include "%s"\n%s;' % (
+        (ROOT / 'src/server/coa/AscensionTalentReplacementData.h').as_posix(),
+        method((ROOT / 'src/server/game/Spells/SpellInfo.h').read_text(), 'enum SpellCustomAttributes')))
     code = code.replace('struct Unit;', '''
 using AuraType=uint32;
-constexpr uint32 CLASS_SPIRIT_MAGE=32, EFFECT_2=2, UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE=7,
+constexpr uint32 CLASS_SPIRIT_MAGE=32, EFFECT_1=1, EFFECT_2=2, UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE=7,
     BASE_ATTACK=0, OFF_ATTACK=1, SPELLVALUE_MELEE_ATTACK_TYPE=10, SPELL_DIRECT_DAMAGE=1,
     SPELL_SCHOOL_MASK_MAGIC=126, SPELL_ATTR2_CANT_CRIT=1,
     SPELL_ATTR3_IGNORE_CASTER_MODIFIERS=2, SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS=4,
@@ -42,7 +43,7 @@ struct Unit;''', 1)
     int32 duration=3000;
     int32 GetDuration() const { return duration; }
     void SetDuration(int32 value) { duration=value; }
-    bool ModStackAmount(int32 num) { stacks+=num; duration=3000; return false; }
+    bool ModStackAmount(int32 num) { stacks=uint8(stacks+num); duration=3000; return false; }
     uint8 stacks=1;''')
     code = code.replace('struct AuraEffect {};', '''struct AuraEffect
     {
@@ -90,6 +91,7 @@ struct Unit
     bool offhand=true;
     auto const& GetSpellMap() const { return spells; }
     bool HasActiveSpell(uint32 id) const { return spells.contains(id); }
+    AuraEffect const* GetAuraEffect(uint32,uint32,uint32) const { return nullptr; }
     void RestoreSpellCharge(uint32 id,uint32 count) { restored.push_back(id); restoredCounts.push_back(count); }
     void RemoveSpellCooldown(uint32 id,bool update) { assert(update); cleared.push_back(id); }
     void* GetWeaponForAttack(uint32 hand,bool usable) { assert(hand==1 && usable); return offhand?this:nullptr; }
@@ -168,11 +170,23 @@ int main()
     spell.info.Id=800732; casts.OnSpellCast(&spell,&player,&spell.info,false); assert(player.restored.size()==2);
     assert(player.restoredCounts==std::vector<uint32>({1,1}));
     player.AddAura(806698,&player);
+    auto const withMagic=player.restored.size();
     casts.OnSpellCast(&spell,&player,&spell.info,false);
-    assert(player.restored.back()==707148 && player.restoredCounts.back()==3);
+    assert(player.restored.size()==withMagic+1 && player.restored.back()==707148 &&
+        player.restoredCounts.back()==3);
+    for (uint32 blast : {712668u,712858u,713002u,712404u,805794u})
+    {
+        auto const before=player.restored.size();
+        spell.info.Id=blast; casts.OnSpellCast(&spell,&player,&spell.info,false);
+        assert(player.restored.size()==before+1 && player.restored.back()==707148 &&
+            player.restoredCounts.back()==3);
+    }
     spell.info.Id=502632; casts.OnSpellCast(&spell,&player,&spell.info,false);
     assert(player.restoredCounts.back()==1);
     player.RemoveAurasDueToSpell(806698,1); player.restored.resize(2); player.restoredCounts.resize(2);
+    auto const withoutMagic=player.restored.size();
+    spell.info.Id=712668; casts.OnSpellCast(&spell,&player,&spell.info,false);
+    assert(player.restored.size()==withoutMagic+1 && player.restoredCounts.back()==1);
     player.AddAura(92153,&player); spell.info.Id=707148; player.casts.clear();
     casts.OnSpellHitResult(&spell,&enemy,0,301,0,false);
     assert(player.casts.size()==1 && player.casts.back().id==712298 && player.casts.back().amount==150);
