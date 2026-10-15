@@ -23,3 +23,8 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (30, 1, 2300715, 0, 0, 47, 0, 175205, 1, 0, 0, 0, 0, '', 'Three Sisters quest cauldron: and News from Cresthairn not taken'),
 (30, 1, 2309001, 0, 0, 47, 0, 175203, 33, 0, 0, 0, 0, '', 'Three Sisters plain cauldron: The Three Sisters'' Wisdom not taken or failed'),
 (30, 1, 2309001, 0, 1, 47, 0, 175205, 106, 0, 0, 0, 0, '', 'Three Sisters plain cauldron: or News from Cresthairn taken, complete, failed or rewarded');
+
+-- Playtest 2026-10-14: Graysky Guards stacked on the Graysky Royal Guards at the keep gate; live sightings show only Royal Guards there.
+DELETE FROM `creature` WHERE `guid` IN (9920754, 9920755) AND `id` = 164552;
+UPDATE `creature` SET `position_x` = -7197.646, `position_y` = 1159.316, `position_z` = 308.466 WHERE `guid` = 9920742 AND `id` = 164173;
+UPDATE `waypoint_data` SET `position_x` = -7197.646, `position_y` = 1159.316, `position_z` = 308.466 WHERE `id` = 9921016 AND `point` IN (1, 3);
