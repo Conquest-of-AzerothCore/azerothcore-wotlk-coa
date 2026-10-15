@@ -112,6 +112,18 @@ class aura_ascension_runemaster_hurricane : public AuraScript
         return GetCaster() && GetCaster() == GetUnitOwner() && CanUseHurricane(GetCaster(), GetId());
     }
 
+    void SetFearImmunity(bool apply)
+    {
+        Unit* player = GetTarget();
+        player->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_FEAR, apply);
+        player->ApplySpellImmune(GetId(), IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, apply);
+    }
+
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    {
+        SetFearImmunity(true);
+    }
+
     void Tick(AuraEffect const*)
     {
         if (!StrikeHurricane(GetTarget(), GetAura()))
@@ -121,6 +133,7 @@ class aura_ascension_runemaster_hurricane : public AuraScript
     void End(AuraEffect const*, AuraEffectHandleModes)
     {
         Unit* player = GetTarget();
+        SetFearImmunity(false);
         player->RemoveAurasDueToSpell(HurricaneDodge(GetId()), player->GetGUID());
         if (GetId() == SPELL_RUNIC_HURRICANE || !player->IsAlive() || !player->IsInWorld() ||
             GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
@@ -133,6 +146,8 @@ class aura_ascension_runemaster_hurricane : public AuraScript
 
     void Register() override
     {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_runemaster_hurricane::Apply,
+            EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
         OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_runemaster_hurricane::Tick,
             EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_runemaster_hurricane::End,
