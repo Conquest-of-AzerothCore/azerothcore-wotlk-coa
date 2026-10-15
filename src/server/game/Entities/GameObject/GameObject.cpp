@@ -1860,8 +1860,6 @@ void GameObject::Use(Unit* user)
                 else
                 {
                     Player* ritualOwner = ObjectAccessor::GetPlayer(*this, m_ritualOwnerGUID);
-                    // The first user stays the ritual owner for good; once that player has left
-                    // the map nobody could use the object again, so hand it over.
                     if (!ritualOwner)
                     {
                         m_ritualOwnerGUID = player->GetGUID();
