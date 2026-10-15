@@ -167,3 +167,6 @@ INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
 (175019, 1, 5, -7843, 876),
 (175019, 1, 6, -7876, 859),
 (175019, 2, 0, -8071, 751);
+
+-- Each Stolen Goods crate yields one Stolen Goods.
+UPDATE `gameobject_loot_template` SET `MinCount` = 1, `MaxCount` = 1 WHERE `Entry` = 2300635 AND `Item` = 559855;
