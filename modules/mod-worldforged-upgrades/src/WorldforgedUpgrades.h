@@ -25,6 +25,13 @@
  * The prices do not survive. They are computed in the SQL generator and kept in
  * a column of their own, so a real capture can replace them without touching
  * any code.
+ *
+ * Above the first rank an item climbs five more tiers, each one sitting at a
+ * fixed id offset from the first-rank item. Every tier past the first opens for
+ * the whole account once one of its characters has defeated a raid's last boss:
+ * Hakkar, Ragnaros, Onyxia, Nefarian and C'Thun, in that order. The kills are
+ * kept in the characters database (`worldforged_account_unlock`), and kills made
+ * before that table existed are read back from the achievement statistics.
  */
 
 #ifndef MOD_WORLDFORGED_UPGRADES_H
@@ -75,6 +82,7 @@ namespace Worldforged
         uint32 baseItem = 0;
         uint32 targetItem = 0;
         uint32 cost = 0;         ///< Runes of Ascension
+        uint32 unlockCreature = 0; ///< raid boss the account must have defeated; 0 is always open
     };
 
     /// All recipes, by their key. Filled once at startup.
@@ -84,6 +92,12 @@ namespace Worldforged
     std::vector<Recipe const*> const& RecipesOfStore(uint32 store);
 
     void LoadRecipes();
+
+    /// Whether some character of the account has defeated this boss.
+    bool IsUnlocked(uint32 accountId, uint32 creature);
+
+    /// Whether a recipe waits on this creature's death.
+    bool IsUnlockCreature(uint32 creature);
 }
 
 #endif

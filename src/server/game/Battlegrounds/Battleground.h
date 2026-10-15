@@ -206,6 +206,7 @@ struct BattlegroundObjectInfo
 enum ArenaType : uint8
 {
     ARENA_TYPE_NONE                 = 0,
+    ARENA_TYPE_1v1                  = 1,
     ARENA_TYPE_2v2                  = 2,
     ARENA_TYPE_3v3                  = 3,
     ARENA_TYPE_5v5                  = 5
@@ -489,7 +490,8 @@ public:
     [[nodiscard]] Group* GetBgRaid(TeamId teamId) const { return m_BgRaids[teamId]; }
     void SetBgRaid(TeamId teamId, Group* bg_raid);
 
-    void BuildPvPLogDataPacket(WorldPacket& data);
+    void BuildPvPLogDataPacket(WorldPacket& data, Player const* receiver = nullptr);
+    void SetArenaPersonalScore(ObjectGuid playerGuid, TeamId teamId, int32 ratingChange, uint32 matchmakerRating);
     virtual bool UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true);
 
     [[nodiscard]] uint32 GetPlayersCountByTeam(TeamId teamId) const { return m_PlayersCount[teamId]; }
@@ -647,6 +649,15 @@ protected:
     int32 m_TeamScores[PVP_TEAMS_COUNT];
 
     ArenaTeamScore _arenaTeamScores[PVP_TEAMS_COUNT];
+
+    struct ArenaPersonalScore
+    {
+        PvPTeamId PvPTeam;
+        int32 RatingChange;
+        uint32 MatchmakerRating;
+    };
+
+    std::unordered_map<ObjectGuid, ArenaPersonalScore> _arenaPersonalScores;
 
     // pussywizard:
     uint32 m_UpdateTimer;

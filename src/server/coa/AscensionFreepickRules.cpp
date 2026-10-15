@@ -575,6 +575,73 @@ UnlearnCost CostToUnlearn(std::uint32_t level, Row const& row)
     return { tier * level, 250 };
 }
 
+Row const* RowBySpell(Catalog const& catalog, Realm const& realm, std::uint32_t classId, std::uint32_t spellId)
+{
+    Row const* best = nullptr;
+    bool bestAdmitted = false;
+    for (std::uint32_t entryId : catalog.RowOrder)
+    {
+        Row const& row = catalog.Rows.at(entryId);
+        if (!Visible(catalog, realm, row) ||
+            std::find(row.Spells.begin(), row.Spells.end(), spellId) == row.Spells.end())
+            continue;
+        bool const admitted = ClassAdmits(catalog, row, classId);
+        if (!best || (admitted && !bestAdmitted) || (admitted == bestAdmitted && row.EntryId < best->EntryId))
+        {
+            best = &row;
+            bestAdmitted = admitted;
+        }
+    }
+    return best;
+}
+
+std::vector<Entry> GuideEntries(Catalog const& catalog, Realm const& realm, std::uint32_t level, std::uint32_t classId,
+    std::vector<GuideSpell> const& spells, std::uint32_t primaryStat)
+{
+    Build build(catalog, realm, level, {}, classId);
+    for (GuideSpell const& spell : spells)
+        if (spell.Level <= level)
+            if (Row const* row = RowBySpell(catalog, realm, classId, spell.Spell))
+                build.AddRank(row->EntryId);
+    if (classId == HERO_CLASS)
+    {
+        constexpr std::array<std::uint32_t, 5> PRIMARY_STAT_ENTRIES = { 0x47D, 0x47E, 0, 0x47F, 0x480 };
+        if (primaryStat < PRIMARY_STAT_ENTRIES.size() && PRIMARY_STAT_ENTRIES[primaryStat] &&
+            !build.Has(PRIMARY_STAT_ENTRIES[primaryStat]))
+            build.AddRank(PRIMARY_STAT_ENTRIES[primaryStat]);
+    }
+    return build.Entries();
+}
+
+std::vector<Entry> FitGuide(Catalog const& catalog, Realm const& realm, std::uint32_t level, std::uint32_t classId,
+    std::vector<Entry> const& guide, std::vector<Entry> const& kept)
+{
+    std::vector<Entry> base;
+    for (Entry const& entry : kept)
+    {
+        Row const* row = catalog.Find(entry.EntryId);
+        bool const replaced = std::any_of(guide.begin(), guide.end(), [&catalog, &entry, row](Entry const& guided)
+        {
+            Row const* other = catalog.Find(guided.EntryId);
+            return guided.EntryId == entry.EntryId || (row && other && row->Group && row->Group == other->Group);
+        });
+        if (!replaced)
+            base.push_back(entry);
+    }
+    Build build(catalog, realm, level, base, classId);
+    for (bool progress = true; progress;)
+    {
+        progress = false;
+        for (Entry const& entry : guide)
+            while (build.RankOf(entry.EntryId) < entry.Rank && build.ValidateLearn(entry.EntryId, nullptr) == LEARN_OK)
+            {
+                build.AddRank(entry.EntryId);
+                progress = true;
+            }
+    }
+    return build.Entries();
+}
+
 ApplyCheck CheckApply(Build const& base, std::vector<Entry> const& upload, UnitCheck const& unit, Purse const& purse)
 {
     ApplyCheck check;

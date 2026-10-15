@@ -41,6 +41,7 @@ DATABASE_KEYS = ('LoginDatabase.WorkerThreads', 'CharacterDatabase.WorkerThreads
                  'CharacterDatabase.TransactionIsolation', 'WorldDatabase.TransactionIsolation')
 SCENARIO_SHUTDOWN = 'Server shut down before the scenario completed'
 TEARDOWN_SHUTDOWN = 'Server shut down before the case teardown completed'
+WINDOWS_ACCESS_VIOLATION = 0xC0000005 - (1 << 32)
 
 
 def write(path, value):
@@ -63,8 +64,7 @@ def listen():
 def crash():
     if hasattr(signal, 'SIGKILL'):
         os.kill(os.getpid(), signal.SIGKILL)
-    import ctypes
-    ctypes.string_at(0)
+    os._exit(WINDOWS_ACCESS_VIOLATION)
 
 
 def measures(item, lane, seconds):
@@ -292,7 +292,8 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'who-hides-bots', 'who-lists-bots', 'wildcard-season-event',
                      'native-fixture-descendant-cleanup-producer', 'native-fixture-descendant-cleanup-consumer',
                      'vanilla-dungeons-normal', 'vanilla-dungeons-heroic', 'vanilla-dungeons-mythic',
-                     'vanilla-dungeons-health', 'mythic-plus-keystone-run', 'mythic-plus-client-data-at-login'}
+                     'vanilla-dungeons-health', 'mythic-plus-keystone-run', 'mythic-plus-client-data-at-login',
+                     'test-zone-bonus-command', 'test-zone-bonus-westfall'}
 UTC_EVENING = datetime(2026, 9, 24, 22, 40, tzinfo=timezone.utc)
 
 

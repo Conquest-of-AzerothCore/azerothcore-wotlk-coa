@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Elwynn: a ghost released at the north-eastern Riverpaw camp reaches a Spirit Healer (#7175)",
-  "contract": "A player who dies in Elwynn Forest releases at the nearest zone 12 graveyard that has a Spirit Healer. The death point is the Riverpaw camp spawn at (-8985.59,-854.958,69.1153). Shadewell Spring 6074 (-8594.75,-615.457,144.698) is nearer but has no Spirit Healer, so it serves only the Inquisitorial dungeon zones. The nearest remaining graveyard is the Tower of Azora 1468 (about 630 yards), ahead of Northshire 105 (about 668 yards), and its Spirit Healer 6491 stands 3 yards from it. Death and spirit release use the native handlers.",
+  "contract": "A player who dies in Elwynn Forest releases at the nearest zone 12 graveyard that has a Spirit Healer. The death point is the Riverpaw camp spawn at (-8985.59,-854.958,69.1153). Shadewell Spring 6074 (-8594.75,-615.457,144.698) is nearer but is linked only to the Shadewell zones (10197, 10218, 10305), not to zone 12. The nearest remaining graveyard is the Tower of Azora 1468 (about 630 yards), ahead of Northshire 105 (about 668 yards), and its Spirit Healer 6491 stands 3 yards from it. Death and spirit release use the native handlers.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,

@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Raid Marker - Removal clears the placed raid markers (COA-5845)",
+  "contract": [
+    "Raid Marker - Removal (499587) reads 'Removes all currently placed raid markers.' Its only effect is a",
+    "SPELL_EFFECT_DUMMY with no script, so casting it did nothing. Each marker (499588-499595) is a persistent area",
+    "aura that leaves a dynamic object owned by the caster. spell_ascension_raid_marker_removal now removes the",
+    "caster's dynamic objects for all eight marker spells."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 27,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 499587
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 499588
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 499590
+    },
+    {
+      "action": "cast",
+      "label": "Place the Triangle marker",
+      "actor": "p",
+      "spell": 499588,
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Place the Skull marker",
+      "actor": "p",
+      "spell": 499590,
+      "destination": {
+        "x": -8912.41,
+        "y": -113.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Triangle marker is on the ground",
+      "actor": "p",
+      "metric": "dynamic_object",
+      "spell": 499588,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Skull marker is on the ground",
+      "actor": "p",
+      "metric": "dynamic_object",
+      "spell": 499590,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Raid Marker - Removal",
+      "actor": "p",
+      "spell": 499587
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the removal is accepted",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 499587,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Triangle marker is gone",
+      "actor": "p",
+      "metric": "dynamic_object",
+      "spell": 499588,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Skull marker is gone",
+      "actor": "p",
+      "metric": "dynamic_object",
+      "spell": 499590,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

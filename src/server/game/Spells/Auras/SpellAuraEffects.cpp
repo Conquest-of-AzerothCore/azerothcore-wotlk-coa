@@ -1527,6 +1527,11 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             break;
     }
 
+    if (spellId)
+        spellId = sSpellMgr->GetSpellTwinFor(spellId, GetId());
+    if (spellId2)
+        spellId2 = sSpellMgr->GetSpellTwinFor(spellId2, GetId());
+
     Player* player = target->ToPlayer();
     if (apply)
     {

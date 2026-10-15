@@ -45,12 +45,12 @@ void SyncFalconstrike(Player* player)
     for (uint32 rank : Falconstrikes)
         if (SpellInfo const* info = sSpellMgr->GetSpellInfo(rank); info && info->SpellLevel <= player->GetLevel())
             replacement = rank;
-    if (player->GetSpellMap().find(replacement) == player->GetSpellMap().end())
+    bool ready = FalconstrikeReady(player);
+    if (ready && player->GetSpellMap().find(replacement) == player->GetSpellMap().end())
         player->learnSpell(replacement, true);
     for (uint32 rank : Falconstrikes)
         if (rank != replacement && player->GetSpellMap().find(rank) != player->GetSpellMap().end())
             player->removeSpell(rank, SPEC_MASK_ALL, true);
-    bool ready = FalconstrikeReady(player);
     for (uint32 quick : QuickShots)
     {
         if (ready && player->HasActiveSpell(quick) && player->HasActiveSpell(replacement))

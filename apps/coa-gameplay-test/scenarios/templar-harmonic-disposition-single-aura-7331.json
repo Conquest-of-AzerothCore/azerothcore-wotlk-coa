@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "name": "templar-harmonic-disposition-single-aura-7331",
+  "contract": [
+    "Two Templars in one party each cast Harmonic Disposition. A party member must hold a single Harmonic",
+    "Disposition aura, from whichever Templar's area aura reached them first, never one copy per Templar.",
+    "Each Templar keeps the aura from their own cast."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "a",
+      "race": 1,
+      "level": 60,
+      "allow_regeneration": false,
+      "class": 19
+    },
+    {
+      "id": "b",
+      "race": 1,
+      "level": 60,
+      "allow_regeneration": false,
+      "class": 19
+    },
+    {
+      "id": "c",
+      "race": 1,
+      "level": 60,
+      "allow_regeneration": false,
+      "class": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "a",
+      "spell": 560653
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 560653
+    },
+    {
+      "action": "group",
+      "actor": "a",
+      "target": "b"
+    },
+    {
+      "action": "group",
+      "actor": "a",
+      "target": "c"
+    },
+    {
+      "action": "cast",
+      "actor": "a",
+      "spell": 560653,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 560653,
+      "caster": "a",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 560653,
+      "target": "b"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 560653,
+      "caster": "a",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 560653,
+      "caster": "b",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 560653,
+      "caster": "a",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 560653,
+      "caster": "b",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 560653,
+      "caster": "b",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 560653,
+      "caster": "a",
+      "equals": 0
+    }
+  ]
+}

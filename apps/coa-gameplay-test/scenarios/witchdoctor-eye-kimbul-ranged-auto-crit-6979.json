@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "name": "Eye of Kimbul adds one percent ranged auto-attack crit per stack on its affected target and reads correctly on the debuff (#6979)",
+  "name": "Eye of Kimbul adds one percent ranged auto-attack crit per stack on its affected target and keeps its DBC debuff text (#6979, #7388)",
   "contract": [
     "Eye of Kimbul debuff 802707 (effect 0 aura 271 MOD_DAMAGE_FROM_CASTER, MiscValue 127; effect 1 aura 308",
     "SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, 1% per stack, StackAmount 5, Spell.dbc DurationIndex 8) must raise the Witch",
@@ -8,12 +8,9 @@
     "The reporter saw 100% crit on ranged auto-attacks with five stacks; the expected value is the baseline plus five.",
     "The assertions here bound the absolute chance as well as the delta, so a baseline that is already wrong - which a",
     "delta-only test cannot see - fails the scenario instead of passing it.",
-    "The report also names the numbers the client shows: the debuff's own aura text (Spell.dbc ToolTip, column 187)",
-    "carried the damage-scaled ${$wN} placeholder for both percent auras, so five stacks rendered a three-digit figure",
-    "instead of the five the mechanic grants. Nothing published that row before, so the client rendered its own DBC",
-    "text; the corrected aura text is published through coa_client_spell_description and arrives as the tooltip",
-    "string of the spell's streamed row, so the scenario reads that stream at login and holds both the fix and the",
-    "already-working mechanic in one place.",
+    "The debuff's own aura text (Spell.dbc ToolTip) reports the current per-stack effect. A published",
+    "coa_client_spell_description row replaced it with a static text that players read as the talent description",
+    "(#7388), so the login patch stream must not publish row 802707 and the client renders its DBC text.",
     "Confirmed unrelated: the Pain rows 706643 and 706664 carry a 100% aura 308 and are applied by nothing in the core."
   ],
   "timeout_ms": 90000,
@@ -42,54 +39,11 @@
     {
       "action": "assert",
       "actor": "w",
-      "metric": "server_packet_contains",
+      "metric": "server_packets",
       "opcode": 2346,
       "row": 802707,
-      "text": "Increases your damage dealt and critical strike chance against this target by",
-      "equals": 1,
-      "within_ms": 5000,
-      "label": "THE FIX: Eye of Kimbul 802707 now has a published row in the login patch stream"
-    },
-    {
-      "action": "assert",
-      "actor": "w",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 802707,
-      "text": "The Shadowhunter deals 1% increased damage to you per stack and has a 1% increased chance to critically strike you per stack.",
-      "equals": 1,
-      "within_ms": 5000,
-      "label": "THE FIX: the debuff's own aura text states the one percent per stack the auras carry"
-    },
-    {
-      "action": "assert",
-      "actor": "w",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 802707,
-      "text": "${$w1}",
       "equals": 0,
-      "label": "THE FIX: the damage-scaled placeholder that rendered a three-digit figure is gone"
-    },
-    {
-      "action": "assert",
-      "actor": "w",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 802707,
-      "text": "${$w2}",
-      "equals": 0,
-      "label": "THE FIX: the second damage-scaled placeholder is gone"
-    },
-    {
-      "action": "assert",
-      "actor": "w",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 802707,
-      "text": "Stacks $u times. Cannot stealth or turn invisible.",
-      "equals": 1,
-      "label": "CONTROL: the aura text keeps its stack clause and its stealth clause"
+      "label": "Eye of Kimbul 802707 has no published row, so the debuff shows its own stack-scaled DBC aura text"
     },
     { "action": "snapshot", "actor": "w", "metric": "ranged_taken_crit_chance", "target": "target", "save_as": "crit" },
     {

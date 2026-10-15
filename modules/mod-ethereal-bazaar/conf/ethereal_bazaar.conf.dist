@@ -21,14 +21,15 @@ EtherealBazaar.RotationMaxHours = 6
 # 1000 tokens, 440 between 1000 and 1500, and 190 above. Equal slot counts
 # would make an expensive item come round far MORE often than a cheap one,
 # because it is drawn from a much smaller bag. With the numbers below a given
-# cheap item returns about every 27 days, a mid one every 36, an expensive one
-# every 48, at four rotations a day.
+# cheap item returns about every 10 days, a mid one every 14, an expensive one
+# every 24, at four rotations a day. Together with the cache row they fill the
+# nine pages of ten the live Bazaar showed.
 #
 # If you change the pool, check those three numbers again before you change
 # these. Slots follow the size of the band, not how rare the item should feel.
-EtherealBazaar.Slots.Cheap = 30
-EtherealBazaar.Slots.Mid = 3
-EtherealBazaar.Slots.Expensive = 1
+EtherealBazaar.Slots.Cheap = 79
+EtherealBazaar.Slots.Mid = 8
+EtherealBazaar.Slots.Expensive = 2
 
 #
 # The module logs under "module.bazaar": what the pool holds, what each
@@ -69,3 +70,35 @@ EtherealBazaar.Tokens.BonusPercent = 150
 # turns into noise; the bag updates either way.
 # Default: 0 (no toast)
 EtherealBazaar.Tokens.Announce = 0
+
+# Groot Coins (item 910001): staff mail them for useful bug reports, players
+# exchange carried coins with Tiraxis for Bazaar Tokens. All keys are read
+# once at startup. Turning a switch off stops new awards or exchanges only;
+# coins already held and every audit record stay. See
+# modules/mod-ethereal-bazaar/GROOT_COINS.md.
+
+# .groot award. Also needs RBAC permission 1001 and Game Master security.
+# Default: 0 (off)
+GrootCoin.Enable = 0
+
+# The "I want to exchange Groot Coins" option at Tiraxis.
+# Default: 0 (off)
+GrootCoin.ExchangeEnable = 0
+
+# Bazaar Tokens paid per coin. Exchanges are 1, 5 or 10 coins.
+# Default: 100
+GrootCoin.TokensPerCoin = 100
+
+# Largest single award.
+# Default: 25
+GrootCoin.MaxAward = 25
+
+# Pay award requests that a website or bot inserts into the characters table
+# groot_coin_award_queue (see GROOT_COINS.md, "Website / external awards").
+# Needs GrootCoin.Enable = 1 as well. Off: queued rows wait untouched.
+# Default: 0 (off)
+GrootCoin.ExternalAwardsEnable = 0
+
+# Seconds between reads of groot_coin_award_queue (minimum 5).
+# Default: 60
+GrootCoin.QueuePollInterval = 60

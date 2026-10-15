@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Sargeron Smite's top rank generates 20 Energy and repeats under Inner Demon (#7323)",
+  "contract": "Sargeron Smite rank 9 (501321) reads 'Blast an enemy for ... Shadowflame Damage and generate $521213s1 Energy', and under Inner Demon (804216) 'This spell casts an additional time free of cost.' felsworn-sargeron-smite-energy covers rank 2 only. Every rank of the 802060 chain casts Energize +20 energy (521213) on a hostile hit, and under Inner Demon copies the hit's damage to the target as 803467. With Inner Demon up, one rank 9 cast on a dummy raises Energy from 50 to 70 and lands the free 803467 hit.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "felsworn", "race": 1, "class": 14, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "felsworn", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "felsworn", "spell": 501321 },
+    { "action": "set_power", "actor": "felsworn", "power": 3, "value": 50 },
+    { "action": "assert", "label": "SETUP: energy is at the fixtured value", "actor": "felsworn", "metric": "power", "power": 3, "equals": 50 },
+    { "action": "set_aura", "label": "SETUP: the rank's Felfury cost", "actor": "felsworn", "spell": 800058, "stacks": 2 },
+    { "action": "set_aura", "label": "SETUP: Inner Demon is up", "actor": "felsworn", "spell": 804216, "stacks": 1 },
+    { "action": "cast", "actor": "felsworn", "spell": 501321, "target": "dummy" },
+    { "action": "assert", "actor": "felsworn", "metric": "cast_failure", "spell": 501321, "equals": 0 },
+    {
+      "action": "assert", "label": "The hit generates the DBC's 20 Energy",
+      "actor": "felsworn", "metric": "power", "power": 3, "equals": 70, "within_ms": 300
+    },
+    {
+      "action": "assert", "label": "Inner Demon's free second cast lands",
+      "actor": "felsworn", "metric": "spell_damage_count", "spell": 803467, "target": "dummy", "min": 1, "within_ms": 2000
+    }
+  ]
+}

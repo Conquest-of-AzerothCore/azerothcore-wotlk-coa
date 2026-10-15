@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Elwynn: a ghost released in Jasperlode Mine reaches the Tower of Azora Spirit Healer (#7648)",
+  "contract": "A player who dies inside Jasperlode Mine (zone 10126, in its eastern tunnel (-9051.2,-551.2,63.6)) releases at the Tower of Azora graveyard 1468 (-9564.74,-605.882,58.4409), about 520 yards west, not at Northshire 105 (-8935.33,-188.646,80.4165), which serves only Northshire Valley and sits about 380 yards away. Its Spirit Healer 6491 stands near it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9051.2,
+    "y": -551.2,
+    "z": 63.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Tower of Azora graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -9579.7,
+      "max": -9549.7,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -620.9,
+      "max": -590.9
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Elwynn: reviving at a Spirit Healer after dying in Jasperlode Mine keeps the ghost at the graveyard (#7648)",
+  "contract": "A player who dies in the eastern tunnel of Jasperlode Mine (zone 10126, (-9051.2,-551.2,63.6)) and releases arrives at the Tower of Azora graveyard 1468 (-9564.74,-605.882,58.4409). Reviving at its Spirit Healer resurrects the player there. The graveyard for the corpse is chosen with the zone and area of the corpse, not those of the ghost: with the ghost's zone 12 it picked Northshire 105, which is nearer to the corpse, and the revive teleported the player 460 yards away to Northshire. Death, spirit release and the Spirit Healer revive use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9564.74,
+    "y": -605.882,
+    "z": 58.4409,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "creatures": [
+    {
+      "id": "healer",
+      "owner": "cleric",
+      "entry": 6491,
+      "distance": 3,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "cleric",
+      "map": 0,
+      "x": -9051.2,
+      "y": -551.2,
+      "z": 63.6,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Tower of Azora graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -9579.7,
+      "max": -9549.7,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -620.9,
+      "max": -590.9
+    },
+    {
+      "action": "client_packet",
+      "actor": "cleric",
+      "opcode": 540,
+      "fields": [
+        {
+          "actor_guid": "healer"
+        }
+      ],
+      "consumed": false,
+      "label": "Revive at the Spirit Healer"
+    },
+    {
+      "action": "assert",
+      "label": "The player is alive",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The revive leaves the player at the Tower of Azora graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -9579.7,
+      "max": -9549.7
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -620.9,
+      "max": -590.9
+    }
+  ]
+}

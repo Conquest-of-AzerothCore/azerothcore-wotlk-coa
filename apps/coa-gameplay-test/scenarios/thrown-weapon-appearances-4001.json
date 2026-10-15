@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Thrown weapon appearances are enabled by the native login config (#4001)",
+  "contract": [
+    "The client appearance population and validation paths require CONFIG_THROWN_WEAPON_APPEARANCES_ENABLED.",
+    "An absent flag hides weapon subclass 16 and rejects its selection. AscConfig replaces its scalar maps",
+    "from the single SMSG_UPDATE_CONFIGS packet, so the default CoA login must send that name followed by true.",
+    "Item 25861 is a level-one thrown weapon. ItemAppearances row 181248 maps item 29201 to appearance 12001",
+    "in category 12. The reported Tauren Barbarian must keep its equipped item when applying this appearance.",
+    "This exercises the native login and appearance protocols; it does not render the client wardrobe."
+  ],
+  "timeout_ms": 30000,
+  "location": { "map": 1, "x": -2892.85, "y": -263.883, "z": 53.3085, "o": 0 },
+  "players": [
+    { "id": "barbarian", "race": 6, "class": 12, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "Login sends one complete config packet", "actor": "barbarian",
+      "metric": "server_packets", "opcode": 1421, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The login config enables thrown appearances", "actor": "barbarian",
+      "metric": "server_packet_contains", "opcode": 1421,
+      "text": "CONFIG_THROWN_WEAPON_APPEARANCES_ENABLED\u0001", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The same config preserves build inspection", "actor": "barbarian",
+      "metric": "server_packet_contains", "opcode": 1421,
+      "text": "CONFIG_CHARACTER_ADVANCEMENT_BUILD_INSPECT_ENABLED\u0001", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The same config preserves XP rates", "actor": "barbarian",
+      "metric": "server_packet_contains", "opcode": 1421, "text": "RATE_XP_GLOBAL", "equals": 1
+    },
+    { "action": "add_item", "actor": "barbarian", "item": 25861 },
+    { "action": "equip", "actor": "barbarian", "item": 25861, "slot": 17 },
+    {
+      "action": "assert", "label": "Equip the thrown weapon", "actor": "barbarian",
+      "metric": "equipped_item", "slot": 17, "equals": 25861
+    },
+    {
+      "action": "snapshot", "actor": "barbarian", "metric": "server_packets", "opcode": 1688,
+      "save_as": "before_apply"
+    },
+    { "action": "apply_appearances", "actor": "barbarian", "selection": { "12": 12001 } },
+    {
+      "action": "assert", "label": "The appearance request receives one response", "actor": "barbarian",
+      "metric": "server_packets", "opcode": 1688, "relative_to": "before_apply", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The thrown appearance is accepted", "actor": "barbarian",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The appearance preserves the equipped weapon", "actor": "barbarian",
+      "metric": "equipped_item", "slot": 17, "equals": 25861
+    }
+  ]
+}

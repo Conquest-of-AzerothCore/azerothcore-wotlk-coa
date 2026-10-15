@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Brill: 'Stay a While' credits only after Dark Priestess Ashara's sermon (#6330)",
+  "contract": [
+    "Quest 1660054 'Stay a While' asks the player to 'Listen to Dark Priestess Ashara' (162847) through her option",
+    "'<Stay a while and listen.>' (gossip 932415). Like Aliscar Lend's lesson for 1660060, choosing it must start a",
+    "spoken sermon and credit the listen marker 162921 only after it, not at once. The sermon lines are INFERRED",
+    "(rev_20261014_60); this checks the flow: no credit 3 s after the choice, the opening and closing lines are said",
+    "to the player (SMSG_MESSAGECHAT 150, MONSTER_SAY 12 in Universal 0, so the first uint32 is 12), and the credit",
+    "follows the closing line. It does not check client chat rendering."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": 2192.81, "y": 333.04, "z": 34.673, "o": 4.46},
+  "players": [
+    {"id": "hero", "race": 5, "class": 1, "level": 5}
+  ],
+  "creatures": [
+    {"id": "ashara", "owner": "hero", "entry": 162847, "distance": 3, "faction": 68}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"label": "SETUP: 'Stay a While' is taken", "action": "prepare_quest", "actor": "hero", "quest": 1660054,
+     "complete": false},
+    {"label": "SETUP: nothing is credited yet", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 1660054, "index": 0, "equals": 0},
+    {"label": "the hero talks to Ashara", "action": "gossip_hello", "actor": "hero", "target": "ashara"},
+    {"label": "the hero stays a while and listens", "action": "gossip_select", "actor": "hero", "option": 0},
+    {"action": "wait", "ms": 3000},
+    {"label": "DISCRIMINATING: choosing the option does not credit the objective by itself", "action": "assert",
+     "actor": "hero", "metric": "quest_objective_count", "quest": 1660054, "index": 0, "equals": 0},
+    {"label": "Ashara opens her sermon", "action": "assert", "actor": "hero", "metric": "server_packet_contains",
+     "opcode": 150, "row": 12, "text": "The living fill their chapels to beg the Light for comfort.",
+     "equals": 1, "within_ms": 3000},
+    {"label": "Ashara speaks of the Three Virtues", "action": "assert", "actor": "hero",
+     "metric": "server_packet_contains", "opcode": 150, "row": 12,
+     "text": "The Cult of the Forgotten Shadow keeps Three Virtues.", "equals": 1, "within_ms": 30000},
+    {"label": "still no credit during the sermon", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 1660054, "index": 0, "equals": 0},
+    {"label": "Ashara closes her sermon", "action": "assert", "actor": "hero", "metric": "server_packet_contains",
+     "opcode": 150, "row": 12, "text": "You have listened longer than most.", "equals": 1, "within_ms": 30000},
+    {"label": "the objective is credited after the sermon", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 1660054, "index": 0, "equals": 1, "within_ms": 5000},
+    {"label": "the quest is complete", "action": "assert", "actor": "hero", "metric": "quest_status",
+     "quest": 1660054, "equals": 1}
+  ]
+}

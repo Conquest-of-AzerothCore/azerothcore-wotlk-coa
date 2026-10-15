@@ -807,6 +807,8 @@ public:
     [[nodiscard]] std::unordered_multimap<uint32, uint32> const& GetSpellTwins() const { return _spellTwins; }
     /// the spell a twin takes its data from, or the spell itself
     [[nodiscard]] uint32 GetSpellTwinSource(uint32 spellId) const;
+    /// the twin or namesake of a stock spell that belongs with a related spell's own twin, or the stock spell
+    [[nodiscard]] uint32 GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const;
     void LoadSpellRequired();
     void LoadSpellLearnSkills();
     void LoadSpellTargetPositions();

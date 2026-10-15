@@ -1932,7 +1932,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
             if (caster->IsPlayer())
             {
                 // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
-                if (AttributesEx2 & SPELL_ATTR2_CANNOT_CAST_ON_TAPPED)
+                if ((AttributesEx2 & SPELL_ATTR2_CANNOT_CAST_ON_TAPPED) && !HasEffect(SPELL_EFFECT_SKINNING))
                     if (Creature const* targetCreature = unitTarget->ToCreature())
                         if (targetCreature->hasLootRecipient() && !targetCreature->isTappedBy(caster->ToPlayer()))
                             return SPELL_FAILED_CANT_CAST_ON_TAPPED;
@@ -3096,9 +3096,11 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
             case POWER_MANA:
                 powerCost += int32(CalculatePct(UsesMaxManaForCost ? caster->GetMaxPower(POWER_MANA) : caster->GetCreateMana(), ManaCostPercentage));
                 break;
+            case POWER_ENERGY:
+                powerCost += int32(CalculatePct(caster->GetCreatePowers(POWER_ENERGY), ManaCostPercentage));
+                break;
             case POWER_RAGE:
             case POWER_FOCUS:
-            case POWER_ENERGY:
             case POWER_HAPPINESS:
                 powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(PowerType)), ManaCostPercentage));
                 break;

@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AllCreatureScript.h"
 #include "CreatureScript.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
@@ -22,6 +23,33 @@
 #include "ScriptedFollowerAI.h"
 #include "ScriptedGossip.h"
 #include "SpellInfo.h"
+#include "TemporarySummon.h"
+
+enum MoonstalkerRunts
+{
+    NPC_MOONSTALKER_MATRIARCH = 2071,
+    NPC_MOONSTALKER_RUNT      = 2070,
+    RUNT_LEVEL_DIFFERENCE     = 3
+};
+
+class moonstalker_runt : public AllCreatureScript
+{
+public:
+    moonstalker_runt() : AllCreatureScript("moonstalker_runt") { }
+
+    void OnBeforeCreatureSelectLevel(CreatureTemplate const*, Creature* creature, uint8& level) override
+    {
+        if (creature->GetEntry() != NPC_MOONSTALKER_RUNT || !creature->IsSummon())
+            return;
+
+        Creature* matriarch = creature->ToTempSummon()->GetSummonerCreatureBase();
+        if (!matriarch || matriarch->GetEntry() != NPC_MOONSTALKER_MATRIARCH || matriarch->IsPet())
+            return;
+
+        level = matriarch->GetLevel() > RUNT_LEVEL_DIFFERENCE
+            ? matriarch->GetLevel() - RUNT_LEVEL_DIFFERENCE : 1;
+    }
+};
 
 enum murkdeep
 {
@@ -633,6 +661,7 @@ public:
 
 void AddSC_darkshore()
 {
+    new moonstalker_runt();
     new npc_murkdeep();
     new npc_rabid_thistle_bear();
     new npc_tharnarian();

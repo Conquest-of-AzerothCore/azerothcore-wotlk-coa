@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionAverageItemLevel.h"
 #include "AscensionCacheRewards.h"
 #include "AscensionCompatOpcodes.h"
 #include "AscensionSpecLoot.h"
@@ -38,6 +39,8 @@ constexpr uint16 SMSG_CALLBOARD_TOKEN_UPDATE = 0x0670;
 constexpr char CallboardPointsToken[] = "TOKEN_TYPE_CALLBOARD_CACHE_POINTS";
 constexpr char CallboardPointsSetting[] = "core.callboard.points";
 constexpr char CallboardItemLevelSetting[] = "core.callboard.itemlevel";
+constexpr uint32 ReachedItemLevelRecountIndex = 1;
+constexpr uint32 ReachedItemLevelRecountVersion = 2;
 constexpr uint32 HighestItemLevelReachedCriterion = 80129;
 constexpr uint32 PointsPerDisplayedPoint = 10;
 
@@ -184,7 +187,7 @@ uint8 HighestStage(uint32 cacheItemId)
 uint32 ResolveGenericTier(Player* player, uint32 cacheItemId)
 {
     uint8 const highest = HighestStage(cacheItemId);
-    uint32 averageItemLevel = uint32(player->GetAverageItemLevel());
+    uint32 averageItemLevel = uint32(AscensionAverageItemLevel::Equipped(player));
     uint32 chosen = 0;
 
     for (uint8 index = 0; index <= highest; ++index)
@@ -272,7 +275,7 @@ bool OpenCallboardCache(Player* player, Item* item)
     player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
 
     AscensionCacheRewards::Reward reward;
-    if (!PickReward(player, *pool, uint32(player->GetAverageItemLevel()), reward))
+    if (!PickReward(player, *pool, uint32(AscensionAverageItemLevel::Equipped(player)), reward))
     {
         ChatHandler(player->GetSession()).SendSysMessage(
             "The cache holds nothing this character can use.");
@@ -364,9 +367,23 @@ void SendReachedItemLevel(Player* player, uint32 itemLevel)
     player->SendDirectMessage(&update);
 }
 
+void RecountReachedItemLevel(Player* player)
+{
+    PlayerSettingVector const* stored = player->FindPlayerSettings(CallboardItemLevelSetting);
+    if (stored && stored->size() > ReachedItemLevelRecountIndex &&
+        (*stored)[ReachedItemLevelRecountIndex].value >= ReachedItemLevelRecountVersion)
+        return;
+
+    uint32 const equipped = uint32(AscensionAverageItemLevel::Equipped(player));
+    if (ReachedItemLevel(player) > equipped)
+        player->UpdatePlayerSetting(CallboardItemLevelSetting, 0, equipped);
+    player->UpdatePlayerSetting(CallboardItemLevelSetting, ReachedItemLevelRecountIndex,
+        ReachedItemLevelRecountVersion);
+}
+
 bool RaiseReachedItemLevel(Player* player)
 {
-    uint32 const equipped = uint32(player->GetAverageItemLevel());
+    uint32 const equipped = uint32(AscensionAverageItemLevel::Equipped(player));
     if (equipped <= ReachedItemLevel(player))
         return false;
 
@@ -493,6 +510,7 @@ public:
 
     void OnPlayerLogin(Player* player) override
     {
+        RecountReachedItemLevel(player);
         RaiseReachedItemLevel(player);
         SendProgressState(player);
     }

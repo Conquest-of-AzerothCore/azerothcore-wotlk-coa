@@ -249,6 +249,18 @@ struct ApplyCheck
 
 ApplyCheck CheckApply(Build const& base, std::vector<Entry> const& upload, UnitCheck const& unit, Purse const& purse);
 
+struct GuideSpell
+{
+    std::uint32_t Spell = 0;
+    std::uint32_t Level = 0;
+};
+
+Row const* RowBySpell(Catalog const& catalog, Realm const& realm, std::uint32_t classId, std::uint32_t spellId);
+std::vector<Entry> GuideEntries(Catalog const& catalog, Realm const& realm, std::uint32_t level, std::uint32_t classId,
+    std::vector<GuideSpell> const& spells, std::uint32_t primaryStat);
+std::vector<Entry> FitGuide(Catalog const& catalog, Realm const& realm, std::uint32_t level, std::uint32_t classId,
+    std::vector<Entry> const& guide, std::vector<Entry> const& kept);
+
 using LearnedSpells = std::function<std::vector<std::uint32_t>(std::uint32_t spellId)>;
 
 std::vector<std::uint32_t> TaughtSpells(std::uint32_t spellId, LearnedSpells const& learned);

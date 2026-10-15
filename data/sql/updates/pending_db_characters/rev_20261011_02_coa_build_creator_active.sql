@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS `coa_build_creator_active` (
+  `guid` INT UNSIGNED NOT NULL,
+  `spec` TINYINT UNSIGNED NOT NULL,
+  `build_id` VARCHAR(36) NOT NULL,
+  `flag_1` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `flag_2` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`guid`, `spec`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

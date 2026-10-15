@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Runemaster Hurricane plays the client's custom wind animation (#7717)",
+  "contract": [
+    "#7717: a Spirit Mage (class 32, the Runemaster) reports Hurricane 645435 with no animation, and the",
+    "recording linked in the report shows the ability wrapped in a wind storm. The client owns the spell's",
+    "authored visual: SpellVisual 1816 (shared only with the Wildcard Runic Hurricane pair 280930/280932), whose",
+    "casting kit 2941 ends on world effect 310142, a row that exists in no archive of the client - the row was",
+    "missing on Ascension as well, where the same client played the ability correctly, so the missing row is not",
+    "what renders it. What carries the wind is the helper visual Ascension authored next to it: SpellVisual 1817",
+    "owns no spell at all and its casting kit 2944 attaches the custom wind effect SPELLS\\shaman_unleashedwind_01",
+    "- a client-owned asset that no other visual plays. The live servers stream that kit to the client when the",
+    "Runemaster casts Hurricane; this repository's server never did, which is why the caster showed only the",
+    "spell's hand and impact effects. The fix plays the client's own kit 2944 on the caster in",
+    "AscensionRunemasterHurricane's non-triggered cast, as Unit::SendPlaySpellVisual (SMSG_PLAY_SPELL_VISUAL,",
+    "opcode 499) - the mechanism the Templar and Necromancer abilities in this repository already use - and leaves",
+    "the client's Spell.dbc rows untouched. That packet is a core opcode, which the harness does not record, so this",
+    "scenario proves the spell still works and that no client row is overridden; the appearance itself is a client",
+    "test. The Wildcard sibling 280930 is out of this issue's scope. The spell must still work: the cast applies",
+    "the 2 s Hurricane aura and its strike deals damage."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI, level scaling and the login patch stream settle", "ms": 7000},
+    {
+      "action": "assert",
+      "label": "CONTROL: nothing overrides the Hurricane's own client visual (645435 keeps its Spell.dbc row)",
+      "actor": "rm", "metric": "server_packets", "opcode": 2346, "row": 645435, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the stream keeps another published spell's own visual (Palm Sigil: Water 500639 = 2692)",
+      "actor": "rm", "metric": "server_packet_u32", "opcode": 2346, "row": 500639, "offset": 524,
+      "equals": 2692, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Wildcard sibling 280930 is out of scope and carries no streamed row",
+      "actor": "rm", "metric": "server_packets", "opcode": 2346, "row": 280930, "equals": 0
+    },
+    {"action": "learn", "actor": "rm", "spell": 197},
+    {"action": "add_item", "actor": "rm", "item": 12784},
+    {"action": "equip", "label": "Hurricane requires a main-hand weapon", "actor": "rm", "item": 12784, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 645435},
+    {"action": "cast", "label": "Casting Hurricane is what streams the wind kit to the client", "actor": "rm",
+      "spell": 645435, "target": "dummy"},
+    {
+      "action": "assert", "label": "REALITY: Hurricane still applies its aura", "actor": "rm", "metric": "aura",
+      "spell": 645435, "equals": 1, "within_ms": 500
+    },
+    {
+      "action": "assert", "label": "REALITY: its strike still lands on the dummy", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 645437, "target": "dummy", "min": 1, "within_ms": 3000
+    },
+    {"action": "assert", "label": "REALITY: the aura still ends after its 2 s", "actor": "rm", "metric": "aura",
+      "spell": 645435, "equals": 0, "within_ms": 4000}
+  ]
+}

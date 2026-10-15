@@ -20,14 +20,8 @@ HeroCallBoard.Enable = 1
 
 #    HeroCallBoard.AutoOffer
 #        Description: Whether reaching a level offers the Hero's Call or Warchief's Command zone orders
-#                     unlocked at that level as a "Quest Discovered!" pop-up the player can accept anywhere,
-#                     and logging in offers open ones again.
+#                     unlocked at that level as a "Quest Discovered!" pop-up the player can accept anywhere.
+#                     Logging in offers nothing again; a dismissed order is still taken from a board.
 #        Default:     1 - (Enabled)
 #                     0 - (Disabled; the orders are taken from the boards only)
 HeroCallBoard.AutoOffer = 1
-
-#    HeroCallBoard.AutoOffer.LoginLimit
-#        Description: How many open zone orders logging in offers again, highest minimum level first. The
-#                     client forgets its pop-ups on logout.
-#        Default:     2
-HeroCallBoard.AutoOffer.LoginLimit = 2

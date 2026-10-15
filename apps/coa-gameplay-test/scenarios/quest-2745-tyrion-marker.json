@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "name": "Infiltrating the Castle: the map and the in-world tracker both mark Tyrion in the keep garden (#7005)",
+  "contract": "Quest 2745 'Infiltrating the Castle' has one POI (id 0, ObjectiveIndex -1) with a single point. CoA moved Tyrion 7766 to the keep roof garden (-8330, 279.5) in rev_20260923_03_coa_stormwind.sql but the marker still points at the stock spot (-8408, 451), ~188 yd away outside the walls. This case asks the server for 2745's points with the CMSG_QUEST_POI_QUERY a real client sends and reads SMSG_QUEST_POI_QUERY_RESPONSE itself. The answer must hold one POI whose single point is Tyrion's garden spot (-8330, 280). The reporter follows the arrow in the world, and that is a second, independent route: the client resolves the in-world tracker and the minimap pin from its own QuestSuperTrack.dbc and SuperTrack.dbc rows, and the core streams SuperTrack.dbc rows from coa_client_super_track to the client at login (SMSG_PATCH_SUPER_TRACK, 0x06BE). QuestSuperTrack row 234 (quest 2745) resolves completion to SuperTrack node 164, which the client ships at the stock spot (-8409.0, 450.793, 123.76) - the ground CoA cut away - and quest 2746 shares that node. The last assertions read the login patch stream and require row 164 to stand on Tyrion's garden at MapID 0 with the client's own radius 5.5 and NextID 0. These are data assertions rather than a run: the harness cannot see what the client draws.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8330.0,
+    "y": 279.5,
+    "z": 156.833,
+    "o": 5.864
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 26
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 2745 'Infiltrating the Castle' unfinished, the way the reporter did",
+      "actor": "c",
+      "quest": 2745,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 2745, exactly what the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 2745
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 2745's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 2745,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the map gets one POI for 2745",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The POI is id 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "with ObjectiveIndex -1, the turn-in marker",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on the Elwynn Forest map, WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on Tyrion in the keep roof garden: x -8330",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294958966,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "y 280, not the stale stock spot 188 yd away outside the walls",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 280,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The login patch stream carries the tracker's SuperTrack row 164, the node 2745 and 2746 end at",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 164,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Row 164 stays on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 164,
+      "index": 1,
+      "within_ms": 8000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: row 164 x is Tyrion's garden -8330, where the client had -8409",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 164,
+      "index": 2,
+      "within_ms": 8000,
+      "equals": 3322030080
+    },
+    {
+      "action": "assert",
+      "label": "Row 164 y is Tyrion's garden 279.5",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 164,
+      "index": 3,
+      "within_ms": 8000,
+      "equals": 1133232128
+    },
+    {
+      "action": "assert",
+      "label": "Row 164 z is the garden floor 156.833, where the client had 123.76",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 164,
+      "index": 4,
+      "within_ms": 8000,
+      "equals": 1125963071
+    },
+    {
+      "action": "assert",
+      "label": "Row 164 keeps the client's own arrival radius of 5.5 yd",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 164,
+      "index": 5,
+      "within_ms": 8000,
+      "equals": 1085276160
+    },
+    {
+      "action": "assert",
+      "label": "Row 164 keeps the client's own end of the chain, NextID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 164,
+      "index": 6,
+      "within_ms": 8000,
+      "equals": 0
+    }
+  ]
+}
