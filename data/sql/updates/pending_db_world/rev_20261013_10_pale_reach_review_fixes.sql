@@ -118,3 +118,52 @@ UPDATE `creature` SET `position_x` = -7835.0, `position_y` = 983.337, `position_
 UPDATE `creature` SET `position_x` = -7798.34, `position_y` = 567.693, `position_z` = 136.265, `orientation` = 5.4503 WHERE `guid` = 9960020 AND `id` = 164118;
 UPDATE `creature` SET `position_x` = -8375.67, `position_y` = 667.452, `position_z` = 95.289, `orientation` = 3.5826 WHERE `guid` = 9960157 AND `id` = 164272;
 DELETE FROM `creature` WHERE `guid` = 9960117 AND `id` = 164108;
+
+-- Deepstone Cave (bandit cave) world edits 2026-10-14 (CoAWorldEdit export): thinned bandits and marauders, the stray
+-- Elwynn skunk, the camp sleeper moved, and work, sleep and kneel poses.
+DELETE FROM `creature_addon` WHERE `guid` IN (9920315, 9920317, 9920319, 9920322, 9920323, 9920327, 9920329, 9961411, 9961435, 9961479, 9961493, 9999105);
+DELETE FROM `creature` WHERE `guid` IN (9920315, 9920317, 9920319, 9920322, 9920323, 9961411, 9961479) AND `id` = 164020;
+DELETE FROM `creature` WHERE `guid` IN (9920327, 9920329, 9961435, 9961493) AND `id` = 164021;
+DELETE FROM `creature` WHERE `guid` = 9999105 AND `id` = 17467;
+UPDATE `creature` SET `orientation` = 4.955 WHERE `guid` = 9961498 AND `id` = 164021;
+UPDATE `creature` SET `position_x` = -7784.223, `position_y` = 867.927, `position_z` = 57.117, `orientation` = 3.1732 WHERE `guid` = 9961212 AND `id` = 164020;
+DELETE FROM `creature_addon` WHERE `guid` IN (9961212, 9961397, 9961474, 9961498);
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(9961212, 0, 0, 3, 1, 0, 0, ''),
+(9961397, 0, 0, 0, 1, 69, 0, ''),
+(9961474, 0, 0, 0, 1, 69, 0, ''),
+(9961498, 0, 0, 8, 1, 0, 0, '');
+
+-- World map markers for Roadside Violence and A Sword for the North: each objective's area is its targets' spawn hull
+-- widened by 8 yd (Stolen Goods; Road Bandits; Road Marauders), turn-ins at the QuestSuperTrack ender points 9109/9110.
+DELETE FROM `quest_poi` WHERE `QuestID` IN (175018, 175019);
+INSERT INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapAreaId`, `Floor`, `Priority`, `Flags`) VALUES
+(175018, 0, 4, 0, 2062, 0, 0, 1),
+(175018, 1, -1, 0, 2062, 0, 0, 1),
+(175019, 0, 0, 0, 2062, 0, 0, 1),
+(175019, 1, 1, 0, 2062, 0, 0, 1),
+(175019, 2, -1, 0, 2062, 0, 0, 1);
+DELETE FROM `quest_poi_points` WHERE `QuestID` IN (175018, 175019);
+INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
+(175018, 0, 0, -7908, 783),
+(175018, 0, 1, -7861, 764),
+(175018, 0, 2, -7791, 826),
+(175018, 0, 3, -7833, 879),
+(175018, 0, 4, -7844, 874),
+(175018, 0, 5, -7905, 817),
+(175018, 1, 0, -8071, 748),
+(175019, 0, 0, -8043, 830),
+(175019, 0, 1, -8029, 806),
+(175019, 0, 2, -8000, 789),
+(175019, 0, 3, -7855, 773),
+(175019, 0, 4, -7780, 863),
+(175019, 0, 5, -7777, 870),
+(175019, 0, 6, -7993, 844),
+(175019, 1, 0, -7907, 817),
+(175019, 1, 1, -7809, 816),
+(175019, 1, 2, -7791, 824),
+(175019, 1, 3, -7784, 850),
+(175019, 1, 4, -7800, 875),
+(175019, 1, 5, -7843, 876),
+(175019, 1, 6, -7876, 859),
+(175019, 2, 0, -8071, 751);
