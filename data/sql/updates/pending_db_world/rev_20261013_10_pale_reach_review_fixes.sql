@@ -111,3 +111,10 @@ UPDATE `creature` SET `position_x` = -8318.84, `position_y` = 306.292, `position
 -- The #6564 Stormwind Guard in attack stance by the bandit road; live sightings of 164427 are all inside Stormwind.
 DELETE FROM `creature_addon` WHERE `guid` = 9999104;
 DELETE FROM `creature` WHERE `guid` = 9999104 AND `id` = 164427;
+
+-- Export spawns labelled with a live spawn id but standing elsewhere: move them to that live position, and drop the
+-- Aerendyl copy whose live id points at the spawn 9960107 already holds.
+UPDATE `creature` SET `position_x` = -7835.0, `position_y` = 983.337, `position_z` = 180.849, `orientation` = 6.2794 WHERE `guid` = 9960016 AND `id` = 164348;
+UPDATE `creature` SET `position_x` = -7798.34, `position_y` = 567.693, `position_z` = 136.265, `orientation` = 5.4503 WHERE `guid` = 9960020 AND `id` = 164118;
+UPDATE `creature` SET `position_x` = -8375.67, `position_y` = 667.452, `position_z` = 95.289, `orientation` = 3.5826 WHERE `guid` = 9960157 AND `id` = 164272;
+DELETE FROM `creature` WHERE `guid` = 9960117 AND `id` = 164108;
