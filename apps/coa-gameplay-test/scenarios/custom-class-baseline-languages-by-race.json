@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "A new CoA-class character knows only the baseline languages its race can learn (#7588)",
+  "contract": "AscensionLiveBaseline::Skills for the Starcaller (class 26) holds Common 98, Orcish 109 and Darnassian 113 at 300/300, captured from a night elf. SkillRaceClassInfo limits Darnassian to night elves (RaceMask 0x8) and allows Common and Orcish for every race. Both characters are created through the normal creation handler, whose Player::Create runs OnPlayerCreateInitialItems and InitializeLiveBaseline; skills are read after login. A tauren Starcaller (race 6) must not know Darnassian but keeps Common, which playercreateinfo_skills does not give tauren, so only the baseline grants it. A night elf Starcaller (race 4) keeps Darnassian.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tauren", "race": 6, "class": 26, "level": 1 },
+    { "id": "nightelf", "race": 4, "class": 26, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    {
+      "action": "assert", "label": "The tauren Starcaller does not know Darnassian", "actor": "tauren",
+      "metric": "skill_value", "skill": 113, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The tauren Starcaller has no Darnassian maximum", "actor": "tauren",
+      "metric": "skill_maximum", "skill": 113, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The tauren Starcaller keeps baseline Common", "actor": "tauren",
+      "metric": "skill_value", "skill": 98, "equals": 300
+    },
+    {
+      "action": "assert", "label": "The tauren Starcaller keeps Orcish", "actor": "tauren",
+      "metric": "skill_value", "skill": 109, "equals": 300
+    },
+    {
+      "action": "assert", "label": "The night elf Starcaller keeps Darnassian", "actor": "nightelf",
+      "metric": "skill_value", "skill": 113, "equals": 300
+    },
+    {
+      "action": "assert", "label": "The night elf Starcaller keeps baseline Orcish", "actor": "nightelf",
+      "metric": "skill_value", "skill": 109, "equals": 300
+    }
+  ]
+}
