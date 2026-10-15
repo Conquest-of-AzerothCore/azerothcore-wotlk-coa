@@ -1872,9 +1872,7 @@ void GameEventMgr::SendWorldStateUpdate(Player* player, uint16 eventId)
     }
 }
 
-// The hooks run AI actions (respawn, summon, despawn) that insert into or erase from the map's object store.
-// Either can invalidate the loop's iterator (an erase frees the node it stands on), so only the GUIDs are
-// collected and every object is looked up again right before its hook.
+// The hooks can add or remove map objects, so they run only after the object store has been walked.
 class GameEventAIHookWorker
 {
 public:
