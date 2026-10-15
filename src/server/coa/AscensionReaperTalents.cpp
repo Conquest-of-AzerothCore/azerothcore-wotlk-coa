@@ -69,6 +69,8 @@ enum ReaperGuardians : uint32
     NPC_SPECTRAL_SCYTHE = 250305
 };
 
+constexpr float SpectralGuardianDamageScale = 1.3f;
+
 Unit* HostileTargetInRange(Player* player, uint32 spellId)
 {
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
@@ -493,7 +495,7 @@ public:
 
         CreatureTemplate const* info = guardian->GetCreatureTemplate();
         CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(guardian->GetLevel(), info->unit_class);
-        float const damage = stats->GenerateBaseDamage(info);
+        float const damage = stats->GenerateBaseDamage(info) * SpectralGuardianDamageScale;
         for (WeaponAttackType attack : {BASE_ATTACK, OFF_ATTACK, RANGED_ATTACK})
         {
             guardian->SetBaseWeaponDamage(attack, MINDAMAGE, damage);
