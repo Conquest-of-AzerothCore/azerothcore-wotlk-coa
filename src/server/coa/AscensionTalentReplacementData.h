@@ -23,13 +23,14 @@ struct TalentReplacement
     bool RequiresAura = false;
 };
 
-inline constexpr std::array<TalentReplacement, 26> TalentReplacements =
+inline constexpr std::array<TalentReplacement, 27> TalentReplacements =
 {{
     { 14, 9, 520853, 500028, {{ { 500610, 0 } }} },
     { 17, 18, 570727, 801059, {{
         { 802581, 0 }, { 802582, 18 }, { 802583, 28 }, { 802584, 36 },
         { 802585, 44 }, { 802586, 52 }
     }} },
+    { 17, 17, 807587, 801059, {{ { 520292, 0 } }} },
     { 17, 17, 301302, 801016, {{
         { 804353, 0 }, { 806869, 18 }, { 806870, 26 }, { 806871, 34 },
         { 806872, 42 }, { 806873, 50 }, { 806874, 58 }
