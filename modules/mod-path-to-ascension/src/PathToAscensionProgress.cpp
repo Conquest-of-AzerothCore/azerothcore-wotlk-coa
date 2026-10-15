@@ -688,6 +688,12 @@ namespace PathToAscension
             && (expansion == settings.expansion || IsLegacyAvailable(tutorial.Id()));
     }
 
+    bool IsStarterMountTutorial(uint32 tutorialId)
+    {
+        return std::any_of(std::begin(StarterMounts), std::end(StarterMounts),
+            [tutorialId](StarterMount const& mount) { return mount.tutorial == tutorialId; });
+    }
+
     bool IsCallbackImplemented(uint32 tutorialId)
     {
         static constexpr uint32 ids[] =
