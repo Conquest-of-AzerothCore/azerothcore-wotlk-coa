@@ -1,0 +1,247 @@
+{
+  "schema": 1,
+  "name": "Custom classes on a caster fallback parry once they learn Parry (#6775)",
+  "contract": "Tome of Parry 1001186 (any class, level 10) teaches Parry 3124 (SPELL_EFFECT_PARRY), and live CoA combat logs show Bloodmage, Barbarian, Tinker and Runemaster players parrying without a class parry talent. With maxed defense skill and no parry rating or aura, Player::UpdateParryPercentage gives the flat 5 percent base chance once CanParry() is set. Bloodmage, Chronomancer, Necromancer and Pyromancer fell back to Druid, Priest, Warlock and Mage, whose parry cap is 0, so they stayed at 0 percent even with Parry learned.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    },
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    },
+    {
+      "id": "necromancer",
+      "race": 1,
+      "class": 23,
+      "level": 60
+    },
+    {
+      "id": "pyromancer",
+      "race": 1,
+      "class": 24,
+      "level": 60
+    },
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "witch_doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    },
+    {
+      "id": "runemaster",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max bloodmage defense",
+      "actor": "bloodmage",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "bloodmage learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "bloodmage",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "bloodmage parries at the base 5 percent",
+      "actor": "bloodmage",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max chronomancer defense",
+      "actor": "chronomancer",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "chronomancer learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "chronomancer",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "chronomancer parries at the base 5 percent",
+      "actor": "chronomancer",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max necromancer defense",
+      "actor": "necromancer",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "necromancer learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "necromancer",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "necromancer parries at the base 5 percent",
+      "actor": "necromancer",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max pyromancer defense",
+      "actor": "pyromancer",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "pyromancer learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "pyromancer",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "pyromancer parries at the base 5 percent",
+      "actor": "pyromancer",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max barbarian defense",
+      "actor": "barbarian",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "barbarian learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "barbarian",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "barbarian parries at the base 5 percent",
+      "actor": "barbarian",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max witch_doctor defense",
+      "actor": "witch_doctor",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "witch_doctor learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "witch_doctor",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "witch_doctor parries at the base 5 percent",
+      "actor": "witch_doctor",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max tinker defense",
+      "actor": "tinker",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "tinker learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "tinker",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "tinker parries at the base 5 percent",
+      "actor": "tinker",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max runemaster defense",
+      "actor": "runemaster",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "runemaster learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "runemaster",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "runemaster parries at the base 5 percent",
+      "actor": "runemaster",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    }
+  ]
+}
