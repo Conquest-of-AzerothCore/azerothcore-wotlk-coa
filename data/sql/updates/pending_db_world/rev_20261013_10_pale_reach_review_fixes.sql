@@ -41,6 +41,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 -- #6: every Raven becomes a Possessed Crow (user decision): perched with the blue raven-aura eyes from the template addon;
 -- the export's live-capture spawns keep their kneel and cannibalize poses with the aura added. Levels 18-21 as targeted in
 -- 2r0PE1dBarE, DuWTvw19xtg and F5g2uzWFLqA.
+DELETE FROM `creature` WHERE `guid` = 9960829 AND `id` = 164371;
 UPDATE `creature` SET `id` = 164944, `MovementType` = 0, `wander_distance` = 0 WHERE `id` = 164371;
 UPDATE `creature_template` SET `minlevel` = 18, `maxlevel` = 21 WHERE `entry` = 164944;
 
